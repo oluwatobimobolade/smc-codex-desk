@@ -254,6 +254,16 @@ def main() -> None:
     print(f"ENGINE: {plan['verdict']} (grade {plan['setup_grade']}) · {plan['direction']} · "
           f"confluence {plan['confluence_score']} · last close {engine['metrics'].get('latest_close')}")
 
+    # Near-miss surfacing: show top failed checklist items
+    checklist = plan.get("checklist", {})
+    failed = [k for k, v in checklist.items() if not v]
+    if failed and plan["verdict"] != "Execute":
+        print(f"\nNear-miss: {len(failed)} checklist items failed:")
+        for item in failed[:3]:
+            print(f"  - {item.replace('_', ' ')}")
+        if len(failed) > 3:
+            print(f"  ... and {len(failed) - 3} more")
+
     if args.vision:
         vision = json.loads(Path(args.vision).read_text(encoding="utf-8"))
         recon = reconcile(engine, vision)
