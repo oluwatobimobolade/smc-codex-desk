@@ -1,0 +1,2835 @@
+1
+00:00:00,240 --> 00:00:02,629
+
+Hello traders and welcome back to
+
+2
+00:00:02,629 --> 00:00:02,639
+Hello traders and welcome back to
+ 
+
+3
+00:00:02,639 --> 00:00:04,710
+Hello traders and welcome back to
+another episode. In today's lesson,
+
+4
+00:00:04,710 --> 00:00:04,720
+another episode. In today's lesson,
+ 
+
+5
+00:00:04,720 --> 00:00:06,950
+another episode. In today's lesson,
+we'll be talking about fair value
+
+6
+00:00:06,950 --> 00:00:06,960
+we'll be talking about fair value
+ 
+
+7
+00:00:06,960 --> 00:00:10,230
+we'll be talking about fair value
+imbalance or inefficiency. These are the
+
+8
+00:00:10,230 --> 00:00:10,240
+imbalance or inefficiency. These are the
+ 
+
+9
+00:00:10,240 --> 00:00:11,830
+imbalance or inefficiency. These are the
+different types of name [music]
+
+10
+00:00:11,830 --> 00:00:11,840
+different types of name [music]
+ 
+
+11
+00:00:11,840 --> 00:00:19,640
+different types of name [music]
+people give to what this topic is.
+
+12
+00:00:19,640 --> 00:00:19,650
+
+ 
+
+13
+00:00:19,650 --> 00:00:20,390
+
+[music]
+
+14
+00:00:20,390 --> 00:00:20,400
+[music]
+ 
+
+15
+00:00:20,400 --> 00:00:22,310
+[music]
+Let's look at what an imbalance or a
+
+16
+00:00:22,310 --> 00:00:22,320
+Let's look at what an imbalance or a
+ 
+
+17
+00:00:22,320 --> 00:00:25,109
+Let's look at what an imbalance or a
+fair value gap is. It means the gap
+
+18
+00:00:25,109 --> 00:00:25,119
+fair value gap is. It means the gap
+ 
+
+19
+00:00:25,119 --> 00:00:27,349
+fair value gap is. It means the gap
+between the leaks in an impulsive
+
+20
+00:00:27,349 --> 00:00:27,359
+between the leaks in an impulsive
+ 
+
+21
+00:00:27,359 --> 00:00:30,790
+between the leaks in an impulsive
+movement. If price moves rapidly
+
+22
+00:00:30,790 --> 00:00:30,800
+movement. If price moves rapidly
+ 
+
+23
+00:00:30,800 --> 00:00:33,110
+movement. If price moves rapidly
+printing several candles and the weeks
+
+24
+00:00:33,110 --> 00:00:33,120
+printing several candles and the weeks
+ 
+
+25
+00:00:33,120 --> 00:00:35,830
+printing several candles and the weeks
+between the candles doesn't meet we say
+
+26
+00:00:35,830 --> 00:00:35,840
+between the candles doesn't meet we say
+ 
+
+27
+00:00:35,840 --> 00:00:38,549
+between the candles doesn't meet we say
+this is an imbalance or fair value or
+
+28
+00:00:38,549 --> 00:00:38,559
+this is an imbalance or fair value or
+ 
+
+29
+00:00:38,559 --> 00:00:41,430
+this is an imbalance or fair value or
+inefficience. Now simply we can say
+
+30
+00:00:41,430 --> 00:00:41,440
+inefficience. Now simply we can say
+ 
+
+31
+00:00:41,440 --> 00:00:43,270
+inefficience. Now simply we can say
+imbalance is an area where there are
+
+32
+00:00:43,270 --> 00:00:43,280
+imbalance is an area where there are
+ 
+
+33
+00:00:43,280 --> 00:00:46,069
+imbalance is an area where there are
+only buyers or only sellers. So when
+
+34
+00:00:46,069 --> 00:00:46,079
+only buyers or only sellers. So when
+ 
+
+35
+00:00:46,079 --> 00:00:48,150
+only buyers or only sellers. So when
+there is an imbalance in the market
+
+36
+00:00:48,150 --> 00:00:48,160
+there is an imbalance in the market
+ 
+
+37
+00:00:48,160 --> 00:00:50,630
+there is an imbalance in the market
+price will always come back to fill the
+
+38
+00:00:50,630 --> 00:00:50,640
+price will always come back to fill the
+ 
+
+39
+00:00:50,640 --> 00:00:53,029
+price will always come back to fill the
+imbalance. Imbalance is essentially
+
+40
+00:00:53,029 --> 00:00:53,039
+imbalance. Imbalance is essentially
+ 
+
+41
+00:00:53,039 --> 00:00:55,189
+imbalance. Imbalance is essentially
+where there has been manipulation and
+
+42
+00:00:55,189 --> 00:00:55,199
+where there has been manipulation and
+ 
+
+43
+00:00:55,199 --> 00:00:58,150
+where there has been manipulation and
+this has left liquidity behind
+
+44
+00:00:58,150 --> 00:00:58,160
+this has left liquidity behind
+ 
+
+45
+00:00:58,160 --> 00:01:02,310
+this has left liquidity behind
+within this candle. These are voids in
+
+46
+00:01:02,310 --> 00:01:02,320
+within this candle. These are voids in
+ 
+
+47
+00:01:02,320 --> 00:01:04,869
+within this candle. These are voids in
+price which will usually be filled fully
+
+48
+00:01:04,869 --> 00:01:04,879
+price which will usually be filled fully
+ 
+
+49
+00:01:04,879 --> 00:01:07,830
+price which will usually be filled fully
+or even halfway. Once filled, price will
+
+50
+00:01:07,830 --> 00:01:07,840
+or even halfway. Once filled, price will
+ 
+
+51
+00:01:07,840 --> 00:01:11,510
+or even halfway. Once filled, price will
+then continue in the overall direction.
+
+52
+00:01:11,510 --> 00:01:11,520
+then continue in the overall direction.
+ 
+
+53
+00:01:11,520 --> 00:01:13,670
+then continue in the overall direction.
+Imbalance is where there's only one type
+
+54
+00:01:13,670 --> 00:01:13,680
+Imbalance is where there's only one type
+ 
+
+55
+00:01:13,680 --> 00:01:15,750
+Imbalance is where there's only one type
+of orders in the market. So [music]
+
+56
+00:01:15,750 --> 00:01:15,760
+of orders in the market. So [music]
+ 
+
+57
+00:01:15,760 --> 00:01:19,270
+of orders in the market. So [music]
+there will either be only buys or only
+
+58
+00:01:19,270 --> 00:01:19,280
+there will either be only buys or only
+ 
+
+59
+00:01:19,280 --> 00:01:22,469
+there will either be only buys or only
+sells [music] at that point. So
+
+60
+00:01:22,469 --> 00:01:22,479
+sells [music] at that point. So
+ 
+
+61
+00:01:22,479 --> 00:01:24,789
+sells [music] at that point. So
+basically imbalance means gap between
+
+62
+00:01:24,789 --> 00:01:24,799
+basically imbalance means gap between
+ 
+
+63
+00:01:24,799 --> 00:01:27,830
+basically imbalance means gap between
+the weeks. We draw this using the week
+
+64
+00:01:27,830 --> 00:01:27,840
+the weeks. We draw this using the week
+ 
+
+65
+00:01:27,840 --> 00:01:30,230
+the weeks. We draw this using the week
+to week from [music] the candle to both
+
+66
+00:01:30,230 --> 00:01:30,240
+to week from [music] the candle to both
+ 
+
+67
+00:01:30,240 --> 00:01:34,390
+to week from [music] the candle to both
+sides of the imbalance. How do you then
+
+68
+00:01:34,390 --> 00:01:34,400
+sides of the imbalance. How do you then
+ 
+
+69
+00:01:34,400 --> 00:01:38,241
+sides of the imbalance. How do you then
+take advantage of this as a trader? When
+
+70
+00:01:38,241 --> 00:01:38,251
+take advantage of this as a trader? When
+ 
+
+71
+00:01:38,251 --> 00:01:40,069
+take advantage of this as a trader? When
+[music] the market moves rapidly and
+
+72
+00:01:40,069 --> 00:01:40,079
+[music] the market moves rapidly and
+ 
+
+73
+00:01:40,079 --> 00:01:42,870
+[music] the market moves rapidly and
+leaves imbalance behind, price usually
+
+74
+00:01:42,870 --> 00:01:42,880
+leaves imbalance behind, price usually
+ 
+
+75
+00:01:42,880 --> 00:01:45,429
+leaves imbalance behind, price usually
+fills the creative gap to restore the
+
+76
+00:01:45,429 --> 00:01:45,439
+fills the creative gap to restore the
+ 
+
+77
+00:01:45,439 --> 00:01:47,830
+fills the creative gap to restore the
+balance. Assigning imbalances and
+
+78
+00:01:47,830 --> 00:01:47,840
+balance. Assigning imbalances and
+ 
+
+79
+00:01:47,840 --> 00:01:50,310
+balance. Assigning imbalances and
+combining them with supply and demand or
+
+80
+00:01:50,310 --> 00:01:50,320
+combining them with supply and demand or
+ 
+
+81
+00:01:50,320 --> 00:01:52,870
+combining them with supply and demand or
+other block zones can make you avoid a
+
+82
+00:01:52,870 --> 00:01:52,880
+other block zones can make you avoid a
+ 
+
+83
+00:01:52,880 --> 00:01:54,789
+other block zones can make you avoid a
+lot of entries and can save you from
+
+84
+00:01:54,789 --> 00:01:54,799
+lot of entries and can save you from
+ 
+
+85
+00:01:54,799 --> 00:01:56,630
+lot of entries and can save you from
+unnecessary losses. [music]
+
+86
+00:01:56,630 --> 00:01:56,640
+unnecessary losses. [music]
+ 
+
+87
+00:01:56,640 --> 00:02:00,069
+unnecessary losses. [music]
+Now let's look at an example. So this is
+
+88
+00:02:00,069 --> 00:02:00,079
+Now let's look at an example. So this is
+ 
+
+89
+00:02:00,079 --> 00:02:03,830
+Now let's look at an example. So this is
+an example of an imbalance in price
+
+90
+00:02:03,830 --> 00:02:03,840
+an example of an imbalance in price
+ 
+
+91
+00:02:03,840 --> 00:02:05,910
+an example of an imbalance in price
+delivery. Now when price delivering
+
+92
+00:02:05,910 --> 00:02:05,920
+delivery. Now when price delivering
+ 
+
+93
+00:02:05,920 --> 00:02:08,309
+delivery. Now when price delivering
+liquidity from one side to another it is
+
+94
+00:02:08,309 --> 00:02:08,319
+liquidity from one side to another it is
+ 
+
+95
+00:02:08,319 --> 00:02:10,790
+liquidity from one side to another it is
+something behind we call imbalance or
+
+96
+00:02:10,790 --> 00:02:10,800
+something behind we call imbalance or
+ 
+
+97
+00:02:10,800 --> 00:02:14,070
+something behind we call imbalance or
+fair value gib
+
+98
+00:02:14,070 --> 00:02:14,080
+fair value gib
+ 
+
+99
+00:02:14,080 --> 00:02:17,350
+fair value gib
+and this usually happens in one order
+
+100
+00:02:17,350 --> 00:02:17,360
+and this usually happens in one order
+ 
+
+101
+00:02:17,360 --> 00:02:20,150
+and this usually happens in one order
+either in a buy order or in a sell order
+
+102
+00:02:20,150 --> 00:02:20,160
+either in a buy order or in a sell order
+ 
+
+103
+00:02:20,160 --> 00:02:22,150
+either in a buy order or in a sell order
+you know these big banks [music] anytime
+
+104
+00:02:22,150 --> 00:02:22,160
+you know these big banks [music] anytime
+ 
+
+105
+00:02:22,160 --> 00:02:24,150
+you know these big banks [music] anytime
+they pushing money into the market they
+
+106
+00:02:24,150 --> 00:02:24,160
+they pushing money into the market they
+ 
+
+107
+00:02:24,160 --> 00:02:27,110
+they pushing money into the market they
+push a lot of money. So what happens is
+
+108
+00:02:27,110 --> 00:02:27,120
+push a lot of money. So what happens is
+ 
+
+109
+00:02:27,120 --> 00:02:28,949
+push a lot of money. So what happens is
+that when they push that amount of money
+
+110
+00:02:28,949 --> 00:02:28,959
+that when they push that amount of money
+ 
+
+111
+00:02:28,959 --> 00:02:31,030
+that when they push that amount of money
+into the market they leave something
+
+112
+00:02:31,030 --> 00:02:31,040
+into the market they leave something
+ 
+
+113
+00:02:31,040 --> 00:02:34,309
+into the market they leave something
+behind we call imbalance and definitely
+
+114
+00:02:34,309 --> 00:02:34,319
+behind we call imbalance and definitely
+ 
+
+115
+00:02:34,319 --> 00:02:36,869
+behind we call imbalance and definitely
+price [music] needs to come back to fill
+
+116
+00:02:36,869 --> 00:02:36,879
+price [music] needs to come back to fill
+ 
+
+117
+00:02:36,879 --> 00:02:39,350
+price [music] needs to come back to fill
+that imbalance.
+
+118
+00:02:39,350 --> 00:02:39,360
+that imbalance.
+ 
+
+119
+00:02:39,360 --> 00:02:42,630
+that imbalance.
+This imbalances usually happens between
+
+120
+00:02:42,630 --> 00:02:42,640
+This imbalances usually happens between
+ 
+
+121
+00:02:42,640 --> 00:02:44,869
+This imbalances usually happens between
+three candles. [music] Okay. So what
+
+122
+00:02:44,869 --> 00:02:44,879
+three candles. [music] Okay. So what
+ 
+
+123
+00:02:44,879 --> 00:02:47,670
+three candles. [music] Okay. So what
+happens is that when the high of the
+
+124
+00:02:47,670 --> 00:02:47,680
+happens is that when the high of the
+ 
+
+125
+00:02:47,680 --> 00:02:49,190
+happens is that when the high of the
+third candle does [music] not meet with
+
+126
+00:02:49,190 --> 00:02:49,200
+third candle does [music] not meet with
+ 
+
+127
+00:02:49,200 --> 00:02:52,229
+third candle does [music] not meet with
+the low of the first candle then they
+
+128
+00:02:52,229 --> 00:02:52,239
+the low of the first candle then they
+ 
+
+129
+00:02:52,239 --> 00:02:54,550
+the low of the first candle then they
+need something behind call imbalance. So
+
+130
+00:02:54,550 --> 00:02:54,560
+need something behind call imbalance. So
+ 
+
+131
+00:02:54,560 --> 00:02:55,990
+need something behind call imbalance. So
+when you look around here, we have an
+
+132
+00:02:55,990 --> 00:02:56,000
+when you look around here, we have an
+ 
+
+133
+00:02:56,000 --> 00:02:57,750
+when you look around here, we have an
+unhealthy price action. You [music] can
+
+134
+00:02:57,750 --> 00:02:57,760
+unhealthy price action. You [music] can
+ 
+
+135
+00:02:57,760 --> 00:03:00,150
+unhealthy price action. You [music] can
+see that the low of this candle which is
+
+136
+00:03:00,150 --> 00:03:00,160
+see that the low of this candle which is
+ 
+
+137
+00:03:00,160 --> 00:03:02,630
+see that the low of this candle which is
+here this week does not meet with the
+
+138
+00:03:02,630 --> 00:03:02,640
+here this week does not meet with the
+ 
+
+139
+00:03:02,640 --> 00:03:04,869
+here this week does not meet with the
+high of the candle and it leaves
+
+140
+00:03:04,869 --> 00:03:04,879
+high of the candle and it leaves
+ 
+
+141
+00:03:04,879 --> 00:03:06,550
+high of the candle and it leaves
+something in between which [music] we
+
+142
+00:03:06,550 --> 00:03:06,560
+something in between which [music] we
+ 
+
+143
+00:03:06,560 --> 00:03:09,350
+something in between which [music] we
+call the imbalance. Now when you look
+
+144
+00:03:09,350 --> 00:03:09,360
+call the imbalance. Now when you look
+ 
+
+145
+00:03:09,360 --> 00:03:11,670
+call the imbalance. Now when you look
+here on this side there's a healthy
+
+146
+00:03:11,670 --> 00:03:11,680
+here on this side there's a healthy
+ 
+
+147
+00:03:11,680 --> 00:03:14,149
+here on this side there's a healthy
+price action. This imbalance is already
+
+148
+00:03:14,149 --> 00:03:14,159
+price action. This imbalance is already
+ 
+
+149
+00:03:14,159 --> 00:03:17,910
+price action. This imbalance is already
+balanced because the high of this candle
+
+150
+00:03:17,910 --> 00:03:17,920
+balanced because the high of this candle
+ 
+
+151
+00:03:17,920 --> 00:03:20,630
+balanced because the high of this candle
+has what has not met the low of this
+
+152
+00:03:20,630 --> 00:03:20,640
+has what has not met the low of this
+ 
+
+153
+00:03:20,640 --> 00:03:22,949
+has what has not met the low of this
+candle. But eventually price came back
+
+154
+00:03:22,949 --> 00:03:22,959
+candle. But eventually price came back
+ 
+
+155
+00:03:22,959 --> 00:03:26,070
+candle. But eventually price came back
+to fill that imbalance. So this is what
+
+156
+00:03:26,070 --> 00:03:26,080
+to fill that imbalance. So this is what
+ 
+
+157
+00:03:26,080 --> 00:03:28,390
+to fill that imbalance. So this is what
+usually happens. Anytime there is an
+
+158
+00:03:28,390 --> 00:03:28,400
+usually happens. Anytime there is an
+ 
+
+159
+00:03:28,400 --> 00:03:30,789
+usually happens. Anytime there is an
+imbalance left behind, price need to
+
+160
+00:03:30,789 --> 00:03:30,799
+imbalance left behind, price need to
+ 
+
+161
+00:03:30,799 --> 00:03:33,990
+imbalance left behind, price need to
+come back to fill that imbalance before
+
+162
+00:03:33,990 --> 00:03:34,000
+come back to fill that imbalance before
+ 
+
+163
+00:03:34,000 --> 00:03:35,910
+come back to fill that imbalance before
+the continuation of the mood. It's just
+
+164
+00:03:35,910 --> 00:03:35,920
+the continuation of the mood. It's just
+ 
+
+165
+00:03:35,920 --> 00:03:39,430
+the continuation of the mood. It's just
+like going to the market to sell or buy.
+
+166
+00:03:39,430 --> 00:03:39,440
+like going to the market to sell or buy.
+ 
+
+167
+00:03:39,440 --> 00:03:41,509
+like going to the market to sell or buy.
+Once you are selling, you need buyers.
+
+168
+00:03:41,509 --> 00:03:41,519
+Once you are selling, you need buyers.
+ 
+
+169
+00:03:41,519 --> 00:03:43,910
+Once you are selling, you need buyers.
+Once you are buying you need sell it. So
+
+170
+00:03:43,910 --> 00:03:43,920
+Once you are buying you need sell it. So
+ 
+
+171
+00:03:43,920 --> 00:03:45,430
+Once you are buying you need sell it. So
+when you are selling you need buyers to
+
+172
+00:03:45,430 --> 00:03:45,440
+when you are selling you need buyers to
+ 
+
+173
+00:03:45,440 --> 00:03:46,710
+when you are selling you need buyers to
+come and buy your stuff. This is the
+
+174
+00:03:46,710 --> 00:03:46,720
+come and buy your stuff. This is the
+ 
+
+175
+00:03:46,720 --> 00:03:48,869
+come and buy your stuff. This is the
+same thing that happens in the forest
+
+176
+00:03:48,869 --> 00:03:48,879
+same thing that happens in the forest
+ 
+
+177
+00:03:48,879 --> 00:03:51,750
+same thing that happens in the forest
+market. So this around this area is a
+
+178
+00:03:51,750 --> 00:03:51,760
+market. So this around this area is a
+ 
+
+179
+00:03:51,760 --> 00:03:53,589
+market. So this around this area is a
+healthy price action because this fair
+
+180
+00:03:53,589 --> 00:03:53,599
+healthy price action because this fair
+ 
+
+181
+00:03:53,599 --> 00:03:55,990
+healthy price action because this fair
+value gap or imbalance has been filled
+
+182
+00:03:55,990 --> 00:03:56,000
+value gap or imbalance has been filled
+ 
+
+183
+00:03:56,000 --> 00:03:58,630
+value gap or imbalance has been filled
+with this week. So we had a sell here
+
+184
+00:03:58,630 --> 00:03:58,640
+with this week. So we had a sell here
+ 
+
+185
+00:03:58,640 --> 00:04:00,949
+with this week. So we had a sell here
+and a buy and the buy has filled the
+
+186
+00:04:00,949 --> 00:04:00,959
+and a buy and the buy has filled the
+ 
+
+187
+00:04:00,959 --> 00:04:03,350
+and a buy and the buy has filled the
+imbalance around this area. But this one
+
+188
+00:04:03,350 --> 00:04:03,360
+imbalance around this area. But this one
+ 
+
+189
+00:04:03,360 --> 00:04:05,910
+imbalance around this area. But this one
+is unhealthy because the weeks has not
+
+190
+00:04:05,910 --> 00:04:05,920
+is unhealthy because the weeks has not
+ 
+
+191
+00:04:05,920 --> 00:04:08,550
+is unhealthy because the weeks has not
+met. It's left something behind which is
+
+192
+00:04:08,550 --> 00:04:08,560
+met. It's left something behind which is
+ 
+
+193
+00:04:08,560 --> 00:04:10,630
+met. It's left something behind which is
+um the imbalance of fair value. You're
+
+194
+00:04:10,630 --> 00:04:10,640
+um the imbalance of fair value. You're
+ 
+
+195
+00:04:10,640 --> 00:04:12,869
+um the imbalance of fair value. You're
+not waiting for price to come back and
+
+196
+00:04:12,869 --> 00:04:12,879
+not waiting for price to come back and
+ 
+
+197
+00:04:12,879 --> 00:04:17,430
+not waiting for price to come back and
+feel this imbalance or fair value. Okay.
+
+198
+00:04:17,430 --> 00:04:17,440
+feel this imbalance or fair value. Okay.
+ 
+
+199
+00:04:17,440 --> 00:04:19,349
+feel this imbalance or fair value. Okay.
+One thing you should also take note of
+
+200
+00:04:19,349 --> 00:04:19,359
+One thing you should also take note of
+ 
+
+201
+00:04:19,359 --> 00:04:22,069
+One thing you should also take note of
+is that anytime this imbalances happen
+
+202
+00:04:22,069 --> 00:04:22,079
+is that anytime this imbalances happen
+ 
+
+203
+00:04:22,079 --> 00:04:25,749
+is that anytime this imbalances happen
+close to either a demand or a supply
+
+204
+00:04:25,749 --> 00:04:25,759
+close to either a demand or a supply
+ 
+
+205
+00:04:25,759 --> 00:04:27,590
+close to either a demand or a supply
+zone the probability that price will
+
+206
+00:04:27,590 --> 00:04:27,600
+zone the probability that price will
+ 
+
+207
+00:04:27,600 --> 00:04:30,390
+zone the probability that price will
+come back to that zone is very high
+
+208
+00:04:30,390 --> 00:04:30,400
+come back to that zone is very high
+ 
+
+209
+00:04:30,400 --> 00:04:32,710
+come back to that zone is very high
+because this demand and supply zone the
+
+210
+00:04:32,710 --> 00:04:32,720
+because this demand and supply zone the
+ 
+
+211
+00:04:32,720 --> 00:04:35,189
+because this demand and supply zone the
+imbalances are all in ititional
+
+212
+00:04:35,189 --> 00:04:35,199
+imbalances are all in ititional
+ 
+
+213
+00:04:35,199 --> 00:04:37,350
+imbalances are all in ititional
+reference point. So the once this
+
+214
+00:04:37,350 --> 00:04:37,360
+reference point. So the once this
+ 
+
+215
+00:04:37,360 --> 00:04:39,590
+reference point. So the once this
+happens behind an order block where
+
+216
+00:04:39,590 --> 00:04:39,600
+happens behind an order block where
+ 
+
+217
+00:04:39,600 --> 00:04:41,830
+happens behind an order block where
+first orders are taken by the big boys
+
+218
+00:04:41,830 --> 00:04:41,840
+first orders are taken by the big boys
+ 
+
+219
+00:04:41,840 --> 00:04:43,510
+first orders are taken by the big boys
+the probability that price will come
+
+220
+00:04:43,510 --> 00:04:43,520
+the probability that price will come
+ 
+
+221
+00:04:43,520 --> 00:04:45,189
+the probability that price will come
+back to fill that imbalance is very
+
+222
+00:04:45,189 --> 00:04:45,199
+back to fill that imbalance is very
+ 
+
+223
+00:04:45,199 --> 00:04:46,950
+back to fill that imbalance is very
+high. So price can come back and fill
+
+224
+00:04:46,950 --> 00:04:46,960
+high. So price can come back and fill
+ 
+
+225
+00:04:46,960 --> 00:04:49,830
+high. So price can come back and fill
+the imbalance halfway or fill the
+
+226
+00:04:49,830 --> 00:04:49,840
+the imbalance halfway or fill the
+ 
+
+227
+00:04:49,840 --> 00:04:52,790
+the imbalance halfway or fill the
+imbalance fully before the continuation
+
+228
+00:04:52,790 --> 00:04:52,800
+imbalance fully before the continuation
+ 
+
+229
+00:04:52,800 --> 00:04:55,430
+imbalance fully before the continuation
+of price.
+
+230
+00:04:55,430 --> 00:04:55,440
+of price.
+ 
+
+231
+00:04:55,440 --> 00:04:57,830
+of price.
+Let's now go to the chart and look for
+
+232
+00:04:57,830 --> 00:04:57,840
+Let's now go to the chart and look for
+ 
+
+233
+00:04:57,840 --> 00:04:59,670
+Let's now go to the chart and look for
+an [music] example.
+
+234
+00:04:59,670 --> 00:04:59,680
+an [music] example.
+ 
+
+235
+00:04:59,680 --> 00:05:01,270
+an [music] example.
+Before we move to the chart, let's talk
+
+236
+00:05:01,270 --> 00:05:01,280
+Before we move to the chart, let's talk
+ 
+
+237
+00:05:01,280 --> 00:05:03,430
+Before we move to the chart, let's talk
+about another thing here. Um even though
+
+238
+00:05:03,430 --> 00:05:03,440
+about another thing here. Um even though
+ 
+
+239
+00:05:03,440 --> 00:05:05,749
+about another thing here. Um even though
+price came back to feel this imbalance
+
+240
+00:05:05,749 --> 00:05:05,759
+price came back to feel this imbalance
+ 
+
+241
+00:05:05,759 --> 00:05:07,189
+price came back to feel this imbalance
+here. Let's leave this one aside and
+
+242
+00:05:07,189 --> 00:05:07,199
+here. Let's leave this one aside and
+ 
+
+243
+00:05:07,199 --> 00:05:08,710
+here. Let's leave this one aside and
+talk about this one. You can see that we
+
+244
+00:05:08,710 --> 00:05:08,720
+talk about this one. You can see that we
+ 
+
+245
+00:05:08,720 --> 00:05:11,118
+talk about this one. You can see that we
+have three candles in between. Right
+
+246
+00:05:11,118 --> 00:05:11,128
+have three candles in between. Right
+ 
+
+247
+00:05:11,128 --> 00:05:11,670
+have three candles in between. Right
+[music]
+
+248
+00:05:11,670 --> 00:05:11,680
+[music]
+ 
+
+249
+00:05:11,680 --> 00:05:13,909
+[music]
+now you can see that the low of this
+
+250
+00:05:13,909 --> 00:05:13,919
+now you can see that the low of this
+ 
+
+251
+00:05:13,919 --> 00:05:16,870
+now you can see that the low of this
+candle has met with the high of this
+
+252
+00:05:16,870 --> 00:05:16,880
+candle has met with the high of this
+ 
+
+253
+00:05:16,880 --> 00:05:19,029
+candle has met with the high of this
+candle. [music] So in between here there
+
+254
+00:05:19,029 --> 00:05:19,039
+candle. [music] So in between here there
+ 
+
+255
+00:05:19,039 --> 00:05:21,990
+candle. [music] So in between here there
+is nothing like an imbalance. This
+
+256
+00:05:21,990 --> 00:05:22,000
+is nothing like an imbalance. This
+ 
+
+257
+00:05:22,000 --> 00:05:25,189
+is nothing like an imbalance. This
+candle here has met with this one. This
+
+258
+00:05:25,189 --> 00:05:25,199
+candle here has met with this one. This
+ 
+
+259
+00:05:25,199 --> 00:05:29,029
+candle here has met with this one. This
+low here you see this candle.
+
+260
+00:05:29,029 --> 00:05:29,039
+low here you see this candle.
+ 
+
+261
+00:05:29,039 --> 00:05:31,029
+low here you see this candle.
+So there is nothing left around this
+
+262
+00:05:31,029 --> 00:05:31,039
+So there is nothing left around this
+ 
+
+263
+00:05:31,039 --> 00:05:33,350
+So there is nothing left around this
+area. that there's no imbalance left
+
+264
+00:05:33,350 --> 00:05:33,360
+area. that there's no imbalance left
+ 
+
+265
+00:05:33,360 --> 00:05:35,749
+area. that there's no imbalance left
+around sorry there's no imbalance left
+
+266
+00:05:35,749 --> 00:05:35,759
+around sorry there's no imbalance left
+ 
+
+267
+00:05:35,759 --> 00:05:38,710
+around sorry there's no imbalance left
+around this area so this is what a
+
+268
+00:05:38,710 --> 00:05:38,720
+around this area so this is what a
+ 
+
+269
+00:05:38,720 --> 00:05:42,070
+around this area so this is what a
+healthy price action I have given an
+
+270
+00:05:42,070 --> 00:05:42,080
+healthy price action I have given an
+ 
+
+271
+00:05:42,080 --> 00:05:44,150
+healthy price action I have given an
+example of this I've alo given an
+
+272
+00:05:44,150 --> 00:05:44,160
+example of this I've alo given an
+ 
+
+273
+00:05:44,160 --> 00:05:46,310
+example of this I've alo given an
+example of this and then price coming
+
+274
+00:05:46,310 --> 00:05:46,320
+example of this and then price coming
+ 
+
+275
+00:05:46,320 --> 00:05:49,670
+example of this and then price coming
+back to fill that imbalance and also
+
+276
+00:05:49,670 --> 00:05:49,680
+back to fill that imbalance and also
+ 
+
+277
+00:05:49,680 --> 00:05:53,029
+back to fill that imbalance and also
+we've given an example of a single order
+
+278
+00:05:53,029 --> 00:05:53,039
+we've given an example of a single order
+ 
+
+279
+00:05:53,039 --> 00:05:55,510
+we've given an example of a single order
+which is this [music] one so this low
+
+280
+00:05:55,510 --> 00:05:55,520
+which is this [music] one so this low
+ 
+
+281
+00:05:55,520 --> 00:05:57,510
+which is this [music] one so this low
+has met with the high which is the weeks
+
+282
+00:05:57,510 --> 00:05:57,520
+has met with the high which is the weeks
+ 
+
+283
+00:05:57,520 --> 00:06:00,710
+has met with the high which is the weeks
+have met with the wick of the upper
+
+284
+00:06:00,710 --> 00:06:00,720
+have met with the wick of the upper
+ 
+
+285
+00:06:00,720 --> 00:06:02,870
+have met with the wick of the upper
+candle So there's nothing like imbalance
+
+286
+00:06:02,870 --> 00:06:02,880
+candle So there's nothing like imbalance
+ 
+
+287
+00:06:02,880 --> 00:06:05,590
+candle So there's nothing like imbalance
+left behind unlike this one where the
+
+288
+00:06:05,590 --> 00:06:05,600
+left behind unlike this one where the
+ 
+
+289
+00:06:05,600 --> 00:06:08,469
+left behind unlike this one where the
+low has not met with the high of the
+
+290
+00:06:08,469 --> 00:06:08,479
+low has not met with the high of the
+ 
+
+291
+00:06:08,479 --> 00:06:09,990
+low has not met with the high of the
+third candle. So this is the first
+
+292
+00:06:09,990 --> 00:06:10,000
+third candle. So this is the first
+ 
+
+293
+00:06:10,000 --> 00:06:11,990
+third candle. So this is the first
+candle. This is the second candle. This
+
+294
+00:06:11,990 --> 00:06:12,000
+candle. This is the second candle. This
+ 
+
+295
+00:06:12,000 --> 00:06:13,590
+candle. This is the second candle. This
+is the third candle [music] and you can
+
+296
+00:06:13,590 --> 00:06:13,600
+is the third candle [music] and you can
+ 
+
+297
+00:06:13,600 --> 00:06:15,990
+is the third candle [music] and you can
+see that the wicks has not met. But this
+
+298
+00:06:15,990 --> 00:06:16,000
+see that the wicks has not met. But this
+ 
+
+299
+00:06:16,000 --> 00:06:17,909
+see that the wicks has not met. But this
+one the wicks have met. So there's
+
+300
+00:06:17,909 --> 00:06:17,919
+one the wicks have met. So there's
+ 
+
+301
+00:06:17,919 --> 00:06:19,830
+one the wicks have met. So there's
+nothing like imbalance here. This one
+
+302
+00:06:19,830 --> 00:06:19,840
+nothing like imbalance here. This one
+ 
+
+303
+00:06:19,840 --> 00:06:21,909
+nothing like imbalance here. This one
+price is already balanced. And this one
+
+304
+00:06:21,909 --> 00:06:21,919
+price is already balanced. And this one
+ 
+
+305
+00:06:21,919 --> 00:06:24,479
+price is already balanced. And this one
+there is an imbalance. This is also an
+
+306
+00:06:24,479 --> 00:06:24,489
+there is an imbalance. This is also an
+ 
+
+307
+00:06:24,489 --> 00:06:27,189
+there is an imbalance. This is also an
+[music] imbalanced.
+
+308
+00:06:27,189 --> 00:06:27,199
+[music] imbalanced.
+ 
+
+309
+00:06:27,199 --> 00:06:28,950
+[music] imbalanced.
+Usually when this happen price might not
+
+310
+00:06:28,950 --> 00:06:28,960
+Usually when this happen price might not
+ 
+
+311
+00:06:28,960 --> 00:06:32,390
+Usually when this happen price might not
+come back to this zone [music] any
+
+312
+00:06:32,390 --> 00:06:32,400
+come back to this zone [music] any
+ 
+
+313
+00:06:32,400 --> 00:06:35,430
+come back to this zone [music] any
+longer. Okay. But once we have this it
+
+314
+00:06:35,430 --> 00:06:35,440
+longer. Okay. But once we have this it
+ 
+
+315
+00:06:35,440 --> 00:06:37,909
+longer. Okay. But once we have this it
+attracts price to come back and fill the
+
+316
+00:06:37,909 --> 00:06:37,919
+attracts price to come back and fill the
+ 
+
+317
+00:06:37,919 --> 00:06:39,749
+attracts price to come back and fill the
+imbalance the same as this. But when
+
+318
+00:06:39,749 --> 00:06:39,759
+imbalance the same as this. But when
+ 
+
+319
+00:06:39,759 --> 00:06:41,749
+imbalance the same as this. But when
+there is a healthy [music] uh price
+
+320
+00:06:41,749 --> 00:06:41,759
+there is a healthy [music] uh price
+ 
+
+321
+00:06:41,759 --> 00:06:45,430
+there is a healthy [music] uh price
+action which is a balanced um which is
+
+322
+00:06:45,430 --> 00:06:45,440
+action which is a balanced um which is
+ 
+
+323
+00:06:45,440 --> 00:06:47,909
+action which is a balanced um which is
+already balanced the probability that
+
+324
+00:06:47,909 --> 00:06:47,919
+already balanced the probability that
+ 
+
+325
+00:06:47,919 --> 00:06:49,670
+already balanced the probability that
+price will not come there is very high.
+
+326
+00:06:49,670 --> 00:06:49,680
+price will not come there is very high.
+ 
+
+327
+00:06:49,680 --> 00:06:51,990
+price will not come there is very high.
+So this might not attract price to come
+
+328
+00:06:51,990 --> 00:06:52,000
+So this might not attract price to come
+ 
+
+329
+00:06:52,000 --> 00:06:54,870
+So this might not attract price to come
+back to this zone. [music]
+
+330
+00:06:54,870 --> 00:06:54,880
+back to this zone. [music]
+ 
+
+331
+00:06:54,880 --> 00:06:57,510
+back to this zone. [music]
+So this is us on the real chart on Euro
+
+332
+00:06:57,510 --> 00:06:57,520
+So this is us on the real chart on Euro
+ 
+
+333
+00:06:57,520 --> 00:07:00,150
+So this is us on the real chart on Euro
+USD 4hour time frame. Now you can see
+
+334
+00:07:00,150 --> 00:07:00,160
+USD 4hour time frame. Now you can see
+ 
+
+335
+00:07:00,160 --> 00:07:02,629
+USD 4hour time frame. Now you can see
+that Euro USD is moving in a downtrend
+
+336
+00:07:02,629 --> 00:07:02,639
+that Euro USD is moving in a downtrend
+ 
+
+337
+00:07:02,639 --> 00:07:06,230
+that Euro USD is moving in a downtrend
+and at the point this imbalances or fair
+
+338
+00:07:06,230 --> 00:07:06,240
+and at the point this imbalances or fair
+ 
+
+339
+00:07:06,240 --> 00:07:09,189
+and at the point this imbalances or fair
+value gap you always see them in between
+
+340
+00:07:09,189 --> 00:07:09,199
+value gap you always see them in between
+ 
+
+341
+00:07:09,199 --> 00:07:11,990
+value gap you always see them in between
+any time you see a an imbalance you see
+
+342
+00:07:11,990 --> 00:07:12,000
+any time you see a an imbalance you see
+ 
+
+343
+00:07:12,000 --> 00:07:15,270
+any time you see a an imbalance you see
+price coming back to fill that imbalance
+
+344
+00:07:15,270 --> 00:07:15,280
+price coming back to fill that imbalance
+ 
+
+345
+00:07:15,280 --> 00:07:16,790
+price coming back to fill that imbalance
+and usually that is what usually
+
+346
+00:07:16,790 --> 00:07:16,800
+and usually that is what usually
+ 
+
+347
+00:07:16,800 --> 00:07:18,230
+and usually that is what usually
+happens. If there's an imbalance price
+
+348
+00:07:18,230 --> 00:07:18,240
+happens. If there's an imbalance price
+ 
+
+349
+00:07:18,240 --> 00:07:19,830
+happens. If there's an imbalance price
+will have to come back and fill. Is this
+
+350
+00:07:19,830 --> 00:07:19,840
+will have to come back and fill. Is this
+ 
+
+351
+00:07:19,840 --> 00:07:21,670
+will have to come back and fill. Is this
+the same as going to the market when you
+
+352
+00:07:21,670 --> 00:07:21,680
+the same as going to the market when you
+ 
+
+353
+00:07:21,680 --> 00:07:23,110
+the same as going to the market when you
+are buying you need sellers when you are
+
+354
+00:07:23,110 --> 00:07:23,120
+are buying you need sellers when you are
+ 
+
+355
+00:07:23,120 --> 00:07:25,350
+are buying you need sellers when you are
+selling you need buyers. So at this
+
+356
+00:07:25,350 --> 00:07:25,360
+selling you need buyers. So at this
+ 
+
+357
+00:07:25,360 --> 00:07:28,790
+selling you need buyers. So at this
+point let's look at an example here when
+
+358
+00:07:28,790 --> 00:07:28,800
+point let's look at an example here when
+ 
+
+359
+00:07:28,800 --> 00:07:32,230
+point let's look at an example here when
+you look at this when you look at what
+
+360
+00:07:32,230 --> 00:07:32,240
+you look at this when you look at what
+ 
+
+361
+00:07:32,240 --> 00:07:35,510
+you look at this when you look at what
+is happening here you can see that this
+
+362
+00:07:35,510 --> 00:07:35,520
+is happening here you can see that this
+ 
+
+363
+00:07:35,520 --> 00:07:38,790
+is happening here you can see that this
+this candle is printed by the big boys.
+
+364
+00:07:38,790 --> 00:07:38,800
+this candle is printed by the big boys.
+ 
+
+365
+00:07:38,800 --> 00:07:41,189
+this candle is printed by the big boys.
+Okay. And then it left something behind
+
+366
+00:07:41,189 --> 00:07:41,199
+Okay. And then it left something behind
+ 
+
+367
+00:07:41,199 --> 00:07:43,270
+Okay. And then it left something behind
+we call imbalance. And I said that
+
+368
+00:07:43,270 --> 00:07:43,280
+we call imbalance. And I said that
+ 
+
+369
+00:07:43,280 --> 00:07:45,270
+we call imbalance. And I said that
+imbalance usually happens between three
+
+370
+00:07:45,270 --> 00:07:45,280
+imbalance usually happens between three
+ 
+
+371
+00:07:45,280 --> 00:07:48,469
+imbalance usually happens between three
+candles. So this is the upper candle and
+
+372
+00:07:48,469 --> 00:07:48,479
+candles. So this is the upper candle and
+ 
+
+373
+00:07:48,479 --> 00:07:51,270
+candles. So this is the upper candle and
+this is the lower candle and the wick of
+
+374
+00:07:51,270 --> 00:07:51,280
+this is the lower candle and the wick of
+ 
+
+375
+00:07:51,280 --> 00:07:53,350
+this is the lower candle and the wick of
+the upper candle has not met with the
+
+376
+00:07:53,350 --> 00:07:53,360
+the upper candle has not met with the
+ 
+
+377
+00:07:53,360 --> 00:07:55,350
+the upper candle has not met with the
+wick of the lower candle. So it left
+
+378
+00:07:55,350 --> 00:07:55,360
+wick of the lower candle. So it left
+ 
+
+379
+00:07:55,360 --> 00:07:57,430
+wick of the lower candle. So it left
+something behind we call the imbalance.
+
+380
+00:07:57,430 --> 00:07:57,440
+something behind we call the imbalance.
+ 
+
+381
+00:07:57,440 --> 00:08:01,830
+something behind we call the imbalance.
+So in between here is now our imbalance.
+
+382
+00:08:01,830 --> 00:08:01,840
+So in between here is now our imbalance.
+ 
+
+383
+00:08:01,840 --> 00:08:04,629
+So in between here is now our imbalance.
+This side is now our imbalance. Now what
+
+384
+00:08:04,629 --> 00:08:04,639
+This side is now our imbalance. Now what
+ 
+
+385
+00:08:04,639 --> 00:08:06,710
+This side is now our imbalance. Now what
+again do we have? I said that anytime
+
+386
+00:08:06,710 --> 00:08:06,720
+again do we have? I said that anytime
+ 
+
+387
+00:08:06,720 --> 00:08:09,670
+again do we have? I said that anytime
+imbalance is close to a demand or a
+
+388
+00:08:09,670 --> 00:08:09,680
+imbalance is close to a demand or a
+ 
+
+389
+00:08:09,680 --> 00:08:11,830
+imbalance is close to a demand or a
+supply zone, the probability that price
+
+390
+00:08:11,830 --> 00:08:11,840
+supply zone, the probability that price
+ 
+
+391
+00:08:11,840 --> 00:08:14,309
+supply zone, the probability that price
+will come back into that zone before the
+
+392
+00:08:14,309 --> 00:08:14,319
+will come back into that zone before the
+ 
+
+393
+00:08:14,319 --> 00:08:17,749
+will come back into that zone before the
+move continues again is very high. So at
+
+394
+00:08:17,749 --> 00:08:17,759
+move continues again is very high. So at
+ 
+
+395
+00:08:17,759 --> 00:08:19,430
+move continues again is very high. So at
+this [music] point we also have an order
+
+396
+00:08:19,430 --> 00:08:19,440
+this [music] point we also have an order
+ 
+
+397
+00:08:19,440 --> 00:08:22,390
+this [music] point we also have an order
+block which is our last candle before
+
+398
+00:08:22,390 --> 00:08:22,400
+block which is our last candle before
+ 
+
+399
+00:08:22,400 --> 00:08:24,469
+block which is our last candle before
+the move to the downside. So this green
+
+400
+00:08:24,469 --> 00:08:24,479
+the move to the downside. So this green
+ 
+
+401
+00:08:24,479 --> 00:08:26,629
+the move to the downside. So this green
+candle before the move to the downside
+
+402
+00:08:26,629 --> 00:08:26,639
+candle before the move to the downside
+ 
+
+403
+00:08:26,639 --> 00:08:29,749
+candle before the move to the downside
+that is now our other block. Let me use
+
+404
+00:08:29,749 --> 00:08:29,759
+that is now our other block. Let me use
+ 
+
+405
+00:08:29,759 --> 00:08:31,589
+that is now our other block. Let me use
+another color. So this now our other
+
+406
+00:08:31,589 --> 00:08:31,599
+another color. So this now our other
+ 
+
+407
+00:08:31,599 --> 00:08:33,909
+another color. So this now our other
+block. Then we also have a fair value
+
+408
+00:08:33,909 --> 00:08:33,919
+block. Then we also have a fair value
+ 
+
+409
+00:08:33,919 --> 00:08:37,190
+block. Then we also have a fair value
+gap. Let me just type this here for you
+
+410
+00:08:37,190 --> 00:08:37,200
+gap. Let me just type this here for you
+ 
+
+411
+00:08:37,200 --> 00:08:38,070
+gap. Let me just type this here for you
+to [music]
+
+412
+00:08:38,070 --> 00:08:38,080
+to [music]
+ 
+
+413
+00:08:38,080 --> 00:08:40,469
+to [music]
+get it. Well,
+
+414
+00:08:40,469 --> 00:08:40,479
+get it. Well,
+ 
+
+415
+00:08:40,479 --> 00:08:46,230
+get it. Well,
+so we have our supply zone.
+
+416
+00:08:46,230 --> 00:08:46,240
+
+ 
+
+417
+00:08:46,240 --> 00:08:48,790
+
+Supply zone.
+
+418
+00:08:48,790 --> 00:08:48,800
+Supply zone.
+ 
+
+419
+00:08:48,800 --> 00:08:50,470
+Supply zone.
+You will always see this happening in
+
+420
+00:08:50,470 --> 00:08:50,480
+You will always see this happening in
+ 
+
+421
+00:08:50,480 --> 00:08:53,509
+You will always see this happening in
+the market. Okay. So, we have our supply
+
+422
+00:08:53,509 --> 00:08:53,519
+the market. Okay. So, we have our supply
+ 
+
+423
+00:08:53,519 --> 00:08:56,310
+the market. Okay. So, we have our supply
+zone here and then we also have our
+
+424
+00:08:56,310 --> 00:08:56,320
+zone here and then we also have our
+ 
+
+425
+00:08:56,320 --> 00:08:59,190
+zone here and then we also have our
+imbalance LBG
+
+426
+00:08:59,190 --> 00:08:59,200
+imbalance LBG
+ 
+
+427
+00:08:59,200 --> 00:09:02,389
+imbalance LBG
+LVG in between
+
+428
+00:09:02,389 --> 00:09:02,399
+LVG in between
+ 
+
+429
+00:09:02,399 --> 00:09:04,230
+LVG in between
+around this area. And now we know that
+
+430
+00:09:04,230 --> 00:09:04,240
+around this area. And now we know that
+ 
+
+431
+00:09:04,240 --> 00:09:06,310
+around this area. And now we know that
+price is moving in a downtrend. So this
+
+432
+00:09:06,310 --> 00:09:06,320
+price is moving in a downtrend. So this
+ 
+
+433
+00:09:06,320 --> 00:09:08,470
+price is moving in a downtrend. So this
+our [music] in between then our supply
+
+434
+00:09:08,470 --> 00:09:08,480
+our [music] in between then our supply
+ 
+
+435
+00:09:08,480 --> 00:09:10,150
+our [music] in between then our supply
+zone. Now look at what happened when
+
+436
+00:09:10,150 --> 00:09:10,160
+zone. Now look at what happened when
+ 
+
+437
+00:09:10,160 --> 00:09:13,750
+zone. Now look at what happened when
+price got into the [music]
+
+438
+00:09:13,750 --> 00:09:13,760
+price got into the [music]
+ 
+
+439
+00:09:13,760 --> 00:09:16,630
+price got into the [music]
+or the supply. So you see we had price
+
+440
+00:09:16,630 --> 00:09:16,640
+or the supply. So you see we had price
+ 
+
+441
+00:09:16,640 --> 00:09:20,630
+or the supply. So you see we had price
+tapping into the supply zone and then we
+
+442
+00:09:20,630 --> 00:09:20,640
+tapping into the supply zone and then we
+ 
+
+443
+00:09:20,640 --> 00:09:23,670
+tapping into the supply zone and then we
+had the drop to the downside. So price
+
+444
+00:09:23,670 --> 00:09:23,680
+had the drop to the downside. So price
+ 
+
+445
+00:09:23,680 --> 00:09:26,710
+had the drop to the downside. So price
+has gone up to fill the imbalance. So
+
+446
+00:09:26,710 --> 00:09:26,720
+has gone up to fill the imbalance. So
+ 
+
+447
+00:09:26,720 --> 00:09:29,030
+has gone up to fill the imbalance. So
+this is now a healthy price action.
+
+448
+00:09:29,030 --> 00:09:29,040
+this is now a healthy price action.
+ 
+
+449
+00:09:29,040 --> 00:09:30,870
+this is now a healthy price action.
+Initially this is not a healthy price
+
+450
+00:09:30,870 --> 00:09:30,880
+Initially this is not a healthy price
+ 
+
+451
+00:09:30,880 --> 00:09:34,310
+Initially this is not a healthy price
+action because price has not balanced
+
+452
+00:09:34,310 --> 00:09:34,320
+action because price has not balanced
+ 
+
+453
+00:09:34,320 --> 00:09:36,710
+action because price has not balanced
+this year. Now that price has balanced
+
+454
+00:09:36,710 --> 00:09:36,720
+this year. Now that price has balanced
+ 
+
+455
+00:09:36,720 --> 00:09:39,110
+this year. Now that price has balanced
+we now have what a price action. So
+
+456
+00:09:39,110 --> 00:09:39,120
+we now have what a price action. So
+ 
+
+457
+00:09:39,120 --> 00:09:40,870
+we now have what a price action. So
+immediately price gets there [music]
+
+458
+00:09:40,870 --> 00:09:40,880
+immediately price gets there [music]
+ 
+
+459
+00:09:40,880 --> 00:09:45,269
+immediately price gets there [music]
+you start. So this two is now an
+
+460
+00:09:45,269 --> 00:09:45,279
+you start. So this two is now an
+ 
+
+461
+00:09:45,279 --> 00:09:48,710
+you start. So this two is now an
+institutional reference point. So we did
+
+462
+00:09:48,710 --> 00:09:48,720
+institutional reference point. So we did
+ 
+
+463
+00:09:48,720 --> 00:09:51,350
+institutional reference point. So we did
+a first example [music] in a downtrend.
+
+464
+00:09:51,350 --> 00:09:51,360
+a first example [music] in a downtrend.
+ 
+
+465
+00:09:51,360 --> 00:09:54,150
+a first example [music] in a downtrend.
+Now we are in an uptrend. And when you
+
+466
+00:09:54,150 --> 00:09:54,160
+Now we are in an uptrend. And when you
+ 
+
+467
+00:09:54,160 --> 00:09:56,630
+Now we are in an uptrend. And when you
+look here, you realize that we had an we
+
+468
+00:09:56,630 --> 00:09:56,640
+look here, you realize that we had an we
+ 
+
+469
+00:09:56,640 --> 00:10:00,870
+look here, you realize that we had an we
+have an imbalance between this candles.
+
+470
+00:10:00,870 --> 00:10:00,880
+have an imbalance between this candles.
+ 
+
+471
+00:10:00,880 --> 00:10:02,790
+have an imbalance between this candles.
+This is the one first candle, second
+
+472
+00:10:02,790 --> 00:10:02,800
+This is the one first candle, second
+ 
+
+473
+00:10:02,800 --> 00:10:05,190
+This is the one first candle, second
+candles and the third candle. So we have
+
+474
+00:10:05,190 --> 00:10:05,200
+candles and the third candle. So we have
+ 
+
+475
+00:10:05,200 --> 00:10:07,181
+candles and the third candle. So we have
+the first candle here. We also have
+
+476
+00:10:07,181 --> 00:10:07,191
+the first candle here. We also have
+ 
+
+477
+00:10:07,191 --> 00:10:09,030
+the first candle here. We also have
+[music] the second candle here. And the
+
+478
+00:10:09,030 --> 00:10:09,040
+[music] the second candle here. And the
+ 
+
+479
+00:10:09,040 --> 00:10:11,829
+[music] the second candle here. And the
+low of this candle has not met with the
+
+480
+00:10:11,829 --> 00:10:11,839
+low of this candle has not met with the
+ 
+
+481
+00:10:11,839 --> 00:10:15,829
+low of this candle has not met with the
+high of the the first candle at the down
+
+482
+00:10:15,829 --> 00:10:15,839
+high of the the first candle at the down
+ 
+
+483
+00:10:15,839 --> 00:10:18,230
+high of the the first candle at the down
+here. So it has left something behind we
+
+484
+00:10:18,230 --> 00:10:18,240
+here. So it has left something behind we
+ 
+
+485
+00:10:18,240 --> 00:10:19,670
+here. So it has left something behind we
+call the [music]
+
+486
+00:10:19,670 --> 00:10:19,680
+call the [music]
+ 
+
+487
+00:10:19,680 --> 00:10:24,949
+call the [music]
+SVG. This is very simple to understand.
+
+488
+00:10:24,949 --> 00:10:24,959
+SVG. This is very simple to understand.
+ 
+
+489
+00:10:24,959 --> 00:10:28,630
+SVG. This is very simple to understand.
+So this is our imbalance or FVG and we
+
+490
+00:10:28,630 --> 00:10:28,640
+So this is our imbalance or FVG and we
+ 
+
+491
+00:10:28,640 --> 00:10:31,990
+So this is our imbalance or FVG and we
+also have our zone over here which is
+
+492
+00:10:31,990 --> 00:10:32,000
+also have our zone over here which is
+ 
+
+493
+00:10:32,000 --> 00:10:36,150
+also have our zone over here which is
+our demand zone. So we are waiting for
+
+494
+00:10:36,150 --> 00:10:36,160
+our demand zone. So we are waiting for
+ 
+
+495
+00:10:36,160 --> 00:10:39,670
+our demand zone. So we are waiting for
+price to come and balance that uh
+
+496
+00:10:39,670 --> 00:10:39,680
+price to come and balance that uh
+ 
+
+497
+00:10:39,680 --> 00:10:41,750
+price to come and balance that uh
+imbalance so that we can have a healthy
+
+498
+00:10:41,750 --> 00:10:41,760
+imbalance so that we can have a healthy
+ 
+
+499
+00:10:41,760 --> 00:10:45,269
+imbalance so that we can have a healthy
+price action before the continuation to
+
+500
+00:10:45,269 --> 00:10:45,279
+price action before the continuation to
+ 
+
+501
+00:10:45,279 --> 00:10:47,990
+price action before the continuation to
+the upside. So look at what happened
+
+502
+00:10:47,990 --> 00:10:48,000
+the upside. So look at what happened
+ 
+
+503
+00:10:48,000 --> 00:10:50,310
+the upside. So look at what happened
+around this area
+
+504
+00:10:50,310 --> 00:10:50,320
+around this area
+ 
+
+505
+00:10:50,320 --> 00:10:56,150
+around this area
+uh as price was trying to balance that
+
+506
+00:10:56,150 --> 00:10:56,160
+uh as price was trying to balance that
+ 
+
+507
+00:10:56,160 --> 00:10:59,269
+uh as price was trying to balance that
+um imbalance and tapping into the supply
+
+508
+00:10:59,269 --> 00:10:59,279
+um imbalance and tapping into the supply
+ 
+
+509
+00:10:59,279 --> 00:11:01,509
+um imbalance and tapping into the supply
+zone. So you can see that when I was
+
+510
+00:11:01,509 --> 00:11:01,519
+zone. So you can see that when I was
+ 
+
+511
+00:11:01,519 --> 00:11:03,750
+zone. So you can see that when I was
+explaining I said that sometime price
+
+512
+00:11:03,750 --> 00:11:03,760
+explaining I said that sometime price
+ 
+
+513
+00:11:03,760 --> 00:11:05,350
+explaining I said that sometime price
+will come back and fill it halfway
+
+514
+00:11:05,350 --> 00:11:05,360
+will come back and fill it halfway
+ 
+
+515
+00:11:05,360 --> 00:11:08,710
+will come back and fill it halfway
+without tapping into the uh supply or
+
+516
+00:11:08,710 --> 00:11:08,720
+without tapping into the uh supply or
+ 
+
+517
+00:11:08,720 --> 00:11:10,310
+without tapping into the uh supply or
+demand zone. So this area you can see
+
+518
+00:11:10,310 --> 00:11:10,320
+demand zone. So this area you can see
+ 
+
+519
+00:11:10,320 --> 00:11:13,350
+demand zone. So this area you can see
+that immediately the uh how do we call
+
+520
+00:11:13,350 --> 00:11:13,360
+that immediately the uh how do we call
+ 
+
+521
+00:11:13,360 --> 00:11:15,750
+that immediately the uh how do we call
+it the imbalance was filled right at the
+
+522
+00:11:15,750 --> 00:11:15,760
+it the imbalance was filled right at the
+ 
+
+523
+00:11:15,760 --> 00:11:18,949
+it the imbalance was filled right at the
+moving up. So we didn't even tap into
+
+524
+00:11:18,949 --> 00:11:18,959
+moving up. So we didn't even tap into
+ 
+
+525
+00:11:18,959 --> 00:11:22,710
+moving up. So we didn't even tap into
+the demand zone anymore. We only tapped
+
+526
+00:11:22,710 --> 00:11:22,720
+the demand zone anymore. We only tapped
+ 
+
+527
+00:11:22,720 --> 00:11:25,430
+the demand zone anymore. We only tapped
+into the imbalance or LVG and
+
+528
+00:11:25,430 --> 00:11:25,440
+into the imbalance or LVG and
+ 
+
+529
+00:11:25,440 --> 00:11:28,150
+into the imbalance or LVG and
+immediately price started moving up.
+
+530
+00:11:28,150 --> 00:11:28,160
+immediately price started moving up.
+ 
+
+531
+00:11:28,160 --> 00:11:30,949
+immediately price started moving up.
+That is why I said all these are
+
+532
+00:11:30,949 --> 00:11:30,959
+That is why I said all these are
+ 
+
+533
+00:11:30,959 --> 00:11:33,110
+That is why I said all these are
+institutional reference points which you
+
+534
+00:11:33,110 --> 00:11:33,120
+institutional reference points which you
+ 
+
+535
+00:11:33,120 --> 00:11:35,750
+institutional reference points which you
+have to pay attention to. So this is
+
+536
+00:11:35,750 --> 00:11:35,760
+have to pay attention to. So this is
+ 
+
+537
+00:11:35,760 --> 00:11:40,069
+have to pay attention to. So this is
+what happened after we tapped into the
+
+538
+00:11:40,069 --> 00:11:40,079
+what happened after we tapped into the
+ 
+
+539
+00:11:40,079 --> 00:11:42,550
+what happened after we tapped into the
+imbalance. You see price has gone up
+
+540
+00:11:42,550 --> 00:11:42,560
+imbalance. You see price has gone up
+ 
+
+541
+00:11:42,560 --> 00:11:45,670
+imbalance. You see price has gone up
+from this area and then take our profit
+
+542
+00:11:45,670 --> 00:11:45,680
+from this area and then take our profit
+ 
+
+543
+00:11:45,680 --> 00:11:50,150
+from this area and then take our profit
+around here. So that is that for
+
+544
+00:11:50,150 --> 00:11:50,160
+around here. So that is that for
+ 
+
+545
+00:11:50,160 --> 00:11:51,670
+around here. So that is that for
+imbalance.
+
+546
+00:11:51,670 --> 00:11:51,680
+imbalance.
+ 
+
+547
+00:11:51,680 --> 00:11:53,190
+imbalance.
+This has brought us to [music] the end
+
+548
+00:11:53,190 --> 00:11:53,200
+This has brought us to [music] the end
+ 
+
+549
+00:11:53,200 --> 00:11:57,110
+This has brought us to [music] the end
+of today's lesson. Hit on the thumbs up
+
+550
+00:11:57,110 --> 00:11:57,120
+of today's lesson. Hit on the thumbs up
+ 
+
+551
+00:11:57,120 --> 00:11:59,829
+of today's lesson. Hit on the thumbs up
+button, [music] subscribe and also leave
+
+552
+00:11:59,829 --> 00:11:59,839
+button, [music] subscribe and also leave
+ 
+
+553
+00:11:59,839 --> 00:12:01,350
+button, [music] subscribe and also leave
+a comment below. Now if you're not part
+
+554
+00:12:01,350 --> 00:12:01,360
+a comment below. Now if you're not part
+ 
+
+555
+00:12:01,360 --> 00:12:03,110
+a comment below. Now if you're not part
+of my telegram channel, I'll leave the
+
+556
+00:12:03,110 --> 00:12:03,120
+of my telegram channel, I'll leave the
+ 
+
+557
+00:12:03,120 --> 00:12:04,790
+of my telegram channel, I'll leave the
+link in the description below. Do what
+
+558
+00:12:04,790 --> 00:12:04,800
+link in the description below. Do what
+ 
+
+559
+00:12:04,800 --> 00:12:06,790
+link in the description below. Do what
+to join the telegram channel and learn
+
+560
+00:12:06,790 --> 00:12:06,800
+to join the telegram channel and learn
+ 
+
+561
+00:12:06,800 --> 00:12:10,230
+to join the telegram channel and learn
+more or acquire more knowledge from me.
+
+562
+00:12:10,230 --> 00:12:10,240
+more or acquire more knowledge from me.
+ 
+
+563
+00:12:10,240 --> 00:12:12,069
+more or acquire more knowledge from me.
+Thank you for watching and see you in
+
+564
+00:12:12,069 --> 00:12:12,079
+Thank you for watching and see you in
+ 
+
+565
+00:12:12,079 --> 00:12:14,253
+Thank you for watching and see you in
+the next video.
+
+566
+00:12:14,253 --> 00:12:14,263
+the next video.
+ 
+
+567
+00:12:14,263 --> 00:12:16,283
+the next video.
+[music]
+

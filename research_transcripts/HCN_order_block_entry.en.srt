@@ -1,0 +1,3005 @@
+1
+00:00:00,080 --> 00:00:01,429
+
+Traders, in today's video, we're going
+
+2
+00:00:01,429 --> 00:00:01,439
+Traders, in today's video, we're going
+ 
+
+3
+00:00:01,439 --> 00:00:03,510
+Traders, in today's video, we're going
+to talk about the different entry models
+
+4
+00:00:03,510 --> 00:00:03,520
+to talk about the different entry models
+ 
+
+5
+00:00:03,520 --> 00:00:05,430
+to talk about the different entry models
+for smart money concepts. I'm going to
+
+6
+00:00:05,430 --> 00:00:05,440
+for smart money concepts. I'm going to
+ 
+
+7
+00:00:05,440 --> 00:00:07,510
+for smart money concepts. I'm going to
+be touching the four popular entry
+
+8
+00:00:07,510 --> 00:00:07,520
+be touching the four popular entry
+ 
+
+9
+00:00:07,520 --> 00:00:09,430
+be touching the four popular entry
+models. We have the order block, fair
+
+10
+00:00:09,430 --> 00:00:09,440
+models. We have the order block, fair
+ 
+
+11
+00:00:09,440 --> 00:00:11,270
+models. We have the order block, fair
+value gap, breaker blocks, and flip
+
+12
+00:00:11,270 --> 00:00:11,280
+value gap, breaker blocks, and flip
+ 
+
+13
+00:00:11,280 --> 00:00:13,110
+value gap, breaker blocks, and flip
+zones. And I'm going to break this video
+
+14
+00:00:13,110 --> 00:00:13,120
+zones. And I'm going to break this video
+ 
+
+15
+00:00:13,120 --> 00:00:15,110
+zones. And I'm going to break this video
+into parts. So, in today's video, we're
+
+16
+00:00:15,110 --> 00:00:15,120
+into parts. So, in today's video, we're
+ 
+
+17
+00:00:15,120 --> 00:00:16,870
+into parts. So, in today's video, we're
+going to focus more on order blocks. So,
+
+18
+00:00:16,870 --> 00:00:16,880
+going to focus more on order blocks. So,
+ 
+
+19
+00:00:16,880 --> 00:00:18,390
+going to focus more on order blocks. So,
+make sure you subscribe, turn on the
+
+20
+00:00:18,390 --> 00:00:18,400
+make sure you subscribe, turn on the
+ 
+
+21
+00:00:18,400 --> 00:00:19,510
+make sure you subscribe, turn on the
+notification bell so that you'll be
+
+22
+00:00:19,510 --> 00:00:19,520
+notification bell so that you'll be
+ 
+
+23
+00:00:19,520 --> 00:00:21,510
+notification bell so that you'll be
+notified when other videos will drop and
+
+24
+00:00:21,510 --> 00:00:21,520
+notified when other videos will drop and
+ 
+
+25
+00:00:21,520 --> 00:00:23,349
+notified when other videos will drop and
+be updated. You get the point? So let's
+
+26
+00:00:23,349 --> 00:00:23,359
+be updated. You get the point? So let's
+ 
+
+27
+00:00:23,359 --> 00:00:26,150
+be updated. You get the point? So let's
+go to the chart guys and point out valid
+
+28
+00:00:26,150 --> 00:00:26,160
+go to the chart guys and point out valid
+ 
+
+29
+00:00:26,160 --> 00:00:28,310
+go to the chart guys and point out valid
+order blocks together and also how to
+
+30
+00:00:28,310 --> 00:00:28,320
+order blocks together and also how to
+ 
+
+31
+00:00:28,320 --> 00:00:30,390
+order blocks together and also how to
+take smart entries from this order
+
+32
+00:00:30,390 --> 00:00:30,400
+take smart entries from this order
+ 
+
+33
+00:00:30,400 --> 00:00:31,750
+take smart entries from this order
+blocks. Let's go to the chart guys. So
+
+34
+00:00:31,750 --> 00:00:31,760
+blocks. Let's go to the chart guys. So
+ 
+
+35
+00:00:31,760 --> 00:00:34,950
+blocks. Let's go to the chart guys. So
+traders let's get to understand the idea
+
+36
+00:00:34,950 --> 00:00:34,960
+traders let's get to understand the idea
+ 
+
+37
+00:00:34,960 --> 00:00:38,549
+traders let's get to understand the idea
+behind order block and what it means. So
+
+38
+00:00:38,549 --> 00:00:38,559
+behind order block and what it means. So
+ 
+
+39
+00:00:38,559 --> 00:00:40,470
+behind order block and what it means. So
+from what I have here on the screen, you
+
+40
+00:00:40,470 --> 00:00:40,480
+from what I have here on the screen, you
+ 
+
+41
+00:00:40,480 --> 00:00:42,709
+from what I have here on the screen, you
+can see that an order block is a price
+
+42
+00:00:42,709 --> 00:00:42,719
+can see that an order block is a price
+ 
+
+43
+00:00:42,719 --> 00:00:46,150
+can see that an order block is a price
+zone on the chart where big financial
+
+44
+00:00:46,150 --> 00:00:46,160
+zone on the chart where big financial
+ 
+
+45
+00:00:46,160 --> 00:00:48,549
+zone on the chart where big financial
+institutions, you know, like banks,
+
+46
+00:00:48,549 --> 00:00:48,559
+institutions, you know, like banks,
+ 
+
+47
+00:00:48,559 --> 00:00:53,510
+institutions, you know, like banks,
+hedge funds, etc. placed large buy or
+
+48
+00:00:53,510 --> 00:00:53,520
+hedge funds, etc. placed large buy or
+ 
+
+49
+00:00:53,520 --> 00:00:57,029
+hedge funds, etc. placed large buy or
+sell orders leaving behind a strong
+
+50
+00:00:57,029 --> 00:00:57,039
+sell orders leaving behind a strong
+ 
+
+51
+00:00:57,039 --> 00:00:59,110
+sell orders leaving behind a strong
+footprint. So having in mind that
+
+52
+00:00:59,110 --> 00:00:59,120
+footprint. So having in mind that
+ 
+
+53
+00:00:59,120 --> 00:01:01,830
+footprint. So having in mind that
+autoblock you know this is actually and
+
+54
+00:01:01,830 --> 00:01:01,840
+autoblock you know this is actually and
+ 
+
+55
+00:01:01,840 --> 00:01:04,789
+autoblock you know this is actually and
+I I will call it the most popular entry
+
+56
+00:01:04,789 --> 00:01:04,799
+I I will call it the most popular entry
+ 
+
+57
+00:01:04,799 --> 00:01:07,750
+I I will call it the most popular entry
+point for smart money concept strategy
+
+58
+00:01:07,750 --> 00:01:07,760
+point for smart money concept strategy
+ 
+
+59
+00:01:07,760 --> 00:01:10,789
+point for smart money concept strategy
+and I use it too and um at the end of
+
+60
+00:01:10,789 --> 00:01:10,799
+and I use it too and um at the end of
+ 
+
+61
+00:01:10,799 --> 00:01:13,429
+and I use it too and um at the end of
+this video I'll get to show you how you
+
+62
+00:01:13,429 --> 00:01:13,439
+this video I'll get to show you how you
+ 
+
+63
+00:01:13,439 --> 00:01:15,670
+this video I'll get to show you how you
+know I map it out on the chart and you
+
+64
+00:01:15,670 --> 00:01:15,680
+know I map it out on the chart and you
+ 
+
+65
+00:01:15,680 --> 00:01:18,950
+know I map it out on the chart and you
+know take my entries things I look out
+
+66
+00:01:18,950 --> 00:01:18,960
+know take my entries things I look out
+ 
+
+67
+00:01:18,960 --> 00:01:21,670
+know take my entries things I look out
+for the order blocks and the rest. So
+
+68
+00:01:21,670 --> 00:01:21,680
+for the order blocks and the rest. So
+ 
+
+69
+00:01:21,680 --> 00:01:25,590
+for the order blocks and the rest. So
+this is actually an important aspect of
+
+70
+00:01:25,590 --> 00:01:25,600
+this is actually an important aspect of
+ 
+
+71
+00:01:25,600 --> 00:01:27,830
+this is actually an important aspect of
+um smart money concept. Once you get to
+
+72
+00:01:27,830 --> 00:01:27,840
+um smart money concept. Once you get to
+ 
+
+73
+00:01:27,840 --> 00:01:31,830
+um smart money concept. Once you get to
+understand the idea behind order block
+
+74
+00:01:31,830 --> 00:01:31,840
+understand the idea behind order block
+ 
+
+75
+00:01:31,840 --> 00:01:35,830
+understand the idea behind order block
+and how to strategically map it out then
+
+76
+00:01:35,830 --> 00:01:35,840
+and how to strategically map it out then
+ 
+
+77
+00:01:35,840 --> 00:01:38,310
+and how to strategically map it out then
+entries in the market won't be a
+
+78
+00:01:38,310 --> 00:01:38,320
+entries in the market won't be a
+ 
+
+79
+00:01:38,320 --> 00:01:39,830
+entries in the market won't be a
+problem. So make sure you watch to the
+
+80
+00:01:39,830 --> 00:01:39,840
+problem. So make sure you watch to the
+ 
+
+81
+00:01:39,840 --> 00:01:41,510
+problem. So make sure you watch to the
+very end. So why is order block
+
+82
+00:01:41,510 --> 00:01:41,520
+very end. So why is order block
+ 
+
+83
+00:01:41,520 --> 00:01:43,350
+very end. So why is order block
+important? Now from here you can see
+
+84
+00:01:43,350 --> 00:01:43,360
+important? Now from here you can see
+ 
+
+85
+00:01:43,360 --> 00:01:45,749
+important? Now from here you can see
+that order blocks are important because
+
+86
+00:01:45,749 --> 00:01:45,759
+that order blocks are important because
+ 
+
+87
+00:01:45,759 --> 00:01:48,310
+that order blocks are important because
+they show where the strongest players in
+
+88
+00:01:48,310 --> 00:01:48,320
+they show where the strongest players in
+ 
+
+89
+00:01:48,320 --> 00:01:50,389
+they show where the strongest players in
+the market institutions you know placed
+
+90
+00:01:50,389 --> 00:01:50,399
+the market institutions you know placed
+ 
+
+91
+00:01:50,399 --> 00:01:52,950
+the market institutions you know placed
+their orders. As you are trying to make
+
+92
+00:01:52,950 --> 00:01:52,960
+their orders. As you are trying to make
+ 
+
+93
+00:01:52,960 --> 00:01:54,870
+their orders. As you are trying to make
+money with your little capital and the
+
+94
+00:01:54,870 --> 00:01:54,880
+money with your little capital and the
+ 
+
+95
+00:01:54,880 --> 00:01:57,510
+money with your little capital and the
+rest we have the market movers you know
+
+96
+00:01:57,510 --> 00:01:57,520
+rest we have the market movers you know
+ 
+
+97
+00:01:57,520 --> 00:02:00,469
+rest we have the market movers you know
+those that you know their orders can you
+
+98
+00:02:00,469 --> 00:02:00,479
+those that you know their orders can you
+ 
+
+99
+00:02:00,479 --> 00:02:02,630
+those that you know their orders can you
+know shake everywhere in the market. So
+
+100
+00:02:02,630 --> 00:02:02,640
+know shake everywhere in the market. So
+ 
+
+101
+00:02:02,640 --> 00:02:04,149
+know shake everywhere in the market. So
+that's what we mean by you know the
+
+102
+00:02:04,149 --> 00:02:04,159
+that's what we mean by you know the
+ 
+
+103
+00:02:04,159 --> 00:02:05,990
+that's what we mean by you know the
+institutions the banks you know central
+
+104
+00:02:05,990 --> 00:02:06,000
+institutions the banks you know central
+ 
+
+105
+00:02:06,000 --> 00:02:09,190
+institutions the banks you know central
+banks and the rest. So other block will
+
+106
+00:02:09,190 --> 00:02:09,200
+banks and the rest. So other block will
+ 
+
+107
+00:02:09,200 --> 00:02:12,070
+banks and the rest. So other block will
+show where these institutions you know
+
+108
+00:02:12,070 --> 00:02:12,080
+show where these institutions you know
+ 
+
+109
+00:02:12,080 --> 00:02:14,710
+show where these institutions you know
+placed their orders and then since these
+
+110
+00:02:14,710 --> 00:02:14,720
+placed their orders and then since these
+ 
+
+111
+00:02:14,720 --> 00:02:17,110
+placed their orders and then since these
+players they move millions their
+
+112
+00:02:17,110 --> 00:02:17,120
+players they move millions their
+ 
+
+113
+00:02:17,120 --> 00:02:20,150
+players they move millions their
+footprints become valuable zones for
+
+114
+00:02:20,150 --> 00:02:20,160
+footprints become valuable zones for
+ 
+
+115
+00:02:20,160 --> 00:02:24,470
+footprints become valuable zones for
+traders. So and now price often reacts
+
+116
+00:02:24,470 --> 00:02:24,480
+traders. So and now price often reacts
+ 
+
+117
+00:02:24,480 --> 00:02:26,869
+traders. So and now price often reacts
+when it returns to an order block making
+
+118
+00:02:26,869 --> 00:02:26,879
+when it returns to an order block making
+ 
+
+119
+00:02:26,879 --> 00:02:30,790
+when it returns to an order block making
+them strong areas for entries, stop-loss
+
+120
+00:02:30,790 --> 00:02:30,800
+them strong areas for entries, stop-loss
+ 
+
+121
+00:02:30,800 --> 00:02:33,350
+them strong areas for entries, stop-loss
+um stop-loss placement and um take
+
+122
+00:02:33,350 --> 00:02:33,360
+um stop-loss placement and um take
+ 
+
+123
+00:02:33,360 --> 00:02:35,270
+um stop-loss placement and um take
+profit targets. So you can see from the
+
+124
+00:02:35,270 --> 00:02:35,280
+profit targets. So you can see from the
+ 
+
+125
+00:02:35,280 --> 00:02:38,630
+profit targets. So you can see from the
+illustration I have here once there is
+
+126
+00:02:38,630 --> 00:02:38,640
+illustration I have here once there is
+ 
+
+127
+00:02:38,640 --> 00:02:42,309
+illustration I have here once there is
+an order block we get an impulsive move
+
+128
+00:02:42,309 --> 00:02:42,319
+an order block we get an impulsive move
+ 
+
+129
+00:02:42,319 --> 00:02:44,949
+an order block we get an impulsive move
+and that impulsive move will now break a
+
+130
+00:02:44,949 --> 00:02:44,959
+and that impulsive move will now break a
+ 
+
+131
+00:02:44,959 --> 00:02:47,750
+and that impulsive move will now break a
+structure. So the idea will be to wait
+
+132
+00:02:47,750 --> 00:02:47,760
+structure. So the idea will be to wait
+ 
+
+133
+00:02:47,760 --> 00:02:49,589
+structure. So the idea will be to wait
+for price to come back into that other
+
+134
+00:02:49,589 --> 00:02:49,599
+for price to come back into that other
+ 
+
+135
+00:02:49,599 --> 00:02:51,750
+for price to come back into that other
+block. If the break of structure was to
+
+136
+00:02:51,750 --> 00:02:51,760
+block. If the break of structure was to
+ 
+
+137
+00:02:51,760 --> 00:02:53,430
+block. If the break of structure was to
+the upside
+
+138
+00:02:53,430 --> 00:02:53,440
+the upside
+ 
+
+139
+00:02:53,440 --> 00:02:56,229
+the upside
+we will be looking to buy once price you
+
+140
+00:02:56,229 --> 00:02:56,239
+we will be looking to buy once price you
+ 
+
+141
+00:02:56,239 --> 00:02:58,790
+we will be looking to buy once price you
+know gets back into that other block.
+
+142
+00:02:58,790 --> 00:02:58,800
+know gets back into that other block.
+ 
+
+143
+00:02:58,800 --> 00:03:01,589
+know gets back into that other block.
+And if the impulsive movement and the
+
+144
+00:03:01,589 --> 00:03:01,599
+And if the impulsive movement and the
+ 
+
+145
+00:03:01,599 --> 00:03:03,990
+And if the impulsive movement and the
+break of structure was to the downside,
+
+146
+00:03:03,990 --> 00:03:04,000
+break of structure was to the downside,
+ 
+
+147
+00:03:04,000 --> 00:03:06,470
+break of structure was to the downside,
+we'll be looking to sell once price you
+
+148
+00:03:06,470 --> 00:03:06,480
+we'll be looking to sell once price you
+ 
+
+149
+00:03:06,480 --> 00:03:09,750
+we'll be looking to sell once price you
+know gets into that order block. So it
+
+150
+00:03:09,750 --> 00:03:09,760
+know gets into that order block. So it
+ 
+
+151
+00:03:09,760 --> 00:03:11,910
+know gets into that order block. So it
+is very important. Now let me quickly
+
+152
+00:03:11,910 --> 00:03:11,920
+is very important. Now let me quickly
+ 
+
+153
+00:03:11,920 --> 00:03:14,470
+is very important. Now let me quickly
+show you guys the rules to follow on how
+
+154
+00:03:14,470 --> 00:03:14,480
+show you guys the rules to follow on how
+ 
+
+155
+00:03:14,480 --> 00:03:18,710
+show you guys the rules to follow on how
+to spot valid blocks. So on how to spot
+
+156
+00:03:18,710 --> 00:03:18,720
+to spot valid blocks. So on how to spot
+ 
+
+157
+00:03:18,720 --> 00:03:21,670
+to spot valid blocks. So on how to spot
+valid block, I've listed five important
+
+158
+00:03:21,670 --> 00:03:21,680
+valid block, I've listed five important
+ 
+
+159
+00:03:21,680 --> 00:03:24,309
+valid block, I've listed five important
+tips here. And number one is the trend
+
+160
+00:03:24,309 --> 00:03:24,319
+tips here. And number one is the trend
+ 
+
+161
+00:03:24,319 --> 00:03:27,350
+tips here. And number one is the trend
+matters. It is important for you to know
+
+162
+00:03:27,350 --> 00:03:27,360
+matters. It is important for you to know
+ 
+
+163
+00:03:27,360 --> 00:03:29,910
+matters. It is important for you to know
+where the market is going to the market
+
+164
+00:03:29,910 --> 00:03:29,920
+where the market is going to the market
+ 
+
+165
+00:03:29,920 --> 00:03:32,630
+where the market is going to the market
+structure. Break the market down and
+
+166
+00:03:32,630 --> 00:03:32,640
+structure. Break the market down and
+ 
+
+167
+00:03:32,640 --> 00:03:35,670
+structure. Break the market down and
+know where it is pointing at so that you
+
+168
+00:03:35,670 --> 00:03:35,680
+know where it is pointing at so that you
+ 
+
+169
+00:03:35,680 --> 00:03:37,509
+know where it is pointing at so that you
+will align. You know the popular
+
+170
+00:03:37,509 --> 00:03:37,519
+will align. You know the popular
+ 
+
+171
+00:03:37,519 --> 00:03:40,390
+will align. You know the popular
+statement the trend is your friend. It
+
+172
+00:03:40,390 --> 00:03:40,400
+statement the trend is your friend. It
+ 
+
+173
+00:03:40,400 --> 00:03:42,149
+statement the trend is your friend. It
+is important you know where the market
+
+174
+00:03:42,149 --> 00:03:42,159
+is important you know where the market
+ 
+
+175
+00:03:42,159 --> 00:03:44,229
+is important you know where the market
+is going to so that you will follow suit
+
+176
+00:03:44,229 --> 00:03:44,239
+is going to so that you will follow suit
+ 
+
+177
+00:03:44,239 --> 00:03:46,869
+is going to so that you will follow suit
+because when you are following the trend
+
+178
+00:03:46,869 --> 00:03:46,879
+because when you are following the trend
+ 
+
+179
+00:03:46,879 --> 00:03:48,550
+because when you are following the trend
+the probability of your trend playing
+
+180
+00:03:48,550 --> 00:03:48,560
+the probability of your trend playing
+ 
+
+181
+00:03:48,560 --> 00:03:51,110
+the probability of your trend playing
+out will be very high than when you are
+
+182
+00:03:51,110 --> 00:03:51,120
+out will be very high than when you are
+ 
+
+183
+00:03:51,120 --> 00:03:54,149
+out will be very high than when you are
+going against the trend. And then the
+
+184
+00:03:54,149 --> 00:03:54,159
+going against the trend. And then the
+ 
+
+185
+00:03:54,159 --> 00:03:56,710
+going against the trend. And then the
+last candlestick in an accumulation is
+
+186
+00:03:56,710 --> 00:03:56,720
+last candlestick in an accumulation is
+ 
+
+187
+00:03:56,720 --> 00:03:58,789
+last candlestick in an accumulation is
+actually the order block. So when you're
+
+188
+00:03:58,789 --> 00:03:58,799
+actually the order block. So when you're
+ 
+
+189
+00:03:58,799 --> 00:04:01,429
+actually the order block. So when you're
+trying to map out your order block
+
+190
+00:04:01,429 --> 00:04:01,439
+trying to map out your order block
+ 
+
+191
+00:04:01,439 --> 00:04:02,949
+trying to map out your order block
+inside
+
+192
+00:04:02,949 --> 00:04:02,959
+inside
+ 
+
+193
+00:04:02,959 --> 00:04:05,670
+inside
+a consolidation or accumulation or
+
+194
+00:04:05,670 --> 00:04:05,680
+a consolidation or accumulation or
+ 
+
+195
+00:04:05,680 --> 00:04:07,990
+a consolidation or accumulation or
+inside an origin,
+
+196
+00:04:07,990 --> 00:04:08,000
+inside an origin,
+ 
+
+197
+00:04:08,000 --> 00:04:11,589
+inside an origin,
+look out for the last candlestick.
+
+198
+00:04:11,589 --> 00:04:11,599
+look out for the last candlestick.
+ 
+
+199
+00:04:11,599 --> 00:04:14,149
+look out for the last candlestick.
+That is your order block candlestick.
+
+200
+00:04:14,149 --> 00:04:14,159
+That is your order block candlestick.
+ 
+
+201
+00:04:14,159 --> 00:04:16,949
+That is your order block candlestick.
+And now the next one here is breakout
+
+202
+00:04:16,949 --> 00:04:16,959
+And now the next one here is breakout
+ 
+
+203
+00:04:16,959 --> 00:04:19,189
+And now the next one here is breakout
+structure. So have it in mind that
+
+204
+00:04:19,189 --> 00:04:19,199
+structure. So have it in mind that
+ 
+
+205
+00:04:19,199 --> 00:04:22,310
+structure. So have it in mind that
+before you even start looking for your
+
+206
+00:04:22,310 --> 00:04:22,320
+before you even start looking for your
+ 
+
+207
+00:04:22,320 --> 00:04:24,390
+before you even start looking for your
+order block candlestick, you must have
+
+208
+00:04:24,390 --> 00:04:24,400
+order block candlestick, you must have
+ 
+
+209
+00:04:24,400 --> 00:04:26,629
+order block candlestick, you must have
+pointed out a break of structure cuz
+
+210
+00:04:26,629 --> 00:04:26,639
+pointed out a break of structure cuz
+ 
+
+211
+00:04:26,639 --> 00:04:30,230
+pointed out a break of structure cuz
+once you see a break of structure, the
+
+212
+00:04:30,230 --> 00:04:30,240
+once you see a break of structure, the
+ 
+
+213
+00:04:30,240 --> 00:04:32,150
+once you see a break of structure, the
+next question
+
+214
+00:04:32,150 --> 00:04:32,160
+next question
+ 
+
+215
+00:04:32,160 --> 00:04:36,230
+next question
+is what caused the break of structure,
+
+216
+00:04:36,230 --> 00:04:36,240
+is what caused the break of structure,
+ 
+
+217
+00:04:36,240 --> 00:04:38,710
+is what caused the break of structure,
+the impulsive move that cleared the
+
+218
+00:04:38,710 --> 00:04:38,720
+the impulsive move that cleared the
+ 
+
+219
+00:04:38,720 --> 00:04:41,670
+the impulsive move that cleared the
+structure, where is it coming from? And
+
+220
+00:04:41,670 --> 00:04:41,680
+structure, where is it coming from? And
+ 
+
+221
+00:04:41,680 --> 00:04:44,310
+structure, where is it coming from? And
+now once you point out the accumulation
+
+222
+00:04:44,310 --> 00:04:44,320
+now once you point out the accumulation
+ 
+
+223
+00:04:44,320 --> 00:04:47,110
+now once you point out the accumulation
+that happened before the impulsive move
+
+224
+00:04:47,110 --> 00:04:47,120
+that happened before the impulsive move
+ 
+
+225
+00:04:47,120 --> 00:04:49,189
+that happened before the impulsive move
+that caused the break of structure, you
+
+226
+00:04:49,189 --> 00:04:49,199
+that caused the break of structure, you
+ 
+
+227
+00:04:49,199 --> 00:04:51,350
+that caused the break of structure, you
+now need to look for the last
+
+228
+00:04:51,350 --> 00:04:51,360
+now need to look for the last
+ 
+
+229
+00:04:51,360 --> 00:04:53,189
+now need to look for the last
+candlestick reaction before the
+
+230
+00:04:53,189 --> 00:04:53,199
+candlestick reaction before the
+ 
+
+231
+00:04:53,199 --> 00:04:55,510
+candlestick reaction before the
+impulsive move. Highlight it because
+
+232
+00:04:55,510 --> 00:04:55,520
+impulsive move. Highlight it because
+ 
+
+233
+00:04:55,520 --> 00:04:57,990
+impulsive move. Highlight it because
+that is your order block candle. And
+
+234
+00:04:57,990 --> 00:04:58,000
+that is your order block candle. And
+ 
+
+235
+00:04:58,000 --> 00:05:00,150
+that is your order block candle. And
+it's important you highlight it very
+
+236
+00:05:00,150 --> 00:05:00,160
+it's important you highlight it very
+ 
+
+237
+00:05:00,160 --> 00:05:02,550
+it's important you highlight it very
+well so that you will not miss out on
+
+238
+00:05:02,550 --> 00:05:02,560
+well so that you will not miss out on
+ 
+
+239
+00:05:02,560 --> 00:05:04,310
+well so that you will not miss out on
+your entries and the rest because there
+
+240
+00:05:04,310 --> 00:05:04,320
+your entries and the rest because there
+ 
+
+241
+00:05:04,320 --> 00:05:06,629
+your entries and the rest because there
+are times price will just come and just
+
+242
+00:05:06,629 --> 00:05:06,639
+are times price will just come and just
+ 
+
+243
+00:05:06,639 --> 00:05:08,710
+are times price will just come and just
+give it a little tapping and move to
+
+244
+00:05:08,710 --> 00:05:08,720
+give it a little tapping and move to
+ 
+
+245
+00:05:08,720 --> 00:05:10,230
+give it a little tapping and move to
+your direction and if you don't
+
+246
+00:05:10,230 --> 00:05:10,240
+your direction and if you don't
+ 
+
+247
+00:05:10,240 --> 00:05:12,469
+your direction and if you don't
+highlight it well to place your entries
+
+248
+00:05:12,469 --> 00:05:12,479
+highlight it well to place your entries
+ 
+
+249
+00:05:12,479 --> 00:05:15,189
+highlight it well to place your entries
+well you see the market leaving you out
+
+250
+00:05:15,189 --> 00:05:15,199
+well you see the market leaving you out
+ 
+
+251
+00:05:15,199 --> 00:05:16,870
+well you see the market leaving you out
+and then you will miss out on trades
+
+252
+00:05:16,870 --> 00:05:16,880
+and then you will miss out on trades
+ 
+
+253
+00:05:16,880 --> 00:05:18,790
+and then you will miss out on trades
+that you know would have given you a
+
+254
+00:05:18,790 --> 00:05:18,800
+that you know would have given you a
+ 
+
+255
+00:05:18,800 --> 00:05:21,110
+that you know would have given you a
+good you know massive you know massive
+
+256
+00:05:21,110 --> 00:05:21,120
+good you know massive you know massive
+ 
+
+257
+00:05:21,120 --> 00:05:23,670
+good you know massive you know massive
+profit and the rest. So make sure you
+
+258
+00:05:23,670 --> 00:05:23,680
+profit and the rest. So make sure you
+ 
+
+259
+00:05:23,680 --> 00:05:25,749
+profit and the rest. So make sure you
+highlight it well the last candlestick
+
+260
+00:05:25,749 --> 00:05:25,759
+highlight it well the last candlestick
+ 
+
+261
+00:05:25,759 --> 00:05:28,070
+highlight it well the last candlestick
+in an accumulation and have it in mind
+
+262
+00:05:28,070 --> 00:05:28,080
+in an accumulation and have it in mind
+ 
+
+263
+00:05:28,080 --> 00:05:31,189
+in an accumulation and have it in mind
+that that other block must cause what a
+
+264
+00:05:31,189 --> 00:05:31,199
+that that other block must cause what a
+ 
+
+265
+00:05:31,199 --> 00:05:33,350
+that that other block must cause what a
+break of structure and it's also
+
+266
+00:05:33,350 --> 00:05:33,360
+break of structure and it's also
+ 
+
+267
+00:05:33,360 --> 00:05:37,350
+break of structure and it's also
+important that you point out imbalance
+
+268
+00:05:37,350 --> 00:05:37,360
+important that you point out imbalance
+ 
+
+269
+00:05:37,360 --> 00:05:40,070
+important that you point out imbalance
+that is fair value gap what I have here
+
+270
+00:05:40,070 --> 00:05:40,080
+that is fair value gap what I have here
+ 
+
+271
+00:05:40,080 --> 00:05:42,790
+that is fair value gap what I have here
+it's important you point out in balance
+
+272
+00:05:42,790 --> 00:05:42,800
+it's important you point out in balance
+ 
+
+273
+00:05:42,800 --> 00:05:45,029
+it's important you point out in balance
+very close to the other block because
+
+274
+00:05:45,029 --> 00:05:45,039
+very close to the other block because
+ 
+
+275
+00:05:45,039 --> 00:05:47,029
+very close to the other block because
+that will make the order block more
+
+276
+00:05:47,029 --> 00:05:47,039
+that will make the order block more
+ 
+
+277
+00:05:47,039 --> 00:05:51,670
+that will make the order block more
+valid you know it will be more strong
+
+278
+00:05:51,670 --> 00:05:51,680
+valid you know it will be more strong
+ 
+
+279
+00:05:51,680 --> 00:05:53,590
+valid you know it will be more strong
+you know for you to take trades from
+
+280
+00:05:53,590 --> 00:05:53,600
+you know for you to take trades from
+ 
+
+281
+00:05:53,600 --> 00:05:55,670
+you know for you to take trades from
+that particular order block because you
+
+282
+00:05:55,670 --> 00:05:55,680
+that particular order block because you
+ 
+
+283
+00:05:55,680 --> 00:05:57,510
+that particular order block because you
+know personally for me any order block
+
+284
+00:05:57,510 --> 00:05:57,520
+know personally for me any order block
+ 
+
+285
+00:05:57,520 --> 00:05:59,430
+know personally for me any order block
+that doesn't have imbalance I'm not
+
+286
+00:05:59,430 --> 00:05:59,440
+that doesn't have imbalance I'm not
+ 
+
+287
+00:05:59,440 --> 00:06:01,909
+that doesn't have imbalance I'm not
+really comfortable with it I need to see
+
+288
+00:06:01,909 --> 00:06:01,919
+really comfortable with it I need to see
+ 
+
+289
+00:06:01,919 --> 00:06:05,110
+really comfortable with it I need to see
+that imbalance you know present before I
+
+290
+00:06:05,110 --> 00:06:05,120
+that imbalance you know present before I
+ 
+
+291
+00:06:05,120 --> 00:06:07,990
+that imbalance you know present before I
+will tag that other block as valid and
+
+292
+00:06:07,990 --> 00:06:08,000
+will tag that other block as valid and
+ 
+
+293
+00:06:08,000 --> 00:06:11,430
+will tag that other block as valid and
+now liquidity must be present before
+
+294
+00:06:11,430 --> 00:06:11,440
+now liquidity must be present before
+ 
+
+295
+00:06:11,440 --> 00:06:15,350
+now liquidity must be present before
+price will tap into your origin make
+
+296
+00:06:15,350 --> 00:06:15,360
+price will tap into your origin make
+ 
+
+297
+00:06:15,360 --> 00:06:17,590
+price will tap into your origin make
+sure that you know you've been able to
+
+298
+00:06:17,590 --> 00:06:17,600
+sure that you know you've been able to
+ 
+
+299
+00:06:17,600 --> 00:06:21,350
+sure that you know you've been able to
+map out liquidity that price will clear
+
+300
+00:06:21,350 --> 00:06:21,360
+map out liquidity that price will clear
+ 
+
+301
+00:06:21,360 --> 00:06:24,710
+map out liquidity that price will clear
+as it is trying to tap into your origin
+
+302
+00:06:24,710 --> 00:06:24,720
+as it is trying to tap into your origin
+ 
+
+303
+00:06:24,720 --> 00:06:28,230
+as it is trying to tap into your origin
+because if there is no liquidity your
+
+304
+00:06:28,230 --> 00:06:28,240
+because if there is no liquidity your
+ 
+
+305
+00:06:28,240 --> 00:06:31,670
+because if there is no liquidity your
+origin or your other block will be the
+
+306
+00:06:31,670 --> 00:06:31,680
+origin or your other block will be the
+ 
+
+307
+00:06:31,680 --> 00:06:34,230
+origin or your other block will be the
+liquidity and then you will see price
+
+308
+00:06:34,230 --> 00:06:34,240
+liquidity and then you will see price
+ 
+
+309
+00:06:34,240 --> 00:06:36,790
+liquidity and then you will see price
+clearing you out you know hitting the
+
+310
+00:06:36,790 --> 00:06:36,800
+clearing you out you know hitting the
+ 
+
+311
+00:06:36,800 --> 00:06:38,790
+clearing you out you know hitting the
+stop loss before it will still move to
+
+312
+00:06:38,790 --> 00:06:38,800
+stop loss before it will still move to
+ 
+
+313
+00:06:38,800 --> 00:06:40,309
+stop loss before it will still move to
+your direction. So make sure there is
+
+314
+00:06:40,309 --> 00:06:40,319
+your direction. So make sure there is
+ 
+
+315
+00:06:40,319 --> 00:06:42,950
+your direction. So make sure there is
+all there is liquidity you know price
+
+316
+00:06:42,950 --> 00:06:42,960
+all there is liquidity you know price
+ 
+
+317
+00:06:42,960 --> 00:06:46,150
+all there is liquidity you know price
+will clear before it will tap into the
+
+318
+00:06:46,150 --> 00:06:46,160
+will clear before it will tap into the
+ 
+
+319
+00:06:46,160 --> 00:06:49,430
+will clear before it will tap into the
+other block. So this is um a bearish
+
+320
+00:06:49,430 --> 00:06:49,440
+other block. So this is um a bearish
+ 
+
+321
+00:06:49,440 --> 00:06:51,990
+other block. So this is um a bearish
+structure and an example of a supply
+
+322
+00:06:51,990 --> 00:06:52,000
+structure and an example of a supply
+ 
+
+323
+00:06:52,000 --> 00:06:54,390
+structure and an example of a supply
+zone which I have highlighted here. Let
+
+324
+00:06:54,390 --> 00:06:54,400
+zone which I have highlighted here. Let
+ 
+
+325
+00:06:54,400 --> 00:06:58,070
+zone which I have highlighted here. Let
+me also show you guys um the example of
+
+326
+00:06:58,070 --> 00:06:58,080
+me also show you guys um the example of
+ 
+
+327
+00:06:58,080 --> 00:07:00,950
+me also show you guys um the example of
+a bullish trend. And after that I'll
+
+328
+00:07:00,950 --> 00:07:00,960
+a bullish trend. And after that I'll
+ 
+
+329
+00:07:00,960 --> 00:07:02,550
+a bullish trend. And after that I'll
+show you guys you know some of the
+
+330
+00:07:02,550 --> 00:07:02,560
+show you guys you know some of the
+ 
+
+331
+00:07:02,560 --> 00:07:04,230
+show you guys you know some of the
+treads I've been able to catch using
+
+332
+00:07:04,230 --> 00:07:04,240
+treads I've been able to catch using
+ 
+
+333
+00:07:04,240 --> 00:07:06,790
+treads I've been able to catch using
+autoblock. Like I said earlier this
+
+334
+00:07:06,790 --> 00:07:06,800
+autoblock. Like I said earlier this
+ 
+
+335
+00:07:06,800 --> 00:07:09,749
+autoblock. Like I said earlier this
+particular entry model I love it and um
+
+336
+00:07:09,749 --> 00:07:09,759
+particular entry model I love it and um
+ 
+
+337
+00:07:09,759 --> 00:07:13,990
+particular entry model I love it and um
+is one of the entry models I use you
+
+338
+00:07:13,990 --> 00:07:14,000
+is one of the entry models I use you
+ 
+
+339
+00:07:14,000 --> 00:07:16,550
+is one of the entry models I use you
+know to catch my entries. I use order
+
+340
+00:07:16,550 --> 00:07:16,560
+know to catch my entries. I use order
+ 
+
+341
+00:07:16,560 --> 00:07:18,950
+know to catch my entries. I use order
+blocks, you know, more to catch my
+
+342
+00:07:18,950 --> 00:07:18,960
+blocks, you know, more to catch my
+ 
+
+343
+00:07:18,960 --> 00:07:20,950
+blocks, you know, more to catch my
+entries. So, I'll also show you guys
+
+344
+00:07:20,950 --> 00:07:20,960
+entries. So, I'll also show you guys
+ 
+
+345
+00:07:20,960 --> 00:07:24,070
+entries. So, I'll also show you guys
+some of the smart setups I've been able
+
+346
+00:07:24,070 --> 00:07:24,080
+some of the smart setups I've been able
+ 
+
+347
+00:07:24,080 --> 00:07:27,589
+some of the smart setups I've been able
+to, you know, catch using order blocks.
+
+348
+00:07:27,589 --> 00:07:27,599
+to, you know, catch using order blocks.
+ 
+
+349
+00:07:27,599 --> 00:07:30,629
+to, you know, catch using order blocks.
+This is an example of a bullish order
+
+350
+00:07:30,629 --> 00:07:30,639
+This is an example of a bullish order
+ 
+
+351
+00:07:30,639 --> 00:07:33,029
+This is an example of a bullish order
+block. You can see from the illustration
+
+352
+00:07:33,029 --> 00:07:33,039
+block. You can see from the illustration
+ 
+
+353
+00:07:33,039 --> 00:07:36,550
+block. You can see from the illustration
+here, we got a change of character. The
+
+354
+00:07:36,550 --> 00:07:36,560
+here, we got a change of character. The
+ 
+
+355
+00:07:36,560 --> 00:07:38,469
+here, we got a change of character. The
+next thing you need to look out for is
+
+356
+00:07:38,469 --> 00:07:38,479
+next thing you need to look out for is
+ 
+
+357
+00:07:38,479 --> 00:07:40,790
+next thing you need to look out for is
+where is the accumulation that happened
+
+358
+00:07:40,790 --> 00:07:40,800
+where is the accumulation that happened
+ 
+
+359
+00:07:40,800 --> 00:07:43,270
+where is the accumulation that happened
+before the change of character. And now
+
+360
+00:07:43,270 --> 00:07:43,280
+before the change of character. And now
+ 
+
+361
+00:07:43,280 --> 00:07:45,990
+before the change of character. And now
+from that accumulation, you do what? You
+
+362
+00:07:45,990 --> 00:07:46,000
+from that accumulation, you do what? You
+ 
+
+363
+00:07:46,000 --> 00:07:48,390
+from that accumulation, you do what? You
+look for the last candlestick reaction
+
+364
+00:07:48,390 --> 00:07:48,400
+look for the last candlestick reaction
+ 
+
+365
+00:07:48,400 --> 00:07:51,430
+look for the last candlestick reaction
+before the impulsive move that cleared
+
+366
+00:07:51,430 --> 00:07:51,440
+before the impulsive move that cleared
+ 
+
+367
+00:07:51,440 --> 00:07:53,990
+before the impulsive move that cleared
+and caused that change of character or
+
+368
+00:07:53,990 --> 00:07:54,000
+and caused that change of character or
+ 
+
+369
+00:07:54,000 --> 00:07:55,749
+and caused that change of character or
+break structure. That is what you will
+
+370
+00:07:55,749 --> 00:07:55,759
+break structure. That is what you will
+ 
+
+371
+00:07:55,759 --> 00:07:57,830
+break structure. That is what you will
+highlight as your order block. And like
+
+372
+00:07:57,830 --> 00:07:57,840
+highlight as your order block. And like
+ 
+
+373
+00:07:57,840 --> 00:08:00,790
+highlight as your order block. And like
+I said earlier, your imbalance must be
+
+374
+00:08:00,790 --> 00:08:00,800
+I said earlier, your imbalance must be
+ 
+
+375
+00:08:00,800 --> 00:08:03,589
+I said earlier, your imbalance must be
+present, which is what I've also mapped
+
+376
+00:08:03,589 --> 00:08:03,599
+present, which is what I've also mapped
+ 
+
+377
+00:08:03,599 --> 00:08:06,629
+present, which is what I've also mapped
+out here. It's either imbalance or fair
+
+378
+00:08:06,629 --> 00:08:06,639
+out here. It's either imbalance or fair
+ 
+
+379
+00:08:06,639 --> 00:08:08,869
+out here. It's either imbalance or fair
+value gap. So you know that's actually
+
+380
+00:08:08,869 --> 00:08:08,879
+value gap. So you know that's actually
+ 
+
+381
+00:08:08,879 --> 00:08:11,670
+value gap. So you know that's actually
+the gap you know price creates in the
+
+382
+00:08:11,670 --> 00:08:11,680
+the gap you know price creates in the
+ 
+
+383
+00:08:11,680 --> 00:08:14,790
+the gap you know price creates in the
+market and it's also one of the entry
+
+384
+00:08:14,790 --> 00:08:14,800
+market and it's also one of the entry
+ 
+
+385
+00:08:14,800 --> 00:08:17,749
+market and it's also one of the entry
+models which I will be explaining how
+
+386
+00:08:17,749 --> 00:08:17,759
+models which I will be explaining how
+ 
+
+387
+00:08:17,759 --> 00:08:20,629
+models which I will be explaining how
+you can also catch smart setups using
+
+388
+00:08:20,629 --> 00:08:20,639
+you can also catch smart setups using
+ 
+
+389
+00:08:20,639 --> 00:08:23,189
+you can also catch smart setups using
+imbalance in our next video. So make
+
+390
+00:08:23,189 --> 00:08:23,199
+imbalance in our next video. So make
+ 
+
+391
+00:08:23,199 --> 00:08:25,589
+imbalance in our next video. So make
+sure you subscribe and turn on the
+
+392
+00:08:25,589 --> 00:08:25,599
+sure you subscribe and turn on the
+ 
+
+393
+00:08:25,599 --> 00:08:28,150
+sure you subscribe and turn on the
+notification bell and then liquidity
+
+394
+00:08:28,150 --> 00:08:28,160
+notification bell and then liquidity
+ 
+
+395
+00:08:28,160 --> 00:08:30,230
+notification bell and then liquidity
+must be present.
+
+396
+00:08:30,230 --> 00:08:30,240
+must be present.
+ 
+
+397
+00:08:30,240 --> 00:08:32,790
+must be present.
+If there is no liquidity you are likely
+
+398
+00:08:32,790 --> 00:08:32,800
+If there is no liquidity you are likely
+ 
+
+399
+00:08:32,800 --> 00:08:34,550
+If there is no liquidity you are likely
+going to be the liquidity. So make sure
+
+400
+00:08:34,550 --> 00:08:34,560
+going to be the liquidity. So make sure
+ 
+
+401
+00:08:34,560 --> 00:08:37,190
+going to be the liquidity. So make sure
+that liquidity price will clear before
+
+402
+00:08:37,190 --> 00:08:37,200
+that liquidity price will clear before
+ 
+
+403
+00:08:37,200 --> 00:08:38,709
+that liquidity price will clear before
+tapping into your order block. Let me
+
+404
+00:08:38,709 --> 00:08:38,719
+tapping into your order block. Let me
+ 
+
+405
+00:08:38,719 --> 00:08:41,509
+tapping into your order block. Let me
+show you guys some smart entries I was
+
+406
+00:08:41,509 --> 00:08:41,519
+show you guys some smart entries I was
+ 
+
+407
+00:08:41,519 --> 00:08:44,630
+show you guys some smart entries I was
+able to catch using order block entry
+
+408
+00:08:44,630 --> 00:08:44,640
+able to catch using order block entry
+ 
+
+409
+00:08:44,640 --> 00:08:47,350
+able to catch using order block entry
+models. If you can remember the first
+
+410
+00:08:47,350 --> 00:08:47,360
+models. If you can remember the first
+ 
+
+411
+00:08:47,360 --> 00:08:49,750
+models. If you can remember the first
+illustration on how to spot order block,
+
+412
+00:08:49,750 --> 00:08:49,760
+illustration on how to spot order block,
+ 
+
+413
+00:08:49,760 --> 00:08:52,230
+illustration on how to spot order block,
+you can see that this is actually the
+
+414
+00:08:52,230 --> 00:08:52,240
+you can see that this is actually the
+ 
+
+415
+00:08:52,240 --> 00:08:54,949
+you can see that this is actually the
+entry. Once the breakup structure
+
+416
+00:08:54,949 --> 00:08:54,959
+entry. Once the breakup structure
+ 
+
+417
+00:08:54,959 --> 00:08:56,710
+entry. Once the breakup structure
+happens, just highlight it. The only
+
+418
+00:08:56,710 --> 00:08:56,720
+happens, just highlight it. The only
+ 
+
+419
+00:08:56,720 --> 00:09:00,150
+happens, just highlight it. The only
+thing you need to do is to patiently
+
+420
+00:09:00,150 --> 00:09:00,160
+thing you need to do is to patiently
+ 
+
+421
+00:09:00,160 --> 00:09:03,990
+thing you need to do is to patiently
+wait for price to come and tap into that
+
+422
+00:09:03,990 --> 00:09:04,000
+wait for price to come and tap into that
+ 
+
+423
+00:09:04,000 --> 00:09:06,630
+wait for price to come and tap into that
+particular order block and dish out the
+
+424
+00:09:06,630 --> 00:09:06,640
+particular order block and dish out the
+ 
+
+425
+00:09:06,640 --> 00:09:08,790
+particular order block and dish out the
+clean movement. Now you can see how
+
+426
+00:09:08,790 --> 00:09:08,800
+clean movement. Now you can see how
+ 
+
+427
+00:09:08,800 --> 00:09:11,269
+clean movement. Now you can see how
+price got there, mitigated the order
+
+428
+00:09:11,269 --> 00:09:11,279
+price got there, mitigated the order
+ 
+
+429
+00:09:11,279 --> 00:09:14,710
+price got there, mitigated the order
+block and then moved straight to take
+
+430
+00:09:14,710 --> 00:09:14,720
+block and then moved straight to take
+ 
+
+431
+00:09:14,720 --> 00:09:17,910
+block and then moved straight to take
+profit. Now when trying to you know put
+
+432
+00:09:17,910 --> 00:09:17,920
+profit. Now when trying to you know put
+ 
+
+433
+00:09:17,920 --> 00:09:21,030
+profit. Now when trying to you know put
+your stop loss and your take profit
+
+434
+00:09:21,030 --> 00:09:21,040
+your stop loss and your take profit
+ 
+
+435
+00:09:21,040 --> 00:09:23,269
+your stop loss and your take profit
+inside the accumulation, look out for
+
+436
+00:09:23,269 --> 00:09:23,279
+inside the accumulation, look out for
+ 
+
+437
+00:09:23,279 --> 00:09:25,590
+inside the accumulation, look out for
+the last week rejection. you know,
+
+438
+00:09:25,590 --> 00:09:25,600
+the last week rejection. you know,
+ 
+
+439
+00:09:25,600 --> 00:09:29,990
+the last week rejection. you know,
+you'll put your stop loss a little bit,
+
+440
+00:09:29,990 --> 00:09:30,000
+you'll put your stop loss a little bit,
+ 
+
+441
+00:09:30,000 --> 00:09:32,470
+you'll put your stop loss a little bit,
+you know, above the last week rejection
+
+442
+00:09:32,470 --> 00:09:32,480
+you know, above the last week rejection
+ 
+
+443
+00:09:32,480 --> 00:09:35,990
+you know, above the last week rejection
+if you're trying to sell or below the
+
+444
+00:09:35,990 --> 00:09:36,000
+if you're trying to sell or below the
+ 
+
+445
+00:09:36,000 --> 00:09:37,990
+if you're trying to sell or below the
+last week rejection if you're trying to
+
+446
+00:09:37,990 --> 00:09:38,000
+last week rejection if you're trying to
+ 
+
+447
+00:09:38,000 --> 00:09:40,389
+last week rejection if you're trying to
+buy. You know, some people may try to
+
+448
+00:09:40,389 --> 00:09:40,399
+buy. You know, some people may try to
+ 
+
+449
+00:09:40,399 --> 00:09:42,310
+buy. You know, some people may try to
+refine, you know, tighten their stop
+
+450
+00:09:42,310 --> 00:09:42,320
+refine, you know, tighten their stop
+ 
+
+451
+00:09:42,320 --> 00:09:44,389
+refine, you know, tighten their stop
+loss. But this is how I place my own
+
+452
+00:09:44,389 --> 00:09:44,399
+loss. But this is how I place my own
+ 
+
+453
+00:09:44,399 --> 00:09:46,310
+loss. But this is how I place my own
+stop loss so that I will give the market
+
+454
+00:09:46,310 --> 00:09:46,320
+stop loss so that I will give the market
+ 
+
+455
+00:09:46,320 --> 00:09:49,750
+stop loss so that I will give the market
+you know some breathing space to
+
+456
+00:09:49,750 --> 00:09:49,760
+you know some breathing space to
+ 
+
+457
+00:09:49,760 --> 00:09:52,550
+you know some breathing space to
+um you know dish out good moves cuz I
+
+458
+00:09:52,550 --> 00:09:52,560
+um you know dish out good moves cuz I
+ 
+
+459
+00:09:52,560 --> 00:09:55,030
+um you know dish out good moves cuz I
+wouldn't want price to like pack me out
+
+460
+00:09:55,030 --> 00:09:55,040
+wouldn't want price to like pack me out
+ 
+
+461
+00:09:55,040 --> 00:09:57,430
+wouldn't want price to like pack me out
+and then dish out the movement when I'm
+
+462
+00:09:57,430 --> 00:09:57,440
+and then dish out the movement when I'm
+ 
+
+463
+00:09:57,440 --> 00:09:59,750
+and then dish out the movement when I'm
+trying to tighten my stop loss. So this
+
+464
+00:09:59,750 --> 00:09:59,760
+trying to tighten my stop loss. So this
+ 
+
+465
+00:09:59,760 --> 00:10:02,230
+trying to tighten my stop loss. So this
+is how you wait for it. And I know some
+
+466
+00:10:02,230 --> 00:10:02,240
+is how you wait for it. And I know some
+ 
+
+467
+00:10:02,240 --> 00:10:04,710
+is how you wait for it. And I know some
+traders will be asking why don't you buy
+
+468
+00:10:04,710 --> 00:10:04,720
+traders will be asking why don't you buy
+ 
+
+469
+00:10:04,720 --> 00:10:07,110
+traders will be asking why don't you buy
+to sell. At the end of the day, you can
+
+470
+00:10:07,110 --> 00:10:07,120
+to sell. At the end of the day, you can
+ 
+
+471
+00:10:07,120 --> 00:10:09,269
+to sell. At the end of the day, you can
+still be able to catch the correctional
+
+472
+00:10:09,269 --> 00:10:09,279
+still be able to catch the correctional
+ 
+
+473
+00:10:09,279 --> 00:10:11,350
+still be able to catch the correctional
+move because any move that is against
+
+474
+00:10:11,350 --> 00:10:11,360
+move because any move that is against
+ 
+
+475
+00:10:11,360 --> 00:10:13,590
+move because any move that is against
+the trend, you call it the correctional
+
+476
+00:10:13,590 --> 00:10:13,600
+the trend, you call it the correctional
+ 
+
+477
+00:10:13,600 --> 00:10:16,069
+the trend, you call it the correctional
+move. So, you can still be able to buy
+
+478
+00:10:16,069 --> 00:10:16,079
+move. So, you can still be able to buy
+ 
+
+479
+00:10:16,079 --> 00:10:19,430
+move. So, you can still be able to buy
+to sell depending on the confirmation
+
+480
+00:10:19,430 --> 00:10:19,440
+to sell depending on the confirmation
+ 
+
+481
+00:10:19,440 --> 00:10:21,030
+to sell depending on the confirmation
+you've seen. But we are not talking
+
+482
+00:10:21,030 --> 00:10:21,040
+you've seen. But we are not talking
+ 
+
+483
+00:10:21,040 --> 00:10:22,630
+you've seen. But we are not talking
+about correctional move today. I just
+
+484
+00:10:22,630 --> 00:10:22,640
+about correctional move today. I just
+ 
+
+485
+00:10:22,640 --> 00:10:24,949
+about correctional move today. I just
+want you to understand how to map out
+
+486
+00:10:24,949 --> 00:10:24,959
+want you to understand how to map out
+ 
+
+487
+00:10:24,959 --> 00:10:27,110
+want you to understand how to map out
+order blocks and how to take smart
+
+488
+00:10:27,110 --> 00:10:27,120
+order blocks and how to take smart
+ 
+
+489
+00:10:27,120 --> 00:10:29,350
+order blocks and how to take smart
+entries with order block. So once you
+
+490
+00:10:29,350 --> 00:10:29,360
+entries with order block. So once you
+ 
+
+491
+00:10:29,360 --> 00:10:31,430
+entries with order block. So once you
+map it out following the rules I stated
+
+492
+00:10:31,430 --> 00:10:31,440
+map it out following the rules I stated
+ 
+
+493
+00:10:31,440 --> 00:10:33,190
+map it out following the rules I stated
+earlier. Once you map out your order
+
+494
+00:10:33,190 --> 00:10:33,200
+earlier. Once you map out your order
+ 
+
+495
+00:10:33,200 --> 00:10:35,990
+earlier. Once you map out your order
+blocks, all you just need to do is to
+
+496
+00:10:35,990 --> 00:10:36,000
+blocks, all you just need to do is to
+ 
+
+497
+00:10:36,000 --> 00:10:38,790
+blocks, all you just need to do is to
+set your pending order and patiently
+
+498
+00:10:38,790 --> 00:10:38,800
+set your pending order and patiently
+ 
+
+499
+00:10:38,800 --> 00:10:40,630
+set your pending order and patiently
+wait for price to come there, tap you
+
+500
+00:10:40,630 --> 00:10:40,640
+wait for price to come there, tap you
+ 
+
+501
+00:10:40,640 --> 00:10:43,430
+wait for price to come there, tap you
+in, and then dish out good results. Make
+
+502
+00:10:43,430 --> 00:10:43,440
+in, and then dish out good results. Make
+ 
+
+503
+00:10:43,440 --> 00:10:45,030
+in, and then dish out good results. Make
+sure you apply proper risk management
+
+504
+00:10:45,030 --> 00:10:45,040
+sure you apply proper risk management
+ 
+
+505
+00:10:45,040 --> 00:10:46,949
+sure you apply proper risk management
+because you understand that trading is
+
+506
+00:10:46,949 --> 00:10:46,959
+because you understand that trading is
+ 
+
+507
+00:10:46,959 --> 00:10:50,389
+because you understand that trading is
+risky and your capital is at risk. So no
+
+508
+00:10:50,389 --> 00:10:50,399
+risky and your capital is at risk. So no
+ 
+
+509
+00:10:50,399 --> 00:10:52,790
+risky and your capital is at risk. So no
+matter how clean you think your setup
+
+510
+00:10:52,790 --> 00:10:52,800
+matter how clean you think your setup
+ 
+
+511
+00:10:52,800 --> 00:10:55,829
+matter how clean you think your setup
+is, you can still lose your money. But
+
+512
+00:10:55,829 --> 00:10:55,839
+is, you can still lose your money. But
+ 
+
+513
+00:10:55,839 --> 00:10:56,870
+is, you can still lose your money. But
+at the end of the day, this is a
+
+514
+00:10:56,870 --> 00:10:56,880
+at the end of the day, this is a
+ 
+
+515
+00:10:56,880 --> 00:11:00,069
+at the end of the day, this is a
+strategy I've tried out. Um, particular,
+
+516
+00:11:00,069 --> 00:11:00,079
+strategy I've tried out. Um, particular,
+ 
+
+517
+00:11:00,079 --> 00:11:02,069
+strategy I've tried out. Um, particular,
+you see how it looks. Just this
+
+518
+00:11:02,069 --> 00:11:02,079
+you see how it looks. Just this
+ 
+
+519
+00:11:02,079 --> 00:11:04,310
+you see how it looks. Just this
+illustration alone is explaining the
+
+520
+00:11:04,310 --> 00:11:04,320
+illustration alone is explaining the
+ 
+
+521
+00:11:04,320 --> 00:11:06,790
+illustration alone is explaining the
+strategy I use because most of my
+
+522
+00:11:06,790 --> 00:11:06,800
+strategy I use because most of my
+ 
+
+523
+00:11:06,800 --> 00:11:09,430
+strategy I use because most of my
+threads are always from other blocks.
+
+524
+00:11:09,430 --> 00:11:09,440
+threads are always from other blocks.
+ 
+
+525
+00:11:09,440 --> 00:11:12,470
+threads are always from other blocks.
+So, let me also show you guys another
+
+526
+00:11:12,470 --> 00:11:12,480
+So, let me also show you guys another
+ 
+
+527
+00:11:12,480 --> 00:11:15,509
+So, let me also show you guys another
+entry. So, this is still coming from the
+
+528
+00:11:15,509 --> 00:11:15,519
+entry. So, this is still coming from the
+ 
+
+529
+00:11:15,519 --> 00:11:17,990
+entry. So, this is still coming from the
+bullish order block that is from the
+
+530
+00:11:17,990 --> 00:11:18,000
+bullish order block that is from the
+ 
+
+531
+00:11:18,000 --> 00:11:20,069
+bullish order block that is from the
+illustration I showed you guys earlier.
+
+532
+00:11:20,069 --> 00:11:20,079
+illustration I showed you guys earlier.
+ 
+
+533
+00:11:20,079 --> 00:11:22,150
+illustration I showed you guys earlier.
+You can still see how price tapped into
+
+534
+00:11:22,150 --> 00:11:22,160
+You can still see how price tapped into
+ 
+
+535
+00:11:22,160 --> 00:11:24,870
+You can still see how price tapped into
+the other block and you know boom
+
+536
+00:11:24,870 --> 00:11:24,880
+the other block and you know boom
+ 
+
+537
+00:11:24,880 --> 00:11:27,269
+the other block and you know boom
+straight to TP. So when you're also
+
+538
+00:11:27,269 --> 00:11:27,279
+straight to TP. So when you're also
+ 
+
+539
+00:11:27,279 --> 00:11:29,750
+straight to TP. So when you're also
+trying to set your TP your TP should
+
+540
+00:11:29,750 --> 00:11:29,760
+trying to set your TP your TP should
+ 
+
+541
+00:11:29,760 --> 00:11:31,829
+trying to set your TP your TP should
+always be at a point of reversal. That
+
+542
+00:11:31,829 --> 00:11:31,839
+always be at a point of reversal. That
+ 
+
+543
+00:11:31,839 --> 00:11:33,670
+always be at a point of reversal. That
+is where the correctional movement
+
+544
+00:11:33,670 --> 00:11:33,680
+is where the correctional movement
+ 
+
+545
+00:11:33,680 --> 00:11:35,829
+is where the correctional movement
+started from. That is where you place
+
+546
+00:11:35,829 --> 00:11:35,839
+started from. That is where you place
+ 
+
+547
+00:11:35,839 --> 00:11:39,110
+started from. That is where you place
+your TP because price can come there and
+
+548
+00:11:39,110 --> 00:11:39,120
+your TP because price can come there and
+ 
+
+549
+00:11:39,120 --> 00:11:42,150
+your TP because price can come there and
+you know retrace almost back to entry.
+
+550
+00:11:42,150 --> 00:11:42,160
+you know retrace almost back to entry.
+ 
+
+551
+00:11:42,160 --> 00:11:44,150
+you know retrace almost back to entry.
+So it's important for you to be very
+
+552
+00:11:44,150 --> 00:11:44,160
+So it's important for you to be very
+ 
+
+553
+00:11:44,160 --> 00:11:46,150
+So it's important for you to be very
+realistic when setting your TP. And you
+
+554
+00:11:46,150 --> 00:11:46,160
+realistic when setting your TP. And you
+ 
+
+555
+00:11:46,160 --> 00:11:48,630
+realistic when setting your TP. And you
+can also see how I placed the stop loss.
+
+556
+00:11:48,630 --> 00:11:48,640
+can also see how I placed the stop loss.
+ 
+
+557
+00:11:48,640 --> 00:11:50,550
+can also see how I placed the stop loss.
+I always pay attention to the last week
+
+558
+00:11:50,550 --> 00:11:50,560
+I always pay attention to the last week
+ 
+
+559
+00:11:50,560 --> 00:11:52,949
+I always pay attention to the last week
+rejection inside the accumulation and my
+
+560
+00:11:52,949 --> 00:11:52,959
+rejection inside the accumulation and my
+ 
+
+561
+00:11:52,959 --> 00:11:56,310
+rejection inside the accumulation and my
+stop loss will just be a little bit um
+
+562
+00:11:56,310 --> 00:11:56,320
+stop loss will just be a little bit um
+ 
+
+563
+00:11:56,320 --> 00:11:59,829
+stop loss will just be a little bit um
+below or above the last week rejection.
+
+564
+00:11:59,829 --> 00:11:59,839
+below or above the last week rejection.
+ 
+
+565
+00:11:59,839 --> 00:12:03,829
+below or above the last week rejection.
+Some traders push it just a little bit
+
+566
+00:12:03,829 --> 00:12:03,839
+Some traders push it just a little bit
+ 
+
+567
+00:12:03,839 --> 00:12:06,790
+Some traders push it just a little bit
+below or above the other block, but I
+
+568
+00:12:06,790 --> 00:12:06,800
+below or above the other block, but I
+ 
+
+569
+00:12:06,800 --> 00:12:09,350
+below or above the other block, but I
+consider the last week rejection. So, it
+
+570
+00:12:09,350 --> 00:12:09,360
+consider the last week rejection. So, it
+ 
+
+571
+00:12:09,360 --> 00:12:12,069
+consider the last week rejection. So, it
+all depends on the one on how you want
+
+572
+00:12:12,069 --> 00:12:12,079
+all depends on the one on how you want
+ 
+
+573
+00:12:12,079 --> 00:12:14,550
+all depends on the one on how you want
+to do it for yourself. You just need to
+
+574
+00:12:14,550 --> 00:12:14,560
+to do it for yourself. You just need to
+ 
+
+575
+00:12:14,560 --> 00:12:17,269
+to do it for yourself. You just need to
+do your back testing and um make sure
+
+576
+00:12:17,269 --> 00:12:17,279
+do your back testing and um make sure
+ 
+
+577
+00:12:17,279 --> 00:12:19,590
+do your back testing and um make sure
+you know what you're doing as you are
+
+578
+00:12:19,590 --> 00:12:19,600
+you know what you're doing as you are
+ 
+
+579
+00:12:19,600 --> 00:12:22,310
+you know what you're doing as you are
+taking your trades. So in our next video
+
+580
+00:12:22,310 --> 00:12:22,320
+taking your trades. So in our next video
+ 
+
+581
+00:12:22,320 --> 00:12:25,110
+taking your trades. So in our next video
+I'll be breaking down how to take
+
+582
+00:12:25,110 --> 00:12:25,120
+I'll be breaking down how to take
+ 
+
+583
+00:12:25,120 --> 00:12:29,030
+I'll be breaking down how to take
+entries with the fair value gap.
+
+584
+00:12:29,030 --> 00:12:29,040
+entries with the fair value gap.
+ 
+
+585
+00:12:29,040 --> 00:12:31,670
+entries with the fair value gap.
+Remember we are talking about the four
+
+586
+00:12:31,670 --> 00:12:31,680
+Remember we are talking about the four
+ 
+
+587
+00:12:31,680 --> 00:12:35,190
+Remember we are talking about the four
+entry models for smart money concept and
+
+588
+00:12:35,190 --> 00:12:35,200
+entry models for smart money concept and
+ 
+
+589
+00:12:35,200 --> 00:12:36,790
+entry models for smart money concept and
+u we've been able to tackle that of
+
+590
+00:12:36,790 --> 00:12:36,800
+u we've been able to tackle that of
+ 
+
+591
+00:12:36,800 --> 00:12:38,550
+u we've been able to tackle that of
+other block. This one is pretty much
+
+592
+00:12:38,550 --> 00:12:38,560
+other block. This one is pretty much
+ 
+
+593
+00:12:38,560 --> 00:12:41,829
+other block. This one is pretty much
+popular. So in our next video which is
+
+594
+00:12:41,829 --> 00:12:41,839
+popular. So in our next video which is
+ 
+
+595
+00:12:41,839 --> 00:12:44,629
+popular. So in our next video which is
+the part two of this particular video
+
+596
+00:12:44,629 --> 00:12:44,639
+the part two of this particular video
+ 
+
+597
+00:12:44,639 --> 00:12:46,710
+the part two of this particular video
+we'll talk about how to catch smart
+
+598
+00:12:46,710 --> 00:12:46,720
+we'll talk about how to catch smart
+ 
+
+599
+00:12:46,720 --> 00:12:49,190
+we'll talk about how to catch smart
+entries with fair value gap. I'll see
+
+600
+00:12:49,190 --> 00:12:49,200
+entries with fair value gap. I'll see
+ 
+
+601
+00:12:49,200 --> 00:12:51,760
+entries with fair value gap. I'll see
+you on the next
+

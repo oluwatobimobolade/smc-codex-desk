@@ -1,0 +1,6585 @@
+1
+00:00:00,120 --> 00:00:01,910
+
+hello guys so in today's video we're
+
+2
+00:00:01,910 --> 00:00:01,920
+hello guys so in today's video we're
+ 
+
+3
+00:00:01,920 --> 00:00:03,750
+hello guys so in today's video we're
+going to talk about Market structure
+
+4
+00:00:03,750 --> 00:00:03,760
+going to talk about Market structure
+ 
+
+5
+00:00:03,760 --> 00:00:06,230
+going to talk about Market structure
+this particular topic is very important
+
+6
+00:00:06,230 --> 00:00:06,240
+this particular topic is very important
+ 
+
+7
+00:00:06,240 --> 00:00:08,270
+this particular topic is very important
+for you as a Trader you don't just open
+
+8
+00:00:08,270 --> 00:00:08,280
+for you as a Trader you don't just open
+ 
+
+9
+00:00:08,280 --> 00:00:10,270
+for you as a Trader you don't just open
+the chart and start looking for entries
+
+10
+00:00:10,270 --> 00:00:10,280
+the chart and start looking for entries
+ 
+
+11
+00:00:10,280 --> 00:00:12,310
+the chart and start looking for entries
+without understanding the general story
+
+12
+00:00:12,310 --> 00:00:12,320
+without understanding the general story
+ 
+
+13
+00:00:12,320 --> 00:00:13,709
+without understanding the general story
+in the market so that is what I'm going
+
+14
+00:00:13,709 --> 00:00:13,719
+in the market so that is what I'm going
+ 
+
+15
+00:00:13,719 --> 00:00:15,509
+in the market so that is what I'm going
+to point out for you in this video how
+
+16
+00:00:15,509 --> 00:00:15,519
+to point out for you in this video how
+ 
+
+17
+00:00:15,519 --> 00:00:17,269
+to point out for you in this video how
+to read the market structure and point
+
+18
+00:00:17,269 --> 00:00:17,279
+to read the market structure and point
+ 
+
+19
+00:00:17,279 --> 00:00:18,990
+to read the market structure and point
+out levels where you can be taking your
+
+20
+00:00:18,990 --> 00:00:19,000
+out levels where you can be taking your
+ 
+
+21
+00:00:19,000 --> 00:00:20,790
+out levels where you can be taking your
+interest from make sure you watch till
+
+22
+00:00:20,790 --> 00:00:20,800
+interest from make sure you watch till
+ 
+
+23
+00:00:20,800 --> 00:00:23,150
+interest from make sure you watch till
+the very end to understand how to map
+
+24
+00:00:23,150 --> 00:00:23,160
+the very end to understand how to map
+ 
+
+25
+00:00:23,160 --> 00:00:25,349
+the very end to understand how to map
+out all the structures Mar out valid
+
+26
+00:00:25,349 --> 00:00:25,359
+out all the structures Mar out valid
+ 
+
+27
+00:00:25,359 --> 00:00:27,189
+out all the structures Mar out valid
+Origins without taking entries from
+
+28
+00:00:27,189 --> 00:00:27,199
+Origins without taking entries from
+ 
+
+29
+00:00:27,199 --> 00:00:29,390
+Origins without taking entries from
+liquidity zones or enement levels so
+
+30
+00:00:29,390 --> 00:00:29,400
+liquidity zones or enement levels so
+ 
+
+31
+00:00:29,400 --> 00:00:31,810
+liquidity zones or enement levels so
+guys you know to do let us stly
+
+32
+00:00:31,810 --> 00:00:31,820
+guys you know to do let us stly
+ 
+
+33
+00:00:31,820 --> 00:00:32,429
+guys you know to do let us stly
+[Applause]
+
+34
+00:00:32,429 --> 00:00:32,439
+[Applause]
+ 
+
+35
+00:00:32,439 --> 00:00:39,790
+[Applause]
+[Music]
+
+36
+00:00:39,790 --> 00:00:39,800
+
+ 
+
+37
+00:00:39,800 --> 00:00:42,549
+
+CH so guys before we go into analyzing
+
+38
+00:00:42,549 --> 00:00:42,559
+CH so guys before we go into analyzing
+ 
+
+39
+00:00:42,559 --> 00:00:44,190
+CH so guys before we go into analyzing
+the real chart let me quickly give you
+
+40
+00:00:44,190 --> 00:00:44,200
+the real chart let me quickly give you
+ 
+
+41
+00:00:44,200 --> 00:00:46,590
+the real chart let me quickly give you
+guys an illustration of the different
+
+42
+00:00:46,590 --> 00:00:46,600
+guys an illustration of the different
+ 
+
+43
+00:00:46,600 --> 00:00:48,709
+guys an illustration of the different
+types of Market structure because when
+
+44
+00:00:48,709 --> 00:00:48,719
+types of Market structure because when
+ 
+
+45
+00:00:48,719 --> 00:00:50,950
+types of Market structure because when
+it comes to Market structure we have
+
+46
+00:00:50,950 --> 00:00:50,960
+it comes to Market structure we have
+ 
+
+47
+00:00:50,960 --> 00:00:53,110
+it comes to Market structure we have
+three types of Market structure we have
+
+48
+00:00:53,110 --> 00:00:53,120
+three types of Market structure we have
+ 
+
+49
+00:00:53,120 --> 00:00:56,910
+three types of Market structure we have
+the bullish Trend and um the bearish
+
+50
+00:00:56,910 --> 00:00:56,920
+the bullish Trend and um the bearish
+ 
+
+51
+00:00:56,920 --> 00:01:00,229
+the bullish Trend and um the bearish
+trend and then we have that of the
+
+52
+00:01:00,229 --> 00:01:00,239
+trend and then we have that of the
+ 
+
+53
+00:01:00,239 --> 00:01:02,950
+trend and then we have that of the
+sideways movement or you can call it a
+
+54
+00:01:02,950 --> 00:01:02,960
+sideways movement or you can call it a
+ 
+
+55
+00:01:02,960 --> 00:01:06,230
+sideways movement or you can call it a
+ranging Market or um a consolidating
+
+56
+00:01:06,230 --> 00:01:06,240
+ranging Market or um a consolidating
+ 
+
+57
+00:01:06,240 --> 00:01:08,830
+ranging Market or um a consolidating
+market or you can just call it
+
+58
+00:01:08,830 --> 00:01:08,840
+market or you can just call it
+ 
+
+59
+00:01:08,840 --> 00:01:11,109
+market or you can just call it
+sideways
+
+60
+00:01:11,109 --> 00:01:11,119
+sideways
+ 
+
+61
+00:01:11,119 --> 00:01:13,630
+sideways
+movement so these are the three types of
+
+62
+00:01:13,630 --> 00:01:13,640
+movement so these are the three types of
+ 
+
+63
+00:01:13,640 --> 00:01:16,429
+movement so these are the three types of
+Market structure now at the end of this
+
+64
+00:01:16,429 --> 00:01:16,439
+Market structure now at the end of this
+ 
+
+65
+00:01:16,439 --> 00:01:19,270
+Market structure now at the end of this
+video I will get to point out the
+
+66
+00:01:19,270 --> 00:01:19,280
+video I will get to point out the
+ 
+
+67
+00:01:19,280 --> 00:01:21,830
+video I will get to point out the
+structure that works more with our
+
+68
+00:01:21,830 --> 00:01:21,840
+structure that works more with our
+ 
+
+69
+00:01:21,840 --> 00:01:23,950
+structure that works more with our
+strategy that is smart money concept so
+
+70
+00:01:23,950 --> 00:01:23,960
+strategy that is smart money concept so
+ 
+
+71
+00:01:23,960 --> 00:01:26,190
+strategy that is smart money concept so
+make sure you watch till the very end to
+
+72
+00:01:26,190 --> 00:01:26,200
+make sure you watch till the very end to
+ 
+
+73
+00:01:26,200 --> 00:01:29,149
+make sure you watch till the very end to
+point out how to use these different
+
+74
+00:01:29,149 --> 00:01:29,159
+point out how to use these different
+ 
+
+75
+00:01:29,159 --> 00:01:30,590
+point out how to use these different
+Market structure
+
+76
+00:01:30,590 --> 00:01:30,600
+Market structure
+ 
+
+77
+00:01:30,600 --> 00:01:34,350
+Market structure
+to your own benefit so pointing out the
+
+78
+00:01:34,350 --> 00:01:34,360
+to your own benefit so pointing out the
+ 
+
+79
+00:01:34,360 --> 00:01:35,870
+to your own benefit so pointing out the
+bullish
+
+80
+00:01:35,870 --> 00:01:35,880
+bullish
+ 
+
+81
+00:01:35,880 --> 00:01:38,469
+bullish
+Trend whenever Market is breaking
+
+82
+00:01:38,469 --> 00:01:38,479
+Trend whenever Market is breaking
+ 
+
+83
+00:01:38,479 --> 00:01:40,590
+Trend whenever Market is breaking
+structure to the upside like
+
+84
+00:01:40,590 --> 00:01:40,600
+structure to the upside like
+ 
+
+85
+00:01:40,600 --> 00:01:43,870
+structure to the upside like
+this creating higher highs and higher
+
+86
+00:01:43,870 --> 00:01:43,880
+this creating higher highs and higher
+ 
+
+87
+00:01:43,880 --> 00:01:47,190
+this creating higher highs and higher
+lows higher highs like this and higher
+
+88
+00:01:47,190 --> 00:01:47,200
+lows higher highs like this and higher
+ 
+
+89
+00:01:47,200 --> 00:01:50,030
+lows higher highs like this and higher
+lows just have it in mind that that is a
+
+90
+00:01:50,030 --> 00:01:50,040
+lows just have it in mind that that is a
+ 
+
+91
+00:01:50,040 --> 00:01:50,990
+lows just have it in mind that that is a
+bullish
+
+92
+00:01:50,990 --> 00:01:51,000
+bullish
+ 
+
+93
+00:01:51,000 --> 00:01:53,270
+bullish
+Trend so you can see the breakout
+
+94
+00:01:53,270 --> 00:01:53,280
+Trend so you can see the breakout
+ 
+
+95
+00:01:53,280 --> 00:01:56,990
+Trend so you can see the breakout
+structure here from here so let me point
+
+96
+00:01:56,990 --> 00:01:57,000
+structure here from here so let me point
+ 
+
+97
+00:01:57,000 --> 00:01:59,069
+structure here from here so let me point
+it out can see this is the break of
+
+98
+00:01:59,069 --> 00:01:59,079
+it out can see this is the break of
+ 
+
+99
+00:01:59,079 --> 00:02:01,469
+it out can see this is the break of
+structure this is another break of
+
+100
+00:02:01,469 --> 00:02:01,479
+structure this is another break of
+ 
+
+101
+00:02:01,479 --> 00:02:04,109
+structure this is another break of
+structure and
+
+102
+00:02:04,109 --> 00:02:04,119
+structure and
+ 
+
+103
+00:02:04,119 --> 00:02:07,550
+structure and
+um this is another break of structure so
+
+104
+00:02:07,550 --> 00:02:07,560
+um this is another break of structure so
+ 
+
+105
+00:02:07,560 --> 00:02:09,589
+um this is another break of structure so
+whenever you open a chart and you see
+
+106
+00:02:09,589 --> 00:02:09,599
+whenever you open a chart and you see
+ 
+
+107
+00:02:09,599 --> 00:02:11,949
+whenever you open a chart and you see
+this type of movement just know that the
+
+108
+00:02:11,949 --> 00:02:11,959
+this type of movement just know that the
+ 
+
+109
+00:02:11,959 --> 00:02:15,470
+this type of movement just know that the
+market is bullish and then whenever you
+
+110
+00:02:15,470 --> 00:02:15,480
+market is bullish and then whenever you
+ 
+
+111
+00:02:15,480 --> 00:02:17,550
+market is bullish and then whenever you
+open the chart and you notice that the
+
+112
+00:02:17,550 --> 00:02:17,560
+open the chart and you notice that the
+ 
+
+113
+00:02:17,560 --> 00:02:21,670
+open the chart and you notice that the
+market is creating you know lower lows
+
+114
+00:02:21,670 --> 00:02:21,680
+market is creating you know lower lows
+ 
+
+115
+00:02:21,680 --> 00:02:26,070
+market is creating you know lower lows
+lower high lower lows lower high just
+
+116
+00:02:26,070 --> 00:02:26,080
+lower high lower lows lower high just
+ 
+
+117
+00:02:26,080 --> 00:02:28,270
+lower high lower lows lower high just
+breaking structures to the downside have
+
+118
+00:02:28,270 --> 00:02:28,280
+breaking structures to the downside have
+ 
+
+119
+00:02:28,280 --> 00:02:30,550
+breaking structures to the downside have
+it in mind that the market is
+
+120
+00:02:30,550 --> 00:02:30,560
+it in mind that the market is
+ 
+
+121
+00:02:30,560 --> 00:02:33,750
+it in mind that the market is
+bearish so let me clone this here so
+
+122
+00:02:33,750 --> 00:02:33,760
+bearish so let me clone this here so
+ 
+
+123
+00:02:33,760 --> 00:02:36,229
+bearish so let me clone this here so
+it's breaking structure to the downside
+
+124
+00:02:36,229 --> 00:02:36,239
+it's breaking structure to the downside
+ 
+
+125
+00:02:36,239 --> 00:02:39,390
+it's breaking structure to the downside
+have it in mind that the market is
+
+126
+00:02:39,390 --> 00:02:39,400
+have it in mind that the market is
+ 
+
+127
+00:02:39,400 --> 00:02:42,229
+have it in mind that the market is
+bearish just like this breaking
+
+128
+00:02:42,229 --> 00:02:42,239
+bearish just like this breaking
+ 
+
+129
+00:02:42,239 --> 00:02:45,710
+bearish just like this breaking
+structure to the downside then for that
+
+130
+00:02:45,710 --> 00:02:45,720
+structure to the downside then for that
+ 
+
+131
+00:02:45,720 --> 00:02:48,670
+structure to the downside then for that
+of the sideways movement whenever the
+
+132
+00:02:48,670 --> 00:02:48,680
+of the sideways movement whenever the
+ 
+
+133
+00:02:48,680 --> 00:02:52,190
+of the sideways movement whenever the
+market is giving equal highs equal low
+
+134
+00:02:52,190 --> 00:02:52,200
+market is giving equal highs equal low
+ 
+
+135
+00:02:52,200 --> 00:02:55,830
+market is giving equal highs equal low
+equal highs equal low equal highs and
+
+136
+00:02:55,830 --> 00:02:55,840
+equal highs equal low equal highs and
+ 
+
+137
+00:02:55,840 --> 00:02:58,350
+equal highs equal low equal highs and
+equal low just know that it's a sideways
+
+138
+00:02:58,350 --> 00:02:58,360
+equal low just know that it's a sideways
+ 
+
+139
+00:02:58,360 --> 00:03:01,149
+equal low just know that it's a sideways
+movement or that the market is r ring
+
+140
+00:03:01,149 --> 00:03:01,159
+movement or that the market is r ring
+ 
+
+141
+00:03:01,159 --> 00:03:04,589
+movement or that the market is r ring
+consolidating and so on so these are the
+
+142
+00:03:04,589 --> 00:03:04,599
+consolidating and so on so these are the
+ 
+
+143
+00:03:04,599 --> 00:03:07,630
+consolidating and so on so these are the
+three types of Market structure now if
+
+144
+00:03:07,630 --> 00:03:07,640
+three types of Market structure now if
+ 
+
+145
+00:03:07,640 --> 00:03:09,309
+three types of Market structure now if
+you read the market structure and you
+
+146
+00:03:09,309 --> 00:03:09,319
+you read the market structure and you
+ 
+
+147
+00:03:09,319 --> 00:03:12,390
+you read the market structure and you
+notice that it is indicating that it is
+
+148
+00:03:12,390 --> 00:03:12,400
+notice that it is indicating that it is
+ 
+
+149
+00:03:12,400 --> 00:03:14,470
+notice that it is indicating that it is
+bullish all you need to be looking out
+
+150
+00:03:14,470 --> 00:03:14,480
+bullish all you need to be looking out
+ 
+
+151
+00:03:14,480 --> 00:03:19,110
+bullish all you need to be looking out
+for is how to buy and then if you read
+
+152
+00:03:19,110 --> 00:03:19,120
+for is how to buy and then if you read
+ 
+
+153
+00:03:19,120 --> 00:03:20,589
+for is how to buy and then if you read
+the market structure and you notice that
+
+154
+00:03:20,589 --> 00:03:20,599
+the market structure and you notice that
+ 
+
+155
+00:03:20,599 --> 00:03:22,070
+the market structure and you notice that
+it is bearish all you need to be looking
+
+156
+00:03:22,070 --> 00:03:22,080
+it is bearish all you need to be looking
+ 
+
+157
+00:03:22,080 --> 00:03:24,110
+it is bearish all you need to be looking
+out for is how to sell that particular
+
+158
+00:03:24,110 --> 00:03:24,120
+out for is how to sell that particular
+ 
+
+159
+00:03:24,120 --> 00:03:26,270
+out for is how to sell that particular
+commodity then if you read the market
+
+160
+00:03:26,270 --> 00:03:26,280
+commodity then if you read the market
+ 
+
+161
+00:03:26,280 --> 00:03:28,229
+commodity then if you read the market
+structure and you notice that it has you
+
+162
+00:03:28,229 --> 00:03:28,239
+structure and you notice that it has you
+ 
+
+163
+00:03:28,239 --> 00:03:30,589
+structure and you notice that it has you
+know sideways movement ranging
+
+164
+00:03:30,589 --> 00:03:30,599
+know sideways movement ranging
+ 
+
+165
+00:03:30,599 --> 00:03:32,830
+know sideways movement ranging
+you really need to wait for a breakout
+
+166
+00:03:32,830 --> 00:03:32,840
+you really need to wait for a breakout
+ 
+
+167
+00:03:32,840 --> 00:03:34,910
+you really need to wait for a breakout
+first we're going to go to the Chart now
+
+168
+00:03:34,910 --> 00:03:34,920
+first we're going to go to the Chart now
+ 
+
+169
+00:03:34,920 --> 00:03:36,509
+first we're going to go to the Chart now
+and we're going to analyze different
+
+170
+00:03:36,509 --> 00:03:36,519
+and we're going to analyze different
+ 
+
+171
+00:03:36,519 --> 00:03:38,550
+and we're going to analyze different
+currency Pairs and you will see how to
+
+172
+00:03:38,550 --> 00:03:38,560
+currency Pairs and you will see how to
+ 
+
+173
+00:03:38,560 --> 00:03:41,190
+currency Pairs and you will see how to
+map out Market structures and different
+
+174
+00:03:41,190 --> 00:03:41,200
+map out Market structures and different
+ 
+
+175
+00:03:41,200 --> 00:03:44,110
+map out Market structures and different
+origins or pois where you can take your
+
+176
+00:03:44,110 --> 00:03:44,120
+origins or pois where you can take your
+ 
+
+177
+00:03:44,120 --> 00:03:46,070
+origins or pois where you can take your
+entries from so guys looking at the real
+
+178
+00:03:46,070 --> 00:03:46,080
+entries from so guys looking at the real
+ 
+
+179
+00:03:46,080 --> 00:03:47,350
+entries from so guys looking at the real
+chart we're going to read this
+
+180
+00:03:47,350 --> 00:03:47,360
+chart we're going to read this
+ 
+
+181
+00:03:47,360 --> 00:03:48,990
+chart we're going to read this
+particular Market structure that is on
+
+182
+00:03:48,990 --> 00:03:49,000
+particular Market structure that is on
+ 
+
+183
+00:03:49,000 --> 00:03:51,429
+particular Market structure that is on
+gpp USD from the daily time frame
+
+184
+00:03:51,429 --> 00:03:51,439
+gpp USD from the daily time frame
+ 
+
+185
+00:03:51,439 --> 00:03:52,990
+gpp USD from the daily time frame
+whenever I'm reading the market
+
+186
+00:03:52,990 --> 00:03:53,000
+whenever I'm reading the market
+ 
+
+187
+00:03:53,000 --> 00:03:55,470
+whenever I'm reading the market
+structure or I'm trying to understand
+
+188
+00:03:55,470 --> 00:03:55,480
+structure or I'm trying to understand
+ 
+
+189
+00:03:55,480 --> 00:03:58,190
+structure or I'm trying to understand
+the general story in the market I
+
+190
+00:03:58,190 --> 00:03:58,200
+the general story in the market I
+ 
+
+191
+00:03:58,200 --> 00:04:00,550
+the general story in the market I
+normally start from the daily time frame
+
+192
+00:04:00,550 --> 00:04:00,560
+normally start from the daily time frame
+ 
+
+193
+00:04:00,560 --> 00:04:03,069
+normally start from the daily time frame
+to understand the general Trend the
+
+194
+00:04:03,069 --> 00:04:03,079
+to understand the general Trend the
+ 
+
+195
+00:04:03,079 --> 00:04:05,030
+to understand the general Trend the
+general story and from there I will head
+
+196
+00:04:05,030 --> 00:04:05,040
+general story and from there I will head
+ 
+
+197
+00:04:05,040 --> 00:04:07,949
+general story and from there I will head
+straight to my entry time frame so I
+
+198
+00:04:07,949 --> 00:04:07,959
+straight to my entry time frame so I
+ 
+
+199
+00:04:07,959 --> 00:04:09,429
+straight to my entry time frame so I
+believe you should know this if you've
+
+200
+00:04:09,429 --> 00:04:09,439
+believe you should know this if you've
+ 
+
+201
+00:04:09,439 --> 00:04:12,030
+believe you should know this if you've
+seen the video where I explained um
+
+202
+00:04:12,030 --> 00:04:12,040
+seen the video where I explained um
+ 
+
+203
+00:04:12,040 --> 00:04:15,550
+seen the video where I explained um
+multi-time frame analysis so guys
+
+204
+00:04:15,550 --> 00:04:15,560
+multi-time frame analysis so guys
+ 
+
+205
+00:04:15,560 --> 00:04:16,990
+multi-time frame analysis so guys
+looking at
+
+206
+00:04:16,990 --> 00:04:17,000
+looking at
+ 
+
+207
+00:04:17,000 --> 00:04:19,990
+looking at
+this if you're trying to use your trend
+
+208
+00:04:19,990 --> 00:04:20,000
+this if you're trying to use your trend
+ 
+
+209
+00:04:20,000 --> 00:04:21,990
+this if you're trying to use your trend
+line for trend line Traders once you
+
+210
+00:04:21,990 --> 00:04:22,000
+line for trend line Traders once you
+ 
+
+211
+00:04:22,000 --> 00:04:23,469
+line for trend line Traders once you
+place this you'll notice that the price
+
+212
+00:04:23,469 --> 00:04:23,479
+place this you'll notice that the price
+ 
+
+213
+00:04:23,479 --> 00:04:25,150
+place this you'll notice that the price
+is pointed to the downside which
+
+214
+00:04:25,150 --> 00:04:25,160
+is pointed to the downside which
+ 
+
+215
+00:04:25,160 --> 00:04:28,189
+is pointed to the downside which
+indicates a downtrend but that is not
+
+216
+00:04:28,189 --> 00:04:28,199
+indicates a downtrend but that is not
+ 
+
+217
+00:04:28,199 --> 00:04:29,870
+indicates a downtrend but that is not
+enough for you because if you just place
+
+218
+00:04:29,870 --> 00:04:29,880
+enough for you because if you just place
+ 
+
+219
+00:04:29,880 --> 00:04:31,510
+enough for you because if you just place
+that you may find it difficult to get
+
+220
+00:04:31,510 --> 00:04:31,520
+that you may find it difficult to get
+ 
+
+221
+00:04:31,520 --> 00:04:34,150
+that you may find it difficult to get
+your entries but if you learn how to
+
+222
+00:04:34,150 --> 00:04:34,160
+your entries but if you learn how to
+ 
+
+223
+00:04:34,160 --> 00:04:36,550
+your entries but if you learn how to
+read the market structure by mapping out
+
+224
+00:04:36,550 --> 00:04:36,560
+read the market structure by mapping out
+ 
+
+225
+00:04:36,560 --> 00:04:38,430
+read the market structure by mapping out
+the origins knowing the origin that
+
+226
+00:04:38,430 --> 00:04:38,440
+the origins knowing the origin that
+ 
+
+227
+00:04:38,440 --> 00:04:40,629
+the origins knowing the origin that
+price has mitigated and the rest that
+
+228
+00:04:40,629 --> 00:04:40,639
+price has mitigated and the rest that
+ 
+
+229
+00:04:40,639 --> 00:04:43,510
+price has mitigated and the rest that
+will help you you know to point out your
+
+230
+00:04:43,510 --> 00:04:43,520
+will help you you know to point out your
+ 
+
+231
+00:04:43,520 --> 00:04:45,749
+will help you you know to point out your
+you know levels in the market and where
+
+232
+00:04:45,749 --> 00:04:45,759
+you know levels in the market and where
+ 
+
+233
+00:04:45,759 --> 00:04:48,390
+you know levels in the market and where
+you can take entries from so from here
+
+234
+00:04:48,390 --> 00:04:48,400
+you can take entries from so from here
+ 
+
+235
+00:04:48,400 --> 00:04:50,430
+you can take entries from so from here
+you can see that we've been having break
+
+236
+00:04:50,430 --> 00:04:50,440
+you can see that we've been having break
+ 
+
+237
+00:04:50,440 --> 00:04:52,590
+you can see that we've been having break
+of structure to the upside so this was
+
+238
+00:04:52,590 --> 00:04:52,600
+of structure to the upside so this was
+ 
+
+239
+00:04:52,600 --> 00:04:55,510
+of structure to the upside so this was
+more like the last break of structure to
+
+240
+00:04:55,510 --> 00:04:55,520
+more like the last break of structure to
+ 
+
+241
+00:04:55,520 --> 00:04:57,790
+more like the last break of structure to
+the upside although it was more of an
+
+242
+00:04:57,790 --> 00:04:57,800
+the upside although it was more of an
+ 
+
+243
+00:04:57,800 --> 00:05:01,110
+the upside although it was more of an
+internal structure let me it out well a
+
+244
+00:05:01,110 --> 00:05:01,120
+internal structure let me it out well a
+ 
+
+245
+00:05:01,120 --> 00:05:04,350
+internal structure let me it out well a
+break of structure to the
+
+246
+00:05:04,350 --> 00:05:04,360
+break of structure to the
+ 
+
+247
+00:05:04,360 --> 00:05:07,390
+break of structure to the
+upside and now when price got here it
+
+248
+00:05:07,390 --> 00:05:07,400
+upside and now when price got here it
+ 
+
+249
+00:05:07,400 --> 00:05:10,790
+upside and now when price got here it
+couldn't break further it created equal
+
+250
+00:05:10,790 --> 00:05:10,800
+couldn't break further it created equal
+ 
+
+251
+00:05:10,800 --> 00:05:15,110
+couldn't break further it created equal
+high so leaving this level more like um
+
+252
+00:05:15,110 --> 00:05:15,120
+high so leaving this level more like um
+ 
+
+253
+00:05:15,120 --> 00:05:18,510
+high so leaving this level more like um
+a resistant level just around this point
+
+254
+00:05:18,510 --> 00:05:18,520
+a resistant level just around this point
+ 
+
+255
+00:05:18,520 --> 00:05:21,189
+a resistant level just around this point
+here leaving it as a resistant level and
+
+256
+00:05:21,189 --> 00:05:21,199
+here leaving it as a resistant level and
+ 
+
+257
+00:05:21,199 --> 00:05:23,870
+here leaving it as a resistant level and
+from there price started retracing and
+
+258
+00:05:23,870 --> 00:05:23,880
+from there price started retracing and
+ 
+
+259
+00:05:23,880 --> 00:05:26,670
+from there price started retracing and
+cleared out the last origin which is
+
+260
+00:05:26,670 --> 00:05:26,680
+cleared out the last origin which is
+ 
+
+261
+00:05:26,680 --> 00:05:29,230
+cleared out the last origin which is
+this level that caused a break of
+
+262
+00:05:29,230 --> 00:05:29,240
+this level that caused a break of
+ 
+
+263
+00:05:29,240 --> 00:05:30,350
+this level that caused a break of
+structure
+
+264
+00:05:30,350 --> 00:05:30,360
+structure
+ 
+
+265
+00:05:30,360 --> 00:05:32,629
+structure
+so as price cleared out this last origin
+
+266
+00:05:32,629 --> 00:05:32,639
+so as price cleared out this last origin
+ 
+
+267
+00:05:32,639 --> 00:05:35,590
+so as price cleared out this last origin
+remember the market was trending to the
+
+268
+00:05:35,590 --> 00:05:35,600
+remember the market was trending to the
+ 
+
+269
+00:05:35,600 --> 00:05:38,390
+remember the market was trending to the
+upside from here but when it got here
+
+270
+00:05:38,390 --> 00:05:38,400
+upside from here but when it got here
+ 
+
+271
+00:05:38,400 --> 00:05:40,510
+upside from here but when it got here
+that was actually a h and from there it
+
+272
+00:05:40,510 --> 00:05:40,520
+that was actually a h and from there it
+ 
+
+273
+00:05:40,520 --> 00:05:42,270
+that was actually a h and from there it
+started pushing to the downside clearing
+
+274
+00:05:42,270 --> 00:05:42,280
+started pushing to the downside clearing
+ 
+
+275
+00:05:42,280 --> 00:05:45,110
+started pushing to the downside clearing
+out the last origin that caused a break
+
+276
+00:05:45,110 --> 00:05:45,120
+out the last origin that caused a break
+ 
+
+277
+00:05:45,120 --> 00:05:48,029
+out the last origin that caused a break
+of stru to the upside so that means that
+
+278
+00:05:48,029 --> 00:05:48,039
+of stru to the upside so that means that
+ 
+
+279
+00:05:48,039 --> 00:05:50,110
+of stru to the upside so that means that
+a change of character has
+
+280
+00:05:50,110 --> 00:05:50,120
+a change of character has
+ 
+
+281
+00:05:50,120 --> 00:05:52,790
+a change of character has
+happened so that means we have a change
+
+282
+00:05:52,790 --> 00:05:52,800
+happened so that means we have a change
+ 
+
+283
+00:05:52,800 --> 00:05:53,550
+happened so that means we have a change
+of
+
+284
+00:05:53,550 --> 00:05:53,560
+of
+ 
+
+285
+00:05:53,560 --> 00:05:56,909
+of
+character so you can call it church just
+
+286
+00:05:56,909 --> 00:05:56,919
+character so you can call it church just
+ 
+
+287
+00:05:56,919 --> 00:05:59,070
+character so you can call it church just
+like this so we have a change of
+
+288
+00:05:59,070 --> 00:05:59,080
+like this so we have a change of
+ 
+
+289
+00:05:59,080 --> 00:06:01,029
+like this so we have a change of
+character around this level so you can
+
+290
+00:06:01,029 --> 00:06:01,039
+character around this level so you can
+ 
+
+291
+00:06:01,039 --> 00:06:02,749
+character around this level so you can
+see after the change of character now
+
+292
+00:06:02,749 --> 00:06:02,759
+see after the change of character now
+ 
+
+293
+00:06:02,759 --> 00:06:04,230
+see after the change of character now
+watch this guys because this is actually
+
+294
+00:06:04,230 --> 00:06:04,240
+watch this guys because this is actually
+ 
+
+295
+00:06:04,240 --> 00:06:06,830
+watch this guys because this is actually
+how you can map out your origin now
+
+296
+00:06:06,830 --> 00:06:06,840
+how you can map out your origin now
+ 
+
+297
+00:06:06,840 --> 00:06:08,469
+how you can map out your origin now
+change of character indicates that the
+
+298
+00:06:08,469 --> 00:06:08,479
+change of character indicates that the
+ 
+
+299
+00:06:08,479 --> 00:06:12,230
+change of character indicates that the
+market has changed Trend that is from up
+
+300
+00:06:12,230 --> 00:06:12,240
+market has changed Trend that is from up
+ 
+
+301
+00:06:12,240 --> 00:06:15,270
+market has changed Trend that is from up
+to down or from down to up so from what
+
+302
+00:06:15,270 --> 00:06:15,280
+to down or from down to up so from what
+ 
+
+303
+00:06:15,280 --> 00:06:17,309
+to down or from down to up so from what
+we can see here now on the chart price
+
+304
+00:06:17,309 --> 00:06:17,319
+we can see here now on the chart price
+ 
+
+305
+00:06:17,319 --> 00:06:19,990
+we can see here now on the chart price
+has actually um changed trend from up to
+
+306
+00:06:19,990 --> 00:06:20,000
+has actually um changed trend from up to
+ 
+
+307
+00:06:20,000 --> 00:06:22,589
+has actually um changed trend from up to
+down because we've gotten a break of
+
+308
+00:06:22,589 --> 00:06:22,599
+down because we've gotten a break of
+ 
+
+309
+00:06:22,599 --> 00:06:24,469
+down because we've gotten a break of
+structure to the downside instead of to
+
+310
+00:06:24,469 --> 00:06:24,479
+structure to the downside instead of to
+ 
+
+311
+00:06:24,479 --> 00:06:26,909
+structure to the downside instead of to
+the upside so now where is actually the
+
+312
+00:06:26,909 --> 00:06:26,919
+the upside so now where is actually the
+ 
+
+313
+00:06:26,919 --> 00:06:28,710
+the upside so now where is actually the
+origin that caused this break of
+
+314
+00:06:28,710 --> 00:06:28,720
+origin that caused this break of
+ 
+
+315
+00:06:28,720 --> 00:06:30,909
+origin that caused this break of
+structure or this change of
+
+316
+00:06:30,909 --> 00:06:30,919
+structure or this change of
+ 
+
+317
+00:06:30,919 --> 00:06:33,270
+structure or this change of
+character now you can see after this
+
+318
+00:06:33,270 --> 00:06:33,280
+character now you can see after this
+ 
+
+319
+00:06:33,280 --> 00:06:35,110
+character now you can see after this
+consolidation everything that happened
+
+320
+00:06:35,110 --> 00:06:35,120
+consolidation everything that happened
+ 
+
+321
+00:06:35,120 --> 00:06:39,029
+consolidation everything that happened
+here price you know created the
+
+322
+00:06:39,029 --> 00:06:39,039
+here price you know created the
+ 
+
+323
+00:06:39,039 --> 00:06:41,390
+here price you know created the
+impulsive movement that cleared out the
+
+324
+00:06:41,390 --> 00:06:41,400
+impulsive movement that cleared out the
+ 
+
+325
+00:06:41,400 --> 00:06:45,029
+impulsive movement that cleared out the
+change of character so from
+
+326
+00:06:45,029 --> 00:06:45,039
+change of character so from
+ 
+
+327
+00:06:45,039 --> 00:06:47,550
+change of character so from
+here this is actually the origin that
+
+328
+00:06:47,550 --> 00:06:47,560
+here this is actually the origin that
+ 
+
+329
+00:06:47,560 --> 00:06:49,589
+here this is actually the origin that
+caused the change of character and you
+
+330
+00:06:49,589 --> 00:06:49,599
+caused the change of character and you
+ 
+
+331
+00:06:49,599 --> 00:06:52,589
+caused the change of character and you
+can see after price you know cleared out
+
+332
+00:06:52,589 --> 00:06:52,599
+can see after price you know cleared out
+ 
+
+333
+00:06:52,599 --> 00:06:56,270
+can see after price you know cleared out
+this level saw how price retraced you
+
+334
+00:06:56,270 --> 00:06:56,280
+this level saw how price retraced you
+ 
+
+335
+00:06:56,280 --> 00:06:59,029
+this level saw how price retraced you
+can see it here you can see how price
+
+336
+00:06:59,029 --> 00:06:59,039
+can see it here you can see how price
+ 
+
+337
+00:06:59,039 --> 00:07:00,029
+can see it here you can see how price
+retraced
+
+338
+00:07:00,029 --> 00:07:00,039
+retraced
+ 
+
+339
+00:07:00,039 --> 00:07:01,869
+retraced
+into this particular origin and from
+
+340
+00:07:01,869 --> 00:07:01,879
+into this particular origin and from
+ 
+
+341
+00:07:01,879 --> 00:07:02,950
+into this particular origin and from
+there it started breaking more
+
+342
+00:07:02,950 --> 00:07:02,960
+there it started breaking more
+ 
+
+343
+00:07:02,960 --> 00:07:05,029
+there it started breaking more
+structures to the downside so now we
+
+344
+00:07:05,029 --> 00:07:05,039
+structures to the downside so now we
+ 
+
+345
+00:07:05,039 --> 00:07:06,270
+structures to the downside so now we
+have
+
+346
+00:07:06,270 --> 00:07:06,280
+have
+ 
+
+347
+00:07:06,280 --> 00:07:09,230
+have
+this we have another break of structure
+
+348
+00:07:09,230 --> 00:07:09,240
+this we have another break of structure
+ 
+
+349
+00:07:09,240 --> 00:07:11,469
+this we have another break of structure
+here to the
+
+350
+00:07:11,469 --> 00:07:11,479
+here to the
+ 
+
+351
+00:07:11,479 --> 00:07:15,230
+here to the
+downside so let me just be cloning this
+
+352
+00:07:15,230 --> 00:07:15,240
+downside so let me just be cloning this
+ 
+
+353
+00:07:15,240 --> 00:07:19,510
+downside so let me just be cloning this
+drawings so that to be easier for me so
+
+354
+00:07:19,510 --> 00:07:19,520
+drawings so that to be easier for me so
+ 
+
+355
+00:07:19,520 --> 00:07:21,990
+drawings so that to be easier for me so
+we have another break of structure here
+
+356
+00:07:21,990 --> 00:07:22,000
+we have another break of structure here
+ 
+
+357
+00:07:22,000 --> 00:07:23,749
+we have another break of structure here
+to the downside what happened where is
+
+358
+00:07:23,749 --> 00:07:23,759
+to the downside what happened where is
+ 
+
+359
+00:07:23,759 --> 00:07:25,550
+to the downside what happened where is
+the origin that caused this particular
+
+360
+00:07:25,550 --> 00:07:25,560
+the origin that caused this particular
+ 
+
+361
+00:07:25,560 --> 00:07:27,469
+the origin that caused this particular
+of structure guys you can see this is
+
+362
+00:07:27,469 --> 00:07:27,479
+of structure guys you can see this is
+ 
+
+363
+00:07:27,479 --> 00:07:29,790
+of structure guys you can see this is
+the origin so I'm just going to m about
+
+364
+00:07:29,790 --> 00:07:29,800
+the origin so I'm just going to m about
+ 
+
+365
+00:07:29,800 --> 00:07:32,350
+the origin so I'm just going to m about
+everything there so you can see how
+
+366
+00:07:32,350 --> 00:07:32,360
+everything there so you can see how
+ 
+
+367
+00:07:32,360 --> 00:07:34,710
+everything there so you can see how
+price retraced tapped into the origin
+
+368
+00:07:34,710 --> 00:07:34,720
+price retraced tapped into the origin
+ 
+
+369
+00:07:34,720 --> 00:07:36,110
+price retraced tapped into the origin
+that cost this particular break of
+
+370
+00:07:36,110 --> 00:07:36,120
+that cost this particular break of
+ 
+
+371
+00:07:36,120 --> 00:07:38,150
+that cost this particular break of
+structure and what are we getting
+
+372
+00:07:38,150 --> 00:07:38,160
+structure and what are we getting
+ 
+
+373
+00:07:38,160 --> 00:07:40,350
+structure and what are we getting
+further break of structure to the
+
+374
+00:07:40,350 --> 00:07:40,360
+further break of structure to the
+ 
+
+375
+00:07:40,360 --> 00:07:43,390
+further break of structure to the
+downside so just like the illustration I
+
+376
+00:07:43,390 --> 00:07:43,400
+downside so just like the illustration I
+ 
+
+377
+00:07:43,400 --> 00:07:45,390
+downside so just like the illustration I
+showed you guys earlier so we are
+
+378
+00:07:45,390 --> 00:07:45,400
+showed you guys earlier so we are
+ 
+
+379
+00:07:45,400 --> 00:07:46,909
+showed you guys earlier so we are
+currently looking at a bearish trend
+
+380
+00:07:46,909 --> 00:07:46,919
+currently looking at a bearish trend
+ 
+
+381
+00:07:46,919 --> 00:07:48,230
+currently looking at a bearish trend
+this is how you can see how price is
+
+382
+00:07:48,230 --> 00:07:48,240
+this is how you can see how price is
+ 
+
+383
+00:07:48,240 --> 00:07:51,629
+this is how you can see how price is
+creating you know lower lows lower
+
+384
+00:07:51,629 --> 00:07:51,639
+creating you know lower lows lower
+ 
+
+385
+00:07:51,639 --> 00:07:53,950
+creating you know lower lows lower
+highs now we have another break of
+
+386
+00:07:53,950 --> 00:07:53,960
+highs now we have another break of
+ 
+
+387
+00:07:53,960 --> 00:07:55,909
+highs now we have another break of
+structure where is the origin that
+
+388
+00:07:55,909 --> 00:07:55,919
+structure where is the origin that
+ 
+
+389
+00:07:55,919 --> 00:07:57,189
+structure where is the origin that
+caused this particular break of
+
+390
+00:07:57,189 --> 00:07:57,199
+caused this particular break of
+ 
+
+391
+00:07:57,199 --> 00:07:59,589
+caused this particular break of
+structure this is the origin
+
+392
+00:07:59,589 --> 00:07:59,599
+structure this is the origin
+ 
+
+393
+00:07:59,599 --> 00:08:01,309
+structure this is the origin
+this is the origin here and what
+
+394
+00:08:01,309 --> 00:08:01,319
+this is the origin here and what
+ 
+
+395
+00:08:01,319 --> 00:08:04,350
+this is the origin here and what
+happened price retrac tapped into it so
+
+396
+00:08:04,350 --> 00:08:04,360
+happened price retrac tapped into it so
+ 
+
+397
+00:08:04,360 --> 00:08:06,029
+happened price retrac tapped into it so
+now as you're reading this particular
+
+398
+00:08:06,029 --> 00:08:06,039
+now as you're reading this particular
+ 
+
+399
+00:08:06,039 --> 00:08:08,149
+now as you're reading this particular
+Market structure you know this is just
+
+400
+00:08:08,149 --> 00:08:08,159
+Market structure you know this is just
+ 
+
+401
+00:08:08,159 --> 00:08:10,629
+Market structure you know this is just
+an example so if you reading this from a
+
+402
+00:08:10,629 --> 00:08:10,639
+an example so if you reading this from a
+ 
+
+403
+00:08:10,639 --> 00:08:12,629
+an example so if you reading this from a
+real time chart that is when the market
+
+404
+00:08:12,629 --> 00:08:12,639
+real time chart that is when the market
+ 
+
+405
+00:08:12,639 --> 00:08:14,230
+real time chart that is when the market
+is moving because currently the market
+
+406
+00:08:14,230 --> 00:08:14,240
+is moving because currently the market
+ 
+
+407
+00:08:14,240 --> 00:08:16,350
+is moving because currently the market
+is closed when the market is moving if
+
+408
+00:08:16,350 --> 00:08:16,360
+is closed when the market is moving if
+ 
+
+409
+00:08:16,360 --> 00:08:18,350
+is closed when the market is moving if
+you get all the things once to point out
+
+410
+00:08:18,350 --> 00:08:18,360
+you get all the things once to point out
+ 
+
+411
+00:08:18,360 --> 00:08:20,790
+you get all the things once to point out
+a break of structure if price should get
+
+412
+00:08:20,790 --> 00:08:20,800
+a break of structure if price should get
+ 
+
+413
+00:08:20,800 --> 00:08:23,029
+a break of structure if price should get
+back into the origin that cost it look
+
+414
+00:08:23,029 --> 00:08:23,039
+back into the origin that cost it look
+ 
+
+415
+00:08:23,039 --> 00:08:26,309
+back into the origin that cost it look
+for sale sell another break of structure
+
+416
+00:08:26,309 --> 00:08:26,319
+for sale sell another break of structure
+ 
+
+417
+00:08:26,319 --> 00:08:27,869
+for sale sell another break of structure
+you look for sale that's just how to
+
+418
+00:08:27,869 --> 00:08:27,879
+you look for sale that's just how to
+ 
+
+419
+00:08:27,879 --> 00:08:29,189
+you look for sale that's just how to
+point it out that's why it is important
+
+420
+00:08:29,189 --> 00:08:29,199
+point it out that's why it is important
+ 
+
+421
+00:08:29,199 --> 00:08:32,029
+point it out that's why it is important
+for you to understand the general story
+
+422
+00:08:32,029 --> 00:08:32,039
+for you to understand the general story
+ 
+
+423
+00:08:32,039 --> 00:08:35,550
+for you to understand the general story
+in the market so what do we have again
+
+424
+00:08:35,550 --> 00:08:35,560
+in the market so what do we have again
+ 
+
+425
+00:08:35,560 --> 00:08:38,709
+in the market so what do we have again
+we have another break of structure to
+
+426
+00:08:38,709 --> 00:08:38,719
+we have another break of structure to
+ 
+
+427
+00:08:38,719 --> 00:08:40,709
+we have another break of structure to
+the downside
+
+428
+00:08:40,709 --> 00:08:40,719
+the downside
+ 
+
+429
+00:08:40,719 --> 00:08:43,670
+the downside
+here let me zoom out so we have another
+
+430
+00:08:43,670 --> 00:08:43,680
+here let me zoom out so we have another
+ 
+
+431
+00:08:43,680 --> 00:08:45,550
+here let me zoom out so we have another
+break of structure to the downside you
+
+432
+00:08:45,550 --> 00:08:45,560
+break of structure to the downside you
+ 
+
+433
+00:08:45,560 --> 00:08:47,430
+break of structure to the downside you
+know leaving out this particular origin
+
+434
+00:08:47,430 --> 00:08:47,440
+know leaving out this particular origin
+ 
+
+435
+00:08:47,440 --> 00:08:49,870
+know leaving out this particular origin
+but here now price did not come into
+
+436
+00:08:49,870 --> 00:08:49,880
+but here now price did not come into
+ 
+
+437
+00:08:49,880 --> 00:08:51,910
+but here now price did not come into
+this origin but look at where it tapped
+
+438
+00:08:51,910 --> 00:08:51,920
+this origin but look at where it tapped
+ 
+
+439
+00:08:51,920 --> 00:08:54,389
+this origin but look at where it tapped
+into just around this level after this
+
+440
+00:08:54,389 --> 00:08:54,399
+into just around this level after this
+ 
+
+441
+00:08:54,399 --> 00:08:56,389
+into just around this level after this
+consolidation here just around this
+
+442
+00:08:56,389 --> 00:08:56,399
+consolidation here just around this
+ 
+
+443
+00:08:56,399 --> 00:08:58,590
+consolidation here just around this
+level although it didn't even tap into
+
+444
+00:08:58,590 --> 00:08:58,600
+level although it didn't even tap into
+ 
+
+445
+00:08:58,600 --> 00:09:00,630
+level although it didn't even tap into
+the consolidation it reacted off the
+
+446
+00:09:00,630 --> 00:09:00,640
+the consolidation it reacted off the
+ 
+
+447
+00:09:00,640 --> 00:09:02,949
+the consolidation it reacted off the
+imbalance very close to it and pushed
+
+448
+00:09:02,949 --> 00:09:02,959
+imbalance very close to it and pushed
+ 
+
+449
+00:09:02,959 --> 00:09:07,430
+imbalance very close to it and pushed
+down so we are still um
+
+450
+00:09:07,430 --> 00:09:07,440
+down so we are still um
+ 
+
+451
+00:09:07,440 --> 00:09:10,550
+down so we are still um
+bearish you know pushing down then we
+
+452
+00:09:10,550 --> 00:09:10,560
+bearish you know pushing down then we
+ 
+
+453
+00:09:10,560 --> 00:09:12,590
+bearish you know pushing down then we
+have this level
+
+454
+00:09:12,590 --> 00:09:12,600
+have this level
+ 
+
+455
+00:09:12,600 --> 00:09:16,190
+have this level
+two another break of structure so this
+
+456
+00:09:16,190 --> 00:09:16,200
+two another break of structure so this
+ 
+
+457
+00:09:16,200 --> 00:09:18,069
+two another break of structure so this
+is just trying to understand the general
+
+458
+00:09:18,069 --> 00:09:18,079
+is just trying to understand the general
+ 
+
+459
+00:09:18,079 --> 00:09:20,829
+is just trying to understand the general
+story of how price you know was pushing
+
+460
+00:09:20,829 --> 00:09:20,839
+story of how price you know was pushing
+ 
+
+461
+00:09:20,839 --> 00:09:22,430
+story of how price you know was pushing
+down you're not just understanding the
+
+462
+00:09:22,430 --> 00:09:22,440
+down you're not just understanding the
+ 
+
+463
+00:09:22,440 --> 00:09:24,350
+down you're not just understanding the
+story but as you mapping it out you are
+
+464
+00:09:24,350 --> 00:09:24,360
+story but as you mapping it out you are
+ 
+
+465
+00:09:24,360 --> 00:09:26,630
+story but as you mapping it out you are
+getting your point of Interest your
+
+466
+00:09:26,630 --> 00:09:26,640
+getting your point of Interest your
+ 
+
+467
+00:09:26,640 --> 00:09:28,230
+getting your point of Interest your
+levels where you'll be taking trades
+
+468
+00:09:28,230 --> 00:09:28,240
+levels where you'll be taking trades
+ 
+
+469
+00:09:28,240 --> 00:09:29,790
+levels where you'll be taking trades
+from so when reading the market
+
+470
+00:09:29,790 --> 00:09:29,800
+from so when reading the market
+ 
+
+471
+00:09:29,800 --> 00:09:31,870
+from so when reading the market
+structure you need to be very very
+
+472
+00:09:31,870 --> 00:09:31,880
+structure you need to be very very
+ 
+
+473
+00:09:31,880 --> 00:09:34,190
+structure you need to be very very
+observant you need to open your eyes to
+
+474
+00:09:34,190 --> 00:09:34,200
+observant you need to open your eyes to
+ 
+
+475
+00:09:34,200 --> 00:09:36,710
+observant you need to open your eyes to
+view what is actually happening so from
+
+476
+00:09:36,710 --> 00:09:36,720
+view what is actually happening so from
+ 
+
+477
+00:09:36,720 --> 00:09:38,870
+view what is actually happening so from
+there we have another break of structure
+
+478
+00:09:38,870 --> 00:09:38,880
+there we have another break of structure
+ 
+
+479
+00:09:38,880 --> 00:09:41,430
+there we have another break of structure
+here I know most people may not map this
+
+480
+00:09:41,430 --> 00:09:41,440
+here I know most people may not map this
+ 
+
+481
+00:09:41,440 --> 00:09:43,430
+here I know most people may not map this
+out as a break of structure but no
+
+482
+00:09:43,430 --> 00:09:43,440
+out as a break of structure but no
+ 
+
+483
+00:09:43,440 --> 00:09:45,829
+out as a break of structure but no
+matter how tiny it is whether it is Big
+
+484
+00:09:45,829 --> 00:09:45,839
+matter how tiny it is whether it is Big
+ 
+
+485
+00:09:45,839 --> 00:09:49,430
+matter how tiny it is whether it is Big
+Tiny as far as a level has been
+
+486
+00:09:49,430 --> 00:09:49,440
+Tiny as far as a level has been
+ 
+
+487
+00:09:49,440 --> 00:09:52,790
+Tiny as far as a level has been
+cleared just know that there is a break
+
+488
+00:09:52,790 --> 00:09:52,800
+cleared just know that there is a break
+ 
+
+489
+00:09:52,800 --> 00:09:53,590
+cleared just know that there is a break
+of
+
+490
+00:09:53,590 --> 00:09:53,600
+of
+ 
+
+491
+00:09:53,600 --> 00:09:56,750
+of
+structure so you can also see price came
+
+492
+00:09:56,750 --> 00:09:56,760
+structure so you can also see price came
+ 
+
+493
+00:09:56,760 --> 00:09:59,790
+structure so you can also see price came
+back into the origin and pushed down for
+
+494
+00:09:59,790 --> 00:09:59,800
+back into the origin and pushed down for
+ 
+
+495
+00:09:59,800 --> 00:10:03,550
+back into the origin and pushed down for
+to dish out a new break of structure so
+
+496
+00:10:03,550 --> 00:10:03,560
+to dish out a new break of structure so
+ 
+
+497
+00:10:03,560 --> 00:10:05,630
+to dish out a new break of structure so
+you can see how price kept on pushing to
+
+498
+00:10:05,630 --> 00:10:05,640
+you can see how price kept on pushing to
+ 
+
+499
+00:10:05,640 --> 00:10:07,750
+you can see how price kept on pushing to
+the downside that's why I said whenever
+
+500
+00:10:07,750 --> 00:10:07,760
+the downside that's why I said whenever
+ 
+
+501
+00:10:07,760 --> 00:10:09,790
+the downside that's why I said whenever
+you notice that the trend is bearish or
+
+502
+00:10:09,790 --> 00:10:09,800
+you notice that the trend is bearish or
+ 
+
+503
+00:10:09,800 --> 00:10:12,710
+you notice that the trend is bearish or
+bullish all you just need to be doing is
+
+504
+00:10:12,710 --> 00:10:12,720
+bullish all you just need to be doing is
+ 
+
+505
+00:10:12,720 --> 00:10:16,990
+bullish all you just need to be doing is
+just sell currently we are looking at a
+
+506
+00:10:16,990 --> 00:10:17,000
+just sell currently we are looking at a
+ 
+
+507
+00:10:17,000 --> 00:10:19,110
+just sell currently we are looking at a
+bearish structure so all you just need
+
+508
+00:10:19,110 --> 00:10:19,120
+bearish structure so all you just need
+ 
+
+509
+00:10:19,120 --> 00:10:21,949
+bearish structure so all you just need
+to do is to sell sell sell you obviously
+
+510
+00:10:21,949 --> 00:10:21,959
+to do is to sell sell sell you obviously
+ 
+
+511
+00:10:21,959 --> 00:10:24,670
+to do is to sell sell sell you obviously
+see when to change Byers to start buying
+
+512
+00:10:24,670 --> 00:10:24,680
+see when to change Byers to start buying
+ 
+
+513
+00:10:24,680 --> 00:10:27,430
+see when to change Byers to start buying
+I still show you guys that so just keep
+
+514
+00:10:27,430 --> 00:10:27,440
+I still show you guys that so just keep
+ 
+
+515
+00:10:27,440 --> 00:10:30,949
+I still show you guys that so just keep
+watching so we have another break of
+
+516
+00:10:30,949 --> 00:10:30,959
+watching so we have another break of
+ 
+
+517
+00:10:30,959 --> 00:10:33,190
+watching so we have another break of
+structure to the downside and you can
+
+518
+00:10:33,190 --> 00:10:33,200
+structure to the downside and you can
+ 
+
+519
+00:10:33,200 --> 00:10:34,750
+structure to the downside and you can
+see what happened price came back into
+
+520
+00:10:34,750 --> 00:10:34,760
+see what happened price came back into
+ 
+
+521
+00:10:34,760 --> 00:10:36,389
+see what happened price came back into
+the origin so what you just need to be
+
+522
+00:10:36,389 --> 00:10:36,399
+the origin so what you just need to be
+ 
+
+523
+00:10:36,399 --> 00:10:38,389
+the origin so what you just need to be
+looking out for is once once you point
+
+524
+00:10:38,389 --> 00:10:38,399
+looking out for is once once you point
+ 
+
+525
+00:10:38,399 --> 00:10:40,990
+looking out for is once once you point
+out a break of structure wait for the
+
+526
+00:10:40,990 --> 00:10:41,000
+out a break of structure wait for the
+ 
+
+527
+00:10:41,000 --> 00:10:42,670
+out a break of structure wait for the
+wait for price to get back into the
+
+528
+00:10:42,670 --> 00:10:42,680
+wait for price to get back into the
+ 
+
+529
+00:10:42,680 --> 00:10:46,150
+wait for price to get back into the
+origin you sell again it's just that
+
+530
+00:10:46,150 --> 00:10:46,160
+origin you sell again it's just that
+ 
+
+531
+00:10:46,160 --> 00:10:48,150
+origin you sell again it's just that
+simple so you can also see we have
+
+532
+00:10:48,150 --> 00:10:48,160
+simple so you can also see we have
+ 
+
+533
+00:10:48,160 --> 00:10:51,150
+simple so you can also see we have
+another break of structure here so this
+
+534
+00:10:51,150 --> 00:10:51,160
+another break of structure here so this
+ 
+
+535
+00:10:51,160 --> 00:10:53,310
+another break of structure here so this
+is actually the origin but you can see
+
+536
+00:10:53,310 --> 00:10:53,320
+is actually the origin but you can see
+ 
+
+537
+00:10:53,320 --> 00:10:55,550
+is actually the origin but you can see
+price kept on pushing to the
+
+538
+00:10:55,550 --> 00:10:55,560
+price kept on pushing to the
+ 
+
+539
+00:10:55,560 --> 00:10:58,470
+price kept on pushing to the
+downside kept on pushing to the downside
+
+540
+00:10:58,470 --> 00:10:58,480
+downside kept on pushing to the downside
+ 
+
+541
+00:10:58,480 --> 00:10:59,750
+downside kept on pushing to the downside
+without tapping into the that particular
+
+542
+00:10:59,750 --> 00:10:59,760
+without tapping into the that particular
+ 
+
+543
+00:10:59,760 --> 00:11:04,590
+without tapping into the that particular
+origin then from here we got the last
+
+544
+00:11:04,590 --> 00:11:04,600
+origin then from here we got the last
+ 
+
+545
+00:11:04,600 --> 00:11:06,110
+origin then from here we got the last
+break of structure to the downside
+
+546
+00:11:06,110 --> 00:11:06,120
+break of structure to the downside
+ 
+
+547
+00:11:06,120 --> 00:11:07,310
+break of structure to the downside
+because you can see price started
+
+548
+00:11:07,310 --> 00:11:07,320
+because you can see price started
+ 
+
+549
+00:11:07,320 --> 00:11:09,269
+because you can see price started
+pushing up so let me show you how you
+
+550
+00:11:09,269 --> 00:11:09,279
+pushing up so let me show you how you
+ 
+
+551
+00:11:09,279 --> 00:11:11,110
+pushing up so let me show you how you
+can actually change Trend you can see
+
+552
+00:11:11,110 --> 00:11:11,120
+can actually change Trend you can see
+ 
+
+553
+00:11:11,120 --> 00:11:13,629
+can actually change Trend you can see
+where we started from from here we've
+
+554
+00:11:13,629 --> 00:11:13,639
+where we started from from here we've
+ 
+
+555
+00:11:13,639 --> 00:11:16,910
+where we started from from here we've
+been selling selling selling selling and
+
+556
+00:11:16,910 --> 00:11:16,920
+been selling selling selling selling and
+ 
+
+557
+00:11:16,920 --> 00:11:18,430
+been selling selling selling selling and
+now
+
+558
+00:11:18,430 --> 00:11:18,440
+now
+ 
+
+559
+00:11:18,440 --> 00:11:21,190
+now
+we have the last break of structure here
+
+560
+00:11:21,190 --> 00:11:21,200
+we have the last break of structure here
+ 
+
+561
+00:11:21,200 --> 00:11:23,269
+we have the last break of structure here
+to the downside so now look at what
+
+562
+00:11:23,269 --> 00:11:23,279
+to the downside so now look at what
+ 
+
+563
+00:11:23,279 --> 00:11:25,550
+to the downside so now look at what
+happened as price cleared this structure
+
+564
+00:11:25,550 --> 00:11:25,560
+happened as price cleared this structure
+ 
+
+565
+00:11:25,560 --> 00:11:27,069
+happened as price cleared this structure
+to the downside this is actually the
+
+566
+00:11:27,069 --> 00:11:27,079
+to the downside this is actually the
+ 
+
+567
+00:11:27,079 --> 00:11:28,829
+to the downside this is actually the
+origin and what happened price tapped
+
+568
+00:11:28,829 --> 00:11:28,839
+origin and what happened price tapped
+ 
+
+569
+00:11:28,839 --> 00:11:31,110
+origin and what happened price tapped
+into that particular origin but if the
+
+570
+00:11:31,110 --> 00:11:31,120
+into that particular origin but if the
+ 
+
+571
+00:11:31,120 --> 00:11:33,269
+into that particular origin but if the
+bearish trend was meant to continue it
+
+572
+00:11:33,269 --> 00:11:33,279
+bearish trend was meant to continue it
+ 
+
+573
+00:11:33,279 --> 00:11:34,870
+bearish trend was meant to continue it
+would have given a new break of
+
+574
+00:11:34,870 --> 00:11:34,880
+would have given a new break of
+ 
+
+575
+00:11:34,880 --> 00:11:36,430
+would have given a new break of
+structure to the downside and you know
+
+576
+00:11:36,430 --> 00:11:36,440
+structure to the downside and you know
+ 
+
+577
+00:11:36,440 --> 00:11:40,990
+structure to the downside and you know
+the drill will keep selling to the
+
+578
+00:11:40,990 --> 00:11:41,000
+the drill will keep selling to the
+ 
+
+579
+00:11:41,000 --> 00:11:44,550
+the drill will keep selling to the
+downside so what happened price ta
+
+580
+00:11:44,550 --> 00:11:44,560
+downside so what happened price ta
+ 
+
+581
+00:11:44,560 --> 00:11:46,509
+downside so what happened price ta
+reacted of that origin ditched out a
+
+582
+00:11:46,509 --> 00:11:46,519
+reacted of that origin ditched out a
+ 
+
+583
+00:11:46,519 --> 00:11:49,550
+reacted of that origin ditched out a
+little cell but from there we got a
+
+584
+00:11:49,550 --> 00:11:49,560
+little cell but from there we got a
+ 
+
+585
+00:11:49,560 --> 00:11:51,910
+little cell but from there we got a
+change of character so just know that
+
+586
+00:11:51,910 --> 00:11:51,920
+change of character so just know that
+ 
+
+587
+00:11:51,920 --> 00:11:55,629
+change of character so just know that
+whenever um there is a shift in Market
+
+588
+00:11:55,629 --> 00:11:55,639
+whenever um there is a shift in Market
+ 
+
+589
+00:11:55,639 --> 00:11:57,870
+whenever um there is a shift in Market
+um structure let me clone this change of
+
+590
+00:11:57,870 --> 00:11:57,880
+um structure let me clone this change of
+ 
+
+591
+00:11:57,880 --> 00:12:01,750
+um structure let me clone this change of
+character here so whenever there is a
+
+592
+00:12:01,750 --> 00:12:01,760
+character here so whenever there is a
+ 
+
+593
+00:12:01,760 --> 00:12:04,629
+character here so whenever there is a
+shift from the general character of the
+
+594
+00:12:04,629 --> 00:12:04,639
+shift from the general character of the
+ 
+
+595
+00:12:04,639 --> 00:12:09,110
+shift from the general character of the
+market to another you know character
+
+596
+00:12:09,110 --> 00:12:09,120
+market to another you know character
+ 
+
+597
+00:12:09,120 --> 00:12:10,629
+market to another you know character
+trying to like make it very simple for
+
+598
+00:12:10,629 --> 00:12:10,639
+trying to like make it very simple for
+ 
+
+599
+00:12:10,639 --> 00:12:13,710
+trying to like make it very simple for
+you guys so that's why I'm just giving a
+
+600
+00:12:13,710 --> 00:12:13,720
+you guys so that's why I'm just giving a
+ 
+
+601
+00:12:13,720 --> 00:12:17,269
+you guys so that's why I'm just giving a
+literal meaning of it so you can see the
+
+602
+00:12:17,269 --> 00:12:17,279
+literal meaning of it so you can see the
+ 
+
+603
+00:12:17,279 --> 00:12:18,629
+literal meaning of it so you can see the
+general Trend was actually Market
+
+604
+00:12:18,629 --> 00:12:18,639
+general Trend was actually Market
+ 
+
+605
+00:12:18,639 --> 00:12:20,430
+general Trend was actually Market
+breaking structure to the downside and
+
+606
+00:12:20,430 --> 00:12:20,440
+breaking structure to the downside and
+ 
+
+607
+00:12:20,440 --> 00:12:23,189
+breaking structure to the downside and
+now we've gotten a shift Market is now
+
+608
+00:12:23,189 --> 00:12:23,199
+now we've gotten a shift Market is now
+ 
+
+609
+00:12:23,199 --> 00:12:27,069
+now we've gotten a shift Market is now
+breaking structure to the upside so as
+
+610
+00:12:27,069 --> 00:12:27,079
+breaking structure to the upside so as
+ 
+
+611
+00:12:27,079 --> 00:12:29,509
+breaking structure to the upside so as
+price cleared out the last origin that
+
+612
+00:12:29,509 --> 00:12:29,519
+price cleared out the last origin that
+ 
+
+613
+00:12:29,519 --> 00:12:31,670
+price cleared out the last origin that
+caused the break of structure to the
+
+614
+00:12:31,670 --> 00:12:31,680
+caused the break of structure to the
+ 
+
+615
+00:12:31,680 --> 00:12:34,509
+caused the break of structure to the
+downside that indicates a change of
+
+616
+00:12:34,509 --> 00:12:34,519
+downside that indicates a change of
+ 
+
+617
+00:12:34,519 --> 00:12:37,430
+downside that indicates a change of
+character which is this level that will
+
+618
+00:12:37,430 --> 00:12:37,440
+character which is this level that will
+ 
+
+619
+00:12:37,440 --> 00:12:40,110
+character which is this level that will
+indicate what a change of character from
+
+620
+00:12:40,110 --> 00:12:40,120
+indicate what a change of character from
+ 
+
+621
+00:12:40,120 --> 00:12:42,150
+indicate what a change of character from
+that level and now from this change of
+
+622
+00:12:42,150 --> 00:12:42,160
+that level and now from this change of
+ 
+
+623
+00:12:42,160 --> 00:12:44,590
+that level and now from this change of
+character this is the origin that caused
+
+624
+00:12:44,590 --> 00:12:44,600
+character this is the origin that caused
+ 
+
+625
+00:12:44,600 --> 00:12:46,710
+character this is the origin that caused
+the change of character but you can see
+
+626
+00:12:46,710 --> 00:12:46,720
+the change of character but you can see
+ 
+
+627
+00:12:46,720 --> 00:12:48,790
+the change of character but you can see
+Market did not get back into the origin
+
+628
+00:12:48,790 --> 00:12:48,800
+Market did not get back into the origin
+ 
+
+629
+00:12:48,800 --> 00:12:51,189
+Market did not get back into the origin
+it left it un mitigated and then from
+
+630
+00:12:51,189 --> 00:12:51,199
+it left it un mitigated and then from
+ 
+
+631
+00:12:51,199 --> 00:12:52,509
+it left it un mitigated and then from
+there we started getting break of
+
+632
+00:12:52,509 --> 00:12:52,519
+there we started getting break of
+ 
+
+633
+00:12:52,519 --> 00:12:53,910
+there we started getting break of
+structure let me clone our break of
+
+634
+00:12:53,910 --> 00:12:53,920
+structure let me clone our break of
+ 
+
+635
+00:12:53,920 --> 00:12:55,150
+structure let me clone our break of
+structure
+
+636
+00:12:55,150 --> 00:12:55,160
+structure
+ 
+
+637
+00:12:55,160 --> 00:12:57,509
+structure
+here from there we started getting break
+
+638
+00:12:57,509 --> 00:12:57,519
+here from there we started getting break
+ 
+
+639
+00:12:57,519 --> 00:12:58,910
+here from there we started getting break
+of structure to the upside so what will
+
+640
+00:12:58,910 --> 00:12:58,920
+of structure to the upside so what will
+ 
+
+641
+00:12:58,920 --> 00:13:02,550
+of structure to the upside so what will
+you as a Trader change your buyers from
+
+642
+00:13:02,550 --> 00:13:02,560
+you as a Trader change your buyers from
+ 
+
+643
+00:13:02,560 --> 00:13:05,670
+you as a Trader change your buyers from
+selling to buying gu at this point now
+
+644
+00:13:05,670 --> 00:13:05,680
+selling to buying gu at this point now
+ 
+
+645
+00:13:05,680 --> 00:13:10,110
+selling to buying gu at this point now
+because we have changed Trend so a break
+
+646
+00:13:10,110 --> 00:13:10,120
+because we have changed Trend so a break
+ 
+
+647
+00:13:10,120 --> 00:13:11,590
+because we have changed Trend so a break
+of structure Market tapped into the
+
+648
+00:13:11,590 --> 00:13:11,600
+of structure Market tapped into the
+ 
+
+649
+00:13:11,600 --> 00:13:13,590
+of structure Market tapped into the
+origin we have another break of
+
+650
+00:13:13,590 --> 00:13:13,600
+origin we have another break of
+ 
+
+651
+00:13:13,600 --> 00:13:17,350
+origin we have another break of
+structure here we have another let me
+
+652
+00:13:17,350 --> 00:13:17,360
+structure here we have another let me
+ 
+
+653
+00:13:17,360 --> 00:13:20,509
+structure here we have another let me
+just we have another break of structure
+
+654
+00:13:20,509 --> 00:13:20,519
+just we have another break of structure
+ 
+
+655
+00:13:20,519 --> 00:13:22,670
+just we have another break of structure
+here and what
+
+656
+00:13:22,670 --> 00:13:22,680
+here and what
+ 
+
+657
+00:13:22,680 --> 00:13:25,269
+here and what
+happened price tapped into the origin
+
+658
+00:13:25,269 --> 00:13:25,279
+happened price tapped into the origin
+ 
+
+659
+00:13:25,279 --> 00:13:28,670
+happened price tapped into the origin
+here and we're still pushing to the
+
+660
+00:13:28,670 --> 00:13:28,680
+here and we're still pushing to the
+ 
+
+661
+00:13:28,680 --> 00:13:30,910
+here and we're still pushing to the
+upside
+
+662
+00:13:30,910 --> 00:13:30,920
+upside
+ 
+
+663
+00:13:30,920 --> 00:13:32,870
+upside
+so what did we get here again another
+
+664
+00:13:32,870 --> 00:13:32,880
+so what did we get here again another
+ 
+
+665
+00:13:32,880 --> 00:13:36,670
+so what did we get here again another
+break of structure to the upside okay
+
+666
+00:13:36,670 --> 00:13:36,680
+break of structure to the upside okay
+ 
+
+667
+00:13:36,680 --> 00:13:38,629
+break of structure to the upside okay
+this is not a clean break of structure
+
+668
+00:13:38,629 --> 00:13:38,639
+this is not a clean break of structure
+ 
+
+669
+00:13:38,639 --> 00:13:41,870
+this is not a clean break of structure
+it just created an equal High there
+
+670
+00:13:41,870 --> 00:13:41,880
+it just created an equal High there
+ 
+
+671
+00:13:41,880 --> 00:13:45,509
+it just created an equal High there
+given a resistant level so whenever
+
+672
+00:13:45,509 --> 00:13:45,519
+given a resistant level so whenever
+ 
+
+673
+00:13:45,519 --> 00:13:47,590
+given a resistant level so whenever
+price fails to
+
+674
+00:13:47,590 --> 00:13:47,600
+price fails to
+ 
+
+675
+00:13:47,600 --> 00:13:50,590
+price fails to
+Break um an equal High remember guys
+
+676
+00:13:50,590 --> 00:13:50,600
+Break um an equal High remember guys
+ 
+
+677
+00:13:50,600 --> 00:13:53,470
+Break um an equal High remember guys
+we've switched from bearish strength to
+
+678
+00:13:53,470 --> 00:13:53,480
+we've switched from bearish strength to
+ 
+
+679
+00:13:53,480 --> 00:13:55,269
+we've switched from bearish strength to
+bullish Trend now so we are looking at a
+
+680
+00:13:55,269 --> 00:13:55,279
+bullish Trend now so we are looking at a
+ 
+
+681
+00:13:55,279 --> 00:13:58,150
+bullish Trend now so we are looking at a
+bullish Trend so whenever price fails to
+
+682
+00:13:58,150 --> 00:13:58,160
+bullish Trend so whenever price fails to
+ 
+
+683
+00:13:58,160 --> 00:14:00,150
+bullish Trend so whenever price fails to
+break a particular level whether it is a
+
+684
+00:14:00,150 --> 00:14:00,160
+break a particular level whether it is a
+ 
+
+685
+00:14:00,160 --> 00:14:01,749
+break a particular level whether it is a
+break of structure to the upside or a
+
+686
+00:14:01,749 --> 00:14:01,759
+break of structure to the upside or a
+ 
+
+687
+00:14:01,759 --> 00:14:03,790
+break of structure to the upside or a
+break of structure to the downside
+
+688
+00:14:03,790 --> 00:14:03,800
+break of structure to the downside
+ 
+
+689
+00:14:03,800 --> 00:14:06,629
+break of structure to the downside
+whenever price or the market fails to
+
+690
+00:14:06,629 --> 00:14:06,639
+whenever price or the market fails to
+ 
+
+691
+00:14:06,639 --> 00:14:08,509
+whenever price or the market fails to
+break a particular level and creates a
+
+692
+00:14:08,509 --> 00:14:08,519
+break a particular level and creates a
+ 
+
+693
+00:14:08,519 --> 00:14:11,389
+break a particular level and creates a
+qu High it may indicate that um there
+
+694
+00:14:11,389 --> 00:14:11,399
+qu High it may indicate that um there
+ 
+
+695
+00:14:11,399 --> 00:14:14,550
+qu High it may indicate that um there
+may be a possible change of character
+
+696
+00:14:14,550 --> 00:14:14,560
+may be a possible change of character
+ 
+
+697
+00:14:14,560 --> 00:14:17,749
+may be a possible change of character
+because if the trend is strong we we
+
+698
+00:14:17,749 --> 00:14:17,759
+because if the trend is strong we we
+ 
+
+699
+00:14:17,759 --> 00:14:19,590
+because if the trend is strong we we
+should have gotten you know a break of
+
+700
+00:14:19,590 --> 00:14:19,600
+should have gotten you know a break of
+ 
+
+701
+00:14:19,600 --> 00:14:20,949
+should have gotten you know a break of
+strcture to the upside so that we'll
+
+702
+00:14:20,949 --> 00:14:20,959
+strcture to the upside so that we'll
+ 
+
+703
+00:14:20,959 --> 00:14:24,790
+strcture to the upside so that we'll
+continue buying but now we got an equal
+
+704
+00:14:24,790 --> 00:14:24,800
+continue buying but now we got an equal
+ 
+
+705
+00:14:24,800 --> 00:14:26,790
+continue buying but now we got an equal
+High here indicating that a resistant
+
+706
+00:14:26,790 --> 00:14:26,800
+High here indicating that a resistant
+ 
+
+707
+00:14:26,800 --> 00:14:28,749
+High here indicating that a resistant
+level has been created here so we can
+
+708
+00:14:28,749 --> 00:14:28,759
+level has been created here so we can
+ 
+
+709
+00:14:28,759 --> 00:14:31,150
+level has been created here so we can
+see from there price you know triggered
+
+710
+00:14:31,150 --> 00:14:31,160
+see from there price you know triggered
+ 
+
+711
+00:14:31,160 --> 00:14:33,910
+see from there price you know triggered
+you know pushed to the downside a little
+
+712
+00:14:33,910 --> 00:14:33,920
+you know pushed to the downside a little
+ 
+
+713
+00:14:33,920 --> 00:14:36,389
+you know pushed to the downside a little
+but the buyers were still intact so they
+
+714
+00:14:36,389 --> 00:14:36,399
+but the buyers were still intact so they
+ 
+
+715
+00:14:36,399 --> 00:14:38,670
+but the buyers were still intact so they
+it reacted off now this particular
+
+716
+00:14:38,670 --> 00:14:38,680
+it reacted off now this particular
+ 
+
+717
+00:14:38,680 --> 00:14:42,030
+it reacted off now this particular
+origin now did not create a new break of
+
+718
+00:14:42,030 --> 00:14:42,040
+origin now did not create a new break of
+ 
+
+719
+00:14:42,040 --> 00:14:45,629
+origin now did not create a new break of
+structure so we're going to treat it as
+
+720
+00:14:45,629 --> 00:14:45,639
+structure so we're going to treat it as
+ 
+
+721
+00:14:45,639 --> 00:14:47,069
+structure so we're going to treat it as
+a support
+
+722
+00:14:47,069 --> 00:14:47,079
+a support
+ 
+
+723
+00:14:47,079 --> 00:14:49,910
+a support
+level which price tapped into and from
+
+724
+00:14:49,910 --> 00:14:49,920
+level which price tapped into and from
+ 
+
+725
+00:14:49,920 --> 00:14:52,949
+level which price tapped into and from
+there we got um a break of structure
+
+726
+00:14:52,949 --> 00:14:52,959
+there we got um a break of structure
+ 
+
+727
+00:14:52,959 --> 00:14:55,829
+there we got um a break of structure
+clearing out this particular um
+
+728
+00:14:55,829 --> 00:14:55,839
+clearing out this particular um
+ 
+
+729
+00:14:55,839 --> 00:14:59,430
+clearing out this particular um
+resistance here so we now have a new
+
+730
+00:14:59,430 --> 00:14:59,440
+resistance here so we now have a new
+ 
+
+731
+00:14:59,440 --> 00:15:02,069
+resistance here so we now have a new
+break of structure let me clone this we
+
+732
+00:15:02,069 --> 00:15:02,079
+break of structure let me clone this we
+ 
+
+733
+00:15:02,079 --> 00:15:05,150
+break of structure let me clone this we
+have a new break of structure around
+
+734
+00:15:05,150 --> 00:15:05,160
+have a new break of structure around
+ 
+
+735
+00:15:05,160 --> 00:15:06,069
+have a new break of structure around
+this
+
+736
+00:15:06,069 --> 00:15:06,079
+this
+ 
+
+737
+00:15:06,079 --> 00:15:09,509
+this
+level a new break of structure now this
+
+738
+00:15:09,509 --> 00:15:09,519
+level a new break of structure now this
+ 
+
+739
+00:15:09,519 --> 00:15:12,389
+level a new break of structure now this
+being the
+
+740
+00:15:12,389 --> 00:15:12,399
+being the
+ 
+
+741
+00:15:12,399 --> 00:15:15,389
+being the
+origin this is the origin here I guess
+
+742
+00:15:15,389 --> 00:15:15,399
+origin this is the origin here I guess
+ 
+
+743
+00:15:15,399 --> 00:15:17,110
+origin this is the origin here I guess
+price did not mitigate it so we're just
+
+744
+00:15:17,110 --> 00:15:17,120
+price did not mitigate it so we're just
+ 
+
+745
+00:15:17,120 --> 00:15:19,030
+price did not mitigate it so we're just
+going to leave it pending and from there
+
+746
+00:15:19,030 --> 00:15:19,040
+going to leave it pending and from there
+ 
+
+747
+00:15:19,040 --> 00:15:21,430
+going to leave it pending and from there
+we continue pushing to the upside so
+
+748
+00:15:21,430 --> 00:15:21,440
+we continue pushing to the upside so
+ 
+
+749
+00:15:21,440 --> 00:15:23,389
+we continue pushing to the upside so
+let's keep mapping out the break of
+
+750
+00:15:23,389 --> 00:15:23,399
+let's keep mapping out the break of
+ 
+
+751
+00:15:23,399 --> 00:15:26,670
+let's keep mapping out the break of
+structure from here so you can
+
+752
+00:15:26,670 --> 00:15:26,680
+structure from here so you can
+ 
+
+753
+00:15:26,680 --> 00:15:29,470
+structure from here so you can
+see after this particular of structure
+
+754
+00:15:29,470 --> 00:15:29,480
+see after this particular of structure
+ 
+
+755
+00:15:29,480 --> 00:15:32,110
+see after this particular of structure
+we got a new one around this
+
+756
+00:15:32,110 --> 00:15:32,120
+we got a new one around this
+ 
+
+757
+00:15:32,120 --> 00:15:34,230
+we got a new one around this
+level break of
+
+758
+00:15:34,230 --> 00:15:34,240
+level break of
+ 
+
+759
+00:15:34,240 --> 00:15:36,910
+level break of
+structure around this
+
+760
+00:15:36,910 --> 00:15:36,920
+structure around this
+ 
+
+761
+00:15:36,920 --> 00:15:39,550
+structure around this
+level and then what happened price
+
+762
+00:15:39,550 --> 00:15:39,560
+level and then what happened price
+ 
+
+763
+00:15:39,560 --> 00:15:41,829
+level and then what happened price
+tapped into the origin that caused the
+
+764
+00:15:41,829 --> 00:15:41,839
+tapped into the origin that caused the
+ 
+
+765
+00:15:41,839 --> 00:15:44,749
+tapped into the origin that caused the
+break of structure to push
+
+766
+00:15:44,749 --> 00:15:44,759
+break of structure to push
+ 
+
+767
+00:15:44,759 --> 00:15:48,350
+break of structure to push
+up you know creating a tiny break of
+
+768
+00:15:48,350 --> 00:15:48,360
+up you know creating a tiny break of
+ 
+
+769
+00:15:48,360 --> 00:15:50,550
+up you know creating a tiny break of
+structure here so this is why I said
+
+770
+00:15:50,550 --> 00:15:50,560
+structure here so this is why I said
+ 
+
+771
+00:15:50,560 --> 00:15:51,790
+structure here so this is why I said
+when reading the market structure you
+
+772
+00:15:51,790 --> 00:15:51,800
+when reading the market structure you
+ 
+
+773
+00:15:51,800 --> 00:15:53,870
+when reading the market structure you
+need to be very observant all these
+
+774
+00:15:53,870 --> 00:15:53,880
+need to be very observant all these
+ 
+
+775
+00:15:53,880 --> 00:15:55,910
+need to be very observant all these
+levels if you are taking entries from
+
+776
+00:15:55,910 --> 00:15:55,920
+levels if you are taking entries from
+ 
+
+777
+00:15:55,920 --> 00:15:57,069
+levels if you are taking entries from
+the daily time frame you would have just
+
+778
+00:15:57,069 --> 00:15:57,079
+the daily time frame you would have just
+ 
+
+779
+00:15:57,079 --> 00:15:58,509
+the daily time frame you would have just
+been taking an aggressive entry from
+
+780
+00:15:58,509 --> 00:15:58,519
+been taking an aggressive entry from
+ 
+
+781
+00:15:58,519 --> 00:16:00,949
+been taking an aggressive entry from
+here but if you're taking entries from
+
+782
+00:16:00,949 --> 00:16:00,959
+here but if you're taking entries from
+ 
+
+783
+00:16:00,959 --> 00:16:03,470
+here but if you're taking entries from
+different um time frames like me now I
+
+784
+00:16:03,470 --> 00:16:03,480
+different um time frames like me now I
+ 
+
+785
+00:16:03,480 --> 00:16:05,990
+different um time frames like me now I
+take my entries for 15 minutes so once
+
+786
+00:16:05,990 --> 00:16:06,000
+take my entries for 15 minutes so once
+ 
+
+787
+00:16:06,000 --> 00:16:08,030
+take my entries for 15 minutes so once
+price Taps into all these Origins all I
+
+788
+00:16:08,030 --> 00:16:08,040
+price Taps into all these Origins all I
+ 
+
+789
+00:16:08,040 --> 00:16:09,990
+price Taps into all these Origins all I
+do is Rush down to my 15 minutes time
+
+790
+00:16:09,990 --> 00:16:10,000
+do is Rush down to my 15 minutes time
+ 
+
+791
+00:16:10,000 --> 00:16:12,590
+do is Rush down to my 15 minutes time
+frame and then take my entries so you
+
+792
+00:16:12,590 --> 00:16:12,600
+frame and then take my entries so you
+ 
+
+793
+00:16:12,600 --> 00:16:14,269
+frame and then take my entries so you
+understand what I mean if you have seen
+
+794
+00:16:14,269 --> 00:16:14,279
+understand what I mean if you have seen
+ 
+
+795
+00:16:14,279 --> 00:16:16,509
+understand what I mean if you have seen
+my video on Entry
+
+796
+00:16:16,509 --> 00:16:16,519
+my video on Entry
+ 
+
+797
+00:16:16,519 --> 00:16:20,430
+my video on Entry
+strategy so we have um another break of
+
+798
+00:16:20,430 --> 00:16:20,440
+strategy so we have um another break of
+ 
+
+799
+00:16:20,440 --> 00:16:21,509
+strategy so we have um another break of
+structure
+
+800
+00:16:21,509 --> 00:16:21,519
+structure
+ 
+
+801
+00:16:21,519 --> 00:16:24,509
+structure
+here and what happened price tapped into
+
+802
+00:16:24,509 --> 00:16:24,519
+here and what happened price tapped into
+ 
+
+803
+00:16:24,519 --> 00:16:26,949
+here and what happened price tapped into
+the origin let me put this one pending
+
+804
+00:16:26,949 --> 00:16:26,959
+the origin let me put this one pending
+ 
+
+805
+00:16:26,959 --> 00:16:29,870
+the origin let me put this one pending
+here so price tapped into the origin
+
+806
+00:16:29,870 --> 00:16:29,880
+here so price tapped into the origin
+ 
+
+807
+00:16:29,880 --> 00:16:32,550
+here so price tapped into the origin
+although it extend a extended a little
+
+808
+00:16:32,550 --> 00:16:32,560
+although it extend a extended a little
+ 
+
+809
+00:16:32,560 --> 00:16:35,189
+although it extend a extended a little
+bit here but
+
+810
+00:16:35,189 --> 00:16:35,199
+bit here but
+ 
+
+811
+00:16:35,199 --> 00:16:39,430
+bit here but
+now uh we have another break of
+
+812
+00:16:39,430 --> 00:16:39,440
+now uh we have another break of
+ 
+
+813
+00:16:39,440 --> 00:16:42,509
+now uh we have another break of
+structure
+
+814
+00:16:42,509 --> 00:16:42,519
+
+ 
+
+815
+00:16:42,519 --> 00:16:45,110
+
+here we have another break of structure
+
+816
+00:16:45,110 --> 00:16:45,120
+here we have another break of structure
+ 
+
+817
+00:16:45,120 --> 00:16:47,309
+here we have another break of structure
+here so you can see how I'm pointing
+
+818
+00:16:47,309 --> 00:16:47,319
+here so you can see how I'm pointing
+ 
+
+819
+00:16:47,319 --> 00:16:48,990
+here so you can see how I'm pointing
+everything out and then from this break
+
+820
+00:16:48,990 --> 00:16:49,000
+everything out and then from this break
+ 
+
+821
+00:16:49,000 --> 00:16:51,230
+everything out and then from this break
+of structure this is actually the origin
+
+822
+00:16:51,230 --> 00:16:51,240
+of structure this is actually the origin
+ 
+
+823
+00:16:51,240 --> 00:16:52,990
+of structure this is actually the origin
+that caused the break of structure all
+
+824
+00:16:52,990 --> 00:16:53,000
+that caused the break of structure all
+ 
+
+825
+00:16:53,000 --> 00:16:54,590
+that caused the break of structure all
+these things were more like
+
+826
+00:16:54,590 --> 00:16:54,600
+these things were more like
+ 
+
+827
+00:16:54,600 --> 00:16:56,870
+these things were more like
+consolidation but now I'm refining it to
+
+828
+00:16:56,870 --> 00:16:56,880
+consolidation but now I'm refining it to
+ 
+
+829
+00:16:56,880 --> 00:16:59,309
+consolidation but now I'm refining it to
+the last Candlestick before the posive
+
+830
+00:16:59,309 --> 00:16:59,319
+the last Candlestick before the posive
+ 
+
+831
+00:16:59,319 --> 00:17:01,389
+the last Candlestick before the posive
+movement that caused this particular
+
+832
+00:17:01,389 --> 00:17:01,399
+movement that caused this particular
+ 
+
+833
+00:17:01,399 --> 00:17:02,910
+movement that caused this particular
+break of structure and you can see price
+
+834
+00:17:02,910 --> 00:17:02,920
+break of structure and you can see price
+ 
+
+835
+00:17:02,920 --> 00:17:04,829
+break of structure and you can see price
+stopped in dishing out a break of
+
+836
+00:17:04,829 --> 00:17:04,839
+stopped in dishing out a break of
+ 
+
+837
+00:17:04,839 --> 00:17:07,590
+stopped in dishing out a break of
+structure as Market is clearing out all
+
+838
+00:17:07,590 --> 00:17:07,600
+structure as Market is clearing out all
+ 
+
+839
+00:17:07,600 --> 00:17:10,189
+structure as Market is clearing out all
+these resistance levels because you I
+
+840
+00:17:10,189 --> 00:17:10,199
+these resistance levels because you I
+ 
+
+841
+00:17:10,199 --> 00:17:13,350
+these resistance levels because you I
+will upload a video also explaining how
+
+842
+00:17:13,350 --> 00:17:13,360
+will upload a video also explaining how
+ 
+
+843
+00:17:13,360 --> 00:17:15,909
+will upload a video also explaining how
+to point out a valid break structure so
+
+844
+00:17:15,909 --> 00:17:15,919
+to point out a valid break structure so
+ 
+
+845
+00:17:15,919 --> 00:17:18,230
+to point out a valid break structure so
+stay tuned guys so as Market is clearing
+
+846
+00:17:18,230 --> 00:17:18,240
+stay tuned guys so as Market is clearing
+ 
+
+847
+00:17:18,240 --> 00:17:20,590
+stay tuned guys so as Market is clearing
+out all these resistant levels it's
+
+848
+00:17:20,590 --> 00:17:20,600
+out all these resistant levels it's
+ 
+
+849
+00:17:20,600 --> 00:17:24,390
+out all these resistant levels it's
+indicating that we are bullish so like I
+
+850
+00:17:24,390 --> 00:17:24,400
+indicating that we are bullish so like I
+ 
+
+851
+00:17:24,400 --> 00:17:28,150
+indicating that we are bullish so like I
+stated just keep buying until we see
+
+852
+00:17:28,150 --> 00:17:28,160
+stated just keep buying until we see
+ 
+
+853
+00:17:28,160 --> 00:17:29,430
+stated just keep buying until we see
+another res
+
+854
+00:17:29,430 --> 00:17:29,440
+another res
+ 
+
+855
+00:17:29,440 --> 00:17:31,990
+another res
+to change Byers which has happened from
+
+856
+00:17:31,990 --> 00:17:32,000
+to change Byers which has happened from
+ 
+
+857
+00:17:32,000 --> 00:17:33,150
+to change Byers which has happened from
+from
+
+858
+00:17:33,150 --> 00:17:33,160
+from
+ 
+
+859
+00:17:33,160 --> 00:17:36,470
+from
+here as price cleared this particular
+
+860
+00:17:36,470 --> 00:17:36,480
+here as price cleared this particular
+ 
+
+861
+00:17:36,480 --> 00:17:38,710
+here as price cleared this particular
+structure to the upside what
+
+862
+00:17:38,710 --> 00:17:38,720
+structure to the upside what
+ 
+
+863
+00:17:38,720 --> 00:17:42,070
+structure to the upside what
+happened this is the origin that caused
+
+864
+00:17:42,070 --> 00:17:42,080
+happened this is the origin that caused
+ 
+
+865
+00:17:42,080 --> 00:17:43,710
+happened this is the origin that caused
+the break of structure to the upside and
+
+866
+00:17:43,710 --> 00:17:43,720
+the break of structure to the upside and
+ 
+
+867
+00:17:43,720 --> 00:17:45,590
+the break of structure to the upside and
+you can see how price reacted but from
+
+868
+00:17:45,590 --> 00:17:45,600
+you can see how price reacted but from
+ 
+
+869
+00:17:45,600 --> 00:17:48,590
+you can see how price reacted but from
+there we got a push to the downside
+
+870
+00:17:48,590 --> 00:17:48,600
+there we got a push to the downside
+ 
+
+871
+00:17:48,600 --> 00:17:52,590
+there we got a push to the downside
+indicating a change of character
+
+872
+00:17:52,590 --> 00:17:52,600
+indicating a change of character
+ 
+
+873
+00:17:52,600 --> 00:17:54,430
+indicating a change of character
+indicating a change of character let's
+
+874
+00:17:54,430 --> 00:17:54,440
+indicating a change of character let's
+ 
+
+875
+00:17:54,440 --> 00:17:56,990
+indicating a change of character let's
+clone this our friend here there change
+
+876
+00:17:56,990 --> 00:17:57,000
+clone this our friend here there change
+ 
+
+877
+00:17:57,000 --> 00:18:01,390
+clone this our friend here there change
+of character
+
+878
+00:18:01,390 --> 00:18:01,400
+
+ 
+
+879
+00:18:01,400 --> 00:18:04,270
+
+so indicating a change of character
+
+880
+00:18:04,270 --> 00:18:04,280
+so indicating a change of character
+ 
+
+881
+00:18:04,280 --> 00:18:07,310
+so indicating a change of character
+around this level so that's Implement
+
+882
+00:18:07,310 --> 00:18:07,320
+around this level so that's Implement
+ 
+
+883
+00:18:07,320 --> 00:18:11,230
+around this level so that's Implement
+price has changed direction from pushing
+
+884
+00:18:11,230 --> 00:18:11,240
+price has changed direction from pushing
+ 
+
+885
+00:18:11,240 --> 00:18:13,669
+price has changed direction from pushing
+up to pushing down and you can see
+
+886
+00:18:13,669 --> 00:18:13,679
+up to pushing down and you can see
+ 
+
+887
+00:18:13,679 --> 00:18:15,350
+up to pushing down and you can see
+inside there we were just getting break
+
+888
+00:18:15,350 --> 00:18:15,360
+inside there we were just getting break
+ 
+
+889
+00:18:15,360 --> 00:18:18,110
+inside there we were just getting break
+of structure but price was not tapping
+
+890
+00:18:18,110 --> 00:18:18,120
+of structure but price was not tapping
+ 
+
+891
+00:18:18,120 --> 00:18:20,190
+of structure but price was not tapping
+into the OR
+
+892
+00:18:20,190 --> 00:18:20,200
+into the OR
+ 
+
+893
+00:18:20,200 --> 00:18:22,430
+into the OR
+regions that
+
+894
+00:18:22,430 --> 00:18:22,440
+regions that
+ 
+
+895
+00:18:22,440 --> 00:18:26,510
+regions that
+caus the you know break of structure
+
+896
+00:18:26,510 --> 00:18:26,520
+caus the you know break of structure
+ 
+
+897
+00:18:26,520 --> 00:18:28,070
+caus the you know break of structure
+because we have this price didn't come
+
+898
+00:18:28,070 --> 00:18:28,080
+because we have this price didn't come
+ 
+
+899
+00:18:28,080 --> 00:18:30,630
+because we have this price didn't come
+back it just re of imbalance you know
+
+900
+00:18:30,630 --> 00:18:30,640
+back it just re of imbalance you know
+ 
+
+901
+00:18:30,640 --> 00:18:33,390
+back it just re of imbalance you know
+pushed although imbalance is also a
+
+902
+00:18:33,390 --> 00:18:33,400
+pushed although imbalance is also a
+ 
+
+903
+00:18:33,400 --> 00:18:35,350
+pushed although imbalance is also a
+level where you can take your entries
+
+904
+00:18:35,350 --> 00:18:35,360
+level where you can take your entries
+ 
+
+905
+00:18:35,360 --> 00:18:37,789
+level where you can take your entries
+from but preferably for me I just love
+
+906
+00:18:37,789 --> 00:18:37,799
+from but preferably for me I just love
+ 
+
+907
+00:18:37,799 --> 00:18:42,190
+from but preferably for me I just love
+taking from my other blocks so I can see
+
+908
+00:18:42,190 --> 00:18:42,200
+taking from my other blocks so I can see
+ 
+
+909
+00:18:42,200 --> 00:18:44,070
+taking from my other blocks so I can see
+price kept on breaking Str to the
+
+910
+00:18:44,070 --> 00:18:44,080
+price kept on breaking Str to the
+ 
+
+911
+00:18:44,080 --> 00:18:48,270
+price kept on breaking Str to the
+downside and then what happened here so
+
+912
+00:18:48,270 --> 00:18:48,280
+downside and then what happened here so
+ 
+
+913
+00:18:48,280 --> 00:18:50,190
+downside and then what happened here so
+if you let me zoom in so that everyone
+
+914
+00:18:50,190 --> 00:18:50,200
+if you let me zoom in so that everyone
+ 
+
+915
+00:18:50,200 --> 00:18:53,390
+if you let me zoom in so that everyone
+can see so if you check from this level
+
+916
+00:18:53,390 --> 00:18:53,400
+can see so if you check from this level
+ 
+
+917
+00:18:53,400 --> 00:18:55,909
+can see so if you check from this level
+we got another
+
+918
+00:18:55,909 --> 00:18:55,919
+we got another
+ 
+
+919
+00:18:55,919 --> 00:18:59,110
+we got another
+break to the downside around on this
+
+920
+00:18:59,110 --> 00:18:59,120
+break to the downside around on this
+ 
+
+921
+00:18:59,120 --> 00:19:03,669
+break to the downside around on this
+level and price came into the origin but
+
+922
+00:19:03,669 --> 00:19:03,679
+level and price came into the origin but
+ 
+
+923
+00:19:03,679 --> 00:19:06,950
+level and price came into the origin but
+it didn't push down further instead we
+
+924
+00:19:06,950 --> 00:19:06,960
+it didn't push down further instead we
+ 
+
+925
+00:19:06,960 --> 00:19:11,310
+it didn't push down further instead we
+got a change of character around this
+
+926
+00:19:11,310 --> 00:19:11,320
+got a change of character around this
+ 
+
+927
+00:19:11,320 --> 00:19:13,470
+got a change of character around this
+level change of
+
+928
+00:19:13,470 --> 00:19:13,480
+level change of
+ 
+
+929
+00:19:13,480 --> 00:19:16,430
+level change of
+character so that implements this
+
+930
+00:19:16,430 --> 00:19:16,440
+character so that implements this
+ 
+
+931
+00:19:16,440 --> 00:19:19,750
+character so that implements this
+bearish trend that just started um we
+
+932
+00:19:19,750 --> 00:19:19,760
+bearish trend that just started um we
+ 
+
+933
+00:19:19,760 --> 00:19:21,950
+bearish trend that just started um we
+have the buyers again coming in change
+
+934
+00:19:21,950 --> 00:19:21,960
+have the buyers again coming in change
+ 
+
+935
+00:19:21,960 --> 00:19:25,149
+have the buyers again coming in change
+of character and then price tapped into
+
+936
+00:19:25,149 --> 00:19:25,159
+of character and then price tapped into
+ 
+
+937
+00:19:25,159 --> 00:19:26,909
+of character and then price tapped into
+the origin that caused the change of
+
+938
+00:19:26,909 --> 00:19:26,919
+the origin that caused the change of
+ 
+
+939
+00:19:26,919 --> 00:19:29,470
+the origin that caused the change of
+character we started pushing
+
+940
+00:19:29,470 --> 00:19:29,480
+character we started pushing
+ 
+
+941
+00:19:29,480 --> 00:19:34,110
+character we started pushing
+up again breaking structures to the
+
+942
+00:19:34,110 --> 00:19:34,120
+up again breaking structures to the
+ 
+
+943
+00:19:34,120 --> 00:19:36,029
+up again breaking structures to the
+upside just like we have it here
+
+944
+00:19:36,029 --> 00:19:36,039
+upside just like we have it here
+ 
+
+945
+00:19:36,039 --> 00:19:38,909
+upside just like we have it here
+breaking structure to the upside and
+
+946
+00:19:38,909 --> 00:19:38,919
+breaking structure to the upside and
+ 
+
+947
+00:19:38,919 --> 00:19:40,630
+breaking structure to the upside and
+what happened as we've gotten this break
+
+948
+00:19:40,630 --> 00:19:40,640
+what happened as we've gotten this break
+ 
+
+949
+00:19:40,640 --> 00:19:43,029
+what happened as we've gotten this break
+of structure price tapped into the
+
+950
+00:19:43,029 --> 00:19:43,039
+of structure price tapped into the
+ 
+
+951
+00:19:43,039 --> 00:19:46,230
+of structure price tapped into the
+origin that caused the break of
+
+952
+00:19:46,230 --> 00:19:46,240
+origin that caused the break of
+ 
+
+953
+00:19:46,240 --> 00:19:50,470
+origin that caused the break of
+structure another break of structure
+
+954
+00:19:50,470 --> 00:19:50,480
+structure another break of structure
+ 
+
+955
+00:19:50,480 --> 00:19:54,230
+structure another break of structure
+here and this is
+
+956
+00:19:54,230 --> 00:19:54,240
+here and this is
+ 
+
+957
+00:19:54,240 --> 00:19:56,870
+here and this is
+actually the origin that caused the
+
+958
+00:19:56,870 --> 00:19:56,880
+actually the origin that caused the
+ 
+
+959
+00:19:56,880 --> 00:19:58,870
+actually the origin that caused the
+break of structure but you can see
+
+960
+00:19:58,870 --> 00:19:58,880
+break of structure but you can see
+ 
+
+961
+00:19:58,880 --> 00:20:00,750
+break of structure but you can see
+Market didn't come back into the origin
+
+962
+00:20:00,750 --> 00:20:00,760
+Market didn't come back into the origin
+ 
+
+963
+00:20:00,760 --> 00:20:03,590
+Market didn't come back into the origin
+so it left it up mitigated instead it to
+
+964
+00:20:03,590 --> 00:20:03,600
+so it left it up mitigated instead it to
+ 
+
+965
+00:20:03,600 --> 00:20:06,350
+so it left it up mitigated instead it to
+push to the upside we have another break
+
+966
+00:20:06,350 --> 00:20:06,360
+push to the upside we have another break
+ 
+
+967
+00:20:06,360 --> 00:20:08,190
+push to the upside we have another break
+of structure
+
+968
+00:20:08,190 --> 00:20:08,200
+of structure
+ 
+
+969
+00:20:08,200 --> 00:20:12,950
+of structure
+here and what happened price tapped into
+
+970
+00:20:12,950 --> 00:20:12,960
+here and what happened price tapped into
+ 
+
+971
+00:20:12,960 --> 00:20:15,909
+here and what happened price tapped into
+the origin pushed up again another break
+
+972
+00:20:15,909 --> 00:20:15,919
+the origin pushed up again another break
+ 
+
+973
+00:20:15,919 --> 00:20:19,310
+the origin pushed up again another break
+of structure is present
+
+974
+00:20:19,310 --> 00:20:19,320
+of structure is present
+ 
+
+975
+00:20:19,320 --> 00:20:23,909
+of structure is present
+here and price also tapped into the
+
+976
+00:20:23,909 --> 00:20:23,919
+here and price also tapped into the
+ 
+
+977
+00:20:23,919 --> 00:20:26,190
+here and price also tapped into the
+origin and pushed up giving us a new
+
+978
+00:20:26,190 --> 00:20:26,200
+origin and pushed up giving us a new
+ 
+
+979
+00:20:26,200 --> 00:20:30,029
+origin and pushed up giving us a new
+break of structure we are fully um
+
+980
+00:20:30,029 --> 00:20:30,039
+break of structure we are fully um
+ 
+
+981
+00:20:30,039 --> 00:20:33,350
+break of structure we are fully um
+bullish just keep buying as we are still
+
+982
+00:20:33,350 --> 00:20:33,360
+bullish just keep buying as we are still
+ 
+
+983
+00:20:33,360 --> 00:20:35,789
+bullish just keep buying as we are still
+breaking structures to the upside just
+
+984
+00:20:35,789 --> 00:20:35,799
+breaking structures to the upside just
+ 
+
+985
+00:20:35,799 --> 00:20:38,710
+breaking structures to the upside just
+keep buying that is it so from here
+
+986
+00:20:38,710 --> 00:20:38,720
+keep buying that is it so from here
+ 
+
+987
+00:20:38,720 --> 00:20:41,430
+keep buying that is it so from here
+price kept on ranging for a while you
+
+988
+00:20:41,430 --> 00:20:41,440
+price kept on ranging for a while you
+ 
+
+989
+00:20:41,440 --> 00:20:44,350
+price kept on ranging for a while you
+can see how it was giving a sideways
+
+990
+00:20:44,350 --> 00:20:44,360
+can see how it was giving a sideways
+ 
+
+991
+00:20:44,360 --> 00:20:47,230
+can see how it was giving a sideways
+movement here so remember the
+
+992
+00:20:47,230 --> 00:20:47,240
+movement here so remember the
+ 
+
+993
+00:20:47,240 --> 00:20:48,909
+movement here so remember the
+illustration I gave about sideways
+
+994
+00:20:48,909 --> 00:20:48,919
+illustration I gave about sideways
+ 
+
+995
+00:20:48,919 --> 00:20:52,710
+illustration I gave about sideways
+movement so let me just put it from here
+
+996
+00:20:52,710 --> 00:20:52,720
+movement so let me just put it from here
+ 
+
+997
+00:20:52,720 --> 00:20:54,430
+movement so let me just put it from here
+so it was giving a sideways movement
+
+998
+00:20:54,430 --> 00:20:54,440
+so it was giving a sideways movement
+ 
+
+999
+00:20:54,440 --> 00:20:56,950
+so it was giving a sideways movement
+inside here you can see push up equal
+
+1000
+00:20:56,950 --> 00:20:56,960
+inside here you can see push up equal
+ 
+
+1001
+00:20:56,960 --> 00:21:00,350
+inside here you can see push up equal
+highs and you know just dancing around
+
+1002
+00:21:00,350 --> 00:21:00,360
+highs and you know just dancing around
+ 
+
+1003
+00:21:00,360 --> 00:21:03,669
+highs and you know just dancing around
+this particular box here until what
+
+1004
+00:21:03,669 --> 00:21:03,679
+this particular box here until what
+ 
+
+1005
+00:21:03,679 --> 00:21:08,710
+this particular box here until what
+happened we got another break to the
+
+1006
+00:21:08,710 --> 00:21:08,720
+happened we got another break to the
+ 
+
+1007
+00:21:08,720 --> 00:21:11,789
+happened we got another break to the
+upside so if you were actually buying
+
+1008
+00:21:11,789 --> 00:21:11,799
+upside so if you were actually buying
+ 
+
+1009
+00:21:11,799 --> 00:21:14,029
+upside so if you were actually buying
+and price started ranging at least you
+
+1010
+00:21:14,029 --> 00:21:14,039
+and price started ranging at least you
+ 
+
+1011
+00:21:14,039 --> 00:21:16,149
+and price started ranging at least you
+should have taken your profit around
+
+1012
+00:21:16,149 --> 00:21:16,159
+should have taken your profit around
+ 
+
+1013
+00:21:16,159 --> 00:21:19,149
+should have taken your profit around
+this level because this range um showed
+
+1014
+00:21:19,149 --> 00:21:19,159
+this level because this range um showed
+ 
+
+1015
+00:21:19,159 --> 00:21:22,269
+this level because this range um showed
+that um uh the market was trying to get
+
+1016
+00:21:22,269 --> 00:21:22,279
+that um uh the market was trying to get
+ 
+
+1017
+00:21:22,279 --> 00:21:24,149
+that um uh the market was trying to get
+a new Direction whether it will break to
+
+1018
+00:21:24,149 --> 00:21:24,159
+a new Direction whether it will break to
+ 
+
+1019
+00:21:24,159 --> 00:21:26,549
+a new Direction whether it will break to
+the downside or it will keep pushing up
+
+1020
+00:21:26,549 --> 00:21:26,559
+the downside or it will keep pushing up
+ 
+
+1021
+00:21:26,559 --> 00:21:30,310
+the downside or it will keep pushing up
+so as we got a break to the
+
+1022
+00:21:30,310 --> 00:21:30,320
+so as we got a break to the
+ 
+
+1023
+00:21:30,320 --> 00:21:33,430
+so as we got a break to the
+upside it indicated that we are still
+
+1024
+00:21:33,430 --> 00:21:33,440
+upside it indicated that we are still
+ 
+
+1025
+00:21:33,440 --> 00:21:36,269
+upside it indicated that we are still
+bullish so what will it do still wait
+
+1026
+00:21:36,269 --> 00:21:36,279
+bullish so what will it do still wait
+ 
+
+1027
+00:21:36,279 --> 00:21:39,070
+bullish so what will it do still wait
+for price to tap into the origin that
+
+1028
+00:21:39,070 --> 00:21:39,080
+for price to tap into the origin that
+ 
+
+1029
+00:21:39,080 --> 00:21:40,909
+for price to tap into the origin that
+cost the break of structure here you can
+
+1030
+00:21:40,909 --> 00:21:40,919
+cost the break of structure here you can
+ 
+
+1031
+00:21:40,919 --> 00:21:44,110
+cost the break of structure here you can
+see what happened mapping out the origin
+
+1032
+00:21:44,110 --> 00:21:44,120
+see what happened mapping out the origin
+ 
+
+1033
+00:21:44,120 --> 00:21:46,110
+see what happened mapping out the origin
+that cost the break of structure price
+
+1034
+00:21:46,110 --> 00:21:46,120
+that cost the break of structure price
+ 
+
+1035
+00:21:46,120 --> 00:21:49,590
+that cost the break of structure price
+tapped in pushed up a little bit from
+
+1036
+00:21:49,590 --> 00:21:49,600
+tapped in pushed up a little bit from
+ 
+
+1037
+00:21:49,600 --> 00:21:51,269
+tapped in pushed up a little bit from
+here but it didn't give us a new break
+
+1038
+00:21:51,269 --> 00:21:51,279
+here but it didn't give us a new break
+ 
+
+1039
+00:21:51,279 --> 00:21:54,750
+here but it didn't give us a new break
+of structure instead we got a break to
+
+1040
+00:21:54,750 --> 00:21:54,760
+of structure instead we got a break to
+ 
+
+1041
+00:21:54,760 --> 00:21:58,269
+of structure instead we got a break to
+the downside indicating that we have a
+
+1042
+00:21:58,269 --> 00:21:58,279
+the downside indicating that we have a
+ 
+
+1043
+00:21:58,279 --> 00:21:59,710
+the downside indicating that we have a
+change change of
+
+1044
+00:21:59,710 --> 00:21:59,720
+change change of
+ 
+
+1045
+00:21:59,720 --> 00:22:01,990
+change change of
+character around this
+
+1046
+00:22:01,990 --> 00:22:02,000
+character around this
+ 
+
+1047
+00:22:02,000 --> 00:22:05,510
+character around this
+level that is a change of character
+
+1048
+00:22:05,510 --> 00:22:05,520
+level that is a change of character
+ 
+
+1049
+00:22:05,520 --> 00:22:09,549
+level that is a change of character
+around this level here and from there
+
+1050
+00:22:09,549 --> 00:22:09,559
+around this level here and from there
+ 
+
+1051
+00:22:09,559 --> 00:22:11,870
+around this level here and from there
+price was still you know breaking
+
+1052
+00:22:11,870 --> 00:22:11,880
+price was still you know breaking
+ 
+
+1053
+00:22:11,880 --> 00:22:14,990
+price was still you know breaking
+structure to the downside so this is
+
+1054
+00:22:14,990 --> 00:22:15,000
+structure to the downside so this is
+ 
+
+1055
+00:22:15,000 --> 00:22:16,590
+structure to the downside so this is
+actually the last break of structure
+
+1056
+00:22:16,590 --> 00:22:16,600
+actually the last break of structure
+ 
+
+1057
+00:22:16,600 --> 00:22:19,710
+actually the last break of structure
+here to the downside
+
+1058
+00:22:19,710 --> 00:22:19,720
+here to the downside
+ 
+
+1059
+00:22:19,720 --> 00:22:22,070
+here to the downside
+us that is the last break of structure
+
+1060
+00:22:22,070 --> 00:22:22,080
+us that is the last break of structure
+ 
+
+1061
+00:22:22,080 --> 00:22:24,070
+us that is the last break of structure
+here to the downside and what
+
+1062
+00:22:24,070 --> 00:22:24,080
+here to the downside and what
+ 
+
+1063
+00:22:24,080 --> 00:22:26,549
+here to the downside and what
+happened this is the origin but when
+
+1064
+00:22:26,549 --> 00:22:26,559
+happened this is the origin but when
+ 
+
+1065
+00:22:26,559 --> 00:22:30,310
+happened this is the origin but when
+price got into that particular origin
+
+1066
+00:22:30,310 --> 00:22:30,320
+price got into that particular origin
+ 
+
+1067
+00:22:30,320 --> 00:22:32,110
+price got into that particular origin
+um instead of reacting and pushing to
+
+1068
+00:22:32,110 --> 00:22:32,120
+um instead of reacting and pushing to
+ 
+
+1069
+00:22:32,120 --> 00:22:35,190
+um instead of reacting and pushing to
+the downside it it dished out a
+
+1070
+00:22:35,190 --> 00:22:35,200
+the downside it it dished out a
+ 
+
+1071
+00:22:35,200 --> 00:22:39,110
+the downside it it dished out a
+new um break to the upside indicating
+
+1072
+00:22:39,110 --> 00:22:39,120
+new um break to the upside indicating
+ 
+
+1073
+00:22:39,120 --> 00:22:41,230
+new um break to the upside indicating
+that the trend has changed so that
+
+1074
+00:22:41,230 --> 00:22:41,240
+that the trend has changed so that
+ 
+
+1075
+00:22:41,240 --> 00:22:43,470
+that the trend has changed so that
+simply means the buyers are still in
+
+1076
+00:22:43,470 --> 00:22:43,480
+simply means the buyers are still in
+ 
+
+1077
+00:22:43,480 --> 00:22:45,070
+simply means the buyers are still in
+because we've gotten a change of cor the
+
+1078
+00:22:45,070 --> 00:22:45,080
+because we've gotten a change of cor the
+ 
+
+1079
+00:22:45,080 --> 00:22:48,230
+because we've gotten a change of cor the
+sellers just came in pushed the market
+
+1080
+00:22:48,230 --> 00:22:48,240
+sellers just came in pushed the market
+ 
+
+1081
+00:22:48,240 --> 00:22:51,110
+sellers just came in pushed the market
+down a little bit but the buyers are
+
+1082
+00:22:51,110 --> 00:22:51,120
+down a little bit but the buyers are
+ 
+
+1083
+00:22:51,120 --> 00:22:54,070
+down a little bit but the buyers are
+still in so now we have
+
+1084
+00:22:54,070 --> 00:22:54,080
+still in so now we have
+ 
+
+1085
+00:22:54,080 --> 00:22:57,789
+still in so now we have
+this change of character from here price
+
+1086
+00:22:57,789 --> 00:22:57,799
+this change of character from here price
+ 
+
+1087
+00:22:57,799 --> 00:22:59,789
+this change of character from here price
+tapped into the origin that caused the
+
+1088
+00:22:59,789 --> 00:22:59,799
+tapped into the origin that caused the
+ 
+
+1089
+00:22:59,799 --> 00:23:02,510
+tapped into the origin that caused the
+change of character and we started
+
+1090
+00:23:02,510 --> 00:23:02,520
+change of character and we started
+ 
+
+1091
+00:23:02,520 --> 00:23:05,149
+change of character and we started
+getting a new break of structure to the
+
+1092
+00:23:05,149 --> 00:23:05,159
+getting a new break of structure to the
+ 
+
+1093
+00:23:05,159 --> 00:23:07,590
+getting a new break of structure to the
+upside we have this this a break of
+
+1094
+00:23:07,590 --> 00:23:07,600
+upside we have this this a break of
+ 
+
+1095
+00:23:07,600 --> 00:23:11,510
+upside we have this this a break of
+structure to the upside and price kept
+
+1096
+00:23:11,510 --> 00:23:11,520
+structure to the upside and price kept
+ 
+
+1097
+00:23:11,520 --> 00:23:15,390
+structure to the upside and price kept
+on pushing up and now we have a clear
+
+1098
+00:23:15,390 --> 00:23:15,400
+on pushing up and now we have a clear
+ 
+
+1099
+00:23:15,400 --> 00:23:19,350
+on pushing up and now we have a clear
+break here this break of structure I
+
+1100
+00:23:19,350 --> 00:23:19,360
+break here this break of structure I
+ 
+
+1101
+00:23:19,360 --> 00:23:20,909
+break here this break of structure I
+know Market did not come back into the
+
+1102
+00:23:20,909 --> 00:23:20,919
+know Market did not come back into the
+ 
+
+1103
+00:23:20,919 --> 00:23:24,990
+know Market did not come back into the
+region instead reacted of this imbalance
+
+1104
+00:23:24,990 --> 00:23:25,000
+region instead reacted of this imbalance
+ 
+
+1105
+00:23:25,000 --> 00:23:28,510
+region instead reacted of this imbalance
+here so now we have a new break of
+
+1106
+00:23:28,510 --> 00:23:28,520
+here so now we have a new break of
+ 
+
+1107
+00:23:28,520 --> 00:23:31,149
+here so now we have a new break of
+structure around this level and you can
+
+1108
+00:23:31,149 --> 00:23:31,159
+structure around this level and you can
+ 
+
+1109
+00:23:31,159 --> 00:23:33,590
+structure around this level and you can
+see how price is currently reacting at
+
+1110
+00:23:33,590 --> 00:23:33,600
+see how price is currently reacting at
+ 
+
+1111
+00:23:33,600 --> 00:23:34,390
+see how price is currently reacting at
+the
+
+1112
+00:23:34,390 --> 00:23:34,400
+the
+ 
+
+1113
+00:23:34,400 --> 00:23:36,990
+the
+origin you know price tapped into the
+
+1114
+00:23:36,990 --> 00:23:37,000
+origin you know price tapped into the
+ 
+
+1115
+00:23:37,000 --> 00:23:38,950
+origin you know price tapped into the
+origin remember I said the market is
+
+1116
+00:23:38,950 --> 00:23:38,960
+origin remember I said the market is
+ 
+
+1117
+00:23:38,960 --> 00:23:40,590
+origin remember I said the market is
+closed as I'm shooting this particular
+
+1118
+00:23:40,590 --> 00:23:40,600
+closed as I'm shooting this particular
+ 
+
+1119
+00:23:40,600 --> 00:23:43,110
+closed as I'm shooting this particular
+video so you can see where we started
+
+1120
+00:23:43,110 --> 00:23:43,120
+video so you can see where we started
+ 
+
+1121
+00:23:43,120 --> 00:23:45,149
+video so you can see where we started
+reading the structure understanding the
+
+1122
+00:23:45,149 --> 00:23:45,159
+reading the structure understanding the
+ 
+
+1123
+00:23:45,159 --> 00:23:48,750
+reading the structure understanding the
+story everything that is going on up
+
+1124
+00:23:48,750 --> 00:23:48,760
+story everything that is going on up
+ 
+
+1125
+00:23:48,760 --> 00:23:51,710
+story everything that is going on up
+until this level now so you can see we
+
+1126
+00:23:51,710 --> 00:23:51,720
+until this level now so you can see we
+ 
+
+1127
+00:23:51,720 --> 00:23:53,990
+until this level now so you can see we
+have the most recent break of structure
+
+1128
+00:23:53,990 --> 00:23:54,000
+have the most recent break of structure
+ 
+
+1129
+00:23:54,000 --> 00:23:58,029
+have the most recent break of structure
+and um last week we've just been buying
+
+1130
+00:23:58,029 --> 00:23:58,039
+and um last week we've just been buying
+ 
+
+1131
+00:23:58,039 --> 00:24:01,430
+and um last week we've just been buying
+more of gu because we are bullish
+
+1132
+00:24:01,430 --> 00:24:01,440
+more of gu because we are bullish
+ 
+
+1133
+00:24:01,440 --> 00:24:03,390
+more of gu because we are bullish
+getting this break of structure we've
+
+1134
+00:24:03,390 --> 00:24:03,400
+getting this break of structure we've
+ 
+
+1135
+00:24:03,400 --> 00:24:06,710
+getting this break of structure we've
+been buying gu and you can see this or
+
+1136
+00:24:06,710 --> 00:24:06,720
+been buying gu and you can see this or
+ 
+
+1137
+00:24:06,720 --> 00:24:08,350
+been buying gu and you can see this or
+that caused this record structure is
+
+1138
+00:24:08,350 --> 00:24:08,360
+that caused this record structure is
+ 
+
+1139
+00:24:08,360 --> 00:24:10,990
+that caused this record structure is
+dishing out another push to the upside
+
+1140
+00:24:10,990 --> 00:24:11,000
+dishing out another push to the upside
+ 
+
+1141
+00:24:11,000 --> 00:24:14,110
+dishing out another push to the upside
+so if the buyers are still strong in the
+
+1142
+00:24:14,110 --> 00:24:14,120
+so if the buyers are still strong in the
+ 
+
+1143
+00:24:14,120 --> 00:24:16,830
+so if the buyers are still strong in the
+market they will break this particular
+
+1144
+00:24:16,830 --> 00:24:16,840
+market they will break this particular
+ 
+
+1145
+00:24:16,840 --> 00:24:18,630
+market they will break this particular
+level give us a new break of structure
+
+1146
+00:24:18,630 --> 00:24:18,640
+level give us a new break of structure
+ 
+
+1147
+00:24:18,640 --> 00:24:20,789
+level give us a new break of structure
+you know the drill we wait for the
+
+1148
+00:24:20,789 --> 00:24:20,799
+you know the drill we wait for the
+ 
+
+1149
+00:24:20,799 --> 00:24:23,149
+you know the drill we wait for the
+origin that costed and we keep pushing
+
+1150
+00:24:23,149 --> 00:24:23,159
+origin that costed and we keep pushing
+ 
+
+1151
+00:24:23,159 --> 00:24:25,310
+origin that costed and we keep pushing
+up so that is
+
+1152
+00:24:25,310 --> 00:24:25,320
+up so that is
+ 
+
+1153
+00:24:25,320 --> 00:24:28,389
+up so that is
+actually the importance of reading the
+
+1154
+00:24:28,389 --> 00:24:28,399
+actually the importance of reading the
+ 
+
+1155
+00:24:28,399 --> 00:24:30,350
+actually the importance of reading the
+Market structure you understand
+
+1156
+00:24:30,350 --> 00:24:30,360
+Market structure you understand
+ 
+
+1157
+00:24:30,360 --> 00:24:31,950
+Market structure you understand
+everything that is going on and know
+
+1158
+00:24:31,950 --> 00:24:31,960
+everything that is going on and know
+ 
+
+1159
+00:24:31,960 --> 00:24:34,190
+everything that is going on and know
+when to take your entries you know what
+
+1160
+00:24:34,190 --> 00:24:34,200
+when to take your entries you know what
+ 
+
+1161
+00:24:34,200 --> 00:24:36,630
+when to take your entries you know what
+is going on you know whether there are
+
+1162
+00:24:36,630 --> 00:24:36,640
+is going on you know whether there are
+ 
+
+1163
+00:24:36,640 --> 00:24:39,430
+is going on you know whether there are
+more buyers or there are more sellers in
+
+1164
+00:24:39,430 --> 00:24:39,440
+more buyers or there are more sellers in
+ 
+
+1165
+00:24:39,440 --> 00:24:41,750
+more buyers or there are more sellers in
+the market so guys following our
+
+1166
+00:24:41,750 --> 00:24:41,760
+the market so guys following our
+ 
+
+1167
+00:24:41,760 --> 00:24:43,430
+the market so guys following our
+strategy remember I stated that I will
+
+1168
+00:24:43,430 --> 00:24:43,440
+strategy remember I stated that I will
+ 
+
+1169
+00:24:43,440 --> 00:24:46,710
+strategy remember I stated that I will
+show you guys um the best structures
+
+1170
+00:24:46,710 --> 00:24:46,720
+show you guys um the best structures
+ 
+
+1171
+00:24:46,720 --> 00:24:48,669
+show you guys um the best structures
+that works with our strategy so
+
+1172
+00:24:48,669 --> 00:24:48,679
+that works with our strategy so
+ 
+
+1173
+00:24:48,679 --> 00:24:50,950
+that works with our strategy so
+following our strategy whenever the
+
+1174
+00:24:50,950 --> 00:24:50,960
+following our strategy whenever the
+ 
+
+1175
+00:24:50,960 --> 00:24:53,590
+following our strategy whenever the
+market has a direction that is um the
+
+1176
+00:24:53,590 --> 00:24:53,600
+market has a direction that is um the
+ 
+
+1177
+00:24:53,600 --> 00:24:55,830
+market has a direction that is um the
+best time to apply our strategy so if
+
+1178
+00:24:55,830 --> 00:24:55,840
+best time to apply our strategy so if
+ 
+
+1179
+00:24:55,840 --> 00:24:58,630
+best time to apply our strategy so if
+the market is pushing to the upside just
+
+1180
+00:24:58,630 --> 00:24:58,640
+the market is pushing to the upside just
+ 
+
+1181
+00:24:58,640 --> 00:25:00,909
+the market is pushing to the upside just
+be looking out for buys and then if the
+
+1182
+00:25:00,909 --> 00:25:00,919
+be looking out for buys and then if the
+ 
+
+1183
+00:25:00,919 --> 00:25:02,990
+be looking out for buys and then if the
+market is pushing to the downside just
+
+1184
+00:25:02,990 --> 00:25:03,000
+market is pushing to the downside just
+ 
+
+1185
+00:25:03,000 --> 00:25:05,110
+market is pushing to the downside just
+be looking out for sells well if the
+
+1186
+00:25:05,110 --> 00:25:05,120
+be looking out for sells well if the
+ 
+
+1187
+00:25:05,120 --> 00:25:07,549
+be looking out for sells well if the
+market is ranging just like we around
+
+1188
+00:25:07,549 --> 00:25:07,559
+market is ranging just like we around
+ 
+
+1189
+00:25:07,559 --> 00:25:10,269
+market is ranging just like we around
+here if the market is ranging you know
+
+1190
+00:25:10,269 --> 00:25:10,279
+here if the market is ranging you know
+ 
+
+1191
+00:25:10,279 --> 00:25:13,029
+here if the market is ranging you know
+consolidating just stay out until there
+
+1192
+00:25:13,029 --> 00:25:13,039
+consolidating just stay out until there
+ 
+
+1193
+00:25:13,039 --> 00:25:14,830
+consolidating just stay out until there
+is a direction because if the market is
+
+1194
+00:25:14,830 --> 00:25:14,840
+is a direction because if the market is
+ 
+
+1195
+00:25:14,840 --> 00:25:17,350
+is a direction because if the market is
+ranging you won't be able to point out a
+
+1196
+00:25:17,350 --> 00:25:17,360
+ranging you won't be able to point out a
+ 
+
+1197
+00:25:17,360 --> 00:25:19,310
+ranging you won't be able to point out a
+break of structure and then the origion
+
+1198
+00:25:19,310 --> 00:25:19,320
+break of structure and then the origion
+ 
+
+1199
+00:25:19,320 --> 00:25:20,630
+break of structure and then the origion
+because when the market is ranging there
+
+1200
+00:25:20,630 --> 00:25:20,640
+because when the market is ranging there
+ 
+
+1201
+00:25:20,640 --> 00:25:22,789
+because when the market is ranging there
+is no break of structure at all so that
+
+1202
+00:25:22,789 --> 00:25:22,799
+is no break of structure at all so that
+ 
+
+1203
+00:25:22,799 --> 00:25:25,190
+is no break of structure at all so that
+implements our strategy will not work
+
+1204
+00:25:25,190 --> 00:25:25,200
+implements our strategy will not work
+ 
+
+1205
+00:25:25,200 --> 00:25:27,830
+implements our strategy will not work
+when the market is ranging wait until
+
+1206
+00:25:27,830 --> 00:25:27,840
+when the market is ranging wait until
+ 
+
+1207
+00:25:27,840 --> 00:25:29,909
+when the market is ranging wait until
+there's a d Direction then you start
+
+1208
+00:25:29,909 --> 00:25:29,919
+there's a d Direction then you start
+ 
+
+1209
+00:25:29,919 --> 00:25:32,110
+there's a d Direction then you start
+taking your entries mapping out your
+
+1210
+00:25:32,110 --> 00:25:32,120
+taking your entries mapping out your
+ 
+
+1211
+00:25:32,120 --> 00:25:34,789
+taking your entries mapping out your
+Origins you know getting your buyers and
+
+1212
+00:25:34,789 --> 00:25:34,799
+Origins you know getting your buyers and
+ 
+
+1213
+00:25:34,799 --> 00:25:37,350
+Origins you know getting your buyers and
+the rest so you can see clearly that's
+
+1214
+00:25:37,350 --> 00:25:37,360
+the rest so you can see clearly that's
+ 
+
+1215
+00:25:37,360 --> 00:25:39,029
+the rest so you can see clearly that's
+what we have here from the daily time
+
+1216
+00:25:39,029 --> 00:25:39,039
+what we have here from the daily time
+ 
+
+1217
+00:25:39,039 --> 00:25:41,070
+what we have here from the daily time
+frame now you can see like I said price
+
+1218
+00:25:41,070 --> 00:25:41,080
+frame now you can see like I said price
+ 
+
+1219
+00:25:41,080 --> 00:25:42,750
+frame now you can see like I said price
+has rected of this origin and it's
+
+1220
+00:25:42,750 --> 00:25:42,760
+has rected of this origin and it's
+ 
+
+1221
+00:25:42,760 --> 00:25:45,510
+has rected of this origin and it's
+pushing up so this buy if I go down to
+
+1222
+00:25:45,510 --> 00:25:45,520
+pushing up so this buy if I go down to
+ 
+
+1223
+00:25:45,520 --> 00:25:48,230
+pushing up so this buy if I go down to
+my entry time frame I all I will just be
+
+1224
+00:25:48,230 --> 00:25:48,240
+my entry time frame I all I will just be
+ 
+
+1225
+00:25:48,240 --> 00:25:50,389
+my entry time frame I all I will just be
+doing there is to be looking out for buy
+
+1226
+00:25:50,389 --> 00:25:50,399
+doing there is to be looking out for buy
+ 
+
+1227
+00:25:50,399 --> 00:25:52,950
+doing there is to be looking out for buy
+setups buy setups and I'll be buying
+
+1228
+00:25:52,950 --> 00:25:52,960
+setups buy setups and I'll be buying
+ 
+
+1229
+00:25:52,960 --> 00:25:55,510
+setups buy setups and I'll be buying
+having this level in mind too because if
+
+1230
+00:25:55,510 --> 00:25:55,520
+having this level in mind too because if
+ 
+
+1231
+00:25:55,520 --> 00:25:56,590
+having this level in mind too because if
+price should get here this is a
+
+1232
+00:25:56,590 --> 00:25:56,600
+price should get here this is a
+ 
+
+1233
+00:25:56,600 --> 00:26:00,190
+price should get here this is a
+resistant level it can still react I can
+
+1234
+00:26:00,190 --> 00:26:00,200
+resistant level it can still react I can
+ 
+
+1235
+00:26:00,200 --> 00:26:02,350
+resistant level it can still react I can
+only keep buying if price should come
+
+1236
+00:26:02,350 --> 00:26:02,360
+only keep buying if price should come
+ 
+
+1237
+00:26:02,360 --> 00:26:04,830
+only keep buying if price should come
+here and still clear to the upside and
+
+1238
+00:26:04,830 --> 00:26:04,840
+here and still clear to the upside and
+ 
+
+1239
+00:26:04,840 --> 00:26:07,669
+here and still clear to the upside and
+then I can change buers to start selling
+
+1240
+00:26:07,669 --> 00:26:07,679
+then I can change buers to start selling
+ 
+
+1241
+00:26:07,679 --> 00:26:11,310
+then I can change buers to start selling
+if I see a change of character just like
+
+1242
+00:26:11,310 --> 00:26:11,320
+if I see a change of character just like
+ 
+
+1243
+00:26:11,320 --> 00:26:13,269
+if I see a change of character just like
+we got here change of character a change
+
+1244
+00:26:13,269 --> 00:26:13,279
+we got here change of character a change
+ 
+
+1245
+00:26:13,279 --> 00:26:14,789
+we got here change of character a change
+of character you can see where we
+
+1246
+00:26:14,789 --> 00:26:14,799
+of character you can see where we
+ 
+
+1247
+00:26:14,799 --> 00:26:19,070
+of character you can see where we
+started from a bearish trend from a
+
+1248
+00:26:19,070 --> 00:26:19,080
+started from a bearish trend from a
+ 
+
+1249
+00:26:19,080 --> 00:26:21,789
+started from a bearish trend from a
+bearish trend we switched to bullish
+
+1250
+00:26:21,789 --> 00:26:21,799
+bearish trend we switched to bullish
+ 
+
+1251
+00:26:21,799 --> 00:26:24,830
+bearish trend we switched to bullish
+from bullish bearish again bullish so
+
+1252
+00:26:24,830 --> 00:26:24,840
+from bullish bearish again bullish so
+ 
+
+1253
+00:26:24,840 --> 00:26:26,430
+from bullish bearish again bullish so
+just like that you get to understand the
+
+1254
+00:26:26,430 --> 00:26:26,440
+just like that you get to understand the
+ 
+
+1255
+00:26:26,440 --> 00:26:28,789
+just like that you get to understand the
+full story everything that scre on the
+
+1256
+00:26:28,789 --> 00:26:28,799
+full story everything that scre on the
+ 
+
+1257
+00:26:28,799 --> 00:26:30,430
+full story everything that scre on the
+chat and from there you will get your
+
+1258
+00:26:30,430 --> 00:26:30,440
+chat and from there you will get your
+ 
+
+1259
+00:26:30,440 --> 00:26:31,990
+chat and from there you will get your
+Biers it's just that simple that's why I
+
+1260
+00:26:31,990 --> 00:26:32,000
+Biers it's just that simple that's why I
+ 
+
+1261
+00:26:32,000 --> 00:26:34,269
+Biers it's just that simple that's why I
+said it is very important for you to
+
+1262
+00:26:34,269 --> 00:26:34,279
+said it is very important for you to
+ 
+
+1263
+00:26:34,279 --> 00:26:35,909
+said it is very important for you to
+know how to read the market structure as
+
+1264
+00:26:35,909 --> 00:26:35,919
+know how to read the market structure as
+ 
+
+1265
+00:26:35,919 --> 00:26:39,430
+know how to read the market structure as
+a Trader so guys remember feel free to
+
+1266
+00:26:39,430 --> 00:26:39,440
+a Trader so guys remember feel free to
+ 
+
+1267
+00:26:39,440 --> 00:26:42,190
+a Trader so guys remember feel free to
+message me with your setups you can read
+
+1268
+00:26:42,190 --> 00:26:42,200
+message me with your setups you can read
+ 
+
+1269
+00:26:42,200 --> 00:26:44,510
+message me with your setups you can read
+the market structure and send it to me
+
+1270
+00:26:44,510 --> 00:26:44,520
+the market structure and send it to me
+ 
+
+1271
+00:26:44,520 --> 00:26:47,310
+the market structure and send it to me
+to check if you are actually getting it
+
+1272
+00:26:47,310 --> 00:26:47,320
+to check if you are actually getting it
+ 
+
+1273
+00:26:47,320 --> 00:26:49,510
+to check if you are actually getting it
+if you actually got you know all my
+
+1274
+00:26:49,510 --> 00:26:49,520
+if you actually got you know all my
+ 
+
+1275
+00:26:49,520 --> 00:26:52,269
+if you actually got you know all my
+explanations here
+
+1276
+00:26:52,269 --> 00:26:52,279
+explanations here
+ 
+
+1277
+00:26:52,279 --> 00:26:55,310
+explanations here
+um all my explanations here so all you
+
+1278
+00:26:55,310 --> 00:26:55,320
+um all my explanations here so all you
+ 
+
+1279
+00:26:55,320 --> 00:26:59,269
+um all my explanations here so all you
+just need to do just send in your setup
+
+1280
+00:26:59,269 --> 00:26:59,279
+just need to do just send in your setup
+ 
+
+1281
+00:26:59,279 --> 00:27:01,710
+just need to do just send in your setup
+um following our strategy too because I
+
+1282
+00:27:01,710 --> 00:27:01,720
+um following our strategy too because I
+ 
+
+1283
+00:27:01,720 --> 00:27:03,950
+um following our strategy too because I
+get a lot of persons you know sending in
+
+1284
+00:27:03,950 --> 00:27:03,960
+get a lot of persons you know sending in
+ 
+
+1285
+00:27:03,960 --> 00:27:05,470
+get a lot of persons you know sending in
+their setups for me whether you're in my
+
+1286
+00:27:05,470 --> 00:27:05,480
+their setups for me whether you're in my
+ 
+
+1287
+00:27:05,480 --> 00:27:07,630
+their setups for me whether you're in my
+VIP group or whether in my free group
+
+1288
+00:27:07,630 --> 00:27:07,640
+VIP group or whether in my free group
+ 
+
+1289
+00:27:07,640 --> 00:27:09,789
+VIP group or whether in my free group
+just feel free I'll dropped the link in
+
+1290
+00:27:09,789 --> 00:27:09,799
+just feel free I'll dropped the link in
+ 
+
+1291
+00:27:09,799 --> 00:27:12,190
+just feel free I'll dropped the link in
+the comments so just feel free to send
+
+1292
+00:27:12,190 --> 00:27:12,200
+the comments so just feel free to send
+ 
+
+1293
+00:27:12,200 --> 00:27:13,830
+the comments so just feel free to send
+your setups send read the market
+
+1294
+00:27:13,830 --> 00:27:13,840
+your setups send read the market
+ 
+
+1295
+00:27:13,840 --> 00:27:16,590
+your setups send read the market
+structure and send in then I will view
+
+1296
+00:27:16,590 --> 00:27:16,600
+structure and send in then I will view
+ 
+
+1297
+00:27:16,600 --> 00:27:18,549
+structure and send in then I will view
+if there's any corrections I'll still
+
+1298
+00:27:18,549 --> 00:27:18,559
+if there's any corrections I'll still
+ 
+
+1299
+00:27:18,559 --> 00:27:19,990
+if there's any corrections I'll still
+help you there all right guys so as
+
+1300
+00:27:19,990 --> 00:27:20,000
+help you there all right guys so as
+ 
+
+1301
+00:27:20,000 --> 00:27:21,710
+help you there all right guys so as
+you've seen this video make sure you
+
+1302
+00:27:21,710 --> 00:27:21,720
+you've seen this video make sure you
+ 
+
+1303
+00:27:21,720 --> 00:27:23,870
+you've seen this video make sure you
+practice learn how to map out your
+
+1304
+00:27:23,870 --> 00:27:23,880
+practice learn how to map out your
+ 
+
+1305
+00:27:23,880 --> 00:27:25,789
+practice learn how to map out your
+structures just following the steps I
+
+1306
+00:27:25,789 --> 00:27:25,799
+structures just following the steps I
+ 
+
+1307
+00:27:25,799 --> 00:27:27,630
+structures just following the steps I
+have showed you guys here thanks once
+
+1308
+00:27:27,630 --> 00:27:27,640
+have showed you guys here thanks once
+ 
+
+1309
+00:27:27,640 --> 00:27:30,510
+have showed you guys here thanks once
+again for watching and don't forget to
+
+1310
+00:27:30,510 --> 00:27:30,520
+again for watching and don't forget to
+ 
+
+1311
+00:27:30,520 --> 00:27:33,230
+again for watching and don't forget to
+like subscribe and turn on notification
+
+1312
+00:27:33,230 --> 00:27:33,240
+like subscribe and turn on notification
+ 
+
+1313
+00:27:33,240 --> 00:27:35,269
+like subscribe and turn on notification
+Bell so that you get the first to be
+
+1314
+00:27:35,269 --> 00:27:35,279
+Bell so that you get the first to be
+ 
+
+1315
+00:27:35,279 --> 00:27:37,350
+Bell so that you get the first to be
+notified when I upload a new video don't
+
+1316
+00:27:37,350 --> 00:27:37,360
+notified when I upload a new video don't
+ 
+
+1317
+00:27:37,360 --> 00:27:41,200
+notified when I upload a new video don't
+forget to share too bye for now
+

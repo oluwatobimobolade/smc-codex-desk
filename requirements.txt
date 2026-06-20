@@ -1,0 +1,9 @@
+pandas>=2.2
+numpy>=1.26
+matplotlib>=3.8
+mplfinance>=0.12
+pillow>=10.0
+pydantic>=2.6
+fastapi>=0.110
+plotly>=5.20
+opencv-python>=4.10
