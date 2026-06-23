@@ -1,0 +1,60 @@
+{
+  "bearish_plan_summary": {
+    "confidence": 0.25,
+    "confluence_score": 0.11,
+    "direction": "bearish",
+    "entry_zone": "N/A",
+    "grade": "C",
+    "invalidation": null,
+    "risk_reward": null,
+    "target": 99.8,
+    "verdict": "Pass"
+  },
+  "bullish_plan_summary": {
+    "confidence": 0.25,
+    "confluence_score": 0.11,
+    "direction": "bullish",
+    "entry_zone": "N/A",
+    "grade": "C",
+    "invalidation": null,
+    "risk_reward": null,
+    "target": 100.5,
+    "verdict": "Pass"
+  },
+  "conflicts": [
+    "Intent unknown detected at confidence 1.0000; modulation disabled until calibrated."
+  ],
+  "contested": false,
+  "contributions": [
+    {
+      "bias": "bullish",
+      "confidence": 0.25,
+      "layer": "engine",
+      "notes": "Deterministic SMC engine; owns all prices.",
+      "verdict": "Pass"
+    },
+    {
+      "bias": "neutral",
+      "confidence": 1.0,
+      "layer": "intent",
+      "notes": "No strong intent signals. Active episode: consolidation.",
+      "verdict": "Watch"
+    }
+  ],
+  "engine_primary_bias": "bullish",
+  "engine_primary_confidence": 0.25,
+  "engine_primary_grade": "C",
+  "engine_primary_verdict": "Pass",
+  "fused_confidence": 0.0,
+  "narrative": "CONSOLIDATION: 100 -> 100/100 -> 100.0 (12.2h) | opposite_displacement at 100\n\nACTIVE: consolidation (bar 49+)\n\nINFERENCE: No clear narrative. Await development.",
+  "overrides": [],
+  "price_sources": {
+    "100.5": "bullish target",
+    "99.8": "bearish target"
+  },
+  "reasoning": "Engine primary: Pass / bullish / grade C. Fused recommendation: Pass / neutral / grade C. Conflicts:   - Intent unknown detected at confidence 1.0000; modulation disabled until calibrated.",
+  "recommended_direction": "neutral",
+  "recommended_grade": "C",
+  "recommended_verdict": "Pass",
+  "scores": {}
+}
