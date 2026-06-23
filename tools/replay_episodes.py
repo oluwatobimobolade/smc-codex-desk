@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk.sequence_memory import BarSnapshot, SequenceMemory
-from smc_desk.visual_cortex import VisualCortex, render_chart_for_visual_cortex
+from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap
 from smc_desk.intent_detector import IntentDetector, MarketContext
 from smc_desk.fusion_engine import FusionEngine
 from smc_desk.models import AnalysisResult, TradePlan
@@ -70,13 +70,12 @@ def _run_replay(args: argparse.Namespace) -> dict[str, Any]:
     df = df.iloc[: args.warmup_bars + args.max_bars].reset_index(drop=True)
 
     memory = SequenceMemory()
-    visual = VisualCortex()
     intent_detector = IntentDetector()
     fusion = FusionEngine()
     context = MarketContext()
 
     transitions: list[dict[str, Any]] = []
-    visual_patterns: list[dict[str, Any]] = []
+    features_log: list[dict[str, Any]] = []
     intent_log: list[dict[str, Any]] = []
     fusion_log: list[dict[str, Any]] = []
 
@@ -90,19 +89,31 @@ def _run_replay(args: argparse.Namespace) -> dict[str, Any]:
                 context.minutes_to_next_major_news = 0.0
 
             if idx % 5 == 0 and idx >= args.visual_window:
-                window = df.iloc[idx - args.visual_window : idx + 1]
-                window_records = window.to_dict("records")
-                img, regions, _price_axis = render_chart_for_visual_cortex(window_records)
-                patterns = visual.analyze_image(img)
-                for pattern in patterns:
-                    pattern.metadata["bar_index"] = idx
-                    pattern.metadata["symbol"] = args.symbol
-                    visual_patterns.append(pattern.to_dict())
+                window_records = df.iloc[idx - args.visual_window : idx + 1].to_dict("records")
+                spike = detect_vertical_spike_trap(window_records)
+                failed_breakout = detect_failed_breakout(window_records)
+                if spike.get("detected"):
+                    features_log.append({
+                        "bar_index": idx,
+                        "pattern_type": "vertical_spike_trap",
+                        "direction": spike["direction"],
+                        "confidence": spike["score"],
+                        "metadata": spike.get("metadata", {}),
+                    })
+                if failed_breakout.get("detected"):
+                    features_log.append({
+                        "bar_index": idx,
+                        "pattern_type": "failed_breakout",
+                        "direction": failed_breakout["direction"],
+                        "confidence": failed_breakout["score"],
+                        "metadata": failed_breakout.get("metadata", {}),
+                    })
 
             if idx % 5 == 0:
+                recent_features = [f for f in features_log if f["bar_index"] >= idx - args.visual_window]
                 intent_result = intent_detector.detect_intent(
                     sequence_memory=memory,
-                    visual_patterns=visual_patterns[-10:],
+                    visual_patterns=recent_features[-10:],
                     context=context,
                 )
                 intents = intent_result.matches
@@ -134,7 +145,7 @@ def _run_replay(args: argparse.Namespace) -> dict[str, Any]:
                     engine_result=engine_result,
                     sequence_memory=memory,
                     intent_result=intent_result,
-                    visual_patterns=visual_patterns[-10:],
+                    visual_patterns=recent_features[-10:],
                 )
                 fusion_log.append(
                     {
@@ -169,7 +180,7 @@ def _run_replay(args: argparse.Namespace) -> dict[str, Any]:
             "narrative": memory.get_current_narrative(),
         },
         "transitions": transitions,
-        "visual_patterns": visual_patterns,
+        "features": features_log,
         "intents": intent_log,
         "fusion": fusion_log,
     }
@@ -184,7 +195,7 @@ def main() -> int:
     print(f"Wrote replay log to {output_path}")
     print(f"Episodes: {len(result['final_state']['episodes'])}")
     print(f"Transitions: {len(result['transitions'])}")
-    print(f"Visual patterns: {len(result['visual_patterns'])}")
+    print(f"Features: {len(result['features'])}")
     print(f"Intent samples: {len(result['intents'])}")
     print(f"Fusion samples: {len(result['fusion'])}")
     return 0

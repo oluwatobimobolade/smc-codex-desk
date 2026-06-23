@@ -11,12 +11,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk import analyze_ohlcv, build_trade_plan_markdown, load_rule_config
+from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap
 from smc_desk.fusion_engine import FusionEngine
 from smc_desk.intent_detector import IntentDetector, MarketContext
 from smc_desk.models import AnalysisResult, TradePlan
 from smc_desk.render import render_annotated_chart, render_screenshot_review
 from smc_desk.sequence_memory import BarSnapshot, SequenceMemory
-from smc_desk.visual_cortex import VisualCortex, render_chart_for_visual_cortex
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,15 +60,34 @@ def _dataframe_to_sequence_memory(df) -> SequenceMemory:
 
 
 def _run_fusion_analysis(analysis: AnalysisResult, df) -> dict:
-    """Run the four-layer fusion stack for observability only."""
+    """Run the four-layer fusion stack for observability only.
+
+    The visual layer is replaced by deterministic OHLCV features (numpy/pandas)
+    so every detection is exact, reproducible, and leakage-free.
+    """
     memory = _dataframe_to_sequence_memory(df)
 
-    visual = VisualCortex()
-    visual_window = min(120, len(df))
-    window_records = df.iloc[-visual_window:].to_dict("records")
-    img, _regions, _ = render_chart_for_visual_cortex(window_records)
-    patterns = visual.analyze_image(img)
-    pattern_dicts = [p.to_dict() for p in patterns]
+    # OHLCV-derivable features (exact, no cv2).
+    records = df.to_dict("records")
+    spike = detect_vertical_spike_trap(records)
+    failed_breakout = detect_failed_breakout(records)
+    pattern_dicts: list[dict] = []
+    if spike.get("detected"):
+        pattern_dicts.append({
+            "pattern_type": "vertical_spike_trap",
+            "direction": spike["direction"],
+            "confidence": spike["score"],
+            "invalidates_bias": "bullish" if spike["direction"] == "bullish" else "bearish",
+            "metadata": spike.get("metadata", {}),
+        })
+    if failed_breakout.get("detected"):
+        pattern_dicts.append({
+            "pattern_type": "failed_breakout",
+            "direction": failed_breakout["direction"],
+            "confidence": failed_breakout["score"],
+            "invalidates_bias": failed_breakout["direction"],
+            "metadata": failed_breakout.get("metadata", {}),
+        })
 
     context = MarketContext(symbol=analysis.symbol, timeframe=analysis.timeframe)
     intent_detector = IntentDetector()
@@ -92,7 +111,7 @@ def _run_fusion_analysis(analysis: AnalysisResult, df) -> dict:
             "active_episode": memory.active_episode.to_dict() if memory.active_episode else None,
             "narrative": memory.get_current_narrative(),
         },
-        "visual_patterns": pattern_dicts,
+        "features": pattern_dicts,
         "intent": intent_result.to_dict(),
         "fusion": fusion_result.to_dict(),
     }
@@ -130,6 +149,14 @@ def _build_fusion_markdown(fusion_payload: dict) -> str:
     lines.append("## Dual-direction scores")
     for direction, score in fusion.get("scores", {}).items():
         lines.append(f"- {direction}: {score}")
+    lines.append("")
+    lines.append("## OHLCV features")
+    features = fusion_payload.get("features", [])
+    if features:
+        for feature in features:
+            lines.append(f"- {feature['pattern_type']} ({feature['direction']}, conf {feature['confidence']})")
+    else:
+        lines.append("- No salient features.")
     lines.append("")
     lines.append("## Bullish plan summary")
     bullish = fusion.get("bullish_plan_summary", {})

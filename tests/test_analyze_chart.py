@@ -64,7 +64,7 @@ class AnalyzeChartFusionTests(unittest.TestCase):
         payload = _run_fusion_analysis(analysis, df)
 
         self.assertIn("sequence", payload)
-        self.assertIn("visual_patterns", payload)
+        self.assertIn("features", payload)
         self.assertIn("intent", payload)
         self.assertIn("fusion", payload)
         self.assertIn("primary_intent", payload["intent"])
