@@ -147,6 +147,28 @@ A complete, high-confluence SMC workflow has been added to this repo:
 - **Journal:** `journal/`
 - **WebBridge capture tool:** `tools/smc_webbridge_analyst.py`
 
+### Fusion Architecture (experimental observability layers)
+
+A new four-layer observability stack sits beside the deterministic engine. It adds narrative, visual, and intent context without replacing the engine or `dual_lens.py`:
+
+- **Sequence Memory** — converts bars into episodes (rally, drop, consolidation, trap, accumulation, distribution) and emits a narrative.
+- **Visual Cortex** — detects vertical-spike traps and failed breakouts from rendered OHLCV charts.
+- **Intent Detector** — scores market-intent hypotheses (bull trap, distribution, exhaustion, etc.).
+- **Fusion Engine** — reconciles engine verdict/bias with the layers; downgrade-only, with explicit override records.
+
+See `strategies/smc/FUSION_ARCHITECTURE.md` for the full contract.
+
+Replay a CSV through the layers:
+
+```bash
+python3 tools/replay_episodes.py \
+  --ohlcv data/sample_ohlcv.csv \
+  --symbol EURUSD \
+  --output /tmp/replay.json \
+  --max-bars 500 \
+  --warmup-bars 50
+```
+
 ### Downloading Binance futures data for backtesting
 
 ```bash

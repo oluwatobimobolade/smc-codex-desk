@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .models import AnalysisResult, StructureEvent, StructureScope, SwingPoint, TradePlan, Zone
+from .models import AnalysisResult, HigherTimeframePoi, StructureEvent, StructureScope, SwingPoint, TradePlan, Zone
 from .rules import RuleConfig
 from .session import summarize_session_context
 
@@ -31,19 +31,40 @@ def load_ohlcv_csv(path: str) -> pd.DataFrame:
     return df
 
 
+def _ts_iso(df: pd.DataFrame) -> list[str]:
+    """Precompute ISO timestamps once (per-row .isoformat() via df.at is a hot spot)."""
+    return [t.isoformat() for t in df["timestamp"]]
+
+
+def _rolling_prev_mean(x: np.ndarray, lookback: int = 20) -> np.ndarray:
+    """out[i] = mean(x[max(0,i-lookback):i]); for i==0 use x[0]; floored at 1e-9.
+
+    Vectorized equivalent of the old per-index ``_avg_body``/``_avg_range`` which
+    averaged the ``lookback`` bars *before* index i (exclusive of i).
+    """
+    n = x.shape[0]
+    out = np.empty(n, dtype=float)
+    for i in range(n):
+        left = max(0, i - lookback)
+        seg = x[left:i] if i > left else x[:1]   # i==0 -> x[:1], matches df.iloc[:1]
+        out[i] = seg.mean()                        # numpy mean == pandas mean (bit-identical)
+    return np.maximum(out, 1e-9)
+
+
 def detect_swings(df: pd.DataFrame, config: RuleConfig, pivot_window: int | None = None) -> list[SwingPoint]:
     swings: list[SwingPoint] = []
     window = pivot_window or config.pivot_window
+    h = df["high"].to_numpy(dtype=float)
+    l = df["low"].to_numpy(dtype=float)
+    ts = _ts_iso(df)
     for index in range(window, len(df) - window):
-        high = float(df.at[index, "high"])
-        low = float(df.at[index, "low"])
-        local_highs = df["high"].iloc[index - window : index + window + 1]
-        local_lows = df["low"].iloc[index - window : index + window + 1]
-        timestamp = df.at[index, "timestamp"].isoformat()
-        if high >= float(local_highs.max()):
-            swings.append(SwingPoint(kind="high", index=index, timestamp=timestamp, price=high))
-        if low <= float(local_lows.min()):
-            swings.append(SwingPoint(kind="low", index=index, timestamp=timestamp, price=low))
+        a, b = index - window, index + window + 1
+        high = h[index]
+        low = l[index]
+        if high >= h[a:b].max():
+            swings.append(SwingPoint(kind="high", index=index, timestamp=ts[index], price=float(high)))
+        if low <= l[a:b].min():
+            swings.append(SwingPoint(kind="low", index=index, timestamp=ts[index], price=float(low)))
     swings.sort(key=lambda point: point.index)
     return swings
 
@@ -180,29 +201,38 @@ def detect_equal_levels(swings: list[SwingPoint], config: RuleConfig) -> list[Zo
 
 def detect_fvgs(df: pd.DataFrame, config: RuleConfig) -> list[Zone]:
     fvgs: list[Zone] = []
-    for index in range(2, len(df)):
-        first = df.iloc[index - 2]
+    n = len(df)
+    o = df["open"].to_numpy(dtype=float)
+    h = df["high"].to_numpy(dtype=float)
+    l = df["low"].to_numpy(dtype=float)
+    c = df["close"].to_numpy(dtype=float)
+    body = np.abs(c - o)
+    rng = h - l
+    avg_body = _rolling_prev_mean(body)
+    avg_range = _rolling_prev_mean(rng)
+    disp = body / avg_body
+    for index in range(2, n):
         middle_index = index - 1
-        third = df.iloc[index]
-        bullish_gap = float(third["low"] - first["high"])
-        bearish_gap = float(first["low"] - third["high"])
-        price_anchor = max(float(third["close"]), 1e-9)
-        has_impulse = _is_displacement(df, middle_index, config, factor=config.fvg_min_displacement_factor)
+        bullish_gap = float(l[index] - h[index - 2])
+        bearish_gap = float(l[index - 2] - h[index])
+        price_anchor = max(float(c[index]), 1e-9)
+        has_impulse = (disp[middle_index] >= config.fvg_min_displacement_factor
+                       and (rng[middle_index] / avg_range[middle_index]) >= 0.9)
+        disp_mid = float(disp[middle_index])
         if bullish_gap / price_anchor >= config.fvg_min_gap_pct and has_impulse:
-            low = float(first["high"])
-            high = float(third["low"])
-            future_lows = df["low"].iloc[index + 1 :]
+            low = float(h[index - 2])
+            high = float(l[index])
             mitigation_pct = 0.0
             status = "fresh"
-            if not future_lows.empty:
-                min_future = float(future_lows.min())
+            if index + 1 < n:
+                min_future = float(l[index + 1 :].min())
                 if min_future <= low:
                     mitigation_pct = 1.0
                     status = "mitigated"
                 elif min_future < high:
                     mitigation_pct = (high - min_future) / max(high - low, 1e-9)
                     status = "partial"
-            score = 0.58 + min(0.22, _displacement_score(df, middle_index) / 10.0) + (0.08 if status == "fresh" else 0.0)
+            score = 0.58 + min(0.22, disp_mid / 10.0) + (0.08 if status == "fresh" else 0.0)
             fvgs.append(
                 Zone(
                     label="Bullish FVG",
@@ -216,24 +246,23 @@ def detect_fvgs(df: pd.DataFrame, config: RuleConfig) -> list[Zone]:
                     score=min(score, 0.9),
                     status=status,
                     mitigation_pct=round(mitigation_pct, 3),
-                    reason=f"Three-candle bullish imbalance with displacement score {_displacement_score(df, middle_index):.2f}.",
+                    reason=f"Three-candle bullish imbalance with displacement score {disp_mid:.2f}.",
                 )
             )
         if bearish_gap / price_anchor >= config.fvg_min_gap_pct and has_impulse:
-            low = float(third["high"])
-            high = float(first["low"])
-            future_highs = df["high"].iloc[index + 1 :]
+            low = float(h[index])
+            high = float(l[index - 2])
             mitigation_pct = 0.0
             status = "fresh"
-            if not future_highs.empty:
-                max_future = float(future_highs.max())
+            if index + 1 < n:
+                max_future = float(h[index + 1 :].max())
                 if max_future >= high:
                     mitigation_pct = 1.0
                     status = "mitigated"
                 elif max_future > low:
                     mitigation_pct = (max_future - low) / max(high - low, 1e-9)
                     status = "partial"
-            score = 0.58 + min(0.22, _displacement_score(df, middle_index) / 10.0) + (0.08 if status == "fresh" else 0.0)
+            score = 0.58 + min(0.22, disp_mid / 10.0) + (0.08 if status == "fresh" else 0.0)
             fvgs.append(
                 Zone(
                     label="Bearish FVG",
@@ -247,7 +276,7 @@ def detect_fvgs(df: pd.DataFrame, config: RuleConfig) -> list[Zone]:
                     score=min(score, 0.9),
                     status=status,
                     mitigation_pct=round(mitigation_pct, 3),
-                    reason=f"Three-candle bearish imbalance with displacement score {_displacement_score(df, middle_index):.2f}.",
+                    reason=f"Three-candle bearish imbalance with displacement score {disp_mid:.2f}.",
                 )
             )
     return fvgs[-10:]
@@ -273,6 +302,17 @@ def detect_structure_events(
     broken_low_indices: set[int] = set()
     requires_protected_reversal = structure_scope in {"swing", "external"}
 
+    o = df["open"].to_numpy(dtype=float)
+    h = df["high"].to_numpy(dtype=float)
+    l = df["low"].to_numpy(dtype=float)
+    c = df["close"].to_numpy(dtype=float)
+    body = np.abs(c - o)
+    rng = h - l
+    avg_body = _rolling_prev_mean(body)
+    avg_range = _rolling_prev_mean(rng)
+    disp = body / avg_body
+    ts = _ts_iso(df)
+
     for index in range(len(df)):
         while high_cursor < len(swing_highs) and swing_highs[high_cursor].index < index:
             active_high = swing_highs[high_cursor]
@@ -281,15 +321,15 @@ def detect_structure_events(
             active_low = swing_lows[low_cursor]
             low_cursor += 1
 
-        close = float(df.at[index, "close"])
-        timestamp = df.at[index, "timestamp"].isoformat()
+        close = float(c[index])
+        timestamp = ts[index]
 
         high_to_break = protected_high if requires_protected_reversal and trend == "bearish" and protected_high else active_high
         is_protected_high_break = bool(trend == "bearish" and protected_high and high_to_break == protected_high)
         if high_to_break and (is_protected_high_break or high_to_break.index not in broken_high_indices):
             threshold = high_to_break.price * (1.0 + config.structure_break_min_pct)
-            displacement_score = _displacement_score(df, index)
-            if close > threshold and _is_displacement(df, index, config):
+            displacement_score = float(disp[index])
+            if close > threshold and disp[index] >= config.displacement_body_factor and (rng[index] / avg_range[index]) >= 0.9:
                 label = "BOS" if trend in {"neutral", "bullish"} else "CHoCH"
                 protected_word = "protected " if is_protected_high_break and requires_protected_reversal else ""
                 internal_word = "internal " if structure_scope == "internal" else ""
@@ -316,8 +356,8 @@ def detect_structure_events(
         is_protected_low_break = bool(trend == "bullish" and protected_low and low_to_break == protected_low)
         if low_to_break and (is_protected_low_break or low_to_break.index not in broken_low_indices):
             threshold = low_to_break.price * (1.0 - config.structure_break_min_pct)
-            displacement_score = _displacement_score(df, index)
-            if close < threshold and _is_displacement(df, index, config):
+            displacement_score = float(disp[index])
+            if close < threshold and disp[index] >= config.displacement_body_factor and (rng[index] / avg_range[index]) >= 0.9:
                 label = "BOS" if trend in {"neutral", "bearish"} else "CHoCH"
                 protected_word = "protected " if is_protected_low_break and requires_protected_reversal else ""
                 internal_word = "internal " if structure_scope == "internal" else ""
@@ -358,13 +398,19 @@ def _merge_structure_events(swing_events: list[StructureEvent], internal_events:
 def detect_liquidity_sweeps(df: pd.DataFrame, swings: list[SwingPoint], config: RuleConfig) -> list[StructureEvent]:
     events: list[StructureEvent] = []
     recent_swings = swings[-config.liquidity_sweep_lookback :]
+    o = df["open"].to_numpy(dtype=float)
+    h_arr = df["high"].to_numpy(dtype=float)
+    l_arr = df["low"].to_numpy(dtype=float)
+    c = df["close"].to_numpy(dtype=float)
+    disp = np.abs(c - o) / _rolling_prev_mean(np.abs(c - o))
+    ts = _ts_iso(df)
     for index in range(len(df)):
         prior_highs = [swing for swing in recent_swings if swing.kind == "high" and swing.index < index]
         prior_lows = [swing for swing in recent_swings if swing.kind == "low" and swing.index < index]
-        timestamp = df.at[index, "timestamp"].isoformat()
-        high = float(df.at[index, "high"])
-        low = float(df.at[index, "low"])
-        close = float(df.at[index, "close"])
+        timestamp = ts[index]
+        high = float(h_arr[index])
+        low = float(l_arr[index])
+        close = float(c[index])
 
         if prior_highs:
             level = prior_highs[-1].price
@@ -377,8 +423,8 @@ def detect_liquidity_sweeps(df: pd.DataFrame, swings: list[SwingPoint], config: 
                         timestamp=timestamp,
                         price=close,
                         swept_level=level,
-                        displacement_score=round(_displacement_score(df, index), 3),
-                        strength=_event_strength(_displacement_score(df, index), config),  # type: ignore[arg-type]
+                        displacement_score=round(float(disp[index]), 3),
+                        strength=_event_strength(float(disp[index]), config),  # type: ignore[arg-type]
                         reason=f"Buy-side liquidity swept above {level:.4f} and candle closed back below.",
                     )
                 )
@@ -393,8 +439,8 @@ def detect_liquidity_sweeps(df: pd.DataFrame, swings: list[SwingPoint], config: 
                         timestamp=timestamp,
                         price=close,
                         swept_level=level,
-                        displacement_score=round(_displacement_score(df, index), 3),
-                        strength=_event_strength(_displacement_score(df, index), config),  # type: ignore[arg-type]
+                        displacement_score=round(float(disp[index]), 3),
+                        strength=_event_strength(float(disp[index]), config),  # type: ignore[arg-type]
                         reason=f"Sell-side liquidity swept below {level:.4f} and candle closed back above.",
                     )
                 )
@@ -406,6 +452,20 @@ def detect_liquidity_sweeps(df: pd.DataFrame, swings: list[SwingPoint], config: 
             deduped.append(event)
             seen.add(key)
     return deduped[-12:]
+
+
+def _last_significant_ob_candle(opposite: pd.DataFrame, df: pd.DataFrame, config: RuleConfig) -> int | None:
+    """Most recent opposite-color candle whose body clears the OB floor.
+
+    Thesis [CONTESTED resolution]: the order block is the last *significant* opposite
+    candle before displacement, not the literal last opposite candle (often a tiny doji
+    that hides the real OB). Returns the df index label, or None if none clear the floor.
+    """
+    for candle_index in reversed(opposite.index.tolist()):
+        body_factor = abs(float(df.at[candle_index, "close"] - df.at[candle_index, "open"])) / _avg_body(df, candle_index)
+        if body_factor >= config.ob_min_body_factor:
+            return int(candle_index)
+    return None
 
 
 def detect_order_blocks(df: pd.DataFrame, events: list[StructureEvent], config: RuleConfig) -> list[Zone]:
@@ -420,13 +480,11 @@ def detect_order_blocks(df: pd.DataFrame, events: list[StructureEvent], config: 
 
         if event.direction == "bullish":
             opposite = pre_event[pre_event["close"] < pre_event["open"]]
-            if opposite.empty:
+            candle_index = _last_significant_ob_candle(opposite, df, config)
+            if candle_index is None:
                 continue
-            candle = opposite.iloc[-1]
-            candle_index = int(candle.name)
+            candle = df.loc[candle_index]
             body_factor = abs(float(candle["close"] - candle["open"])) / _avg_body(df, candle_index)
-            if body_factor < config.ob_min_body_factor:
-                continue
             future_lows = df["low"].iloc[candle_index + 1 :]
             status = "fresh"
             mitigation_pct = 0.0
@@ -457,13 +515,11 @@ def detect_order_blocks(df: pd.DataFrame, events: list[StructureEvent], config: 
             )
         else:
             opposite = pre_event[pre_event["close"] > pre_event["open"]]
-            if opposite.empty:
+            candle_index = _last_significant_ob_candle(opposite, df, config)
+            if candle_index is None:
                 continue
-            candle = opposite.iloc[-1]
-            candle_index = int(candle.name)
+            candle = df.loc[candle_index]
             body_factor = abs(float(candle["close"] - candle["open"])) / _avg_body(df, candle_index)
-            if body_factor < config.ob_min_body_factor:
-                continue
             future_highs = df["high"].iloc[candle_index + 1 :]
             status = "fresh"
             mitigation_pct = 0.0
@@ -503,15 +559,22 @@ def _select_range(df: pd.DataFrame, swings: list[SwingPoint]) -> tuple[float, fl
     return float(recent_slice["low"].min()), float(recent_slice["high"].max())
 
 
-def build_trade_plan(
+def _build_trade_plan_for_direction(
     df: pd.DataFrame,
     swings: list[SwingPoint],
     zones: list[Zone],
     events: list[StructureEvent],
     config: RuleConfig,
+    direction: str,
     bias_hint: str | None = None,
     poi_selection: str = "balanced",
+    htf_poi: HigherTimeframePoi | None = None,
 ) -> TradePlan:
+    """Build a TradePlan for an explicit direction.
+
+    This is the direction-agnostic core previously inside build_trade_plan().
+    All prices (POI, stop, target) are derived from engine-computed levels.
+    """
     current_close = float(df["close"].iloc[-1])
     range_low, range_high = _select_range(df, swings)
     midpoint = (range_low + range_high) / 2.0
@@ -522,7 +585,6 @@ def build_trade_plan(
     sweep_events = [event for event in events if event.label == "Liquidity Sweep"]
     inferred = swing_structure_events[-1].direction if swing_structure_events else infer_trend(swings)
     normalized_bias = bias_hint.lower() if bias_hint and bias_hint.lower() in {"bullish", "bearish"} else None
-    direction = normalized_bias or inferred
     entry_low: float | None = None
     entry_high: float | None = None
     structural_invalidation: float | None = None
@@ -587,7 +649,13 @@ def build_trade_plan(
         selected_poi = future_or_near[0] if future_or_near else None
         if selected_poi:
             entry_low, entry_high = selected_poi.low, selected_poi.high
-        targets = [price for price in liquidity_levels if price > current_close][:2] or [round(range_high, 5)]
+        target_floor = max(current_close, entry_high) if entry_high is not None else current_close
+        targets = [price for price in liquidity_levels if price > target_floor][:2]
+        fallback_target = round(range_high, 5)
+        if not targets and fallback_target > target_floor:
+            targets = [fallback_target]
+        if not targets:
+            warnings.append("No external bullish liquidity target lies beyond the proposed entry; no target issued.")
         liquidity_target = targets[0] if targets else None
         conditions = [
             "Wait for a sell-side liquidity sweep, bullish displacement, and 15m CHoCH/BOS before entry.",
@@ -603,7 +671,13 @@ def build_trade_plan(
         selected_poi = future_or_near[0] if future_or_near else None
         if selected_poi:
             entry_low, entry_high = selected_poi.low, selected_poi.high
-        targets = [price for price in reversed(liquidity_levels) if price < current_close][:2] or [round(range_low, 5)]
+        target_ceiling = min(current_close, entry_low) if entry_low is not None else current_close
+        targets = [price for price in reversed(liquidity_levels) if price < target_ceiling][:2]
+        fallback_target = round(range_low, 5)
+        if not targets and fallback_target < target_ceiling:
+            targets = [fallback_target]
+        if not targets:
+            warnings.append("No external bearish liquidity target lies beyond the proposed entry; no target issued.")
         liquidity_target = targets[0] if targets else None
         conditions = [
             "Wait for a buy-side liquidity sweep, bearish displacement, and 15m CHoCH/BOS before entry.",
@@ -776,13 +850,50 @@ def build_trade_plan(
         verdict = "Watch"
         entry_type = "confirmation" if has_sweep else "no_trade"
 
+    # HARD GATE: R:R floor is a binary veto. It cannot be overridden by partial
+    # confluence, confidence, or any downstream layer.
+    if not has_rr:
+        verdict = "Pass"
+        setup_grade = "C"
+        entry_type = "no_trade"
+        risk_pct = 0.0
+
+    # A higher-timeframe POI is a route map, not a limit order. It can only
+    # surface a watch state while the 15m model is otherwise a pass; it never
+    # changes the execution checklist or manufactures entry/SL/TP levels.
+    # Only promote to Watch HTF POI if the HTF POI direction matches this plan.
+    if verdict == "Pass" and htf_poi and htf_poi.zone.direction == direction and htf_poi.state in {"approaching", "at_poi"}:
+        verdict = "Watch HTF POI"
+        setup_grade = "C"
+        targets = []
+        liquidity_target = None
+        risk_reward = None
+        conditions.insert(
+            0,
+            (
+                f"Monitor the {htf_poi.timeframe} {htf_poi.zone.label} "
+                f"{htf_poi.zone.low:.5f}-{htf_poi.zone.high:.5f} ({htf_poi.state}); "
+                "do not enter until a 15m sweep, displacement, and internal structure break form at the zone."
+            ),
+        )
+        warnings.append(
+            "Higher-timeframe POI watch only: no executable entry, stop, target, or risk has been issued."
+        )
+
     confidence = min(0.9, 0.18 + confluence_score * 0.62 + (selected_poi.score * 0.15 if selected_poi else 0.0))
-    poi_text = f"{selected_poi.label} {selected_poi.low:.5f}-{selected_poi.high:.5f}" if selected_poi else "no valid POI"
+    poi_text = f"{selected_poi.label} {selected_poi.low:.5f}-{selected_poi.high:.5f}" if selected_poi else "no valid 15m POI"
+    htf_poi_text = (
+        f" {htf_poi.timeframe} watch zone: {htf_poi.zone.label} {htf_poi.zone.low:.5f}-{htf_poi.zone.high:.5f} "
+        f"({htf_poi.state}, {htf_poi.distance_atr:.2f} ATR away)."
+        if htf_poi
+        else ""
+    )
 
     thesis = (
         f"Current structure reads {direction}. Price is trading in {location} of the recent dealing range "
         f"between {range_low:.4f} and {range_high:.4f}. Selected POI: {poi_text}. "
         f"Confluence score is {confluence_score:.2f}; verdict is {verdict} with setup grade {setup_grade}."
+        f"{htf_poi_text}"
     )
     if invalidation is not None and structural_invalidation is not None:
         conditions.append(
@@ -809,11 +920,81 @@ def build_trade_plan(
         confluence_score=confluence_score,
         liquidity_target=liquidity_target,
         selected_poi=selected_poi,
+        selected_htf_poi=htf_poi,
         checklist=checklist,
         thesis=thesis,
         conditions=conditions,
         warnings=warnings,
     )
+
+
+def build_trade_plan(
+    df: pd.DataFrame,
+    swings: list[SwingPoint],
+    zones: list[Zone],
+    events: list[StructureEvent],
+    config: RuleConfig,
+    bias_hint: str | None = None,
+    poi_selection: str = "balanced",
+    htf_poi: HigherTimeframePoi | None = None,
+) -> TradePlan:
+    """Backward-compatible single-direction plan builder.
+
+    Resolves one direction from bias_hint or inferred trend and delegates to
+    the direction-agnostic helper.
+    """
+    structure_events = [event for event in events if event.label in {"BOS", "CHoCH"}]
+    swing_structure_events = [
+        event for event in structure_events if event.structure_scope in {"swing", "external", "unknown"}
+    ]
+    inferred = swing_structure_events[-1].direction if swing_structure_events else infer_trend(swings)
+    normalized_bias = bias_hint.lower() if bias_hint and bias_hint.lower() in {"bullish", "bearish"} else None
+    direction = normalized_bias or inferred
+    return _build_trade_plan_for_direction(
+        df=df,
+        swings=swings,
+        zones=zones,
+        events=events,
+        config=config,
+        direction=direction,
+        bias_hint=bias_hint,
+        poi_selection=poi_selection,
+        htf_poi=htf_poi,
+    )
+
+
+def build_dual_trade_plan(
+    df: pd.DataFrame,
+    swings: list[SwingPoint],
+    zones: list[Zone],
+    events: list[StructureEvent],
+    config: RuleConfig,
+    bias_hint: str | None = None,
+    poi_selection: str = "balanced",
+    htf_poi: HigherTimeframePoi | None = None,
+) -> dict[str, TradePlan]:
+    """Build both bullish and bearish trade plans from the same precomputed structure.
+
+    Each plan uses engine-owned POI, stop, target, and R:R. The bullish plan
+    ignores bearish POIs and vice versa. This is the keystone of the Fusion
+    Engine: fusion scores two competing hypotheses rather than overriding a
+    single baseline.
+    """
+    plans: dict[str, TradePlan] = {}
+    for direction in ("bullish", "bearish"):
+        plans[direction] = _build_trade_plan_for_direction(
+            df=df,
+            swings=swings,
+            zones=zones,
+            events=events,
+            config=config,
+            direction=direction,
+            bias_hint=bias_hint,
+            poi_selection=poi_selection,
+            htf_poi=htf_poi,
+        )
+    return plans
+
 
 
 def analyze_ohlcv(
@@ -846,6 +1027,7 @@ def analyze_dataframe(
     notes: str | None = None,
     input_type: str = "ohlcv",
     poi_selection: str = "balanced",
+    htf_poi: HigherTimeframePoi | None = None,
 ) -> tuple[AnalysisResult, pd.DataFrame]:
     df = df.copy()
     if "date" in df.columns and "timestamp" not in df.columns:
@@ -876,7 +1058,25 @@ def analyze_dataframe(
     events = sorted(structure_events + sweep_events, key=lambda event: event.index)[-18:]
     order_blocks = detect_order_blocks(df, swing_structure_events, config)
     all_zones = equal_levels + fvgs + order_blocks
-    trade_plan = build_trade_plan(df, swings, all_zones, events, config, bias_hint=bias_hint, poi_selection=poi_selection)
+    dual_plans = build_dual_trade_plan(
+        df,
+        swings,
+        all_zones,
+        events,
+        config,
+        bias_hint=bias_hint,
+        poi_selection=poi_selection,
+        htf_poi=htf_poi,
+    )
+    # Primary plan remains the single-direction view for backward compatibility.
+    # If a bias_hint is supplied, prefer that direction; otherwise use the
+    # direction with the higher confluence score, falling back to inferred trend.
+    primary_direction = bias_hint.lower() if bias_hint and bias_hint.lower() in {"bullish", "bearish"} else None
+    if primary_direction is None:
+        primary_direction = dual_plans["bullish"].direction
+        if dual_plans["bearish"].confluence_score > dual_plans["bullish"].confluence_score:
+            primary_direction = dual_plans["bearish"].direction
+    trade_plan = dual_plans[primary_direction]
     session_context = summarize_session_context(df)
     range_low, range_high = _select_range(df, swings)
     metrics = {
@@ -908,6 +1108,8 @@ def analyze_dataframe(
         zones=all_zones,
         events=events,
         trade_plan=trade_plan,
+        bullish_plan=dual_plans["bullish"],
+        bearish_plan=dual_plans["bearish"],
         limitations=limitations,
     )
     return result, df
@@ -934,6 +1136,16 @@ def build_trade_plan_markdown(result: AnalysisResult) -> str:
         "",
         "## Key Levels",
         f"- Entry zone: {format_zone(result.trade_plan.entry_low, result.trade_plan.entry_high)}",
+        (
+            "- HTF POI: "
+            f"{result.trade_plan.selected_htf_poi.timeframe} "
+            f"{result.trade_plan.selected_htf_poi.zone.label} "
+            f"{format_zone(result.trade_plan.selected_htf_poi.zone.low, result.trade_plan.selected_htf_poi.zone.high)} "
+            f"({result.trade_plan.selected_htf_poi.state}, "
+            f"{result.trade_plan.selected_htf_poi.distance_atr:.2f} ATR away)"
+            if result.trade_plan.selected_htf_poi
+            else "- HTF POI: None"
+        ),
         f"- Execution SL / invalidation: {format_level(result.trade_plan.invalidation)}",
         f"- Structural invalidation: {format_level(result.trade_plan.structural_invalidation)}",
         (
@@ -966,6 +1178,31 @@ def build_trade_plan_markdown(result: AnalysisResult) -> str:
         lines.append("- None.")
     lines.extend(["", "## Limitations"])
     lines.extend(f"- {item}" for item in result.limitations)
+
+    # Dual-direction assessment (new). Only shown when both plans are populated
+    # and at least one is non-Pass, so the output surfaces competing theses.
+    bullish = result.bullish_plan
+    bearish = result.bearish_plan
+    if bullish and bearish:
+        both_pass = bullish.verdict == "Pass" and bearish.verdict == "Pass"
+        one_non_pass = bullish.verdict != "Pass" or bearish.verdict != "Pass"
+        if one_non_pass or not both_pass:
+            lines.extend([
+                "",
+                "## Dual-Direction Assessment",
+                f"| | Bullish | Bearish |",
+                f"| verdict | {bullish.verdict} / {bullish.setup_grade} | {bearish.verdict} / {bearish.setup_grade} |",
+                f"| confluence | {bullish.confluence_score:.2f} | {bearish.confluence_score:.2f} |",
+                f"| R:R | {bullish.risk_reward if bullish.risk_reward is not None else 'N/A'} | {bearish.risk_reward if bearish.risk_reward is not None else 'N/A'} |",
+                f"| entry | {format_zone(bullish.entry_low, bullish.entry_high)} | {format_zone(bearish.entry_low, bearish.entry_high)} |",
+                f"| stop | {format_level(bullish.invalidation)} | {format_level(bearish.invalidation)} |",
+                f"| target | {format_level(bullish.liquidity_target)} | {format_level(bearish.liquidity_target)} |",
+            ])
+            if bullish.verdict == "Pass" and bearish.verdict == "Pass":
+                lines.append("Neither direction has a valid executable setup.")
+            elif bullish.verdict != "Pass" and bearish.verdict != "Pass":
+                lines.append("Both directions have candidate setups; the primary plan above is the higher-confluence side.")
+
     return "\n".join(lines) + "\n"
 
 

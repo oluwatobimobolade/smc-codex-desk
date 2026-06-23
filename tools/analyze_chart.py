@@ -11,8 +11,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk import analyze_ohlcv, build_trade_plan_markdown, load_rule_config
+from smc_desk.fusion_engine import FusionEngine
+from smc_desk.intent_detector import IntentDetector, MarketContext
 from smc_desk.models import AnalysisResult, TradePlan
 from smc_desk.render import render_annotated_chart, render_screenshot_review
+from smc_desk.sequence_memory import BarSnapshot, SequenceMemory
+from smc_desk.visual_cortex import VisualCortex, render_chart_for_visual_cortex
 
 
 def parse_args() -> argparse.Namespace:
@@ -25,11 +29,152 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--notes", help="Optional manual notes.")
     parser.add_argument("--rules", help="Optional rules JSON path.")
     parser.add_argument("--output-dir", default="outputs", help="Directory for generated artifacts.")
+    parser.add_argument(
+        "--fusion",
+        action="store_true",
+        help="Run the experimental Fusion Engine in shadow mode. Logs observability output only; "
+             "the engine verdict and trade plan remain authoritative.",
+    )
     return parser.parse_args()
 
 
 def write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def _dataframe_to_sequence_memory(df) -> SequenceMemory:
+    memory = SequenceMemory()
+    for idx, row in df.iterrows():
+        memory.process_bar(
+            BarSnapshot(
+                index=idx,
+                timestamp=str(row["timestamp"]),
+                open=float(row["open"]),
+                high=float(row["high"]),
+                low=float(row["low"]),
+                close=float(row["close"]),
+                volume=float(row.get("volume", 0.0)),
+            )
+        )
+    return memory
+
+
+def _run_fusion_analysis(analysis: AnalysisResult, df) -> dict:
+    """Run the four-layer fusion stack for observability only."""
+    memory = _dataframe_to_sequence_memory(df)
+
+    visual = VisualCortex()
+    visual_window = min(120, len(df))
+    window_records = df.iloc[-visual_window:].to_dict("records")
+    img, _regions, _ = render_chart_for_visual_cortex(window_records)
+    patterns = visual.analyze_image(img)
+    pattern_dicts = [p.to_dict() for p in patterns]
+
+    context = MarketContext(symbol=analysis.symbol, timeframe=analysis.timeframe)
+    intent_detector = IntentDetector()
+    intent_result = intent_detector.detect_intent(
+        sequence_memory=memory,
+        visual_patterns=pattern_dicts,
+        context=context,
+    )
+
+    fusion = FusionEngine()
+    fusion_result = fusion.fuse(
+        engine_result=analysis,
+        sequence_memory=memory,
+        intent_result=intent_result,
+        visual_patterns=pattern_dicts,
+    )
+
+    return {
+        "sequence": {
+            "episodes": [ep.to_dict() for ep in memory.episodes],
+            "active_episode": memory.active_episode.to_dict() if memory.active_episode else None,
+            "narrative": memory.get_current_narrative(),
+        },
+        "visual_patterns": pattern_dicts,
+        "intent": intent_result.to_dict(),
+        "fusion": fusion_result.to_dict(),
+    }
+
+
+def _build_fusion_markdown(fusion_payload: dict) -> str:
+    lines = [
+        "# Fusion Engine Observability",
+        "",
+        "> **WARNING: SHADOW MODE.** This output is for research and review only.",
+        "> The deterministic engine owns all prices, stops, targets, and invalidations.",
+        "> The fused verdict shown here does **not** change the live trade plan.",
+        "",
+    ]
+    fusion = fusion_payload["fusion"]
+    lines.append(
+        f"**Engine primary verdict:** {fusion['engine_primary_verdict']} "
+        f"({fusion['engine_primary_bias']})"
+    )
+    lines.append(
+        f"**Fused verdict:** {fusion['recommended_verdict']} "
+        f"({fusion['recommended_direction']})"
+    )
+    if fusion.get("contested"):
+        lines.append("**State:** CONTESTED — neither direction won by a clear margin.")
+    lines.append(f"**Fused confidence:** {fusion['fused_confidence']}")
+    lines.append("")
+    lines.append("## Narrative")
+    lines.append(fusion_payload["sequence"]["narrative"] or "No narrative yet.")
+    lines.append("")
+    lines.append("## Primary intent")
+    intent = fusion_payload["intent"]
+    lines.append(f"- {intent['primary_intent']} (confidence {intent['confidence']})")
+    lines.append("")
+    lines.append("## Dual-direction scores")
+    for direction, score in fusion.get("scores", {}).items():
+        lines.append(f"- {direction}: {score}")
+    lines.append("")
+    lines.append("## Bullish plan summary")
+    bullish = fusion.get("bullish_plan_summary", {})
+    if bullish:
+        lines.append(f"- verdict: {bullish.get('verdict')} / grade {bullish.get('grade')}")
+        lines.append(f"- entry: {bullish.get('entry_zone')}")
+        lines.append(f"- stop: {bullish.get('invalidation')}")
+        lines.append(f"- target: {bullish.get('target')}")
+        lines.append(f"- R:R: {bullish.get('risk_reward')}")
+    else:
+        lines.append("- No bullish candidate.")
+    lines.append("")
+    lines.append("## Bearish plan summary")
+    bearish = fusion.get("bearish_plan_summary", {})
+    if bearish:
+        lines.append(f"- verdict: {bearish.get('verdict')} / grade {bearish.get('grade')}")
+        lines.append(f"- entry: {bearish.get('entry_zone')}")
+        lines.append(f"- stop: {bearish.get('invalidation')}")
+        lines.append(f"- target: {bearish.get('target')}")
+        lines.append(f"- R:R: {bearish.get('risk_reward')}")
+    else:
+        lines.append("- No bearish candidate.")
+    lines.append("")
+    lines.append("## Overrides")
+    if fusion["overrides"]:
+        for override in fusion["overrides"]:
+            lines.append(
+                f"- {override['source']}: {override['field']} "
+                f"{override['old_value']} → {override['new_value']} "
+                f"({override['reason']})"
+            )
+    else:
+        lines.append("- No overrides.")
+    lines.append("")
+    lines.append("## Conflicts")
+    if fusion["conflicts"]:
+        for conflict in fusion["conflicts"]:
+            lines.append(f"- {conflict}")
+    else:
+        lines.append("- No conflicts.")
+    lines.append("")
+    lines.append(
+        "*This is observability-only output. The deterministic engine still owns all prices."
+    )
+    return "\n".join(lines)
 
 
 def screenshot_only_result(symbol: str, timeframe: str, bias: str | None, notes: str | None) -> AnalysisResult:
@@ -84,6 +229,14 @@ def main() -> None:
         write_json(output_dir / "analysis.json", analysis.model_dump())
         (output_dir / "trade_plan.md").write_text(build_trade_plan_markdown(analysis), encoding="utf-8")
         render_annotated_chart(df, analysis, str(output_dir / "annotated_chart.png"))
+        if args.fusion:
+            fusion_payload = _run_fusion_analysis(analysis, df)
+            analysis_payload = analysis.model_dump()
+            analysis_payload["fusion_observability"] = fusion_payload
+            write_json(output_dir / "analysis.json", analysis_payload)
+            (output_dir / "fusion.md").write_text(
+                _build_fusion_markdown(fusion_payload), encoding="utf-8"
+            )
         if args.image:
             render_screenshot_review(args.image, analysis, str(output_dir / "screenshot_review.png"))
     else:

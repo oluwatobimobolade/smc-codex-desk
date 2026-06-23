@@ -7,11 +7,11 @@ from pydantic import BaseModel, Field
 
 Direction = Literal["bullish", "bearish", "neutral"]
 ZoneKind = Literal["fvg", "order_block", "liquidity", "range", "entry", "target", "invalidation", "other"]
-EventLabel = Literal["BOS", "CHoCH", "Liquidity Sweep", "Range Break"]
+EventLabel = Literal["BOS", "CHoCH", "Liquidity Sweep", "Range Break", "Inducement"]
 ZoneStatus = Literal["fresh", "partial", "mitigated", "unknown"]
 EntryType = Literal["aggressive_limit", "confirmation", "no_trade"]
 SetupGrade = Literal["A+", "A", "B", "C"]
-Verdict = Literal["Execute", "Watch", "Watch Retrace", "Pass"]
+Verdict = Literal["Execute", "Watch", "Watch Retrace", "Watch HTF POI", "Pass"]
 EventStrength = Literal["weak", "valid", "strong"]
 StructureScope = Literal["internal", "swing", "external", "unknown"]
 
@@ -38,6 +38,18 @@ class Zone(BaseModel):
     mitigation_pct: float | None = Field(default=None, ge=0.0, le=1.0)
     source_event_index: int | None = None
     reason: str
+
+
+class HigherTimeframePoi(BaseModel):
+    """A higher-timeframe area to monitor, never an executable order by itself."""
+
+    timeframe: Literal["1h", "4h"]
+    zone: Zone
+    state: Literal["mapped", "approaching", "at_poi"]
+    distance_atr: float = Field(ge=0.0)
+    age_bars: int = Field(ge=0)
+    rank: float = Field(ge=0.0, le=1.0)
+    approach_confirmed: bool = False
 
 
 class StructureEvent(BaseModel):
@@ -74,6 +86,7 @@ class TradePlan(BaseModel):
     confluence_score: float = Field(default=0.0, ge=0.0, le=1.0)
     liquidity_target: float | None = None
     selected_poi: Zone | None = None
+    selected_htf_poi: HigherTimeframePoi | None = None
     checklist: dict[str, bool] = Field(default_factory=dict)
     thesis: str
     conditions: list[str] = Field(default_factory=list)
@@ -93,4 +106,6 @@ class AnalysisResult(BaseModel):
     zones: list[Zone] = Field(default_factory=list)
     events: list[StructureEvent] = Field(default_factory=list)
     trade_plan: TradePlan
+    bullish_plan: TradePlan | None = None
+    bearish_plan: TradePlan | None = None
     limitations: list[str] = Field(default_factory=list)
