@@ -242,7 +242,7 @@ def regime_features(ohlcv: list[dict] | pd.DataFrame, lookback: int = 20) -> dic
     """
     records = _as_records(ohlcv)
     if len(records) < lookback:
-        return {"adx_proxy": 0.0, "volatility_pct": 0.0, "net_change": 0.0}
+        return {"adx_proxy": 0.0, "volatility_pct": 0.0, "net_change": 0.0, "regime_label": "unknown"}
 
     window = records[-lookback:]
     closes = np.array([r["close"] for r in window])
@@ -255,8 +255,18 @@ def regime_features(ohlcv: list[dict] | pd.DataFrame, lookback: int = 20) -> dic
     gross_moves = np.sum(np.abs(np.diff(closes)))
     adx_proxy = abs(net_change) / gross_moves if gross_moves > 0 else 0.0
 
+    # Simple proxy classification: strong one-directional movement = trending,
+    # low adx_proxy with expanding range = transitional/chop.
+    if adx_proxy >= 0.6:
+        regime_label = "trend_aligned"
+    elif adx_proxy <= 0.25:
+        regime_label = "chop"
+    else:
+        regime_label = "transitional"
+
     return {
         "adx_proxy": round(adx_proxy, 4),
         "volatility_pct": round(atr / max(price, 1e-9), 4),
         "net_change": round(net_change, 5),
+        "regime_label": regime_label,
     }

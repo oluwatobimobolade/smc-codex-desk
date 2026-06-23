@@ -155,6 +155,7 @@ class FusionEngine:
         sequence_memory: SequenceMemory,
         intent_result: Optional[IntentResult] = None,
         visual_patterns: Optional[list[dict[str, Any]]] = None,
+        context: Optional[Any] = None,
     ) -> FusionResult:
         """Produce a fused recommendation from the engine's dual plans and context layers."""
         visual_patterns = visual_patterns or []
@@ -189,6 +190,17 @@ class FusionEngine:
         raw_scores: dict[str, float] = {
             direction: plan.confluence_score for direction, plan in candidates.items()
         }
+
+        # REGIME MODULATION: chop and trend-counter regimes lower confidence.
+        regime = getattr(context, "regime_label", "unknown")
+        if regime == "chop":
+            for direction in raw_scores:
+                raw_scores[direction] *= 0.7
+            conflicts.append("Regime is chop; trend-following setups are penalized.")
+        elif regime == "trend_counter":
+            for direction in raw_scores:
+                raw_scores[direction] *= 0.8
+            conflicts.append("Regime is trend_counter; setup fights HTF bias.")
 
         # INTENT MODULATION (log-only by default until calibrated).
         # A trap/distribution intent lowers the score of the affected direction.

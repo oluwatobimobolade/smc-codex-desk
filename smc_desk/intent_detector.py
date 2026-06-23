@@ -46,6 +46,7 @@ class MarketContext:
     is_options_expiry_day: bool = False
     options_max_pain_price: Optional[float] = None
     session: str = "unknown"
+    regime_label: str = "unknown"  # e.g. trend_aligned, chop, transitional
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -55,6 +56,7 @@ class MarketContext:
             "is_options_expiry_day": self.is_options_expiry_day,
             "options_max_pain_price": self.options_max_pain_price,
             "session": self.session,
+            "regime_label": self.regime_label,
         }
 
 

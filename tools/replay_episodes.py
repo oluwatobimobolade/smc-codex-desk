@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk.sequence_memory import BarSnapshot, SequenceMemory
-from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap
+from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap, regime_features
 from smc_desk.intent_detector import IntentDetector, MarketContext
 from smc_desk.fusion_engine import FusionEngine
 from smc_desk.models import AnalysisResult, TradePlan
@@ -111,6 +111,9 @@ def _run_replay(args: argparse.Namespace) -> dict[str, Any]:
 
             if idx % 5 == 0:
                 recent_features = [f for f in features_log if f["bar_index"] >= idx - args.visual_window]
+                records_so_far = df.iloc[: idx + 1].to_dict("records")
+                regime = regime_features(records_so_far)
+                context.regime_label = regime.get("regime_label", "unknown")
                 intent_result = intent_detector.detect_intent(
                     sequence_memory=memory,
                     visual_patterns=recent_features[-10:],
@@ -146,6 +149,7 @@ def _run_replay(args: argparse.Namespace) -> dict[str, Any]:
                     sequence_memory=memory,
                     intent_result=intent_result,
                     visual_patterns=recent_features[-10:],
+                    context=context,
                 )
                 fusion_log.append(
                     {

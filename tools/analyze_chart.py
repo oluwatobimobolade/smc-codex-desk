@@ -11,7 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk import analyze_ohlcv, build_trade_plan_markdown, load_rule_config
-from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap
+from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap, regime_features
 from smc_desk.fusion_engine import FusionEngine
 from smc_desk.intent_detector import IntentDetector, MarketContext
 from smc_desk.models import AnalysisResult, TradePlan
@@ -89,7 +89,12 @@ def _run_fusion_analysis(analysis: AnalysisResult, df) -> dict:
             "metadata": failed_breakout.get("metadata", {}),
         })
 
-    context = MarketContext(symbol=analysis.symbol, timeframe=analysis.timeframe)
+    regime = regime_features(records)
+    context = MarketContext(
+        symbol=analysis.symbol,
+        timeframe=analysis.timeframe,
+        regime_label=regime.get("regime_label", "unknown"),
+    )
     intent_detector = IntentDetector()
     intent_result = intent_detector.detect_intent(
         sequence_memory=memory,
@@ -103,6 +108,7 @@ def _run_fusion_analysis(analysis: AnalysisResult, df) -> dict:
         sequence_memory=memory,
         intent_result=intent_result,
         visual_patterns=pattern_dicts,
+        context=context,
     )
 
     return {
