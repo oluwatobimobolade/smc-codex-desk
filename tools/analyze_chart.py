@@ -11,12 +11,14 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk import analyze_ohlcv, build_trade_plan_markdown, load_rule_config
+from smc_desk.dual_lens import reconcile, render_markdown
+from smc_desk.episode_narrative import EpisodeNarrativeBuilder
 from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap, regime_features
 from smc_desk.fusion_engine import FusionEngine
 from smc_desk.intent_detector import IntentDetector, MarketContext
 from smc_desk.models import AnalysisResult, TradePlan
 from smc_desk.render import render_annotated_chart, render_screenshot_review
-from smc_desk.sequence_memory import BarSnapshot, SequenceMemory
+from smc_desk.sequence_memory import BarSnapshot
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,6 +30,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bias", help="Optional directional bias hint.")
     parser.add_argument("--notes", help="Optional manual notes.")
     parser.add_argument("--rules", help="Optional rules JSON path.")
+    parser.add_argument("--vision", help="Optional path to a vision_read.json for the Dual Lens Macro Sanity Check.")
     parser.add_argument("--output-dir", default="outputs", help="Directory for generated artifacts.")
     parser.add_argument(
         "--fusion",
@@ -42,30 +45,35 @@ def write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-def _dataframe_to_sequence_memory(df) -> SequenceMemory:
-    memory = SequenceMemory()
+def _dataframe_to_episode_narrative(df, events):
+    """Build an EpisodeNarrativeBuilder from bars + engine structure events."""
+    builder = EpisodeNarrativeBuilder()
+    events_by_index: dict[int, list] = {}
+    for event in events:
+        events_by_index.setdefault(event.index, []).append(event)
     for idx, row in df.iterrows():
-        memory.process_bar(
-            BarSnapshot(
-                index=idx,
-                timestamp=str(row["timestamp"]),
-                open=float(row["open"]),
-                high=float(row["high"]),
-                low=float(row["low"]),
-                close=float(row["close"]),
-                volume=float(row.get("volume", 0.0)),
-            )
+        bar = BarSnapshot(
+            index=idx,
+            timestamp=str(row["timestamp"]),
+            open=float(row["open"]),
+            high=float(row["high"]),
+            low=float(row["low"]),
+            close=float(row["close"]),
+            volume=float(row.get("volume", 0.0)),
         )
-    return memory
+        builder.process_bar(bar, events_by_index.get(idx, []))
+    return builder
 
 
 def _run_fusion_analysis(analysis: AnalysisResult, df) -> dict:
     """Run the four-layer fusion stack for observability only.
 
     The visual layer is replaced by deterministic OHLCV features (numpy/pandas)
-    so every detection is exact, reproducible, and leakage-free.
+    so every detection is exact, reproducible, and leakage-free. Episodes are
+    derived from engine structure events (the same evidence the state machine
+    uses), not from an independent bar processor.
     """
-    memory = _dataframe_to_sequence_memory(df)
+    memory = _dataframe_to_episode_narrative(df, analysis.events)
 
     # OHLCV-derivable features (exact, no cv2).
     records = df.to_dict("records")
@@ -270,6 +278,11 @@ def main() -> None:
             (output_dir / "fusion.md").write_text(
                 _build_fusion_markdown(fusion_payload), encoding="utf-8"
             )
+        if args.vision:
+            vision_data = json.loads(Path(args.vision).read_text(encoding="utf-8"))
+            recon = reconcile(analysis.model_dump(), vision_data)
+            write_json(output_dir / "reconciliation.json", recon)
+            (output_dir / "reconciliation.md").write_text(render_markdown(recon), encoding="utf-8")
         if args.image:
             render_screenshot_review(args.image, analysis, str(output_dir / "screenshot_review.png"))
     else:

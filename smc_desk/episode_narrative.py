@@ -178,6 +178,25 @@ class EpisodeNarrativeBuilder:
 
         # Break without a matching pending sweep: either a continuation or a
         # reversal of the active episode.
+        # If there is a pending sweep in the OPPOSITE direction, it was a
+        # failed sweep (trap): terminate the active episode as a trap first.
+        if (
+            self._pending_sweep is not None
+            and self._pending_sweep.direction != direction
+            and self.active_episode is not None
+        ):
+            self.active_episode.episode_type = EpisodeType.TRAP
+            self.active_episode.confidence = 0.75
+            self.active_episode.key_events.append(self._pending_sweep)
+            self._pending_sweep = None
+            self._terminate_active(
+                bar.index,
+                str(bar.timestamp),
+                EpisodeEventType.REVERSAL,
+                f"pending {self.active_episode.episode_type.value} sweep failed; "
+                f"{direction} displacement reverses",
+            )
+
         if self.active_episode is not None:
             active_direction = self._episode_direction(self.active_episode.episode_type)
             if active_direction == direction:

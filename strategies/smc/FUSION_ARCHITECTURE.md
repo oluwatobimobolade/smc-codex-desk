@@ -106,6 +106,15 @@ Behavior:
 
 **Safety note:** Fusion may only downgrade or contextualize. It cannot invent prices or upgrade a verdict.
 
+## Macro Sanity Check: The Dual Lens
+
+The **Dual Lens** (`smc_desk/dual_lens.py`) is an orthogonal "Macro Sanity Check" that runs *after* the Fusion Engine. It compares the final Math Engine trade plan against a `VisionRead` (a qualitative assessment from a Vision AI or human looking at the chart).
+
+Behavior:
+- **Reconciliation:** It computes an Agreement Score based on bias, key zones, and structural clarity.
+- **Safety Veto:** If the mathematical model wants to `Execute` but the vision model rates the chart as chaotic or disagrees on the direction, the Dual Lens enforces a veto, reducing confidence or forcing a `Pass`.
+- **No Heavy Dependencies:** We decoupled the heavy `cv2` image-generation dependencies. The Dual Lens now strictly accepts a standardized `vision_read.json`, which can be supplied by Kimi WebBridge or an offline classifier.
+
 ## Market Context
 
 `MarketContext` carries external state that can affect interpretation:
@@ -142,6 +151,21 @@ Behavior:
 ```
 
 This writes `analysis.json` with a `fusion_observability` section and a human-readable `fusion.md` report.
+
+### Attach Vision Read (Dual Lens)
+
+If you have a qualitative assessment of the chart (e.g., from an LLM), provide it to the analyzer to run the Dual Lens:
+
+```bash
+.venv/bin/python tools/analyze_chart.py \
+  --ohlcv data/sample_ohlcv.csv \
+  --symbol EURUSD \
+  --timeframe 15m \
+  --fusion \
+  --vision data/sample_vision_read.json
+```
+
+This will additionally generate a `reconciliation.json` and a `reconciliation.md` report.
 
 ## Integration Contract
 
