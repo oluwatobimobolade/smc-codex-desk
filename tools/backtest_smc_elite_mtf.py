@@ -66,6 +66,9 @@ class MtfDecision:
     htf_agreement_ratio: float
     htf_filter_passed: bool
     bias_hint_used: str
+    fusion_verdict: str | None = None
+    fusion_direction: str | None = None
+    fusion_confidence: float | None = None
     trade_outcome: str | None = None
     trade_r_multiple: float | None = None
     trade_entry_time: str | None = None
@@ -103,6 +106,11 @@ def parse_args() -> argparse.Namespace:
         choices=["off", "on"],
         default="off",
         help="Diagnostic only: treat 'Watch Retrace' as a tradeable pending POI.",
+    )
+    parser.add_argument(
+        "--fusion",
+        action="store_true",
+        help="Run the experimental Fusion Engine in shadow mode.",
     )
     return parser.parse_args()
 
@@ -147,6 +155,16 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
     blocker_freq: Counter = Counter()
     index = args.warmup_bars
     decision_bars = 0
+    
+    if args.fusion:
+        from smc_desk.sequence_memory import SequenceMemory, BarSnapshot
+        from smc_desk.intent_detector import IntentDetector, MarketContext
+        from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap, regime_features
+        from smc_desk.fusion_engine import FusionEngine
+        sequence_memory = SequenceMemory()
+        intent_detector = IntentDetector()
+        fusion_engine = FusionEngine()
+        last_sm_index = -1
 
     while index <= last_decision_index:
         if args.max_decisions is not None and decision_bars >= args.max_decisions:
@@ -177,6 +195,67 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
         plan = analysis.trade_plan
         decision_bars += 1
         update_diagnostics(plan, verdict_counts, grade_counts, missing_checks)
+        
+        fusion_verdict = None
+        fusion_direction = None
+        fusion_confidence = None
+        
+        if args.fusion:
+            for i in range(last_sm_index + 1, index + 1):
+                row = df.iloc[i]
+                sequence_memory.process_bar(BarSnapshot(
+                    index=i,
+                    timestamp=str(row["timestamp"]),
+                    open=float(row["open"]),
+                    high=float(row["high"]),
+                    low=float(row["low"]),
+                    close=float(row["close"]),
+                    volume=float(row.get("volume", 0.0)),
+                ))
+            last_sm_index = index
+            
+            records = history_15m.to_dict("records")
+            spike = detect_vertical_spike_trap(records)
+            failed_breakout = detect_failed_breakout(records)
+            pattern_dicts = []
+            if spike.get("detected"):
+                pattern_dicts.append({
+                    "pattern_type": "vertical_spike_trap",
+                    "direction": spike["direction"],
+                    "confidence": spike["score"],
+                    "invalidates_bias": "bullish" if spike["direction"] == "bullish" else "bearish",
+                    "metadata": spike.get("metadata", {}),
+                })
+            if failed_breakout.get("detected"):
+                pattern_dicts.append({
+                    "pattern_type": "failed_breakout",
+                    "direction": failed_breakout["direction"],
+                    "confidence": failed_breakout["score"],
+                    "invalidates_bias": failed_breakout["direction"],
+                    "metadata": failed_breakout.get("metadata", {}),
+                })
+
+            regime = regime_features(records)
+            context = MarketContext(
+                symbol=args.symbol,
+                timeframe=args.timeframe,
+                regime_label=regime.get("regime_label", "unknown"),
+            )
+            intent_result = intent_detector.detect_intent(
+                sequence_memory=sequence_memory,
+                visual_patterns=pattern_dicts,
+                context=context,
+            )
+            fusion_result = fusion_engine.fuse(
+                engine_result=analysis,
+                sequence_memory=sequence_memory,
+                intent_result=intent_result,
+                visual_patterns=pattern_dicts,
+                context=context,
+            )
+            fusion_verdict = fusion_result.recommended_verdict
+            fusion_direction = fusion_result.recommended_direction
+            fusion_confidence = fusion_result.fused_confidence
 
         blockers = _blockers(plan)
         for blocker in blockers:
@@ -233,6 +312,9 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
             htf_agreement_ratio=float(snap_dict["agreement_ratio"]),
             htf_filter_passed=bool(htf_filter_passed),
             bias_hint_used=bias_hint or "",
+            fusion_verdict=fusion_verdict,
+            fusion_direction=fusion_direction,
+            fusion_confidence=fusion_confidence,
             blockers=blockers,
         )
 
@@ -326,7 +408,12 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
         "watch_count": sum(1 for d in decisions if d.verdict == "Watch"),
         "execute_count": sum(1 for d in decisions if d.verdict == "Execute"),
         "pass_count": sum(1 for d in decisions if d.verdict == "Pass"),
+        "fusion_enabled": args.fusion,
     }
+    if args.fusion:
+        diagnostics["fusion_verdict_counts"] = dict(Counter(d.fusion_verdict for d in decisions).most_common())
+        diagnostics["fusion_overrides"] = sum(1 for d in decisions if d.fusion_verdict != d.verdict)
+    
     summary = summarize(trades, diagnostics)
     return summary, trades, decisions, near_misses
 
@@ -386,9 +473,18 @@ def _write_summary_markdown(path: Path, summary: dict[str, Any], decisions: list
         f"- Avg R per entered trade: {summary['avg_r']}",
         f"- Max drawdown R: {summary['max_drawdown_r']}",
         f"- HTF filter allowed/blocked: {summary.get('htf_filter_allowed', 0)} / {summary.get('htf_filter_blocked', 0)}",
+    ]
+    if args.fusion:
+        lines.extend([
+            "",
+            "## Fusion Shadow Mode",
+            f"- Fusion overrides: {summary.get('fusion_overrides', 0)}",
+            f"- Fusion verdicts: {summary.get('fusion_verdict_counts', {})}",
+        ])
+    lines.extend([
         "",
         "## HTF Direction Mismatches",
-    ]
+    ])
     if summary.get("htf_direction_mismatches"):
         for k, v in summary["htf_direction_mismatches"].items():
             lines.append(f"- 15m said {k.split('_vs_')[0]}, HTF said {k.split('_vs_')[1]}: {v} times")
