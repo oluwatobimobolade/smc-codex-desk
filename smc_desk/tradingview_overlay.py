@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
+from .visual_geometry import zone_visual_key
 
 
 @dataclass(frozen=True)
@@ -23,15 +25,6 @@ def _timestamp_ms(value: str) -> int:
     else:
         ts = ts.tz_convert(timezone.utc)
     return int(ts.timestamp() * 1000)
-
-
-def _future_ms(decision_time: str, days: int = 3) -> int:
-    ts = pd.Timestamp(decision_time)
-    if ts.tzinfo is None:
-        ts = ts.tz_localize(timezone.utc)
-    else:
-        ts = ts.tz_convert(timezone.utc)
-    return int((ts + timedelta(days=days)).timestamp() * 1000)
 
 
 def _pine_string(value: str) -> str:
@@ -76,22 +69,64 @@ def _rank_zone(zone: dict[str, Any]) -> tuple[float, int]:
     return (float(zone.get("score") or zone.get("confidence") or 0.0), int(zone.get("end_index") or 0))
 
 
-def _zone_start_time(case: dict[str, Any], zone: dict[str, Any]) -> str:
-    # The compact case payload stores candle indices but not every candle's
-    # timestamp. Anchor boxes at the decision time and extend right so the
-    # current actionable zones are precise in price without pretending to know
-    # a historical x-coordinate that is not in the case.
-    return case["decision_time"]
-
-
 def _selected_poi(case: dict[str, Any]) -> dict[str, Any] | None:
     return case.get("machine_analysis", {}).get("trade_plan", {}).get("selected_poi")
 
 
-def _zones_for_overlay(case: dict[str, Any], max_zones: int = 12) -> list[dict[str, Any]]:
-    zones = [zone for zone in case.get("machine_analysis", {}).get("zones", []) if _is_visible_zone(zone)]
+def _plan_is_actionable(case: dict[str, Any]) -> bool:
+    plan = case.get("machine_analysis", {}).get("trade_plan", {})
+    geometry = case.get("visual_geometry", {}).get("plan", {})
+    if "actionable" in geometry:
+        return bool(geometry["actionable"])
+    return (
+        plan.get("verdict") in {"Execute", "Watch", "Watch Retrace"}
+        and plan.get("entry_type") != "no_trade"
+        and plan.get("entry_low") is not None
+        and plan.get("entry_high") is not None
+    )
+
+
+def _zone_geometry(case: dict[str, Any], zone: dict[str, Any]) -> dict[str, Any] | None:
+    key = zone_visual_key(zone)
+    for geometry in case.get("visual_geometry", {}).get("zones", []):
+        if geometry.get("key") == key:
+            return geometry
+    return None
+
+
+def _structure_geometry(case: dict[str, Any], event: dict[str, Any]) -> dict[str, Any] | None:
+    for geometry in case.get("visual_geometry", {}).get("structure_segments", []):
+        if geometry.get("event_index") == event.get("index") and geometry.get("event_label") == event.get("label"):
+            return geometry
+    return None
+
+
+def _event_geometry(case: dict[str, Any], event: dict[str, Any]) -> dict[str, Any] | None:
+    for geometry in case.get("visual_geometry", {}).get("events", []):
+        if (
+            geometry.get("event_index") == event.get("index")
+            and geometry.get("event_label") == event.get("label")
+            and geometry.get("direction") == event.get("direction")
+        ):
+            return geometry
+    return None
+
+
+def _zones_for_overlay(case: dict[str, Any], max_zones: int = 6) -> list[dict[str, Any]]:
+    zones = [
+        zone
+        for zone in case.get("machine_analysis", {}).get("zones", [])
+        if _is_visible_zone(zone)
+        and (
+            _zone_geometry(case, zone) is None
+            or (
+                bool(_zone_geometry(case, zone).get("active"))
+                and _zone_geometry(case, zone).get("display_confidence") != "low"
+            )
+        )
+    ]
     selected = _selected_poi(case)
-    if selected:
+    if selected and _plan_is_actionable(case):
         selected_label = selected.get("label")
         zones = [zone for zone in zones if zone.get("label") != selected_label or zone.get("low") != selected.get("low")]
         zones.insert(0, {**selected, "_selected": True})
@@ -101,6 +136,8 @@ def _zones_for_overlay(case: dict[str, Any], max_zones: int = 12) -> list[dict[s
 
 def _plan_lines(case: dict[str, Any]) -> list[dict[str, Any]]:
     plan = case.get("machine_analysis", {}).get("trade_plan", {})
+    if not _plan_is_actionable(case):
+        return []
     lines: list[dict[str, Any]] = []
     seen_prices: set[float] = set()
 
@@ -134,6 +171,14 @@ def _events_for_overlay(case: dict[str, Any], max_events: int = 16) -> list[dict
         and event.get("timestamp")
         and event.get("price") is not None
     ]
+    geometry_events = case.get("visual_geometry", {}).get("events", [])
+    if geometry_events:
+        events = [
+            event
+            for event in events
+            if (_event_geometry(case, event) or {}).get("display_confidence") != "low"
+            and _event_geometry(case, event) is not None
+        ]
     return events[-max_events:]
 
 
@@ -141,8 +186,7 @@ def build_tradingview_pine_overlay(case: dict[str, Any]) -> tuple[str, OverlaySt
     symbol = case.get("symbol") or "SMC"
     exchange = case.get("exchange") or ""
     decision_time = case["decision_time"]
-    right = _future_ms(decision_time)
-    left_default = _timestamp_ms(decision_time)
+    decision_ms = _timestamp_ms(decision_time)
     lines: list[str] = [
         "//@version=6",
         f'indicator("SMC Desk Overlay - {symbol}", overlay = true, max_lines_count = 500, max_boxes_count = 500, max_labels_count = 500)',
@@ -151,6 +195,8 @@ def build_tradingview_pine_overlay(case: dict[str, Any]) -> tuple[str, OverlaySt
         f"// Case: {case.get('case_id')}",
         f"// Source: {exchange}:{symbol}".rstrip(":"),
         f"// Decision time: {decision_time}",
+        "// Snapshot semantics: objects stop at their resolution or this decision candle.",
+        "// Regenerate from fresh OHLCV before using a later chart state.",
         "",
         "var line[] smcLines = array.new_line()",
         "var box[] smcBoxes = array.new_box()",
@@ -172,19 +218,21 @@ def build_tradingview_pine_overlay(case: dict[str, Any]) -> tuple[str, OverlaySt
     label_count = 0
 
     for zone in _zones_for_overlay(case):
+        geometry = _zone_geometry(case, zone)
         color, transparency = _color_for_zone(zone)
         low = float(zone["low"])
         high = float(zone["high"])
         top = max(low, high)
         bottom = min(low, high)
-        left = _timestamp_ms(_zone_start_time(case, zone)) if zone.get("start_index") is not None else left_default
+        left = _timestamp_ms(geometry["activation_time"]) if geometry else decision_ms
+        right = _timestamp_ms(geometry["end_time"]) if geometry else decision_ms
         label = zone.get("label") or zone.get("kind") or "zone"
         selected_prefix = "SELECTED POI - " if zone.get("_selected") else ""
         text = f"{selected_prefix}{label} {bottom:.2f}-{top:.2f}"
         border = "color.blue" if zone.get("_selected") else color
         lines.append(
             "    array.push(smcBoxes, box.new(left = {left}, top = {top}, right = {right}, bottom = {bottom}, "
-            "xloc = xloc.bar_time, extend = extend.right, bgcolor = color.new({color}, {transparency}), "
+            "xloc = xloc.bar_time, bgcolor = color.new({color}, {transparency}), "
             "border_color = {border}, text = {text}, text_color = color.white, text_size = size.tiny))".format(
                 left=left,
                 top=round(top, 5),
@@ -202,25 +250,17 @@ def build_tradingview_pine_overlay(case: dict[str, Any]) -> tuple[str, OverlaySt
         price = round(float(plan_line["price"]), 5)
         label = plan_line["label"]
         color = _line_color(label)
+        # A case plan is born at its decision candle. Use a label rather than
+        # projecting a horizontal level into an unobserved future.
         lines.append(
-            "    array.push(smcLines, line.new(x1 = {left}, y1 = {price}, x2 = {right}, y2 = {price}, "
-            "xloc = xloc.bar_time, extend = extend.right, color = {color}, style = line.style_dashed, width = 2))".format(
-                left=left_default,
-                right=right,
-                price=price,
-                color=color,
-            )
-        )
-        lines.append(
-            "    array.push(smcLabels, label.new(x = {right}, y = {price}, xloc = xloc.bar_time, text = {text}, "
+            "    array.push(smcLabels, label.new(x = {decision}, y = {price}, xloc = xloc.bar_time, text = {text}, "
             "style = label.style_label_left, color = color.new({color}, 10), textcolor = color.white, size = size.tiny))".format(
-                right=right,
+                decision=decision_ms,
                 price=price,
                 text=_pine_string(f"{label}: {price:.2f}"),
                 color=color,
             )
         )
-        line_count += 1
         label_count += 1
 
     for event in _events_for_overlay(case):
@@ -239,6 +279,19 @@ def build_tradingview_pine_overlay(case: dict[str, Any]) -> tuple[str, OverlaySt
             )
         )
         label_count += 1
+        segment = _structure_geometry(case, event)
+        if segment is not None:
+            broken_price = round(float(segment["price"]), 5)
+            lines.append(
+                "    array.push(smcLines, line.new(x1 = {left}, y1 = {price}, x2 = {right}, y2 = {price}, "
+                "xloc = xloc.bar_time, color = {color}, style = line.style_dashed, width = 1))".format(
+                    left=_timestamp_ms(segment["start_time"]),
+                    right=_timestamp_ms(segment["end_time"]),
+                    price=broken_price,
+                    color=color,
+                )
+            )
+            line_count += 1
 
     lines.extend(
         [
@@ -262,6 +315,8 @@ def write_tradingview_overlay(case_path: Path, output_path: Path | None = None) 
         "boxes": stats.boxes,
         "lines": stats.lines,
         "labels": stats.labels,
+        "snapshot_semantics": "Objects stop at resolution or the case decision candle; regenerate for a later chart state.",
+        "visibility_policy": {"maximum_active_zones": 6, "minimum_display_confidence": "medium"},
         "installation_note": "Paste this Pine Script into TradingView Pine Editor and add it to the chart. Public TradingView pages do not expose the Charting Library Drawings API directly.",
     }
     manifest_path = target.with_suffix(".manifest.json")

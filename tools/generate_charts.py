@@ -41,6 +41,7 @@ from smc_desk.engine import (
 )
 from smc_desk.mtf import build_mtf_snapshot, precompute_htf_series, slice_precomputed_htf, snapshot_to_dict
 from smc_desk.rules import load_rule_config
+from smc_desk.visual_geometry import select_display_events, structure_origin_index, zone_lifecycle
 
 
 PANEL_SPECS = [
@@ -202,8 +203,16 @@ def annotate_smc(ax: plt.Axes, df_slice: pd.DataFrame, cfg: Any, visible_until: 
 
     for zone in (zones + order_blocks)[-16:]:
         color = "#089981" if zone.direction == "bullish" else "#f23645"
-        if zone.kind in {"fvg", "order_block"} and zone.status != "mitigated":
-            ax.axhspan(zone.low, zone.high, alpha=0.10, color=color)
+        lifecycle = zone_lifecycle(working, zone, events)
+        if not lifecycle.is_active:
+            continue
+        start = lifecycle.activation_index
+        end = lifecycle.end_index
+        if zone.kind in {"fvg", "order_block"}:
+            ax.fill_between(ts.iloc[start : end + 1], zone.low, zone.high, alpha=0.10, color=color)
+        elif zone.kind == "liquidity":
+            level = zone.high if zone.direction == "bearish" else zone.low
+            ax.plot([ts.iloc[start], ts.iloc[end]], [level, level], color="#9467bd", linestyle="--", linewidth=0.8)
 
     for swing in swings[-14:]:
         if 0 <= swing.index < len(working):
@@ -211,7 +220,7 @@ def annotate_smc(ax: plt.Axes, df_slice: pd.DataFrame, cfg: Any, visible_until: 
             color = "#2962ff" if swing.kind == "high" else "#ff9800"
             ax.scatter(ts.iloc[swing.index], swing.price, marker=marker, color=color, s=18, zorder=5, alpha=0.75)
 
-    for event in events[-18:]:
+    for event in select_display_events(events)[-18:]:
         if 0 <= event.index < len(working):
             t = ts.iloc[event.index]
             if event.label == "CHoCH":
@@ -221,6 +230,10 @@ def annotate_smc(ax: plt.Axes, df_slice: pd.DataFrame, cfg: Any, visible_until: 
                 ax.scatter(t, event.price, marker="s", color=color, s=32, zorder=6, label="BOS")
             elif event.label == "Liquidity Sweep":
                 ax.scatter(t, event.price, marker="*", color="#f6c343", edgecolors="#111111", linewidth=0.4, s=58, zorder=6, label="Sweep")
+            if event.label in {"BOS", "CHoCH"} and event.broken_level is not None:
+                origin = structure_origin_index(event, swings, working)
+                if origin is not None:
+                    ax.plot([ts.iloc[origin], t], [event.broken_level, event.broken_level], color="#2962ff" if event.direction == "bullish" else "#f23645", linestyle="--", linewidth=0.8)
 
 
 def mark_vertical(ax: plt.Axes, when: pd.Timestamp | None, label: str, color: str) -> None:
@@ -229,18 +242,27 @@ def mark_vertical(ax: plt.Axes, when: pd.Timestamp | None, label: str, color: st
     ax.axvline(x=when, color=color, linestyle=":", linewidth=1.05, alpha=0.9, label=label)
 
 
-def overlay_plan_levels(ax: plt.Axes, row: dict[str, Any]) -> None:
+def overlay_plan_levels(ax: plt.Axes, row: dict[str, Any], decision_time: pd.Timestamp) -> None:
     entry_low = _float_or_none(row.get("entry_low"))
     entry_high = _float_or_none(row.get("entry_high"))
     stop = _float_or_none(row.get("invalidation"))
     target = _float_or_none(row.get("target"))
+    htf_low = _float_or_none(row.get("htf_poi_low"))
+    htf_high = _float_or_none(row.get("htf_poi_high"))
+    htf_tf = str(row.get("htf_poi_timeframe") or "")
+    htf_state = str(row.get("htf_poi_state") or "")
 
-    if entry_low is not None and entry_high is not None:
-        ax.axhspan(min(entry_low, entry_high), max(entry_low, entry_high), alpha=0.16, color="#2962ff", label="Entry zone")
-    if stop is not None:
-        ax.axhline(y=stop, color="#f23645", linestyle="--", linewidth=0.9, label="Stop")
-    if target is not None:
-        ax.axhline(y=target, color="#089981", linestyle="--", linewidth=0.9, label="Target")
+    verdict = str(row.get("verdict") or "")
+    actionable = verdict in {"Execute", "Watch", "Watch Retrace"} and entry_low is not None and entry_high is not None
+    if actionable:
+        ax.vlines(decision_time, min(entry_low, entry_high), max(entry_low, entry_high), color="#2962ff", linewidth=4.0, alpha=0.85, label="Entry zone")
+        if stop is not None:
+            ax.scatter(decision_time, stop, marker="_", color="#f23645", s=110, linewidths=1.3, label="Stop")
+        if target is not None:
+            ax.scatter(decision_time, target, marker="_", color="#089981", s=110, linewidths=1.3, label="Target")
+    if htf_low is not None and htf_high is not None:
+        ax.vlines(decision_time, min(htf_low, htf_high), max(htf_low, htf_high), color="#9467bd", linewidth=3.0, alpha=0.7, label="HTF POI")
+        ax.annotate(f"HTF {htf_tf} {htf_state}", xy=(decision_time, max(htf_low, htf_high)), xytext=(4, 4), textcoords="offset points", fontsize=8, color="#9467bd")
 
 
 def _decision_index_for_time(df: pd.DataFrame, decision_time: pd.Timestamp) -> int | None:
@@ -302,7 +324,7 @@ def _render_pack(
     exec_title = "15m execution - annotations use candles visible at decision"
     plot_ohlcv(axes[3], execution_slice, exec_title, reference_time=decision_time)
     annotate_smc(axes[3], execution_slice, cfg, visible_until=decision_time)
-    overlay_plan_levels(axes[3], plan_row)
+    overlay_plan_levels(axes[3], plan_row, decision_time)
     mark_vertical(axes[3], signal_time or decision_time, "Signal", "#ff9800")
     mark_vertical(axes[3], entry_time, "Entry", "#2962ff")
     mark_vertical(axes[3], exit_time, "Exit", "#089981")

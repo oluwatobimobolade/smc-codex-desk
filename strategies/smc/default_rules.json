@@ -14,6 +14,8 @@
   "confirmation_lookback": 24,
   "max_zone_age_bars": 160,
   "poi_proximity_atr": 2.0,
+  "htf_poi_watch_distance_atr": 1.5,
+  "htf_approach_lookback_bars": 4,
   "lookback_bars": 250,
   "risk_reward_floor": 3.0,
   "atr_lookback": 14,

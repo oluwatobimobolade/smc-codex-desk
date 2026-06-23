@@ -5,13 +5,17 @@ import unittest
 import pandas as pd
 
 from smc_desk.engine import build_trade_plan
-from smc_desk.models import StructureEvent, SwingPoint, Zone
+from smc_desk.models import HigherTimeframePoi, StructureEvent, SwingPoint, Zone
 from smc_desk.mtf import (
+    HtfContext,
+    MtfSnapshot,
     build_mtf_snapshot,
     derive_htf_consensus_bias,
     precompute_htf_series,
     resample_ohlcv,
+    select_htf_poi,
     slice_precomputed_htf,
+    snapshot_to_dict,
 )
 from smc_desk.rules import RuleConfig
 
@@ -46,6 +50,138 @@ class HtfConsensusBiasTests(unittest.TestCase):
 
     def test_daily_opposition_blocks_1h_4h_agreement(self) -> None:
         self.assertEqual(derive_htf_consensus_bias(snapshot_dict("bullish", "bullish", "bearish")), "neutral")
+
+    def test_snapshot_exposes_strict_execution_consensus_not_directional_plurality(self) -> None:
+        snapshot = MtfSnapshot(
+            decision_time=pd.Timestamp("2026-01-02 12:00:00"),
+            bars_visible_15m=300,
+            one_hour=HtfContext("1h", 40, 100.0, "bullish", None, None, None, "bullish"),
+            four_hour=HtfContext("4h", 40, 100.0, "bearish", None, None, None, "bearish"),
+            daily=HtfContext("1d", 40, 100.0, "neutral", None, None, None, "neutral"),
+            alignment="bullish",
+            agreement_count=1,
+            total_count=3,
+            agreement_ratio=0.3333,
+        )
+        self.assertEqual(snapshot_to_dict(snapshot)["execution_consensus"], "neutral")
+
+
+class HtfPoiWatchTests(unittest.TestCase):
+    def _context(self, timeframe: str, bias: str, zones: list[Zone] | None = None) -> HtfContext:
+        return HtfContext(
+            timeframe=timeframe,
+            candle_count=40,
+            last_close=104.0,
+            bias=bias,  # type: ignore[arg-type]
+            last_structure_label="BOS",
+            last_structure_direction=bias,
+            last_structure_index=35,
+            inferred_trend=bias,
+            atr=2.0,
+            poi_candidates=zones or [],
+        )
+
+    def _snapshot(self, zone: Zone) -> MtfSnapshot:
+        return MtfSnapshot(
+            decision_time=pd.Timestamp("2026-01-02 12:00:00"),
+            bars_visible_15m=300,
+            one_hour=self._context("1h", "bearish", [zone]),
+            four_hour=self._context("4h", "bearish"),
+            daily=self._context("1d", "neutral"),
+            alignment="bearish",
+            agreement_count=2,
+            total_count=3,
+            agreement_ratio=0.6667,
+        )
+
+    def _bearish_zone(self) -> Zone:
+        return Zone(
+            label="Bearish Order Block",
+            kind="order_block",
+            direction="bearish",
+            low=105.0,
+            high=106.0,
+            start_index=32,
+            end_index=35,
+            score=0.84,
+            confidence=0.84,
+            status="fresh",
+            reason="test HTF POI",
+        )
+
+    def test_approaching_aligned_htf_poi_is_selected_for_monitoring(self) -> None:
+        poi = select_htf_poi(
+            self._snapshot(self._bearish_zone()),
+            current_price=104.0,
+            config=RuleConfig(htf_poi_watch_distance_atr=1.5, htf_approach_lookback_bars=4),
+            recent_15m_closes=pd.Series([102.5, 102.8, 103.0, 103.4, 104.0]),
+        )
+
+        self.assertIsNotNone(poi)
+        assert poi is not None
+        self.assertEqual(poi.timeframe, "1h")
+        self.assertEqual(poi.state, "approaching")
+        self.assertTrue(poi.approach_confirmed)
+        self.assertEqual(poi.distance_atr, 0.5)
+
+    def test_distant_or_non_approaching_htf_poi_stays_mapped(self) -> None:
+        poi = select_htf_poi(
+            self._snapshot(self._bearish_zone()),
+            current_price=100.0,
+            config=RuleConfig(htf_poi_watch_distance_atr=1.5),
+            recent_15m_closes=pd.Series([99.0, 99.2, 99.4, 99.6, 100.0]),
+        )
+
+        self.assertIsNotNone(poi)
+        assert poi is not None
+        self.assertEqual(poi.state, "mapped")
+
+    def test_htf_poi_watch_does_not_manufacture_an_executable_trade(self) -> None:
+        config = RuleConfig(risk_reward_floor=3.0)
+        df = candles([(100.0, 101.0, 99.0, 100.0) for _ in range(40)])
+        swings = [
+            SwingPoint(kind="low", index=5, timestamp=df.at[5, "timestamp"].isoformat(), price=95.0),
+            SwingPoint(kind="high", index=10, timestamp=df.at[10, "timestamp"].isoformat(), price=110.0),
+        ]
+        htf_poi = HigherTimeframePoi(
+            timeframe="1h",
+            zone=self._bearish_zone(),
+            state="approaching",
+            distance_atr=0.5,
+            age_bars=4,
+            rank=0.9,
+            approach_confirmed=True,
+        )
+
+        plan = build_trade_plan(df, swings, [], [], config, bias_hint="bearish", htf_poi=htf_poi)
+
+        self.assertEqual(plan.verdict, "Watch HTF POI")
+        self.assertEqual(plan.risk_pct, 0.0)
+        self.assertIsNone(plan.entry_low)
+        self.assertIsNone(plan.entry_high)
+        self.assertIsNone(plan.invalidation)
+        self.assertEqual(plan.targets, [])
+        self.assertEqual(plan.selected_htf_poi, htf_poi)
+
+    def test_mapped_htf_poi_does_not_override_a_pass(self) -> None:
+        config = RuleConfig(risk_reward_floor=3.0)
+        df = candles([(100.0, 101.0, 99.0, 100.0) for _ in range(40)])
+        swings = [
+            SwingPoint(kind="low", index=5, timestamp=df.at[5, "timestamp"].isoformat(), price=95.0),
+            SwingPoint(kind="high", index=10, timestamp=df.at[10, "timestamp"].isoformat(), price=110.0),
+        ]
+        htf_poi = HigherTimeframePoi(
+            timeframe="1h",
+            zone=self._bearish_zone(),
+            state="mapped",
+            distance_atr=3.0,
+            age_bars=4,
+            rank=0.8,
+        )
+
+        plan = build_trade_plan(df, swings, [], [], config, bias_hint="bearish", htf_poi=htf_poi)
+
+        self.assertEqual(plan.verdict, "Pass")
 
 
 class MtfLeakageTests(unittest.TestCase):

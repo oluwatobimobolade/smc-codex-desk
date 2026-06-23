@@ -10,10 +10,12 @@ import pandas as pd
 
 from .engine import analyze_dataframe
 from .mtf import build_mtf_snapshot, derive_htf_consensus_bias, precompute_htf_series, snapshot_to_dict
+from .perception import perception_annotation_scaffold
 from .rules import RuleConfig
+from .visual_geometry import build_visual_geometry_payload
 
 
-CASE_VERSION = "1.0"
+CASE_VERSION = "1.2"
 NO_LEAKAGE_RULE = "15m history is sliced to timestamp <= decision_time; HTF candles are visible only when close_time <= decision_time."
 
 
@@ -119,6 +121,7 @@ def expert_label_scaffold() -> dict[str, Any]:
         "outcome_r": None,
         "mistake_tags": [],
         "correction_notes": None,
+        "perception_annotations": perception_annotation_scaffold(),
     }
 
 
@@ -164,7 +167,7 @@ def build_case_payload(
     bias_hint = consensus_bias if consensus_bias in {"bullish", "bearish"} else None
     input_type = "hybrid" if screenshot_meta else "ohlcv"
 
-    analysis, _ = analyze_dataframe(
+    analysis, analyzed_df = analyze_dataframe(
         df=visible_df,
         symbol=symbol,
         timeframe="15m",
@@ -172,6 +175,7 @@ def build_case_payload(
         bias_hint=bias_hint,
         notes=notes,
         input_type=input_type,
+        htf_poi=snapshot.selected_htf_poi,
     )
 
     quality = data_quality_report(normalized_df, expected_step_minutes=expected_step_minutes)
@@ -207,6 +211,7 @@ def build_case_payload(
         },
         "mtf_snapshot": snapshot_dict,
         "machine_analysis": analysis.model_dump(mode="json"),
+        "visual_geometry": build_visual_geometry_payload(analysis, analyzed_df),
         "expert_label": expert_label_scaffold(),
     }
     return payload
@@ -312,6 +317,15 @@ def build_human_label_template(payload: dict[str, Any]) -> str:
         "- If no, what rule or label needs correction?",
         "- Does this become a gold-standard training case? yes/no",
         "",
+        "## Perception Labels",
+        "Label only what is visibly present at the decision time. One object per row.",
+        "- Primitive: bos / choch / liquidity_sweep / fvg / order_block / equal_highs / equal_lows / inducement / supply / demand",
+        "- Timeframe and direction: 15m/1h/4h/1d, bullish/bearish/neutral where applicable",
+        "- Events: exact candle timestamp and price. Zones: price_low and price_high.",
+        "- Structure scope for BOS/CHoCH: internal / swing / external.",
+        "- Status: fresh / partial / mitigated / swept / unswept / unknown.",
+        "- Reviewer IDs and an adjudicator are required before this becomes perception gold data.",
+        "",
     ]
     return "\n".join(lines)
 
@@ -359,6 +373,7 @@ def build_review_packet_markdown(payload: dict[str, Any]) -> str:
             "- Is the missing confirmation correct?",
             "- Final expert verdict: take / wait / pass",
             "- Should this become a gold-standard training case? yes/no",
+            "- Complete `expert_label.perception_annotations` in case.json before using this case for perception evaluation.",
             "",
             "Research support only. This is not financial advice or an execution instruction.",
             "",

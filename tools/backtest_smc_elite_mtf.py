@@ -48,6 +48,12 @@ class MtfDecision:
     setup_grade: str
     confluence_score: float
     selected_poi_label: str | None
+    htf_poi_timeframe: str | None
+    htf_poi_label: str | None
+    htf_poi_state: str | None
+    htf_poi_low: float | None
+    htf_poi_high: float | None
+    htf_poi_distance_atr: float | None
     entry_low: float | None
     entry_high: float | None
     invalidation: float | None
@@ -166,6 +172,7 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
             notes=f"MTF backtest: HTF alignment {snap_dict['alignment']} @ {snap_dict['agreement_ratio']:.2f}",
             input_type="ohlcv",
             poi_selection=args.poi_selection,
+            htf_poi=snapshot.selected_htf_poi,
         )
         plan = analysis.trade_plan
         decision_bars += 1
@@ -192,6 +199,7 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
             htf_filter_allowed += 1
 
         selected_poi = plan.selected_poi
+        htf_poi = plan.selected_htf_poi
         is_watch_retrace = plan.verdict == "Watch Retrace"
         should_trade = (
             plan.verdict == "Execute"
@@ -207,6 +215,12 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
             setup_grade=plan.setup_grade,
             confluence_score=float(plan.confluence_score),
             selected_poi_label=selected_poi.label if selected_poi else None,
+            htf_poi_timeframe=htf_poi.timeframe if htf_poi else None,
+            htf_poi_label=htf_poi.zone.label if htf_poi else None,
+            htf_poi_state=htf_poi.state if htf_poi else None,
+            htf_poi_low=htf_poi.zone.low if htf_poi else None,
+            htf_poi_high=htf_poi.zone.high if htf_poi else None,
+            htf_poi_distance_atr=htf_poi.distance_atr if htf_poi else None,
             entry_low=plan.entry_low,
             entry_high=plan.entry_high,
             invalidation=plan.invalidation,
@@ -265,6 +279,8 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
                     "setup_grade": plan.setup_grade,
                     "confluence_score": plan.confluence_score,
                     "selected_poi": selected_poi.label if selected_poi else None,
+                    "htf_poi": htf_poi.zone.label if htf_poi else None,
+                    "htf_poi_state": htf_poi.state if htf_poi else None,
                     "htf_alignment": snap_dict["alignment"],
                     "htf_agreement_ratio": snap_dict["agreement_ratio"],
                     "htf_filter_passed": bool(htf_filter_passed),

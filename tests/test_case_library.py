@@ -64,7 +64,10 @@ class CaseLibraryTests(unittest.TestCase):
             self.assertIn("source_csv_sha256", payload["data"])
             self.assertEqual(payload["data"]["quality"]["gap_count"], 0)
             self.assertIn("machine_analysis", payload)
+            self.assertIn("zones", payload["visual_geometry"])
+            self.assertIn("structure_segments", payload["visual_geometry"])
             self.assertEqual(payload["expert_label"]["review_status"], "unreviewed")
+            self.assertEqual(payload["expert_label"]["perception_annotations"]["label_status"], "missing")
 
             out_dir = tmp_path / "case"
             paths = write_case_files(out_dir, payload)
@@ -74,7 +77,7 @@ class CaseLibraryTests(unittest.TestCase):
             self.assertTrue(paths["human_label"].exists())
             self.assertTrue(paths["review_packet"].exists())
             written = json.loads(paths["case_json"].read_text(encoding="utf-8"))
-            self.assertEqual(written["case_version"], "1.0")
+            self.assertEqual(written["case_version"], "1.2")
             self.assertIn("Expert Read", paths["human_label"].read_text(encoding="utf-8"))
             self.assertIn("Chart Evidence", paths["review_packet"].read_text(encoding="utf-8"))
 

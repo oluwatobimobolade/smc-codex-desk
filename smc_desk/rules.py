@@ -25,6 +25,8 @@ class RuleConfig(BaseModel):
     confirmation_lookback: int = Field(default=24, ge=3)
     max_zone_age_bars: int = Field(default=160, ge=10)
     poi_proximity_atr: float = Field(default=2.0, gt=0)
+    htf_poi_watch_distance_atr: float = Field(default=1.5, gt=0)
+    htf_approach_lookback_bars: int = Field(default=4, ge=1)
     lookback_bars: int = Field(default=250, ge=50)
     risk_reward_floor: float = Field(default=3.0, gt=0.5)
     atr_lookback: int = Field(default=14, ge=2)

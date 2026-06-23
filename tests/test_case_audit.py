@@ -68,6 +68,7 @@ class CaseAuditTests(unittest.TestCase):
 
             self.assertTrue(case["usable_for_machine_research"])
             self.assertFalse(case["usable_for_training"])
+            self.assertFalse(case["usable_for_perception_evaluation"])
             self.assertIn("unreviewed", case["warnings"])
             self.assertEqual(audit["summary"]["usable_for_training"], 0)
 

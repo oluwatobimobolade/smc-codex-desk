@@ -106,6 +106,17 @@ def engine_analysis_dict(result: Any) -> dict[str, Any]:
             "stop_quality": plan.stop_quality,
             "targets": plan.targets, "risk_reward": plan.risk_reward, "liquidity_target": plan.liquidity_target,
             "checklist": dict(plan.checklist), "selected_poi": _zone_dict(plan.selected_poi),
+            "selected_htf_poi": (
+                {
+                    "timeframe": plan.selected_htf_poi.timeframe,
+                    "state": plan.selected_htf_poi.state,
+                    "distance_atr": plan.selected_htf_poi.distance_atr,
+                    "rank": plan.selected_htf_poi.rank,
+                    "zone": _zone_dict(plan.selected_htf_poi.zone),
+                }
+                if plan.selected_htf_poi
+                else None
+            ),
             "thesis": plan.thesis, "warnings": plan.warnings, "conditions": plan.conditions,
         },
     }
@@ -219,13 +230,15 @@ def main() -> None:
     # engine to the 1H bias (same convention as the backtester) so the live
     # read is not myopic to the execution timeframe.
     decision_time = df["timestamp"].iloc[-1]
-    snap = snapshot_to_dict(build_mtf_snapshot(df, decision_time, config))
+    mtf_snapshot = build_mtf_snapshot(df, decision_time, config)
+    snap = snapshot_to_dict(mtf_snapshot)
     htf_bias = derive_htf_consensus_bias(snap)
     bias_hint = args.bias or (htf_bias if htf_bias in ("bullish", "bearish") else None)
 
     result, _df = analyze_dataframe(
         df=df, symbol=symbol, timeframe=args.timeframe,
         config=config, bias_hint=bias_hint, notes="live dual-lens + MTF", input_type="ohlcv",
+        htf_poi=mtf_snapshot.selected_htf_poi,
     )
     engine = engine_analysis_dict(result)
     engine["mtf"] = snap
@@ -250,7 +263,7 @@ def main() -> None:
 
     plan = engine["trade_plan"]
     print(f"\nMTF -> 1H {snap['1h']['bias']} / 4H {snap['4h']['bias']} / 1D {snap['1d']['bias']} "
-          f"| alignment {snap['alignment']} ({snap['agreement_ratio']})  bias->engine: {bias_hint}")
+          f"| execution consensus {snap['execution_consensus']}  bias->engine: {bias_hint}")
     print(f"ENGINE: {plan['verdict']} (grade {plan['setup_grade']}) · {plan['direction']} · "
           f"confluence {plan['confluence_score']} · last close {engine['metrics'].get('latest_close')}")
 

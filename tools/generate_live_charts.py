@@ -20,6 +20,7 @@ import numpy as np
 from smc_desk.engine import load_ohlcv_csv, analyze_dataframe, detect_swings, detect_equal_levels, detect_fvgs, detect_structure_events, detect_liquidity_sweeps, detect_order_blocks
 from smc_desk.mtf import precompute_htf_series, slice_precomputed_htf, build_mtf_snapshot, derive_htf_consensus_bias, snapshot_to_dict
 from smc_desk.rules import load_rule_config
+from smc_desk.visual_geometry import has_actionable_plan, plan_levels, select_display_events, structure_origin_index, zone_lifecycle
 
 OUTPUT_DIR = ROOT / "journal" / "2026-06-18" / "BTCUSD" / "annotated_charts"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -79,30 +80,25 @@ def annotate_smc(ax, df_slice, swings, zones, events, config, show_premium_disco
             else:
                 ax.scatter(t, s.price, marker="^", color="orange", s=20, zorder=5, alpha=0.7)
 
-    # Equal highs/lows (liquidity)
+    # Zones run from their confirming touch/candle to resolution or this chart's decision candle.
     for z in zones:
+        lifecycle = zone_lifecycle(df_slice, z, events)
+        if not lifecycle.is_active:
+            continue
+        start = lifecycle.activation_index
+        end = lifecycle.end_index
         if z.kind == "liquidity":
-            ax.axhspan(z.low, z.high, alpha=0.15, color="purple", zorder=0)
-            ax.text(timestamps.iloc[0], z.high, f" {z.label}", fontsize=6, color="purple", va="bottom")
-
-    # FVGs
-    for z in zones:
-        if z.kind == "fvg" and z.status != "mitigated":
+            level = z.high if z.direction == "bearish" else z.low
+            ax.plot([timestamps.iloc[start], timestamps.iloc[end]], [level, level], color="purple", linestyle="--", linewidth=0.8, zorder=0)
+            ax.text(timestamps.iloc[end], level, f" {z.label}", fontsize=6, color="purple", va="bottom")
+        elif z.kind in {"fvg", "order_block"}:
             color = "green" if z.direction == "bullish" else "red"
-            ax.axhspan(z.low, z.high, alpha=0.12, color=color, zorder=0)
-            mid_t = timestamps.iloc[min(z.end_index or 0, len(df_slice)-1)]
-            ax.text(mid_t, (z.low + z.high) / 2, f" FVG({z.status[:3]})", fontsize=5, color=color, va="center")
-
-    # Order blocks
-    for z in zones:
-        if z.kind == "order_block" and z.status != "mitigated":
-            color = "green" if z.direction == "bullish" else "red"
-            ax.axhspan(z.low, z.high, alpha=0.15, color=color, zorder=0)
-            mid_t = timestamps.iloc[min(z.end_index or 0, len(df_slice)-1)]
-            ax.text(mid_t, z.high, f" OB({z.status[:3]},{z.score:.2f})", fontsize=5, color=color, va="bottom")
+            ax.fill_between(timestamps.iloc[start : end + 1], z.low, z.high, alpha=0.12, color=color, zorder=0)
+            label = "FVG" if z.kind == "fvg" else "OB"
+            ax.text(timestamps.iloc[start], z.high, f" {label}({z.status[:3]})", fontsize=5, color=color, va="bottom")
 
     # Structure events (BOS/CHoCH)
-    for e in events:
+    for e in select_display_events(events):
         if e.label in ("BOS", "CHoCH") and e.index < len(df_slice):
             t = timestamps.iloc[e.index]
             marker = "D" if e.label == "CHoCH" else "s"
@@ -110,6 +106,9 @@ def annotate_smc(ax, df_slice, swings, zones, events, config, show_premium_disco
             ax.scatter(t, e.price, marker=marker, color=color, s=40, zorder=6, edgecolors="black", linewidth=0.5)
             ax.annotate(f"{e.label}", xy=(t, e.price), fontsize=5, color=color,
                        xytext=(5, 5), textcoords="offset points")
+            origin = structure_origin_index(e, swings, df_slice)
+            if origin is not None and e.broken_level is not None:
+                ax.plot([timestamps.iloc[origin], t], [e.broken_level, e.broken_level], color=color, linestyle="--", linewidth=0.8)
 
     # Liquidity sweeps
     for e in events:
@@ -186,18 +185,29 @@ annotate_smc(ax, df_15m, swings_15m, all_zones_15m, all_events_15m, cfg)
 # Run the full 15m analysis and mark the trade plan
 consensus_bias = derive_htf_consensus_bias(snap_dict)
 bias_hint = consensus_bias if consensus_bias in ("bullish", "bearish") else None
-analysis, _ = analyze_dataframe(df=combined, symbol="BTCUSD", timeframe="15m", config=cfg, bias_hint=bias_hint, input_type="ohlcv")
+analysis, _ = analyze_dataframe(
+    df=combined,
+    symbol="BTCUSD",
+    timeframe="15m",
+    config=cfg,
+    bias_hint=bias_hint,
+    input_type="ohlcv",
+    htf_poi=snap.selected_htf_poi,
+)
 plan = analysis.trade_plan
 
-if plan.selected_poi:
-    ax.axhspan(plan.selected_poi.low, plan.selected_poi.high, alpha=0.25, color="blue", zorder=0)
-    ax.text(df_15m["timestamp"].iloc[0], plan.selected_poi.high, f" POI: {plan.selected_poi.label} ({plan.selected_poi.low:.0f}-{plan.selected_poi.high:.0f})", fontsize=6, color="blue", va="bottom")
+if plan.selected_poi and has_actionable_plan(plan):
+    ax.vlines(decision_time, plan.selected_poi.low, plan.selected_poi.high, color="blue", linewidth=4.0, alpha=0.8, zorder=6)
+    ax.text(decision_time, plan.selected_poi.high, f" POI: {plan.selected_poi.label}", fontsize=6, color="blue", va="bottom")
+if plan.selected_htf_poi:
+    htf_poi = plan.selected_htf_poi
+    ax.vlines(decision_time, htf_poi.zone.low, htf_poi.zone.high, color="purple", linewidth=3.0, alpha=0.7, zorder=6)
+    ax.text(decision_time, htf_poi.zone.high, f" HTF {htf_poi.timeframe}: {htf_poi.state}", fontsize=6, color="purple", va="bottom")
 
-if plan.invalidation:
-    ax.axhline(y=plan.invalidation, color="red", linestyle="--", linewidth=0.8, alpha=0.6, label=f"Stop: {plan.invalidation:.0f}")
-if plan.targets:
-    for t in plan.targets[:2]:
-        ax.axhline(y=t, color="green", linestyle="--", linewidth=0.8, alpha=0.6, label=f"Target: {t:.0f}")
+if has_actionable_plan(plan):
+    for level in plan_levels(plan):
+        color = "red" if "invalid" in level.label.lower() or "sl" in level.label.lower() else "green"
+        ax.scatter(decision_time, level.price, marker="_", color=color, s=110, linewidths=1.3, label=level.label)
 
 ax.axvline(x=decision_time, color="orange", linestyle=":", linewidth=1, alpha=0.7, label=f"Now: {decision_time.strftime('%H:%M')}")
 ax.legend(fontsize=6, loc="upper right")
@@ -232,6 +242,9 @@ for key, value in plan.checklist.items():
 
 if plan.selected_poi:
     summary_text += ["", f"POI: {plan.selected_poi.label} {plan.selected_poi.low:.0f}-{plan.selected_poi.high:.0f} ({plan.selected_poi.status}, score {plan.selected_poi.score:.2f})"]
+if plan.selected_htf_poi:
+    htf_poi = plan.selected_htf_poi
+    summary_text += ["", f"HTF POI: {htf_poi.timeframe} {htf_poi.zone.label} {htf_poi.zone.low:.0f}-{htf_poi.zone.high:.0f} ({htf_poi.state}, {htf_poi.distance_atr:.2f} ATR)"]
 if plan.entry_low and plan.entry_high:
     summary_text += [f"Entry zone: {plan.entry_low:.0f} - {plan.entry_high:.0f}"]
 if plan.invalidation:

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .case_library import file_sha256
+from .perception import annotation_set_from_case, annotation_set_is_gold_ready
 
 
 GOLD_REVIEW_STATUSES = {"gold_standard", "approved"}
@@ -77,6 +78,21 @@ def audit_case(case_path: Path) -> dict[str, Any]:
     if review_status == "unreviewed":
         warnings.append("unreviewed")
 
+    perception_annotation_count = 0
+    perception_label_status = "missing"
+    perception_gold_ready = False
+    try:
+        perception_labels = annotation_set_from_case(case)
+        perception_annotation_count = len(perception_labels.objects)
+        perception_label_status = perception_labels.label_status
+        perception_gold_ready = annotation_set_is_gold_ready(perception_labels)
+    except ValueError:
+        warnings.append("invalid_perception_annotations")
+    if perception_label_status == "missing":
+        warnings.append("missing_perception_annotations")
+    elif not perception_gold_ready:
+        warnings.append("perception_annotations_not_adjudicated")
+
     false_items = _false_checklist_items(case)
     return {
         "case_id": case.get("case_id"),
@@ -88,6 +104,9 @@ def audit_case(case_path: Path) -> dict[str, Any]:
         "case_kind": case.get("case_kind"),
         "review_status": review_status,
         "is_gold_standard": review_status in GOLD_REVIEW_STATUSES,
+        "perception_label_status": perception_label_status,
+        "perception_annotation_count": perception_annotation_count,
+        "perception_gold_ready": perception_gold_ready,
         "machine_verdict": plan.get("verdict"),
         "machine_grade": plan.get("setup_grade"),
         "machine_direction": plan.get("direction"),
@@ -119,6 +138,14 @@ def audit_case(case_path: Path) -> dict[str, Any]:
             and not missing_screenshots
             and review_status in GOLD_REVIEW_STATUSES
         ),
+        "usable_for_perception_evaluation": (
+            source_exists
+            and hash_matches is True
+            and chart_matches is True
+            and not missing_screenshots
+            and review_status in GOLD_REVIEW_STATUSES
+            and perception_gold_ready
+        ),
     }
 
 
@@ -136,6 +163,7 @@ def audit_case_library(root: Path) -> dict[str, Any]:
 
     usable_research = [case for case in cases if case["usable_for_machine_research"]]
     usable_training = [case for case in cases if case["usable_for_training"]]
+    usable_perception = [case for case in cases if case["usable_for_perception_evaluation"]]
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "root": str(root.resolve()),
@@ -143,6 +171,7 @@ def audit_case_library(root: Path) -> dict[str, Any]:
             "total_cases": len(cases),
             "usable_for_machine_research": len(usable_research),
             "usable_for_training": len(usable_training),
+            "usable_for_perception_evaluation": len(usable_perception),
             "gold_standard_cases": sum(1 for case in cases if case["is_gold_standard"]),
             "unreviewed_cases": sum(1 for case in cases if case["review_status"] == "unreviewed"),
             "source_aligned_cases": sum(1 for case in cases if case["chart_exchange_matches_ohlcv"] is True),
@@ -167,6 +196,7 @@ def build_case_index_markdown(audit: dict[str, Any]) -> str:
         f"- Total cases: {summary['total_cases']}",
         f"- Usable for machine research: {summary['usable_for_machine_research']}",
         f"- Usable for training: {summary['usable_for_training']}",
+        f"- Usable for perception evaluation: {summary['usable_for_perception_evaluation']}",
         f"- Gold-standard cases: {summary['gold_standard_cases']}",
         f"- Unreviewed cases: {summary['unreviewed_cases']}",
         f"- Source-aligned cases: {summary['source_aligned_cases']}",
@@ -185,15 +215,15 @@ def build_case_index_markdown(audit: dict[str, Any]) -> str:
             "",
             "## Cases",
             "",
-            "| Case | Symbol | Decision | Verdict | Grade | Review | Research OK | Training OK | Warnings |",
-            "|---|---|---|---|---|---|---:|---:|---|",
+            "| Case | Symbol | Decision | Verdict | Grade | Review | Research OK | Training OK | Perception OK | Warnings |",
+            "|---|---|---|---|---|---|---:|---:|---:|---|",
         ]
     )
     for case in audit["cases"]:
         warnings = ", ".join(case.get("warnings") or []) or "none"
         case_link = Path(case["case_dir"]) / "machine_report.md"
         lines.append(
-            "| [{case_id}]({case_link}) | {symbol} | {decision} | {verdict} | {grade} | {review} | {research_ok} | {training_ok} | {warnings} |".format(
+            "| [{case_id}]({case_link}) | {symbol} | {decision} | {verdict} | {grade} | {review} | {research_ok} | {training_ok} | {perception_ok} | {warnings} |".format(
                 case_id=case.get("case_id") or "unknown",
                 case_link=case_link,
                 symbol=case.get("symbol") or "",
@@ -203,6 +233,7 @@ def build_case_index_markdown(audit: dict[str, Any]) -> str:
                 review=case.get("review_status") or "",
                 research_ok="yes" if case.get("usable_for_machine_research") else "no",
                 training_ok="yes" if case.get("usable_for_training") else "no",
+                perception_ok="yes" if case.get("usable_for_perception_evaluation") else "no",
                 warnings=warnings,
             )
         )

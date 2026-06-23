@@ -8,13 +8,13 @@ The 15m slice passed in must be the analyzer-visible history up to
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
 
 import pandas as pd
 
 from .engine import analyze_dataframe, infer_trend
-from .models import Direction
+from .models import Direction, HigherTimeframePoi, Zone
 from .rules import RuleConfig
 
 
@@ -31,6 +31,8 @@ class HtfContext:
     last_structure_direction: str | None
     last_structure_index: int | None
     inferred_trend: str
+    atr: float | None = None
+    poi_candidates: list[Zone] = field(default_factory=list)
 
 
 @dataclass
@@ -44,6 +46,7 @@ class MtfSnapshot:
     agreement_count: int
     total_count: int
     agreement_ratio: float
+    selected_htf_poi: HigherTimeframePoi | None = None
 
 
 def derive_htf_consensus_bias(snapshot: MtfSnapshot | dict) -> Direction:
@@ -200,6 +203,22 @@ def _context_for(
         bias = last_event.direction if last_event.direction in {"bullish", "bearish"} else inferred
     else:
         bias = inferred
+    true_range = pd.concat(
+        [
+            htf_df["high"] - htf_df["low"],
+            (htf_df["high"] - htf_df["close"].shift(1)).abs(),
+            (htf_df["low"] - htf_df["close"].shift(1)).abs(),
+        ],
+        axis=1,
+    ).max(axis=1)
+    atr = float(true_range.tail(config.atr_lookback).mean()) if not true_range.empty else None
+    allowed_statuses = {"fresh"} if config.require_fresh_poi else {"fresh", "partial"}
+    allowed_kinds = set(config.allowed_poi_kinds or ["fvg", "order_block"])
+    poi_candidates = [
+        zone
+        for zone in analysis.zones
+        if zone.kind in allowed_kinds and zone.status in allowed_statuses
+    ]
     return HtfContext(
         timeframe=target_tf,
         candle_count=int(len(htf_df)),
@@ -209,7 +228,100 @@ def _context_for(
         last_structure_direction=last_event.direction if last_event else None,
         last_structure_index=last_event.index if last_event else None,
         inferred_trend=inferred,
+        atr=round(atr, 8) if atr is not None else None,
+        poi_candidates=poi_candidates,
     )
+
+
+def _htf_poi_age_bars(context: HtfContext, zone: Zone) -> int:
+    if zone.end_index is None:
+        return context.candle_count
+    return max(0, context.candle_count - 1 - zone.end_index)
+
+
+def _approach_is_aligned(
+    closes: pd.Series,
+    direction: Direction,
+    lookback: int,
+) -> bool:
+    if direction not in {"bullish", "bearish"} or len(closes) <= lookback:
+        return False
+    current = float(closes.iloc[-1])
+    prior = float(closes.iloc[-1 - lookback])
+    return (direction == "bearish" and current > prior) or (direction == "bullish" and current < prior)
+
+
+def select_htf_poi(
+    snapshot: MtfSnapshot,
+    current_price: float,
+    config: RuleConfig,
+    recent_15m_closes: pd.Series | None = None,
+) -> HigherTimeframePoi | None:
+    """Choose one aligned 1H/4H POI for monitoring, not for direct execution.
+
+    A zone may be mapped while distant. It becomes ``approaching`` only when
+    price is moving toward it and within a timeframe-normalised distance. This
+    prevents every untouched historical zone from becoming a live watch alert.
+    """
+    direction = derive_htf_consensus_bias(snapshot)
+    if direction not in {"bullish", "bearish"}:
+        return None
+
+    max_age_hours = config.max_zone_age_bars * 0.25
+    closes = recent_15m_closes if recent_15m_closes is not None else pd.Series(dtype=float)
+    approach_confirmed = _approach_is_aligned(closes, direction, config.htf_approach_lookback_bars)
+    candidates: list[HigherTimeframePoi] = []
+
+    for timeframe, context, hours_per_bar in (
+        ("1h", snapshot.one_hour, 1.0),
+        ("4h", snapshot.four_hour, 4.0),
+    ):
+        timeframe_atr = context.atr
+        if timeframe_atr is None or timeframe_atr <= 0:
+            continue
+        for zone in context.poi_candidates:
+            if zone.direction != direction:
+                continue
+            age_bars = _htf_poi_age_bars(context, zone)
+            if age_bars * hours_per_bar > max_age_hours:
+                continue
+            if direction == "bearish" and zone.high < current_price:
+                continue
+            if direction == "bullish" and zone.low > current_price:
+                continue
+
+            if zone.low <= current_price <= zone.high:
+                state = "at_poi"
+                distance_atr = 0.0
+            else:
+                distance = zone.low - current_price if direction == "bearish" else current_price - zone.high
+                distance_atr = max(0.0, distance / timeframe_atr)
+                state = (
+                    "approaching"
+                    if approach_confirmed and distance_atr <= config.htf_poi_watch_distance_atr
+                    else "mapped"
+                )
+
+            timeframe_bonus = 0.07 if timeframe == "4h" else 0.03
+            freshness_bonus = 0.08 if zone.status == "fresh" else 0.02
+            distance_penalty = min(0.25, distance_atr * 0.035)
+            rank = max(0.0, min(1.0, zone.score + timeframe_bonus + freshness_bonus - distance_penalty))
+            candidates.append(
+                HigherTimeframePoi(
+                    timeframe=timeframe,
+                    zone=zone,
+                    state=state,
+                    distance_atr=round(distance_atr, 3),
+                    age_bars=age_bars,
+                    rank=round(rank, 3),
+                    approach_confirmed=approach_confirmed,
+                )
+            )
+
+    if not candidates:
+        return None
+    state_priority = {"mapped": 0, "approaching": 1, "at_poi": 2}
+    return sorted(candidates, key=lambda poi: (state_priority[poi.state], poi.rank), reverse=True)[0]
 
 
 def build_mtf_snapshot(
@@ -245,7 +357,7 @@ def build_mtf_snapshot(
     total = len(biases)
     agreement_count = max(agreement_bullish, agreement_bearish)
 
-    return MtfSnapshot(
+    snapshot = MtfSnapshot(
         decision_time=pd.Timestamp(decision_time),
         bars_visible_15m=int(len(visible_15m)),
         one_hour=contexts["1h"],
@@ -256,6 +368,14 @@ def build_mtf_snapshot(
         total_count=int(total),
         agreement_ratio=round(agreement_count / total, 4) if total else 0.0,
     )
+    current_price = float(visible_15m["close"].iloc[-1]) if not visible_15m.empty else 0.0
+    snapshot.selected_htf_poi = select_htf_poi(
+        snapshot,
+        current_price=current_price,
+        config=config,
+        recent_15m_closes=visible_15m["close"],
+    )
+    return snapshot
 
 
 def snapshot_to_dict(snapshot: MtfSnapshot) -> dict:
@@ -269,6 +389,8 @@ def snapshot_to_dict(snapshot: MtfSnapshot) -> dict:
             "last_structure_direction": ctx.last_structure_direction,
             "last_structure_index": ctx.last_structure_index,
             "inferred_trend": ctx.inferred_trend,
+            "atr": ctx.atr,
+            "poi_candidates": [zone.model_dump() for zone in ctx.poi_candidates],
         }
 
     return {
@@ -281,4 +403,8 @@ def snapshot_to_dict(snapshot: MtfSnapshot) -> dict:
         "agreement_count": snapshot.agreement_count,
         "total_count": snapshot.total_count,
         "agreement_ratio": snapshot.agreement_ratio,
+        # ``alignment`` is a descriptive plurality across the three HTFs.
+        # Execution must use the stricter 1H/4H(+1D) consensus rule instead.
+        "execution_consensus": derive_htf_consensus_bias(snapshot),
+        "selected_htf_poi": snapshot.selected_htf_poi.model_dump() if snapshot.selected_htf_poi else None,
     }

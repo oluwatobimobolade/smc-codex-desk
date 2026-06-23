@@ -187,6 +187,114 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(plan.risk_pct, 0.0)
         self.assertFalse(plan.checklist["liquidity_sweep"])
 
+    def test_trade_plan_never_issues_target_on_wrong_side_of_entry(self) -> None:
+        df = candles([(109.0, 111.0, 108.0, 110.0) for _ in range(30)])
+        swings = [
+            SwingPoint(kind="low", index=5, timestamp=df.at[5, "timestamp"].isoformat(), price=95.0),
+            SwingPoint(kind="high", index=10, timestamp=df.at[10, "timestamp"].isoformat(), price=108.0),
+            SwingPoint(kind="low", index=15, timestamp=df.at[15, "timestamp"].isoformat(), price=96.0),
+            SwingPoint(kind="high", index=22, timestamp=df.at[22, "timestamp"].isoformat(), price=107.0),
+        ]
+        zones = [
+            Zone(
+                label="Bullish FVG",
+                kind="fvg",
+                direction="bullish",
+                low=100.0,
+                high=101.0,
+                start_index=18,
+                end_index=20,
+                score=0.85,
+                confidence=0.85,
+                status="fresh",
+                reason="test entry",
+            ),
+            Zone(
+                label="Equal Lows",
+                kind="liquidity",
+                direction="bullish",
+                low=99.0,
+                high=99.1,
+                score=0.8,
+                confidence=0.8,
+                reason="wrong-side liquidity",
+            ),
+        ]
+        events = [
+            StructureEvent(
+                label="BOS",
+                direction="bullish",
+                index=28,
+                timestamp=df.at[28, "timestamp"].isoformat(),
+                price=110.0,
+                broken_level=108.0,
+                displacement_score=2.0,
+                strength="valid",
+                reason="test break",
+            )
+        ]
+
+        plan = build_trade_plan(df, swings, zones, events, RuleConfig(risk_reward_floor=1.0), bias_hint="bullish")
+
+        self.assertEqual(plan.targets, [])
+        self.assertIsNone(plan.liquidity_target)
+        self.assertIsNone(plan.risk_reward)
+        self.assertTrue(any("No external bullish liquidity target" in warning for warning in plan.warnings))
+
+    def test_trade_plan_never_issues_short_target_above_entry(self) -> None:
+        df = candles([(99.0, 101.0, 98.0, 100.0) for _ in range(30)])
+        swings = [
+            SwingPoint(kind="low", index=5, timestamp=df.at[5, "timestamp"].isoformat(), price=101.0),
+            SwingPoint(kind="high", index=10, timestamp=df.at[10, "timestamp"].isoformat(), price=103.0),
+            SwingPoint(kind="low", index=15, timestamp=df.at[15, "timestamp"].isoformat(), price=102.0),
+            SwingPoint(kind="high", index=22, timestamp=df.at[22, "timestamp"].isoformat(), price=102.0),
+        ]
+        zones = [
+            Zone(
+                label="Bearish FVG",
+                kind="fvg",
+                direction="bearish",
+                low=104.0,
+                high=105.0,
+                start_index=18,
+                end_index=20,
+                score=0.85,
+                confidence=0.85,
+                status="fresh",
+                reason="test entry",
+            ),
+            Zone(
+                label="Equal Highs",
+                kind="liquidity",
+                direction="bearish",
+                low=106.0,
+                high=106.1,
+                score=0.8,
+                confidence=0.8,
+                reason="wrong-side liquidity",
+            ),
+        ]
+        events = [
+            StructureEvent(
+                label="BOS",
+                direction="bearish",
+                index=28,
+                timestamp=df.at[28, "timestamp"].isoformat(),
+                price=100.0,
+                broken_level=102.0,
+                displacement_score=2.0,
+                strength="valid",
+                reason="test break",
+            )
+        ]
+
+        plan = build_trade_plan(df, swings, zones, events, RuleConfig(risk_reward_floor=1.0), bias_hint="bearish")
+
+        self.assertEqual(plan.targets, [])
+        self.assertIsNone(plan.liquidity_target)
+        self.assertIsNone(plan.risk_reward)
+        self.assertTrue(any("No external bearish liquidity target" in warning for warning in plan.warnings))
+
     def test_trade_plan_executes_only_when_full_checklist_passes(self) -> None:
         config = RuleConfig(risk_reward_floor=3.0)
         df = candles([(105.0, 106.0, 104.5, 105.5) for _ in range(30)])

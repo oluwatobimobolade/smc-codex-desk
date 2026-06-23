@@ -125,7 +125,31 @@ Engine rule today:
 - A trade cannot be `Execute` unless POI, sweep, displacement break, sequence, stop buffer, and R:R all pass.
 - `Watch Retrace` is diagnostic/watchlist unless explicitly enabled for research.
 
-### 7. Stops and targets must be structural
+### 7. Higher-timeframe POIs should be monitored before they are traded
+
+The common top-down workflow separates **where a trade might form** from
+**whether a trade may be entered now**. A 1H/4H OB or FVG aligned with the
+external bias is a route-map area; lower-timeframe sweep, displacement, and
+structure are the timing mechanism.
+
+Engine rule:
+
+- A fresh, directionally aligned 1H/4H POI is retained with its native
+  timeframe and price range.
+- It is merely **mapped** when distant.
+- It becomes `Watch HTF POI` only when price is inside it or approaching it
+  within a timeframe-normalised distance in the expected corrective direction.
+- `Watch HTF POI` has zero risk and never supplies an entry, SL, TP, or
+  backtest trade. It asks the execution engine to wait for the normal 15m
+  sweep -> displacement -> internal CHoCH/BOS -> refined retrace sequence.
+- `Watch Retrace` remains a distinct later state: the 15m confirmation has
+  already happened and the engine is waiting for a retrace into the refined
+  execution POI.
+
+This is a monitoring improvement, not a claim that an untouched OB/FVG has an
+edge. A POI touch alone remains insufficient for an `Execute` verdict.
+
+### 8. Stops and targets must be structural
 
 Common language:
 
@@ -159,6 +183,7 @@ These may be useful, but they are not common enough across our source set to bec
 5. Keep FVG and OB as core POIs, but do not force every OB to have an immediate FVG until tested.
 6. Keep fresh POI default.
 7. Treat killzones, 5m confirmation, news, breaker blocks, and strict OB+FVG rules as modules to test, not claims that the engine already enforces.
+8. Surface aligned 1H/4H POIs as zero-risk watch context, while preserving the complete 15m confirmation gate for execution.
 
 ## External References
 
@@ -169,4 +194,3 @@ These may be useful, but they are not common enough across our source set to bec
 - [LuxAlgo Premium & Discount Zones](https://docs.luxalgo.com/docs/algos/price-action-concepts/pdzones)
 - [LuxAlgo Highs & Lows MTF](https://docs.luxalgo.com/docs/algos/price-action-concepts/previous-high-low)
 - [TradingView Smart Money Concepts (SMC) LuxAlgo](https://www.tradingview.com/script/CnB3fSph-Smart-Money-Concepts-SMC-LuxAlgo/)
-

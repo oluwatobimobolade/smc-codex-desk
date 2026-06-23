@@ -6,10 +6,11 @@ import unittest
 from pathlib import Path
 
 from smc_desk.tradingview_overlay import build_tradingview_pine_overlay, write_tradingview_overlay
+from smc_desk.visual_geometry import zone_visual_key
 
 
 def minimal_case() -> dict:
-    return {
+    case = {
         "case_id": "BTCUSD_20260101_000000_test",
         "symbol": "BTCUSD",
         "exchange": "BITSTAMP",
@@ -39,8 +40,10 @@ def minimal_case() -> dict:
                 {
                     "label": "BOS",
                     "direction": "bearish",
+                    "index": 3,
                     "timestamp": "2026-01-01T00:00:00",
                     "price": 99.0,
+                    "broken_level": 99.0,
                 },
                 {
                     "label": "Liquidity Sweep",
@@ -65,6 +68,37 @@ def minimal_case() -> dict:
             },
         },
     }
+    zones = case["machine_analysis"]["zones"]
+    case["visual_geometry"] = {
+        "as_of": "2026-01-01T00:00:00",
+        "zones": [
+            {
+                "key": zone_visual_key(zones[0]),
+                "activation_time": "2025-12-31T22:00:00Z",
+                "end_time": "2026-01-01T00:00:00Z",
+                "state": "fresh",
+                "active": True,
+            },
+            {
+                "key": zone_visual_key(zones[1]),
+                "activation_time": "2025-12-31T23:00:00Z",
+                "end_time": "2026-01-01T00:00:00Z",
+                "state": "fresh",
+                "active": True,
+            },
+        ],
+        "structure_segments": [
+            {
+                "event_index": 3,
+                "event_label": "BOS",
+                "start_time": "2025-12-31T23:15:00Z",
+                "end_time": "2026-01-01T00:00:00Z",
+                "price": 99.0,
+            }
+        ],
+        "plan": {"actionable": False},
+    }
+    return case
 
 
 class TradingViewOverlayTests(unittest.TestCase):
@@ -77,9 +111,14 @@ class TradingViewOverlayTests(unittest.TestCase):
         self.assertIn("line.new", pine)
         self.assertIn("label.new", pine)
         self.assertIn("should not invent extra levels", pine)
-        self.assertGreaterEqual(stats.boxes, 2)
-        self.assertGreaterEqual(stats.lines, 3)
-        self.assertGreaterEqual(stats.labels, 5)
+        self.assertNotIn("extend = extend.right", pine)
+        self.assertNotIn("three days", pine)
+        self.assertIn("left = 1767218400000", pine)
+        self.assertIn("right = 1767225600000", pine)
+        self.assertNotIn("Execution SL", pine)
+        self.assertEqual(stats.boxes, 2)
+        self.assertEqual(stats.lines, 1)
+        self.assertEqual(stats.labels, 2)
 
     def test_writes_overlay_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -94,6 +133,36 @@ class TradingViewOverlayTests(unittest.TestCase):
             self.assertTrue(pine_path.exists())
             self.assertTrue(manifest_path.exists())
             self.assertEqual(manifest["boxes"], 2)
+
+    def test_limits_snapshot_to_six_highest_priority_active_zones(self) -> None:
+        case = minimal_case()
+        for index in range(7):
+            zone = {
+                "label": f"Bullish FVG {index}",
+                "kind": "fvg",
+                "direction": "bullish",
+                "low": 110.0 + index,
+                "high": 111.0 + index,
+                "status": "fresh",
+                "score": 0.9 - index * 0.01,
+                "start_index": index,
+                "end_index": index + 1,
+            }
+            case["machine_analysis"]["zones"].append(zone)
+            case["visual_geometry"]["zones"].append(
+                {
+                    "key": zone_visual_key(zone),
+                    "activation_time": "2025-12-31T22:00:00Z",
+                    "end_time": "2026-01-01T00:00:00Z",
+                    "state": "fresh",
+                    "active": True,
+                    "display_confidence": "high",
+                }
+            )
+
+        _pine, stats = build_tradingview_pine_overlay(case)
+
+        self.assertEqual(stats.boxes, 6)
 
 
 if __name__ == "__main__":

@@ -14,6 +14,10 @@ The system is not yet a perfect multi-pair SMC trader. It is a strong foundation
 
 It should not be described as screenshot-trained or edge-proven yet. The current edge is discipline and repeatability, not proven profitability.
 
+Perception measurement is governed by `PERCEPTION_ACCURACY_PROTOCOL.md`.
+Synthetic fixtures are detector regression tests only; only adjudicated,
+source-aligned real cases can support a perception-accuracy claim.
+
 ## Core Rule
 
 Screenshots are evidence, not the source of truth.
@@ -28,6 +32,31 @@ The system should never ask a model to freely invent levels from pixels. The saf
 6. Audit the result against human/expert labels.
 
 This makes weak and strong models read the same structured truth instead of guessing.
+
+## Visual Lifecycle Contract
+
+Every rendered object must state when it became valid and when its meaning
+ended. Rendering is a snapshot of the closed-candle decision state, not a
+projection into an unknown future.
+
+- **FVG and order block:** begin at their confirming candle and end at first
+  full mitigation or the decision candle if still active.
+- **Equal-high/equal-low liquidity:** begins once the final confirming touch is
+  available and ends at the matching sweep or the decision candle if unswept.
+- **BOS/CHoCH:** the dashed segment runs from the matching protected swing to
+  the break candle. If that source swing cannot be proven, show only the event
+  marker; never manufacture a fixed-width backward line.
+- **Trade plan:** entry/SL/target values are decision-candle tags only. They
+  are shown only for an actionable entry geometry, never for a `Pass`, and are
+  not drawn as forward rays.
+- **Pine overlay:** is a static case snapshot. It stops all objects at their
+  resolution or decision time, carries no `extend.right`, and shows at most
+  the six highest-priority active zones. The underlying case retains every
+  detected object for audit.
+
+The same lifecycle and display-confidence policy must drive the PNG renderer,
+vision explanation overlays, and Pine export. A chart that lacks lifecycle
+metadata must not pretend to know historical x-coordinates or future validity.
 
 ## What Must Be Detected
 
@@ -108,6 +137,7 @@ This can click and type, but using it to mouse-draw rectangles/lines is fragile 
 5. **Missing checks must be explicit:** the model must say why it is not an entry.
 6. **Human label gate:** only `gold_standard` or `approved` cases can train/evaluate model behavior.
 7. **Regression set:** every future rules change must pass a fixed set of reviewed wins, losses, missed entries, and no-trade chop cases.
+8. **No synthetic accuracy claims:** synthetic recall validates a code contract, not real-chart recognition.
 
 ## Research Notes
 
