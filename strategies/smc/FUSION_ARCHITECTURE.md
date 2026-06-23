@@ -1,69 +1,85 @@
-# Fusion Architecture — Autonomous SMC Layers
+# Fusion Architecture — Trustworthy SMC Augmentation
 
-This document describes the four-layer observability stack that sits **beside** the existing deterministic SMC engine. It does **not** replace the engine, `dual_lens.py`, or the safety model. It adds narrative, visual, and intent context that can be used to downgrade or challenge an engine recommendation, never to upgrade it.
+This document describes the experimental observability stack that sits **beside** the existing deterministic SMC engine. It does **not** replace the engine, `dual_lens.py`, or the safety model. Its purpose is to add context that helps the system see more clearly and abstain more accurately.
+
+> **Guiding principle:** The fusion layer adds better seeing and better abstention. It does not add alpha. Any piece that makes you more likely to deploy capital on the base signal is a bug.
+
+## Status
+
+This is a **shadow-mode** research layer. It logs its verdicts and reasoning; it does not change the live trade plan. It may graduate to "voting" only after meeting the acceptance gates at the end of this document.
 
 ## Design Principles
 
-1. **Engine owns prices.** The deterministic engine continues to calculate entry, stop, target, invalidation, and POI levels.
-2. **Fusion is observability-only by default.** It records conflicts, overrides, and narratives; it does not originate trades.
-3. **Downgrade-only.** The Fusion Engine may lower a verdict (`Execute → Watch → Pass`) and may change bias, but it may **not** promote `Pass`/`Watch` to `Execute`.
-4. **No invented prices.** None of the new layers generate entry, stop, or target prices.
-5. **Falsifiable hypotheses.** Every intent rule and visual detector states its trigger conditions explicitly and is unit-tested against synthetic data.
+1. **Engine owns every price.** Entry, stop, target, invalidation, and POI levels all come from the deterministic engine.
+2. **Dual-direction hypotheses.** The engine emits both a bullish and a bearish `TradePlan`. Fusion scores the two competing hypotheses rather than overriding a single baseline.
+3. **Fusion is observability-only by default.** It records conflicts, overrides, and narratives; it does not originate trades.
+4. **Downgrade-only.** The Fusion Engine may lower a verdict (`Execute → Watch → Pass`) and may flag a contested state, but it may **not** promote `Pass`/`Watch` to `Execute`.
+5. **No invented prices.** Every price referenced by Fusion must trace to an engine-owned level.
+6. **Hard gates are vetoes, not scores.** R:R floor, POI mitigation, news blackout, and counter-Daily-without-exception each force `Pass` and cannot be overridden by confidence.
+7. **Falsifiable hypotheses.** Every intent rule and feature detector states its trigger conditions and is unit-tested against synthetic data.
 
 ## The Four Layers
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Fusion Engine                                              │
-│  - reconciles engine verdict with narrative/intent/visual   │
-│  - downgrade-only overrides                                 │
+│  - scores bullish/bearish engine plans                      │
+│  - downgrade-only; can flag contested                       │
 └──────────────────┬──────────────────────────────────────────┘
                    │
     ┌──────────────┼──────────────┬──────────────┐
     ▼              ▼              ▼              ▼
 ┌────────┐  ┌────────────┐  ┌────────────┐  ┌─────────────┐
-│ Engine │  │ Sequence   │  │ Intent     │  │ Visual      │
-│        │  │ Memory     │  │ Detector   │  │ Cortex      │
-│ owns   │  │ episodes   │  │ what is    │  │ vertical    │
-│ prices │  │ & narrative│  │ market     │  │ spikes,     │
-│        │  │            │  │ trying to  │  │ failed      │
-│        │  │            │  │ do?        │  │ breakouts   │
+│ Engine │  │ Sequence   │  │ Intent     │  │ OHLCV       │
+│        │  │ Memory     │  │ Detector   │  │ Features    │
+│ owns   │  │ episodes   │  │ calibrated │  │ exact,      │
+│ prices │  │ & narrative│  │ modulators │  │ cv2-free    │
+│        │  │            │  │            │  │             │
+│ emits  │  │            │  │            │  │             │
+│ both   │  │            │  │            │  │             │
+│ dirs   │  │            │  │            │  │             │
 └────────┘  └────────────┘  └────────────┘  └─────────────┘
 ```
 
-### 1. Sequence Memory (`smc_desk/sequence_memory.py`)
+### 1. Engine — now dual-direction (`smc_desk/engine.py`)
 
-Converts a stream of closed bars into discrete market episodes:
+The engine still computes all prices, but `analyze_dataframe()` now populates:
 
-- `RALLY` — sustained upward displacement
-- `DROP` — sustained downward displacement
-- `CONSOLIDATION` — range-bound action
-- `TRAP` — a spike that reverses and invalidates the prior move
-- `ACCUMULATION` / `DISTRIBUTION` — inferred from episode context (observability only)
+- `AnalysisResult.trade_plan` — the primary direction (backward-compatible).
+- `AnalysisResult.bullish_plan` — the long thesis with engine-owned levels.
+- `AnalysisResult.bearish_plan` — the short thesis with engine-owned levels.
 
-Each completed episode stores start/end bar, high/low, key events, parent/child relationships, and a confidence score. The layer also emits a short human-readable narrative of the last few episodes.
+`build_dual_trade_plan()` calls the same direction-agnostic helper twice. There is no duplicated preprocessing; swing, FVG, OB, sweep, and structure detection already run once for both directions.
 
-**Safety note:** Sequence Memory never creates price levels. It only labels what has already happened.
+**Hard gate:** A plan with `risk_reward < floor` now forces `Pass`, regardless of other confluence. This fixes the "R:R 1.5 · Watch" bug.
 
-### 2. Visual Cortex (`smc_desk/visual_cortex.py`)
+### 2. Sequence Memory (`smc_desk/sequence_memory.py`)
 
-Provides computer-vision-style analysis of rendered OHLCV charts. Because the input is synthetic/rendered, the detectors are deterministic and independent of broker chart scaling.
+Converts a stream of closed bars into descriptive market episodes:
 
-Current detectors:
+- `RALLY`, `DROP`, `CONSOLIDATION`, `TRAP`, `ACCUMULATION`, `DISTRIBUTION`
 
-- **Vertical spike trap** — a tall wick that reverses, suggesting liquidity grab.
-- **Failed breakout** — price pushes past a recent extreme and closes back inside the range.
+Each completed episode stores start/end bar, high/low, key events, and a confidence score. The layer emits a human-readable narrative.
 
-The layer exposes `render_chart_for_visual_cortex()` so callers can produce the exact image the detectors see, making every detection reproducible.
+**Safety note:** Sequence Memory never creates price levels. It only labels what has already happened. It is tested for no future leakage: episodes that end before bar T are unchanged when future bars arrive.
 
-**Safety note:** Visual Cortex returns patterns and confidence scores. It does not calculate entry/stop/target prices.
+### 3. OHLCV Features (`smc_desk/features.py`)
 
-### 3. Intent Detector (`smc_desk/intent_detector.py`)
+OHLCV-derivable pattern detection in pure numpy/pandas:
 
-Scores competing hypotheses about market intent. Rules are small, composable plugins implementing the `IntentRule` protocol. Current rules include:
+- **Vertical spike trap** — sudden range expansion + reversal.
+- **Failed breakout** — price pierces a recent extreme and closes back inside.
+- **Wick/body ratios** — rejection strength.
+- **Regime proxies** — adx_proxy, volatility_pct, net_change, regime_label.
+
+Every function accepts a `decision_time` cutoff and refuses to read future bars. This replaces the cv2-based pixel-recovery pipeline for all features that are losslessly computable from the raw data.
+
+### 4. Intent Detector (`smc_desk/intent_detector.py`)
+
+Scores competing hypotheses about market intent. Rules implement the `IntentRule` protocol. Current rules include:
 
 - Sweep reversal trap
-- Spike trap (uses Visual Cortex patterns)
+- Spike trap (uses OHLCV features)
 - Rally-then-trap distribution
 - Drop-then-trap accumulation
 - Exhaustion
@@ -71,34 +87,39 @@ Scores competing hypotheses about market intent. Rules are small, composable plu
 - Active trap / chop
 - Multiple failed breakouts
 
-The detector aggregates rule scores into a normalized distribution and returns a primary intent with reasoning.
+**Critical change:** Intent is a **modulator**, not a director. By default it runs in **log-only mode**: it records conflicts and would-have-been score adjustments, but it cannot change the fused verdict. After calibration against a gold set, `allow_intent_modulation=True` can apply learned multipliers.
 
-**Safety note:** Intent is probabilistic context, not a trade signal.
+### 5. Fusion Engine (`smc_desk/fusion_engine.py`)
 
-### 4. Fusion Engine (`smc_desk/fusion_engine.py`)
-
-Reconciles the deterministic engine recommendation with Sequence Memory, Intent Detector, and Visual Cortex.
+Reconciles the engine's dual plans with Sequence Memory, Intent Detector, features, and regime context.
 
 Behavior:
 
-- Records each layer as a `FusionContribution`.
-- If a high-confidence intent conflicts with engine bias (e.g., `BULL_TRAP` vs. `bullish`), it may override the bias and downgrade the verdict.
-- If the active sequence episode is a trap/chop, it downgrades `Execute` to `Watch`.
-- Every change produces a `FusionOverride` with source, field, old/new values, and reason.
-- Confidence is penalized when layers conflict.
+- Records engine, intent, and sequence contributions.
+- Scores both bullish and bearish plans.
+- Applies regime penalties (`chop`, `trend_counter`).
+- Records intent modulation as log-only by default.
+- Flags `contested` when neither direction wins by a clear margin.
+- Downgrades `Execute → Watch` when an active trap episode exists.
+- Produces `FusionOverride` records for every change.
+- Maps every emitted price to its engine source in `price_sources`.
 
-**Safety note:** Fusion Engine accepts the engine's `AnalysisResult` (which owns all prices) and may only downgrade the verdict or bias. It cannot create new price levels or upgrade a verdict.
+**Safety note:** Fusion may only downgrade or contextualize. It cannot invent prices or upgrade a verdict.
 
-## Replay Tool
+## Market Context
 
-`tools/replay_episodes.py` replays a closed-candle OHLCV CSV through the four layers and writes a JSON log:
+`MarketContext` carries external state that can affect interpretation:
 
-- episode transitions
-- visual pattern detections
-- intent samples
-- fusion overrides and final recommendations
+- `minutes_to_next_major_news`
+- `is_options_expiry_day`
+- `session`
+- `regime_label` — from `features.regime_features()`
 
-Example:
+## Tools
+
+### Replay episodes
+
+`tools/replay_episodes.py` runs the layers over a historical CSV and writes a JSON log:
 
 ```bash
 .venv/bin/python tools/replay_episodes.py \
@@ -109,9 +130,7 @@ Example:
   --warmup-bars 50
 ```
 
-This is useful for auditing how the layers evolve over a historical window without generating trades.
-
-You can also attach the Fusion Engine to a normal chart analysis:
+### Attach to chart analysis
 
 ```bash
 .venv/bin/python tools/analyze_chart.py \
@@ -128,32 +147,50 @@ This writes `analysis.json` with a `fusion_observability` section and a human-re
 
 When wiring the Fusion Engine into the live pipeline:
 
-1. Run the deterministic engine first and obtain its `AnalysisResult`.
+1. Run the deterministic engine first and obtain its `AnalysisResult` with both `bullish_plan` and `bearish_plan`.
 2. Run Sequence Memory over the same closed bars.
-3. (Optional) run Visual Cortex on the rendered chart window.
-4. Run Intent Detector with the current memory, patterns, and any `MarketContext` (news, session, options expiry).
-5. Call `FusionEngine.fuse(engine_result, sequence_memory, intent_result, visual_patterns)`.
-6. Use the returned `FusionResult.recommended_verdict` / `recommended_bias` only if they are **downgrades** from the engine verdict/bias.
+3. Compute OHLCV features and regime context from bars ≤ decision time.
+4. Run Intent Detector with memory, features, and `MarketContext`.
+5. Call `FusionEngine.fuse(engine_result, sequence_memory, intent_result, visual_patterns=features, context=context)`.
+6. Use the returned `FusionResult` only for logging and research. Do not let it change the live trade plan until the acceptance gates are met.
 7. Log every `FusionOverride` for review.
+
+## Acceptance Gates (GO/NO-GO)
+
+Fusion may graduate from shadow mode to voting only when all three hold on a blind adversarial gold set:
+
+1. **Direction accuracy ≥ 85%** (including "no_trade").
+2. **Brier score ≤ 0.25** on confidence predictions.
+3. **Zero hard-gate violations** in the regression suite.
+
+Until all three hold, it is not A+ no matter how persuasive the prose reads.
 
 ## Future Work
 
-- Calibrate Visual Cortex thresholds on real annotated screenshots.
-- Add more intent rules (e.g., order-block failure, stop-run cascade).
+- Calibrate intent rule weights against adjudicated gold cases.
+- Add more intent rules (order-block failure, stop-run cascade).
 - Wire Fusion Engine into `tools/backtest_smc_elite.py` as an optional observability flag.
-- Add a perception benchmark that compares Fusion Engine overrides against adjudicated labels.
+- Build a perception benchmark that compares Fusion Engine overrides against adjudicated labels.
+- Migrate Sequence Memory to consume state-machine transitions for a single temporal source of truth.
 
 ## References
 
+- `smc_desk/engine.py`
+- `smc_desk/features.py`
 - `smc_desk/sequence_memory.py`
-- `smc_desk/visual_cortex.py`
 - `smc_desk/intent_detector.py`
 - `smc_desk/fusion_engine.py`
+- `smc_desk/regime.py`
 - `tools/replay_episodes.py`
 - `tools/analyze_chart.py`
-- `tests/test_sequence_memory.py`
-- `tests/test_visual_cortex.py`
-- `tests/test_intent_detector.py`
+- `tests/test_engine_dual_direction.py`
+- `tests/test_engine_hard_gates.py`
+- `tests/test_features.py`
+- `tests/test_fusion_leakage.py`
+- `tests/test_fusion_golden.py`
+- `tests/test_fusion_price_provenance.py`
 - `tests/test_fusion_engine.py`
+- `tests/test_intent_detector.py`
+- `tests/test_sequence_memory.py`
 - `tests/test_replay_episodes.py`
 - `tests/test_analyze_chart.py`
