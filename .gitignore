@@ -37,7 +37,7 @@ ENV/
 Thumbs.db
 
 # Data (large files)
-data/
+/data/
 
 # Backtest outputs (artifacts)
 backtests/
