@@ -143,11 +143,19 @@ class FusionEngineConfig:
     conflict_confidence_penalty: float = 0.85
 
 
+from smc_desk.rules import load_rule_config
+
 class FusionEngine:
     """Score two engine-owned directions and select or contest the result."""
 
     def __init__(self, config: Optional[FusionEngineConfig] = None):
         self.config = config or FusionEngineConfig()
+        
+        # Enforce global authority limit
+        rule_config = load_rule_config()
+        if getattr(rule_config, "vision_authority_mode", "observe_only") == "observe_only":
+            self.config.allow_verdict_downgrade = False
+            self.config.allow_intent_modulation = False
 
     def fuse(
         self,

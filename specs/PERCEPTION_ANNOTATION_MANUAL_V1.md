@@ -7,8 +7,9 @@ Do not assume what the chart *ought* to have done based on subsequent action. Yo
 ## Global Rules
 
 1. **Information Horizon:** You cannot use information that occurs after the rightmost candle.
-2. **Ambiguity:** If a structure is poorly formed or unclear, mark it `AMBIGUOUS`.
+2. **Ambiguity:** If a structure is poorly formed or unclear, mark it `AMBIGUOUS`. Genuine ambiguity should be preserved.
 3. **Insufficient Context:** If the left side of the chart does not contain enough data to make a definitive structural call, mark `INSUFFICIENT_CONTEXT`. Do not guess.
+4. **Agreement Expectation:** Objective geometry (e.g. gaps, wicks) is expected to have 100% human agreement. Operational structure (e.g. valid BOS) will have agreement measured and reported.
 
 ---
 
@@ -16,9 +17,9 @@ Do not assume what the chart *ought* to have done based on subsequent action. Yo
 
 A **Swing** is a structural pivot.
 
-*   **Local Swing:** A raw pivot point (High or Low) formed by a minimum of 3 candles (e.g., lower-high, highest-high, lower-high).
-*   **Internal Swing:** A swing that causes a break of sub-structure (minor pivots) but does not result in a new macro high/low.
-*   **External Swing:** The absolute extreme (highest high or lowest low) within the dominant dealing range.
+*   **Local Swing (N=1):** A raw pivot point (High or Low) formed by a minimum of 3 candles (e.g., lower-high, highest-high, lower-high).
+*   **Internal Swing (N=3):** A swing that causes a break of sub-structure (minor pivots) but does not result in a new macro high/low. Formed by 7 candles.
+*   **External Swing (N=5):** The absolute extreme (highest high or lowest low) within the dominant dealing range. Formed by 11 candles.
 *   **Equal Highs/Lows:** If two adjacent candles have the exact same high/low, the first candle in time is the pivot.
 *   **Nested Swings:** If an internal swing occurs within the leg of an external swing, both can exist simultaneously. Annotate their scope appropriately.
 
@@ -49,6 +50,7 @@ A **BOS** is the continuation of the existing structural trend.
 *   **Direction:** Must align with the prior structural break (e.g., a bullish BOS following a bullish BOS/CHoCH).
 *   **Broken Swing:** The BOS must break the most recent valid external (or internal, depending on scope) swing.
 *   **Wick vs. Body:** A valid BOS **must** feature a body closing beyond the extreme wick of the broken swing. A wick-only break is a sweep.
+*   **Displacement Attribute:** The strength of the body close is tracked as a `displacement` attribute. Displacement is a *quality attribute*, not a requirement for the object to exist as a BOS.
 *   **Confirmation:** The exact candle whose body closes beyond the level is the confirmation candle.
 
 **Examples:**
@@ -63,6 +65,7 @@ A **CHoCH** is the first break of structure against the prevailing trend, indica
 
 *   **Broken Swing:** A bearish CHoCH occurs when the most recent **bullish protected low** is broken. A bullish CHoCH occurs when the most recent **bearish protected high** is broken.
 *   **Confirmation:** Like a BOS, a CHoCH requires a body close beyond the protected point's wick.
+*   **Displacement Attribute:** Similar to BOS, displacement is tracked as a quality attribute, not a strict existence requirement.
 *   **Context:** If the prior trend is entirely unclear due to insufficient leftward data, you must mark `INSUFFICIENT_CONTEXT` rather than guessing if a break is a CHoCH or BOS.
 
 **Examples:**
@@ -80,9 +83,11 @@ An **FVG** is a 3-candle imbalance.
     *   **Bearish FVG:** The high of Candle 3 is strictly lower than the low of Candle 1.
 *   **Equality:** If High(1) == Low(3), there is no gap. It is a perfectly balanced price action. The gap must be > 0.
 *   **Mitigation State:**
-    *   **Unmitigated:** No subsequent candle has entered the gap region.
-    *   **Partially Mitigated:** A subsequent wick has entered the gap, but not completely filled it.
-    *   **Fully Mitigated / Invalidated:** A subsequent wick has completely overlapped the gap, or a body has closed entirely beyond the gap.
+    *   **ACTIVE_UNTOUCHED:** No subsequent candle has entered the gap region.
+    *   **PARTIALLY_MITIGATED:** A subsequent wick has entered the gap, but not completely filled it.
+    *   **FULLY_MITIGATED:** A subsequent wick has completely overlapped the gap, reaching the origin.
+    *   **INVALIDATED:** A body has closed entirely beyond the gap origin.
+    *   **SUPERSEDED:** The FVG has aged out or a new structure break has replaced it as the primary POI.
 
 **Examples:**
 *   **Positive:** Candle 1 high is 100. Candle 2 is a massive green body. Candle 3 low is 105. The FVG exists between 100 and 105.

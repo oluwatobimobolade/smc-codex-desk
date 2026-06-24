@@ -24,7 +24,8 @@ def candles(rows: list[tuple[float, float, float, float]]) -> pd.DataFrame:
 
 class EngineTests(unittest.TestCase):
     def test_structure_break_requires_displacement(self) -> None:
-        config = RuleConfig(pivot_window=2, displacement_body_factor=1.5)
+        config = RuleConfig(displacement_body_factor=1.5)
+        config.break_confirmation.displacement_required = True
         df = candles(
             [
                 (100.00, 100.20, 99.90, 100.05),

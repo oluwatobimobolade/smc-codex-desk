@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch, MagicMock
 
 import pandas as pd
 
@@ -71,8 +72,13 @@ class FusionEngineTests(unittest.TestCase):
         intent.primary_intent = MarketIntent.BULL_TRAP
         intent.confidence = 0.92
 
-        fusion = FusionEngine(FusionEngineConfig(allow_intent_modulation=True))
-        result = fusion.fuse(engine_result, mem, intent_result=intent)
+        with patch("smc_desk.fusion_engine.load_rule_config") as mock_load:
+            mock_config = MagicMock()
+            mock_config.vision_authority_mode = "veto"
+            mock_load.return_value = mock_config
+            fusion = FusionEngine(FusionEngineConfig(allow_intent_modulation=True))
+            result = fusion.fuse(engine_result, mem, intent_result=intent)
+        
         # A BULL_TRAP intent should reduce the bullish score relative to bearish.
         if "bullish" in result.scores and "bearish" in result.scores:
             self.assertLess(
@@ -90,8 +96,13 @@ class FusionEngineTests(unittest.TestCase):
         mem = SequenceMemory()
         mem.active_episode = MarketEpisode("ep1", EpisodeType.TRAP, 0, 100.0)
 
-        fusion = FusionEngine()
-        result = fusion.fuse(engine_result, mem)
+        with patch("smc_desk.fusion_engine.load_rule_config") as mock_load:
+            mock_config = MagicMock()
+            mock_config.vision_authority_mode = "veto"
+            mock_load.return_value = mock_config
+            fusion = FusionEngine()
+            result = fusion.fuse(engine_result, mem)
+            
         self.assertEqual(result.recommended_verdict, "Watch")
         self.assertTrue(any("trap" in o.reason.lower() for o in result.overrides))
 

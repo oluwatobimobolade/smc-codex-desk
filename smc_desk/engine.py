@@ -53,7 +53,8 @@ def _rolling_prev_mean(x: np.ndarray, lookback: int = 20) -> np.ndarray:
 
 def detect_swings(df: pd.DataFrame, config: RuleConfig, pivot_window: int | None = None) -> list[SwingPoint]:
     swings: list[SwingPoint] = []
-    window = pivot_window or config.pivot_window
+    # Use specified window, or fallback to the local_pivot_window
+    window = pivot_window or config.swing_scales.local
     h = df["high"].to_numpy(dtype=float)
     l = df["low"].to_numpy(dtype=float)
     ts = _ts_iso(df)
@@ -71,10 +72,10 @@ def detect_swings(df: pd.DataFrame, config: RuleConfig, pivot_window: int | None
 
 def _scope_pivot_window(config: RuleConfig, structure_scope: StructureScope) -> int:
     if structure_scope == "internal":
-        return config.internal_pivot_window or max(2, config.pivot_window - 1)
-    if structure_scope in {"swing", "external"}:
-        return config.swing_pivot_window or config.pivot_window
-    return config.pivot_window
+        return config.swing_scales.internal
+    elif structure_scope == "swing":
+        return config.swing_scales.external
+    return config.swing_scales.local
 
 
 def _recent_swings(swings: list[SwingPoint], kind: str, limit: int = 6) -> list[SwingPoint]:
@@ -160,7 +161,7 @@ def detect_equal_levels(swings: list[SwingPoint], config: RuleConfig) -> list[Zo
                 active = [point]
                 continue
             anchor = float(np.mean([item.price for item in active]))
-            tolerance = anchor * config.equal_level_tolerance_pct
+            tolerance = anchor * (config.equal_level_tolerance_bps / 10000.0)
             if abs(point.price - anchor) <= tolerance:
                 active.append(point)
             else:
@@ -216,10 +217,10 @@ def detect_fvgs(df: pd.DataFrame, config: RuleConfig) -> list[Zone]:
         bullish_gap = float(l[index] - h[index - 2])
         bearish_gap = float(l[index - 2] - h[index])
         price_anchor = max(float(c[index]), 1e-9)
-        has_impulse = (disp[middle_index] >= config.fvg_min_displacement_factor
+        has_impulse = (disp[middle_index] >= config.fvg.displacement_factor
                        and (rng[middle_index] / avg_range[middle_index]) >= 0.9)
         disp_mid = float(disp[middle_index])
-        if bullish_gap / price_anchor >= config.fvg_min_gap_pct and has_impulse:
+        if bullish_gap / price_anchor >= (config.fvg.minimum_gap_bps / 10000.0) and has_impulse:
             low = float(h[index - 2])
             high = float(l[index])
             mitigation_pct = 0.0
@@ -249,7 +250,7 @@ def detect_fvgs(df: pd.DataFrame, config: RuleConfig) -> list[Zone]:
                     reason=f"Three-candle bullish imbalance with displacement score {disp_mid:.2f}.",
                 )
             )
-        if bearish_gap / price_anchor >= config.fvg_min_gap_pct and has_impulse:
+        if bearish_gap / price_anchor >= (config.fvg.minimum_gap_bps / 10000.0) and has_impulse:
             low = float(h[index])
             high = float(l[index - 2])
             mitigation_pct = 0.0
@@ -327,9 +328,10 @@ def detect_structure_events(
         high_to_break = protected_high if requires_protected_reversal and trend == "bearish" and protected_high else active_high
         is_protected_high_break = bool(trend == "bearish" and protected_high and high_to_break == protected_high)
         if high_to_break and (is_protected_high_break or high_to_break.index not in broken_high_indices):
-            threshold = high_to_break.price * (1.0 + config.structure_break_min_pct)
+            threshold = high_to_break.price * (1.0 + config.structure_break_min_bps / 10000.0)
             displacement_score = float(disp[index])
-            if close > threshold and disp[index] >= config.displacement_body_factor and (rng[index] / avg_range[index]) >= 0.9:
+            meets_displacement = not config.break_confirmation.displacement_required or (disp[index] >= config.displacement_body_factor and (rng[index] / avg_range[index]) >= 0.9)
+            if close > threshold and meets_displacement:
                 label = "BOS" if trend in {"neutral", "bullish"} else "CHoCH"
                 protected_word = "protected " if is_protected_high_break and requires_protected_reversal else ""
                 internal_word = "internal " if structure_scope == "internal" else ""
@@ -355,9 +357,10 @@ def detect_structure_events(
         low_to_break = protected_low if requires_protected_reversal and trend == "bullish" and protected_low else active_low
         is_protected_low_break = bool(trend == "bullish" and protected_low and low_to_break == protected_low)
         if low_to_break and (is_protected_low_break or low_to_break.index not in broken_low_indices):
-            threshold = low_to_break.price * (1.0 - config.structure_break_min_pct)
+            threshold = low_to_break.price * (1.0 - config.structure_break_min_bps / 10000.0)
             displacement_score = float(disp[index])
-            if close < threshold and disp[index] >= config.displacement_body_factor and (rng[index] / avg_range[index]) >= 0.9:
+            meets_displacement = not config.break_confirmation.displacement_required or (disp[index] >= config.displacement_body_factor and (rng[index] / avg_range[index]) >= 0.9)
+            if close < threshold and meets_displacement:
                 label = "BOS" if trend in {"neutral", "bearish"} else "CHoCH"
                 protected_word = "protected " if is_protected_low_break and requires_protected_reversal else ""
                 internal_word = "internal " if structure_scope == "internal" else ""
@@ -414,7 +417,7 @@ def detect_liquidity_sweeps(df: pd.DataFrame, swings: list[SwingPoint], config: 
 
         if prior_highs:
             level = prior_highs[-1].price
-            if high > level * (1.0 + config.structure_break_min_pct / 2.0) and close < level:
+            if high > level * (1.0 + config.structure_break_min_bps / 20000.0) and close < level:
                 events.append(
                     StructureEvent(
                         label="Liquidity Sweep",
@@ -430,7 +433,7 @@ def detect_liquidity_sweeps(df: pd.DataFrame, swings: list[SwingPoint], config: 
                 )
         if prior_lows:
             level = prior_lows[-1].price
-            if low < level * (1.0 - config.structure_break_min_pct / 2.0) and close > level:
+            if low < level * (1.0 - config.structure_break_min_bps / 20000.0) and close > level:
                 events.append(
                     StructureEvent(
                         label="Liquidity Sweep",
@@ -626,7 +629,7 @@ def _build_trade_plan_for_direction(
         and zone.direction == direction
         and zone.status in allowed_poi_statuses
         and (zone.end_index is None or len(df) - zone.end_index <= config.max_zone_age_bars)
-        and ((zone.high - zone.low) / max(current_close, 1e-9) * 100.0 >= config.min_poi_width_pct)
+        and ((zone.high - zone.low) / max(current_close, 1e-9) * 100.0 >= (config.min_poi_width_bps / 10000.0))
     ]
 
     def poi_rank(zone: Zone) -> float:
@@ -729,13 +732,13 @@ def _build_trade_plan_for_direction(
     structural_edge: float | None = None
     if selected_poi and direction == "bullish":
         structural_edge = min(selected_poi.low, recent_sweep.swept_level or selected_poi.low) if recent_sweep else selected_poi.low
-        raw_stop = structural_edge * (1.0 - config.structural_stop_margin_pct)
+        raw_stop = structural_edge * (1.0 - config.structural_stop_margin_bps / 10000.0)
         volatility_stop = structural_edge - atr * config.stop_buffer_atr_mult
         structural_invalidation = round(raw_stop, 5)
         execution_invalidation = round(min(raw_stop, volatility_stop), 5)
     elif selected_poi and direction == "bearish":
         structural_edge = max(selected_poi.high, recent_sweep.swept_level or selected_poi.high) if recent_sweep else selected_poi.high
-        raw_stop = structural_edge * (1.0 + config.structural_stop_margin_pct)
+        raw_stop = structural_edge * (1.0 + config.structural_stop_margin_bps / 10000.0)
         volatility_stop = structural_edge + atr * config.stop_buffer_atr_mult
         structural_invalidation = round(raw_stop, 5)
         execution_invalidation = round(max(raw_stop, volatility_stop), 5)

@@ -1,0 +1,40 @@
+{
+  "protocol_id": "PILOT_001_PERCEPTION_V1",
+  "version": "1.0.0",
+  "target_cohort": "perception_pilot_rc1",
+  "scoring_rules": {
+    "objective_geometry": {
+      "fvg": {
+        "price_tolerance_bps": 0.0,
+        "time_tolerance_bars": 0,
+        "expected_agreement_pct": 100
+      },
+      "swing_points": {
+        "price_tolerance_bps": 0.0,
+        "time_tolerance_bars": 0,
+        "expected_agreement_pct": 100
+      }
+    },
+    "operational_structure": {
+      "bos": {
+        "price_tolerance_bps": 0.0,
+        "time_tolerance_bars": 0,
+        "expected_agreement_threshold_pct": 85
+      },
+      "choch": {
+        "price_tolerance_bps": 0.0,
+        "time_tolerance_bars": 0,
+        "expected_agreement_threshold_pct": 80
+      }
+    },
+    "iou_thresholds": {
+      "fvg_overlap": 0.95,
+      "liquidity_zone_overlap": 0.85
+    }
+  },
+  "bootstrap_method": {
+    "iterations": 1000,
+    "confidence_interval_pct": 95.0,
+    "resampling_strategy": "case_level_with_replacement"
+  }
+}

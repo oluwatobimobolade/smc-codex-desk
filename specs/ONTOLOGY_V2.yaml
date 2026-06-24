@@ -1,0 +1,54 @@
+# Authoritative Ontology Configuration V2
+ontology_version: "2.0.0"
+
+# --- Geometry and Tolerances ---
+equal_level_tolerance_bps: 15.0
+equal_level_min_touches: 2
+
+# --- Structural Scales ---
+swing_scales:
+  local: 1
+  internal: 3
+  external: 5
+
+# --- Fair Value Gaps (FVG) ---
+fvg:
+  minimum_gap_bps: 5.0
+  displacement_factor: 1.05
+
+# --- Structure Breaks (BOS / CHoCH) ---
+break_confirmation:
+  wick_cross_creates_candidate: true
+  body_close_confirms: true
+  displacement_required: false
+
+structure_break_min_bps: 4.0
+displacement_body_factor: 1.3
+
+# --- Order Blocks (OB) ---
+ob_lookback: 8
+ob_min_body_factor: 0.75
+
+# --- Sweeps ---
+liquidity_sweep_lookback: 80
+
+# --- General System Limits ---
+confirmation_lookback: 24
+max_zone_age_bars: 160
+lookback_bars: 250
+atr_lookback: 14
+
+# --- POI and Approach ---
+poi_proximity_atr: 2.0
+htf_poi_watch_distance_atr: 1.5
+htf_approach_lookback_bars: 4
+min_poi_width_bps: 0.0
+require_fresh_poi: true
+
+# --- Risk Management ---
+risk_reward_floor: 3.0
+structural_stop_margin_bps: 10.0
+stop_buffer_atr_mult: 0.75
+
+# --- Authority Modes ---
+vision_authority_mode: "observe_only"

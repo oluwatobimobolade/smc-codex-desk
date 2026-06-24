@@ -71,9 +71,12 @@ def render_clean_chart(df: pd.DataFrame, output_path: str, venue: str, symbol: s
     ax.spines['bottom'].set_color('#333333')
     ax.spines['left'].set_color('#333333')
     
+    # X-axis bar IDs
+    ax.set_xticks(range(0, n, 10))
+    ax.set_xticklabels([f"B{i+1:03d}" for i in range(0, n, 10)], rotation=45, ha='right')
+    
     # Title showing decision timestamp
-    decision_ts = pd.to_datetime(df.iloc[-1]['timestamp'])
-    title = f"{venue.upper()} | {symbol} | {timeframe} | Decision TS: {decision_ts.isoformat()} Z"
+    title = f"{venue.upper()} | {symbol} | {timeframe} | Decision TS: Bar {n}"
     ax.set_title(title, color="#ffffff", loc='left', pad=10)
     
     plt.tight_layout()
@@ -276,28 +279,63 @@ def main():
         json.dump(cohort_manifest, f, indent=2)
         
     # Reviewer Folders
-    for r_id in ["reviewer_a", "reviewer_b", "adjudicator"]:
+    reviewer_ids = ["reviewer_a", "reviewer_b", "adjudicator"]
+    for r_id in reviewer_ids:
         r_dir = output_dir / "reviewer_exports" / r_id
         r_dir.mkdir(parents=True, exist_ok=True)
         
-        # Empty template
-        template = {
-            "case_id": "FILL_ME",
-            "reviewer_id": r_id,
-            "manual_version": "1.0.0",
-            "started_at": "",
-            "submitted_at": "",
-            "chart_valid": True,
-            "context_sufficient": True,
-            "external_direction": "",
-            "internal_direction": "",
-            "objects": [],
-            "ambiguities": [],
-            "overall_confidence": 1.0,
-            "locked": False
-        }
-        with open(r_dir / "annotation_template.json", "w") as f:
-            json.dump(template, f, indent=2)
+        # Shuffle cases for this reviewer
+        reviewer_cases = [f"CASE-{i+1:03d}" for i in range(len(selected_indices))]
+        if r_id != "adjudicator":
+            # Adjudicator sees real case IDs, reviewers get shuffled CHART-XXX IDs
+            random.shuffle(reviewer_cases)
+            
+        mapping = {}
+        for chart_idx, case_id in enumerate(reviewer_cases):
+            chart_id = f"CHART-{chart_idx+1:03d}" if r_id != "adjudicator" else case_id
+            mapping[chart_id] = case_id
+            
+            # Copy only clean_review.png and public_manifest.json
+            import shutil
+            case_dir = r_dir / chart_id
+            case_dir.mkdir(exist_ok=True)
+            shutil.copy(cases_dir / case_id / "clean_review.png", case_dir / "clean_review.png")
+            shutil.copy(cases_dir / case_id / "public_manifest.json", case_dir / "public_manifest.json")
+            
+            # Empty template
+            template = {
+                "chart_id": chart_id,
+                "reviewer_id": r_id,
+                "manual_version": "1.0.0",
+                "started_at": "",
+                "submitted_at": "",
+                "chart_valid": True,
+                "context_sufficient": True,
+                "external_direction": "",
+                "internal_direction": "",
+                "objects": [
+                    {
+                        "event_bar_id": "",
+                        "price_ticks": 0,
+                        "broken_swing_id": "",
+                        "zone_low_ticks": 0,
+                        "zone_high_ticks": 0,
+                        "confidence": 1.0,
+                        "ambiguity_reason": ""
+                    }
+                ],
+                "ambiguities": [],
+                "overall_confidence": 1.0,
+                "locked": False
+            }
+            with open(case_dir / "annotation.json", "w") as f:
+                json.dump(template, f, indent=2)
+                
+        # Save mapping for admin (not given to reviewer)
+        if r_id != "adjudicator":
+            admin_dir = output_dir / "reports"
+            with open(admin_dir / f"{r_id}_mapping.json", "w") as f:
+                json.dump(mapping, f, indent=2)
 
     logger.info("Cohort built successfully.")
 

@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "suites": {
+    "unittest": {
+      "exit_code": 0
+    },
+    "pytest": {
+      "exit_code": 0
+    },
+    "stress": {
+      "exit_code": 0
+    }
+  }
+}

@@ -187,14 +187,13 @@ A V2 perception stack with full object lifecycle, provenance, and tick-precision
 
 ### Testing
 
-| Suite | Count | Runner |
-|-------|-------|--------|
-| unittest (fusion + legacy engine) | 197 | `python -m unittest discover -s tests` |
-| pytest (gauntlet stages 1-16, V2/V3/V4/V5, other) | 271 | `python -m pytest tests/ -q` |
-| stress tests (B1, C, F2, G2, I1) | 9 | `python -m pytest tests/stress_tests/ -q` |
-| **Total** | **468** | **all passing** |
+All deterministic tests are cataloged in `evidence/VALIDATION_REGISTRY.json`.
 
-Gauntlet test categories: duplicate/out-of-order/future/unclosed attacks, causality wall, FVG geometry, decimal/tick discipline, minimal pairs, metamorphic rendering, external screenshot vision, deliberately wrong overlay, false consensus, source grounding, prompt injection, OOD data, human vs AI, adversarial ingestion, drift stability, prediction separation.
+The system uses a validation registry to decouple the evaluation harness from the engine logic. To run the full validation registry:
+
+```bash
+python3 tools/run_validation_registry.py
+```
 
 ### Downloading Binance futures data for backtesting
 

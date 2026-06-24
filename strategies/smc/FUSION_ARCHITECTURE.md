@@ -112,7 +112,7 @@ The **Dual Lens** (`smc_desk/dual_lens.py`) is an orthogonal "Macro Sanity Check
 
 Behavior:
 - **Reconciliation:** It computes an Agreement Score based on bias, key zones, and structural clarity.
-- **Safety Veto:** If the mathematical model wants to `Execute` but the vision model rates the chart as chaotic or disagrees on the direction, the Dual Lens enforces a veto, reducing confidence or forcing a `Pass`.
+- **Safety Veto (Disabled by Default):** If the mathematical model wants to `Execute` but the vision model rates the chart as chaotic or disagrees on the direction, the Dual Lens logs the conflict. In `observe_only` mode, it does *not* enforce a veto or change the verdict. It acts strictly as an observability layer.
 - **No Heavy Dependencies:** We decoupled the heavy `cv2` image-generation dependencies. The Dual Lens now strictly accepts a standardized `vision_read.json`, which can be supplied by Kimi WebBridge or an offline classifier.
 
 ## Market Context
