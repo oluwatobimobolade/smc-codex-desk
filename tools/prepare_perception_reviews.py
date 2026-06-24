@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk.case_audit import audit_case, find_case_files
-from smc_desk.perception import perception_annotation_scaffold
+from smc_desk.perception_legacy import perception_annotation_scaffold
 
 
 def candidate_for_blind_review(audit: dict[str, Any]) -> bool:

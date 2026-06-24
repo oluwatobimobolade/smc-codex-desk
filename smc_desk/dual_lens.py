@@ -128,7 +128,11 @@ _LOCATION_COMPATIBLE = {
 
 # --- reconciliation ---------------------------------------------------------
 
-def reconcile(engine_analysis: dict[str, Any], vision_read: dict[str, Any] | VisionRead) -> dict[str, Any]:
+def reconcile(
+    engine_analysis: dict[str, Any],
+    vision_read: dict[str, Any] | VisionRead,
+    vision_authority_mode: str = "observe_only"
+) -> dict[str, Any]:
     vision = vision_read if isinstance(vision_read, VisionRead) else VisionRead.from_dict(vision_read)
     plan = _plan(engine_analysis)
 
@@ -215,6 +219,7 @@ def reconcile(engine_analysis: dict[str, Any], vision_read: dict[str, Any] | Vis
         factor *= 0.85
     if source_mismatch:
         factor *= 0.85
+    
     combined_confidence = round(max(0.0, min(0.95, base_conf * factor)), 3)
 
     # Final verdict: engine verdict, modulated. Vision can veto or conflict
@@ -228,6 +233,11 @@ def reconcile(engine_analysis: dict[str, Any], vision_read: dict[str, Any] | Vis
         final_verdict = "Conflict — stand aside"
         combined_confidence = min(combined_confidence, 0.3)
     else:
+        final_verdict = engine_verdict
+
+    # Enforce observe_only authority limits
+    if vision_authority_mode == "observe_only":
+        combined_confidence = base_conf
         final_verdict = engine_verdict
 
     if agreement_score >= 0.75:

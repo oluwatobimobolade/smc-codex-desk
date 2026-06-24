@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-06-24T08:40:28.528714",
+  "release_tag": "perception-pilot-rc1",
+  "parameters": {
+    "venue": "binance",
+    "symbol": "BTCUSDT",
+    "market_type": "perpetual",
+    "timeframe": "15m",
+    "count": 10,
+    "visible_bars": 200,
+    "minimum_separation_bars": 250,
+    "seed": 12345,
+    "release": "perception-pilot-rc1",
+    "output": "cases/perception_review_smoke_001"
+  },
+  "cases": [
+    {
+      "case_id": "CASE-001",
+      "decision_timestamp": "2022-07-19 20:15:00+00:00"
+    },
+    {
+      "case_id": "CASE-002",
+      "decision_timestamp": "2022-10-13 12:15:00+00:00"
+    },
+    {
+      "case_id": "CASE-003",
+      "decision_timestamp": "2023-12-02 21:45:00+00:00"
+    },
+    {
+      "case_id": "CASE-004",
+      "decision_timestamp": "2024-04-13 22:15:00+00:00"
+    },
+    {
+      "case_id": "CASE-005",
+      "decision_timestamp": "2024-09-14 13:30:00+00:00"
+    },
+    {
+      "case_id": "CASE-006",
+      "decision_timestamp": "2025-02-01 01:30:00+00:00"
+    },
+    {
+      "case_id": "CASE-007",
+      "decision_timestamp": "2025-03-24 02:00:00+00:00"
+    },
+    {
+      "case_id": "CASE-008",
+      "decision_timestamp": "2025-08-02 17:30:00+00:00"
+    },
+    {
+      "case_id": "CASE-009",
+      "decision_timestamp": "2025-09-25 06:30:00+00:00"
+    },
+    {
+      "case_id": "CASE-010",
+      "decision_timestamp": "2026-02-05 21:15:00+00:00"
+    }
+  ]
+}

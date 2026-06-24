@@ -25,7 +25,7 @@ from smc_desk.case_audit import audit_case
 from smc_desk.case_library import file_sha256
 from smc_desk.engine import analyze_dataframe, load_ohlcv_csv
 from smc_desk.mtf import resample_ohlcv
-from smc_desk.perception import perception_annotation_scaffold
+from smc_desk.perception_legacy import perception_annotation_scaffold
 from smc_desk.render import render_raw_chart
 from smc_desk.rules import RuleConfig, load_rule_config
 

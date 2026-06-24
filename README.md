@@ -149,25 +149,52 @@ A complete, high-confluence SMC workflow has been added to this repo:
 
 ### Fusion Architecture (experimental observability layers)
 
-A new four-layer observability stack sits beside the deterministic engine. It adds narrative, visual, and intent context without replacing the engine or `dual_lens.py`:
+A shadow-mode observability stack sits beside the deterministic engine. It adds narrative, intent, regime, and visual context without replacing the engine or `dual_lens.py`:
 
-- **Sequence Memory** — converts bars into episodes (rally, drop, consolidation, trap, accumulation, distribution) and emits a narrative.
-- **Visual Cortex** — detects vertical-spike traps and failed breakouts from rendered OHLCV charts.
-- **Intent Detector** — scores market-intent hypotheses (bull trap, distribution, exhaustion, etc.).
-- **Fusion Engine** — reconciles engine verdict/bias with the layers; downgrade-only, with explicit override records.
+- **Dual-direction engine** — emits both bullish and bearish `TradePlan`s with engine-owned prices.
+- **Episode Narrative** — derives RALLY/DROP/TRAP/CONSOLIDATION episodes from engine structure events (same evidence the state machine uses).
+- **OHLCV Features** — exact, deterministic, no-cv2 detectors for spike traps, failed breakouts, wick ratios, regime proxies.
+- **Intent Detector** — log-only modulator by default until calibrated; never asserts a standalone direction.
+- **Fusion Engine** — scores the two engine plans, applies regime penalties, flags contested, maps every price to its engine source.
+- **Calibration harness** — Brier score, reliability curve, isotonic regression.
+- **Dual Lens** (`--vision` flag) — vision reconciliation as a Macro Sanity Check; defaults to `observe_only`.
 
-See `strategies/smc/FUSION_ARCHITECTURE.md` for the full contract.
+See `strategies/smc/FUSION_ARCHITECTURE.md` for the full contract and `strategies/smc/PRECEDENCE_LADDER.md` for the authored tiebreakers.
 
-Replay a CSV through the layers:
+Attach fusion to a normal chart analysis:
 
 ```bash
-python3 tools/replay_episodes.py \
+python3 tools/analyze_chart.py \
   --ohlcv data/sample_ohlcv.csv \
   --symbol EURUSD \
-  --output /tmp/replay.json \
-  --max-bars 500 \
-  --warmup-bars 50
+  --timeframe 15m \
+  --output-dir outputs \
+  --fusion
 ```
+
+### Perception V2 (object-based engine, restructure branch)
+
+A V2 perception stack with full object lifecycle, provenance, and tick-precision:
+
+- **`smc_desk/perception/`** — object-based perception: swings, structure, FVGs, lifecycle, ontology, comparator
+- **`smc_desk/rendering/`** — semantic scene graph + 4-mode deterministic chart renderer (clean / live / audit / review)
+- **`smc_desk/vision/`** — blind vision evaluation pipeline with provider abstraction (observe_only default)
+- **`smc_desk/knowledge/`** — rule cards, academy profiles, conflict matrix, retrieval
+- **`smc_desk/teacher_panel/`** — AI annotation committee (extractor, critic, judge, source-critic, adversarial-critic)
+- **`smc_desk/synthetic/`** — synthetic chart university (scene generator, ground truth, visual variants, counterfactuals)
+- **`smc_desk/evaluation/`** — sandbox evaluation (hidden holdout, metamorphic, counterfactual, human challenge)
+- **`smc_desk/data/`** — Candle schemas, provenance, quality control, Binance adapters
+
+### Testing
+
+| Suite | Count | Runner |
+|-------|-------|--------|
+| unittest (fusion + legacy engine) | 197 | `python -m unittest discover -s tests` |
+| pytest (gauntlet stages 1-16, V2/V3/V4/V5, other) | 271 | `python -m pytest tests/ -q` |
+| stress tests (B1, C, F2, G2, I1) | 9 | `python -m pytest tests/stress_tests/ -q` |
+| **Total** | **468** | **all passing** |
+
+Gauntlet test categories: duplicate/out-of-order/future/unclosed attacks, causality wall, FVG geometry, decimal/tick discipline, minimal pairs, metamorphic rendering, external screenshot vision, deliberately wrong overlay, false consensus, source grounding, prompt injection, OOD data, human vs AI, adversarial ingestion, drift stability, prediction separation.
 
 ### Downloading Binance futures data for backtesting
 

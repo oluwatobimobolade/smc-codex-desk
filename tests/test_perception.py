@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from smc_desk.perception import (
+from smc_desk.perception_legacy import (
     PerceptionAnnotation,
     PerceptionAnnotationSet,
     annotation_match_score,

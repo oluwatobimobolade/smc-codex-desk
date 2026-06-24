@@ -1,0 +1,8 @@
+{
+  "case_id": "CASE-045",
+  "venue": "binance",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "decision_timestamp": "2026-05-20 09:45:00+00:00",
+  "visible_bars": 200
+}

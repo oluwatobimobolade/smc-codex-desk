@@ -1,17 +1,19 @@
-"""EXPERIMENTAL — SHADOW MODE ONLY. Episodic narrative of price action.
+"""DEPRECATED — use smc_desk.episode_narrative.EpisodeNarrativeBuilder instead.
 
-This module transforms a stream of OHLCV bars into a running story of market
-structure: rallies, drops, consolidations, traps, accumulation, and distribution.
-It is intentionally observability-only. It does not create TradePlan objects,
-fills, or live orders. It produces narrative context that higher layers (intent
-detector, fusion engine, and human reviewers) can consume.
+This module now provides only the shared type definitions (BarSnapshot,
+EpisodeType, EpisodeEventType, MarketEpisode, EpisodeEvent). The
+SequenceMemory class and its bar-processor logic have been superseded by
+EpisodeNarrativeBuilder, which derives episodes from engine structure
+events (the same evidence the state machine uses) rather than independent
+bar thresholds.
 
-Design principles:
-- Deterministic: same bars -> same episodes.
-- Incremental: process one closed bar at a time; no future leakage.
-- Testable: every episode classification has explicit, measurable criteria.
-- Layered: can consume engine events and visual patterns as optional evidence,
-  but does not require them.
+The SequenceMemory class is kept for backward compatibility with
+existing callers (fusion engine, backtest tool, replay tool, intent
+detector) but should be considered deprecated. New code should use
+EpisodeNarrativeBuilder.
+
+For episode classification tests, see tests/test_episode_narrative.py.
+For shared type tests, see tests/test_sequence_memory.py.
 """
 from __future__ import annotations
 

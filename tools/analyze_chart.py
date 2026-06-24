@@ -17,6 +17,7 @@ from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap
 from smc_desk.fusion_engine import FusionEngine
 from smc_desk.intent_detector import IntentDetector, MarketContext
 from smc_desk.models import AnalysisResult, TradePlan
+from smc_desk.perception_bridge import run_v2_perception_shadow
 from smc_desk.render import render_annotated_chart, render_screenshot_review
 from smc_desk.sequence_memory import BarSnapshot
 
@@ -119,6 +120,14 @@ def _run_fusion_analysis(analysis: AnalysisResult, df) -> dict:
         context=context,
     )
 
+    # V2 perception engine runs in shadow mode (informational only).
+    v2_perception = run_v2_perception_shadow(
+        df,
+        venue="BINANCE",
+        instrument=analysis.symbol,
+        timeframe=analysis.timeframe,
+    )
+
     return {
         "sequence": {
             "episodes": [ep.to_dict() for ep in memory.episodes],
@@ -128,6 +137,7 @@ def _run_fusion_analysis(analysis: AnalysisResult, df) -> dict:
         "features": pattern_dicts,
         "intent": intent_result.to_dict(),
         "fusion": fusion_result.to_dict(),
+        "v2_perception": v2_perception,
     }
 
 

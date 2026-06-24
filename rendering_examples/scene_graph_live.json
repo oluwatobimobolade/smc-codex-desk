@@ -1,0 +1,3854 @@
+{
+  "scene_graph_id": "scene_live_1782257346.350651",
+  "renderer_version": "2.0.0",
+  "generated_at": "2026-06-23T23:29:06.350658Z",
+  "objects": [
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656134100.0::marker",
+      "semantic_object_id": "swing_local_1656134100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 292.1721854304636,
+        "x2": null,
+        "y1": 599.7802816901421,
+        "y2": null,
+        "anchor_x": 292.1721854304636,
+        "anchor_y": 599.7802816901421,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T05:15:00Z",
+        "end_time": "2022-06-25T05:15:00Z",
+        "price_low": "21259.0",
+        "price_high": "21313.0",
+        "pivot_time": "2022-06-25T05:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656133200.0",
+          "c_1656134100.0",
+          "c_1656135000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "624b0465"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656136800.0::marker",
+      "semantic_object_id": "swing_local_1656136800.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 325.43046357615896,
+        "x2": null,
+        "y1": 699.4774647887334,
+        "y2": null,
+        "anchor_x": 325.43046357615896,
+        "anchor_y": 699.4774647887334,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T06:00:00Z",
+        "end_time": "2022-06-25T06:00:00Z",
+        "price_low": "21170.0",
+        "price_high": "21239.0",
+        "pivot_time": "2022-06-25T06:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656135900.0",
+          "c_1656136800.0",
+          "c_1656137700.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "aaaa0398"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656142200.0::marker",
+      "semantic_object_id": "swing_local_1656142200.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 391.94701986754967,
+        "x2": null,
+        "y1": 380.4464788732421,
+        "y2": null,
+        "anchor_x": 391.94701986754967,
+        "anchor_y": 380.4464788732421,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T07:30:00Z",
+        "end_time": "2022-06-25T07:30:00Z",
+        "price_low": "21434.7",
+        "price_high": "21627.6",
+        "pivot_time": "2022-06-25T07:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656141300.0",
+          "c_1656142200.0",
+          "c_1656143100.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "bbac14cf"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656143100.0::marker",
+      "semantic_object_id": "swing_local_1656143100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 403.0331125827815,
+        "x2": null,
+        "y1": 539.1253521126782,
+        "y2": null,
+        "anchor_x": 403.0331125827815,
+        "anchor_y": 539.1253521126782,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T07:45:00Z",
+        "end_time": "2022-06-25T07:45:00Z",
+        "price_low": "21400.0",
+        "price_high": "21511.0",
+        "pivot_time": "2022-06-25T07:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656142200.0",
+          "c_1656143100.0",
+          "c_1656144000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "882d24b1"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656144000.0::marker",
+      "semantic_object_id": "swing_local_1656144000.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 414.1192052980133,
+        "x2": null,
+        "y1": 434.6873239436645,
+        "y2": null,
+        "anchor_x": 414.1192052980133,
+        "anchor_y": 434.6873239436645,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T08:00:00Z",
+        "end_time": "2022-06-25T08:00:00Z",
+        "price_low": "21434.7",
+        "price_high": "21549.8",
+        "pivot_time": "2022-06-25T08:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656143100.0",
+          "c_1656144000.0",
+          "c_1656144900.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "4397b82d"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656145800.0::marker",
+      "semantic_object_id": "swing_local_1656145800.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 436.2913907284768,
+        "x2": null,
+        "y1": 570.498591549298,
+        "y2": null,
+        "anchor_x": 436.2913907284768,
+        "anchor_y": 570.498591549298,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T08:30:00Z",
+        "end_time": "2022-06-25T08:30:00Z",
+        "price_low": "21355.0",
+        "price_high": "21454.3",
+        "pivot_time": "2022-06-25T08:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656144900.0",
+          "c_1656145800.0",
+          "c_1656146700.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "54996aa6"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656147600.0::marker",
+      "semantic_object_id": "swing_local_1656147600.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 458.46357615894044,
+        "x2": null,
+        "y1": 573.2873239436631,
+        "y2": null,
+        "anchor_x": 458.46357615894044,
+        "anchor_y": 573.2873239436631,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T09:00:00Z",
+        "end_time": "2022-06-25T09:00:00Z",
+        "price_low": "21351.0",
+        "price_high": "21425.3",
+        "pivot_time": "2022-06-25T09:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656146700.0",
+          "c_1656147600.0",
+          "c_1656148500.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "d1ea6e59"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656149400.0::marker",
+      "semantic_object_id": "swing_local_1656149400.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 480.63576158940396,
+        "x2": null,
+        "y1": 477.7732394366212,
+        "y2": null,
+        "anchor_x": 480.63576158940396,
+        "anchor_y": 477.7732394366212,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T09:30:00Z",
+        "end_time": "2022-06-25T09:30:00Z",
+        "price_low": "21435.0",
+        "price_high": "21488.0",
+        "pivot_time": "2022-06-25T09:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656148500.0",
+          "c_1656149400.0",
+          "c_1656150300.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "dfb9f687"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656150300.0::marker",
+      "semantic_object_id": "swing_local_1656150300.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 491.72185430463577,
+        "x2": null,
+        "y1": 546.5852112676075,
+        "y2": null,
+        "anchor_x": 491.72185430463577,
+        "anchor_y": 546.5852112676075,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T09:45:00Z",
+        "end_time": "2022-06-25T09:45:00Z",
+        "price_low": "21389.3",
+        "price_high": "21487.9",
+        "pivot_time": "2022-06-25T09:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656149400.0",
+          "c_1656150300.0",
+          "c_1656151200.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "497bd8b2"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656152100.0::marker",
+      "semantic_object_id": "swing_local_1656152100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 513.8940397350993,
+        "x2": null,
+        "y1": 557.7401408450714,
+        "y2": null,
+        "anchor_x": 513.8940397350993,
+        "anchor_y": 557.7401408450714,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T10:15:00Z",
+        "end_time": "2022-06-25T10:15:00Z",
+        "price_low": "21373.3",
+        "price_high": "21475.0",
+        "pivot_time": "2022-06-25T10:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656151200.0",
+          "c_1656152100.0",
+          "c_1656153000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "a039c820"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656155700.0::marker",
+      "semantic_object_id": "swing_local_1656155700.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 558.2384105960265,
+        "x2": null,
+        "y1": 491.71690140845203,
+        "y2": null,
+        "anchor_x": 558.2384105960265,
+        "anchor_y": 491.71690140845203,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T11:15:00Z",
+        "end_time": "2022-06-25T11:15:00Z",
+        "price_low": "21409.4",
+        "price_high": "21468.0",
+        "pivot_time": "2022-06-25T11:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656154800.0",
+          "c_1656155700.0",
+          "c_1656156600.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "48941fed"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656160200.0::marker",
+      "semantic_object_id": "swing_local_1656160200.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 613.6688741721855,
+        "x2": null,
+        "y1": 798.3380281690152,
+        "y2": null,
+        "anchor_x": 613.6688741721855,
+        "anchor_y": 798.3380281690152,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T12:30:00Z",
+        "end_time": "2022-06-25T12:30:00Z",
+        "price_low": "21028.2",
+        "price_high": "21167.8",
+        "pivot_time": "2022-06-25T12:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656159300.0",
+          "c_1656160200.0",
+          "c_1656161100.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "ceae6ed3"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656161100.0::marker",
+      "semantic_object_id": "swing_local_1656161100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 624.7549668874171,
+        "x2": null,
+        "y1": 666.0126760563398,
+        "y2": null,
+        "anchor_x": 624.7549668874171,
+        "anchor_y": 666.0126760563398,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T12:45:00Z",
+        "end_time": "2022-06-25T12:45:00Z",
+        "price_low": "21093.1",
+        "price_high": "21218.0",
+        "pivot_time": "2022-06-25T12:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656160200.0",
+          "c_1656161100.0",
+          "c_1656162000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "9e6b1f67"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656162000.0::marker",
+      "semantic_object_id": "swing_local_1656162000.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 635.841059602649,
+        "x2": null,
+        "y1": 776.1676056338038,
+        "y2": null,
+        "anchor_x": 635.841059602649,
+        "anchor_y": 776.1676056338038,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T13:00:00Z",
+        "end_time": "2022-06-25T13:00:00Z",
+        "price_low": "21060.0",
+        "price_high": "21187.6",
+        "pivot_time": "2022-06-25T13:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656161100.0",
+          "c_1656162000.0",
+          "c_1656162900.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "951e56f6"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656163800.0::marker",
+      "semantic_object_id": "swing_local_1656163800.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 658.0132450331125,
+        "x2": null,
+        "y1": 652.7661971831003,
+        "y2": null,
+        "anchor_x": 658.0132450331125,
+        "anchor_y": 652.7661971831003,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T13:30:00Z",
+        "end_time": "2022-06-25T13:30:00Z",
+        "price_low": "21152.8",
+        "price_high": "21237.0",
+        "pivot_time": "2022-06-25T13:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656162900.0",
+          "c_1656163800.0",
+          "c_1656164700.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "f72fa6a8"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656164700.0::marker",
+      "semantic_object_id": "swing_local_1656164700.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 669.0993377483444,
+        "x2": null,
+        "y1": 744.794366197184,
+        "y2": null,
+        "anchor_x": 669.0993377483444,
+        "anchor_y": 744.794366197184,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T13:45:00Z",
+        "end_time": "2022-06-25T13:45:00Z",
+        "price_low": "21105.0",
+        "price_high": "21218.6",
+        "pivot_time": "2022-06-25T13:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656163800.0",
+          "c_1656164700.0",
+          "c_1656165600.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "5efad391"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656166500.0::marker",
+      "semantic_object_id": "swing_local_1656166500.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 691.2715231788079,
+        "x2": null,
+        "y1": 666.6401408450729,
+        "y2": null,
+        "anchor_x": 691.2715231788079,
+        "anchor_y": 666.6401408450729,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T14:15:00Z",
+        "end_time": "2022-06-25T14:15:00Z",
+        "price_low": "21070.1",
+        "price_high": "21217.1",
+        "pivot_time": "2022-06-25T14:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656165600.0",
+          "c_1656166500.0",
+          "c_1656167400.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "86275d52"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656167400.0::marker",
+      "semantic_object_id": "swing_local_1656167400.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 702.3576158940398,
+        "x2": null,
+        "y1": 769.1957746478874,
+        "y2": null,
+        "anchor_x": 702.3576158940398,
+        "anchor_y": 769.1957746478874,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T14:30:00Z",
+        "end_time": "2022-06-25T14:30:00Z",
+        "price_low": "21070.0",
+        "price_high": "21148.9",
+        "pivot_time": "2022-06-25T14:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656166500.0",
+          "c_1656167400.0",
+          "c_1656168300.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "b1906bd7"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656168300.0::marker",
+      "semantic_object_id": "swing_local_1656168300.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 713.4437086092715,
+        "x2": null,
+        "y1": 702.5450704225368,
+        "y2": null,
+        "anchor_x": 713.4437086092715,
+        "anchor_y": 702.5450704225368,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T14:45:00Z",
+        "end_time": "2022-06-25T14:45:00Z",
+        "price_low": "21105.6",
+        "price_high": "21165.6",
+        "pivot_time": "2022-06-25T14:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656167400.0",
+          "c_1656168300.0",
+          "c_1656169200.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "2b6d4bad"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656170100.0::marker",
+      "semantic_object_id": "swing_local_1656170100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 735.6158940397352,
+        "x2": null,
+        "y1": 765.7795774647893,
+        "y2": null,
+        "anchor_x": 735.6158940397352,
+        "anchor_y": 765.7795774647893,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T15:15:00Z",
+        "end_time": "2022-06-25T15:15:00Z",
+        "price_low": "21074.9",
+        "price_high": "21158.0",
+        "pivot_time": "2022-06-25T15:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656169200.0",
+          "c_1656170100.0",
+          "c_1656171000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "91cf24bc"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656171000.0::marker",
+      "semantic_object_id": "swing_local_1656171000.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 746.7019867549668,
+        "x2": null,
+        "y1": 695.9915492957753,
+        "y2": null,
+        "anchor_x": 746.7019867549668,
+        "anchor_y": 695.9915492957753,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T15:30:00Z",
+        "end_time": "2022-06-25T15:30:00Z",
+        "price_low": "21127.3",
+        "price_high": "21175.0",
+        "pivot_time": "2022-06-25T15:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656170100.0",
+          "c_1656171000.0",
+          "c_1656171900.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "1f75ef4c"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656171900.0::marker",
+      "semantic_object_id": "swing_local_1656171900.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 757.7880794701987,
+        "x2": null,
+        "y1": 891.8999999999996,
+        "y2": null,
+        "anchor_x": 757.7880794701987,
+        "anchor_y": 891.8999999999996,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T15:45:00Z",
+        "end_time": "2022-06-25T15:45:00Z",
+        "price_low": "20894.0",
+        "price_high": "21133.8",
+        "pivot_time": "2022-06-25T15:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656171000.0",
+          "c_1656171900.0",
+          "c_1656172800.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "9859952e"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656174600.0::marker",
+      "semantic_object_id": "swing_local_1656174600.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 791.0463576158941,
+        "x2": null,
+        "y1": 772.8211267605639,
+        "y2": null,
+        "anchor_x": 791.0463576158941,
+        "anchor_y": 772.8211267605639,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T16:30:00Z",
+        "end_time": "2022-06-25T16:30:00Z",
+        "price_low": "20987.0",
+        "price_high": "21064.8",
+        "pivot_time": "2022-06-25T16:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656173700.0",
+          "c_1656174600.0",
+          "c_1656175500.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "6db8b02f"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656176400.0::marker",
+      "semantic_object_id": "swing_local_1656176400.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 813.2185430463576,
+        "x2": null,
+        "y1": 815.9070422535224,
+        "y2": null,
+        "anchor_x": 813.2185430463576,
+        "anchor_y": 815.9070422535224,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T17:00:00Z",
+        "end_time": "2022-06-25T17:00:00Z",
+        "price_low": "21003.0",
+        "price_high": "21074.0",
+        "pivot_time": "2022-06-25T17:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656175500.0",
+          "c_1656176400.0",
+          "c_1656177300.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "1357414a"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656178200.0::marker",
+      "semantic_object_id": "swing_local_1656178200.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 835.3907284768211,
+        "x2": null,
+        "y1": 713.4211267605642,
+        "y2": null,
+        "anchor_x": 835.3907284768211,
+        "anchor_y": 713.4211267605642,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T17:30:00Z",
+        "end_time": "2022-06-25T17:30:00Z",
+        "price_low": "21090.0",
+        "price_high": "21150.0",
+        "pivot_time": "2022-06-25T17:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656177300.0",
+          "c_1656178200.0",
+          "c_1656179100.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "fcf0bed1"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656180900.0::marker",
+      "semantic_object_id": "swing_local_1656180900.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 868.6490066225165,
+        "x2": null,
+        "y1": 793.736619718311,
+        "y2": null,
+        "anchor_x": 868.6490066225165,
+        "anchor_y": 793.736619718311,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T18:15:00Z",
+        "end_time": "2022-06-25T18:15:00Z",
+        "price_low": "21034.8",
+        "price_high": "21107.8",
+        "pivot_time": "2022-06-25T18:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656180000.0",
+          "c_1656180900.0",
+          "c_1656181800.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "964161aa"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656182700.0::marker",
+      "semantic_object_id": "swing_local_1656182700.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 890.8211920529802,
+        "x2": null,
+        "y1": 622.7873239436631,
+        "y2": null,
+        "anchor_x": 890.8211920529802,
+        "anchor_y": 622.7873239436631,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T18:45:00Z",
+        "end_time": "2022-06-25T18:45:00Z",
+        "price_low": "21094.9",
+        "price_high": "21280.0",
+        "pivot_time": "2022-06-25T18:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656181800.0",
+          "c_1656182700.0",
+          "c_1656183600.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "77de27c1"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656185400.0::marker",
+      "semantic_object_id": "swing_local_1656185400.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 924.0794701986754,
+        "x2": null,
+        "y1": 713.4211267605642,
+        "y2": null,
+        "anchor_x": 924.0794701986754,
+        "anchor_y": 713.4211267605642,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T19:30:00Z",
+        "end_time": "2022-06-25T19:30:00Z",
+        "price_low": "21150.0",
+        "price_high": "21189.3",
+        "pivot_time": "2022-06-25T19:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656184500.0",
+          "c_1656185400.0",
+          "c_1656186300.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "d12b202f"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656187200.0::marker",
+      "semantic_object_id": "swing_local_1656187200.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 946.2516556291391,
+        "x2": null,
+        "y1": 727.364788732395,
+        "y2": null,
+        "anchor_x": 946.2516556291391,
+        "anchor_y": 727.364788732395,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T20:00:00Z",
+        "end_time": "2022-06-25T20:00:00Z",
+        "price_low": "21130.0",
+        "price_high": "21213.3",
+        "pivot_time": "2022-06-25T20:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656186300.0",
+          "c_1656187200.0",
+          "c_1656188100.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "90c570d4"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656192600.0::marker",
+      "semantic_object_id": "swing_local_1656192600.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1012.7682119205299,
+        "x2": null,
+        "y1": 445.1450704225372,
+        "y2": null,
+        "anchor_x": 1012.7682119205299,
+        "anchor_y": 445.1450704225372,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T21:30:00Z",
+        "end_time": "2022-06-25T21:30:00Z",
+        "price_low": "21359.9",
+        "price_high": "21534.8",
+        "pivot_time": "2022-06-25T21:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656191700.0",
+          "c_1656192600.0",
+          "c_1656193500.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "e8564b72"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656195300.0::marker",
+      "semantic_object_id": "swing_local_1656195300.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1046.026490066225,
+        "x2": null,
+        "y1": 550.2802816901421,
+        "y2": null,
+        "anchor_x": 1046.026490066225,
+        "anchor_y": 550.2802816901421,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T22:15:00Z",
+        "end_time": "2022-06-25T22:15:00Z",
+        "price_low": "21384.0",
+        "price_high": "21461.0",
+        "pivot_time": "2022-06-25T22:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656194400.0",
+          "c_1656195300.0",
+          "c_1656196200.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "dddb3b9d"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656196200.0::marker",
+      "semantic_object_id": "swing_local_1656196200.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1057.112582781457,
+        "x2": null,
+        "y1": 478.9584507042273,
+        "y2": null,
+        "anchor_x": 1057.112582781457,
+        "anchor_y": 478.9584507042273,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T22:30:00Z",
+        "end_time": "2022-06-25T22:30:00Z",
+        "price_low": "21415.6",
+        "price_high": "21486.3",
+        "pivot_time": "2022-06-25T22:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656195300.0",
+          "c_1656196200.0",
+          "c_1656197100.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "2b36d15f"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656197100.0::marker",
+      "semantic_object_id": "swing_local_1656197100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1068.1986754966888,
+        "x2": null,
+        "y1": 534.1753521126793,
+        "y2": null,
+        "anchor_x": 1068.1986754966888,
+        "anchor_y": 534.1753521126793,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T22:45:00Z",
+        "end_time": "2022-06-25T22:45:00Z",
+        "price_low": "21407.1",
+        "price_high": "21447.2",
+        "pivot_time": "2022-06-25T22:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656196200.0",
+          "c_1656197100.0",
+          "c_1656198000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "ba646e18"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656198900.0::marker",
+      "semantic_object_id": "swing_local_1656198900.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1090.3708609271523,
+        "x2": null,
+        "y1": 477.2154929577482,
+        "y2": null,
+        "anchor_x": 1090.3708609271523,
+        "anchor_y": 477.2154929577482,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T23:15:00Z",
+        "end_time": "2022-06-25T23:15:00Z",
+        "price_low": "21434.4",
+        "price_high": "21488.8",
+        "pivot_time": "2022-06-25T23:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656198000.0",
+          "c_1656198900.0",
+          "c_1656199800.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "3b5cda74"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656200700.0::marker",
+      "semantic_object_id": "swing_local_1656200700.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1112.5430463576158,
+        "x2": null,
+        "y1": 399.68873239436834,
+        "y2": null,
+        "anchor_x": 1112.5430463576158,
+        "anchor_y": 399.68873239436834,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T23:45:00Z",
+        "end_time": "2022-06-25T23:45:00Z",
+        "price_low": "21431.6",
+        "price_high": "21600.0",
+        "pivot_time": "2022-06-25T23:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656199800.0",
+          "c_1656200700.0",
+          "c_1656201600.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "6bd602df"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656202500.0::marker",
+      "semantic_object_id": "swing_local_1656202500.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1134.7152317880793,
+        "x2": null,
+        "y1": 550.9774647887334,
+        "y2": null,
+        "anchor_x": 1134.7152317880793,
+        "anchor_y": 550.9774647887334,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T00:15:00Z",
+        "end_time": "2022-06-26T00:15:00Z",
+        "price_low": "21383.0",
+        "price_high": "21453.5",
+        "pivot_time": "2022-06-26T00:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656201600.0",
+          "c_1656202500.0",
+          "c_1656203400.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "c2f20516"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656206100.0::marker",
+      "semantic_object_id": "swing_local_1656206100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1179.0596026490066,
+        "x2": null,
+        "y1": 443.1929577464816,
+        "y2": null,
+        "anchor_x": 1179.0596026490066,
+        "anchor_y": 443.1929577464816,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T01:15:00Z",
+        "end_time": "2022-06-26T01:15:00Z",
+        "price_low": "21450.0",
+        "price_high": "21537.6",
+        "pivot_time": "2022-06-26T01:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656205200.0",
+          "c_1656206100.0",
+          "c_1656207000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "3d600a6d"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656207000.0::marker",
+      "semantic_object_id": "swing_local_1656207000.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1190.1456953642385,
+        "x2": null,
+        "y1": 599.6408450704239,
+        "y2": null,
+        "anchor_x": 1190.1456953642385,
+        "anchor_y": 599.6408450704239,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T01:30:00Z",
+        "end_time": "2022-06-26T01:30:00Z",
+        "price_low": "21313.2",
+        "price_high": "21454.4",
+        "pivot_time": "2022-06-26T01:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656206100.0",
+          "c_1656207000.0",
+          "c_1656207900.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "75af3a2a"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656208800.0::marker",
+      "semantic_object_id": "swing_local_1656208800.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1212.317880794702,
+        "x2": null,
+        "y1": 529.8528169014098,
+        "y2": null,
+        "anchor_x": 1212.317880794702,
+        "anchor_y": 529.8528169014098,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T02:00:00Z",
+        "end_time": "2022-06-26T02:00:00Z",
+        "price_low": "21361.5",
+        "price_high": "21413.3",
+        "pivot_time": "2022-06-26T02:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656207900.0",
+          "c_1656208800.0",
+          "c_1656209700.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "c805ff9b"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656211500.0::marker",
+      "semantic_object_id": "swing_local_1656211500.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1245.5761589403974,
+        "x2": null,
+        "y1": 634.1514084507053,
+        "y2": null,
+        "anchor_x": 1245.5761589403974,
+        "anchor_y": 634.1514084507053,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T02:45:00Z",
+        "end_time": "2022-06-26T02:45:00Z",
+        "price_low": "21263.7",
+        "price_high": "21393.1",
+        "pivot_time": "2022-06-26T02:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656210600.0",
+          "c_1656211500.0",
+          "c_1656212400.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "f3932646"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656215100.0::marker",
+      "semantic_object_id": "swing_local_1656215100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1289.9205298013244,
+        "x2": null,
+        "y1": 501.82605633802996,
+        "y2": null,
+        "anchor_x": 1289.9205298013244,
+        "anchor_y": 501.82605633802996,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T03:45:00Z",
+        "end_time": "2022-06-26T03:45:00Z",
+        "price_low": "21400.0",
+        "price_high": "21453.5",
+        "pivot_time": "2022-06-26T03:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656214200.0",
+          "c_1656215100.0",
+          "c_1656216000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "d173a9c4"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656216900.0::marker",
+      "semantic_object_id": "swing_local_1656216900.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1312.0927152317881,
+        "x2": null,
+        "y1": 572.2415492957753,
+        "y2": null,
+        "anchor_x": 1312.0927152317881,
+        "anchor_y": 572.2415492957753,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T04:15:00Z",
+        "end_time": "2022-06-26T04:15:00Z",
+        "price_low": "21352.5",
+        "price_high": "21410.0",
+        "pivot_time": "2022-06-26T04:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656216000.0",
+          "c_1656216900.0",
+          "c_1656217800.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "fdb3180e"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656218700.0::marker",
+      "semantic_object_id": "swing_local_1656218700.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1334.2649006622516,
+        "x2": null,
+        "y1": 486.90633802816956,
+        "y2": null,
+        "anchor_x": 1334.2649006622516,
+        "anchor_y": 486.90633802816956,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T04:45:00Z",
+        "end_time": "2022-06-26T04:45:00Z",
+        "price_low": "21411.9",
+        "price_high": "21474.9",
+        "pivot_time": "2022-06-26T04:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656217800.0",
+          "c_1656218700.0",
+          "c_1656219600.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "09b8cf97"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656220500.0::marker",
+      "semantic_object_id": "swing_local_1656220500.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1356.4370860927152,
+        "x2": null,
+        "y1": 484.53591549295925,
+        "y2": null,
+        "anchor_x": 1356.4370860927152,
+        "anchor_y": 484.53591549295925,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T05:15:00Z",
+        "end_time": "2022-06-26T05:15:00Z",
+        "price_low": "21429.7",
+        "price_high": "21478.3",
+        "pivot_time": "2022-06-26T05:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656219600.0",
+          "c_1656220500.0",
+          "c_1656221400.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "136c0163"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656222300.0::marker",
+      "semantic_object_id": "swing_local_1656222300.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1378.609271523179,
+        "x2": null,
+        "y1": 563.0387323943669,
+        "y2": null,
+        "anchor_x": 1378.609271523179,
+        "anchor_y": 563.0387323943669,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T05:45:00Z",
+        "end_time": "2022-06-26T05:45:00Z",
+        "price_low": "21365.7",
+        "price_high": "21448.0",
+        "pivot_time": "2022-06-26T05:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656221400.0",
+          "c_1656222300.0",
+          "c_1656223200.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "71954e1a"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656224100.0::marker",
+      "semantic_object_id": "swing_local_1656224100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1400.7814569536424,
+        "x2": null,
+        "y1": 591.7626760563398,
+        "y2": null,
+        "anchor_x": 1400.7814569536424,
+        "anchor_y": 591.7626760563398,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T06:15:00Z",
+        "end_time": "2022-06-26T06:15:00Z",
+        "price_low": "21324.5",
+        "price_high": "21414.3",
+        "pivot_time": "2022-06-26T06:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656223200.0",
+          "c_1656224100.0",
+          "c_1656225000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "97319298"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656225000.0::marker",
+      "semantic_object_id": "swing_local_1656225000.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1411.8675496688743,
+        "x2": null,
+        "y1": 455.46338028169157,
+        "y2": null,
+        "anchor_x": 1411.8675496688743,
+        "anchor_y": 455.46338028169157,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T06:30:00Z",
+        "end_time": "2022-06-26T06:30:00Z",
+        "price_low": "21400.2",
+        "price_high": "21520.0",
+        "pivot_time": "2022-06-26T06:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656224100.0",
+          "c_1656225000.0",
+          "c_1656225900.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "823815fe"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656228600.0::marker",
+      "semantic_object_id": "swing_local_1656228600.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1456.2119205298013,
+        "x2": null,
+        "y1": 503.7084507042273,
+        "y2": null,
+        "anchor_x": 1456.2119205298013,
+        "anchor_y": 503.7084507042273,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T07:30:00Z",
+        "end_time": "2022-06-26T07:30:00Z",
+        "price_low": "21374.1",
+        "price_high": "21450.8",
+        "pivot_time": "2022-06-26T07:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656227700.0",
+          "c_1656228600.0",
+          "c_1656229500.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "3feb0835"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656229500.0::marker",
+      "semantic_object_id": "swing_local_1656229500.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1467.2980132450332,
+        "x2": null,
+        "y1": 573.9845070422543,
+        "y2": null,
+        "anchor_x": 1467.2980132450332,
+        "anchor_y": 573.9845070422543,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T07:45:00Z",
+        "end_time": "2022-06-26T07:45:00Z",
+        "price_low": "21350.0",
+        "price_high": "21407.2",
+        "pivot_time": "2022-06-26T07:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656228600.0",
+          "c_1656229500.0",
+          "c_1656230400.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "a842130f"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656232200.0::marker",
+      "semantic_object_id": "swing_local_1656232200.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1500.5562913907286,
+        "x2": null,
+        "y1": 559.9711267605653,
+        "y2": null,
+        "anchor_x": 1500.5562913907286,
+        "anchor_y": 559.9711267605653,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T08:30:00Z",
+        "end_time": "2022-06-26T08:30:00Z",
+        "price_low": "21370.1",
+        "price_high": "21466.3",
+        "pivot_time": "2022-06-26T08:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656231300.0",
+          "c_1656232200.0",
+          "c_1656233100.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "49447438"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656234000.0::marker",
+      "semantic_object_id": "swing_local_1656234000.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1522.728476821192,
+        "x2": null,
+        "y1": 488.0915492957756,
+        "y2": null,
+        "anchor_x": 1522.728476821192,
+        "anchor_y": 488.0915492957756,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T09:00:00Z",
+        "end_time": "2022-06-26T09:00:00Z",
+        "price_low": "21374.6",
+        "price_high": "21473.2",
+        "pivot_time": "2022-06-26T09:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656233100.0",
+          "c_1656234000.0",
+          "c_1656234900.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "267d8305"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656234900.0::marker",
+      "semantic_object_id": "swing_local_1656234900.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1533.814569536424,
+        "x2": null,
+        "y1": 570.498591549298,
+        "y2": null,
+        "anchor_x": 1533.814569536424,
+        "anchor_y": 570.498591549298,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T09:15:00Z",
+        "end_time": "2022-06-26T09:15:00Z",
+        "price_low": "21355.0",
+        "price_high": "21431.9",
+        "pivot_time": "2022-06-26T09:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656234000.0",
+          "c_1656234900.0",
+          "c_1656235800.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "c37f7629"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656235800.0::marker",
+      "semantic_object_id": "swing_local_1656235800.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1544.9006622516556,
+        "x2": null,
+        "y1": 512.0049295774661,
+        "y2": null,
+        "anchor_x": 1544.9006622516556,
+        "anchor_y": 512.0049295774661,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T09:30:00Z",
+        "end_time": "2022-06-26T09:30:00Z",
+        "price_low": "21380.0",
+        "price_high": "21438.9",
+        "pivot_time": "2022-06-26T09:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656234900.0",
+          "c_1656235800.0",
+          "c_1656236700.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "7d2b4235"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656236700.0::marker",
+      "semantic_object_id": "swing_local_1656236700.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1555.9867549668875,
+        "x2": null,
+        "y1": 563.5267605633817,
+        "y2": null,
+        "anchor_x": 1555.9867549668875,
+        "anchor_y": 563.5267605633817,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T09:45:00Z",
+        "end_time": "2022-06-26T09:45:00Z",
+        "price_low": "21365.0",
+        "price_high": "21417.8",
+        "pivot_time": "2022-06-26T09:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656235800.0",
+          "c_1656236700.0",
+          "c_1656237600.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "1bbc27c6"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656237600.0::marker",
+      "semantic_object_id": "swing_local_1656237600.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1567.0728476821191,
+        "x2": null,
+        "y1": 506.77605633802887,
+        "y2": null,
+        "anchor_x": 1567.0728476821191,
+        "anchor_y": 506.77605633802887,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T10:00:00Z",
+        "end_time": "2022-06-26T10:00:00Z",
+        "price_low": "21386.5",
+        "price_high": "21446.4",
+        "pivot_time": "2022-06-26T10:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656236700.0",
+          "c_1656237600.0",
+          "c_1656238500.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "f0fcd037"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656240300.0::marker",
+      "semantic_object_id": "swing_local_1656240300.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1600.3311258278145,
+        "x2": null,
+        "y1": 563.9450704225364,
+        "y2": null,
+        "anchor_x": 1600.3311258278145,
+        "anchor_y": 563.9450704225364,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T10:45:00Z",
+        "end_time": "2022-06-26T10:45:00Z",
+        "price_low": "21364.4",
+        "price_high": "21425.0",
+        "pivot_time": "2022-06-26T10:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656239400.0",
+          "c_1656240300.0",
+          "c_1656241200.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "4d099133"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656243000.0::marker",
+      "semantic_object_id": "swing_local_1656243000.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1633.58940397351,
+        "x2": null,
+        "y1": 547.90985915493,
+        "y2": null,
+        "anchor_x": 1633.58940397351,
+        "anchor_y": 547.90985915493,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T11:30:00Z",
+        "end_time": "2022-06-26T11:30:00Z",
+        "price_low": "21387.4",
+        "price_high": "21568.0",
+        "pivot_time": "2022-06-26T11:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656242100.0",
+          "c_1656243000.0",
+          "c_1656243900.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "f95604a7"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656244800.0::marker",
+      "semantic_object_id": "swing_local_1656244800.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1655.7615894039734,
+        "x2": null,
+        "y1": 198.90000000000146,
+        "y2": null,
+        "anchor_x": 1655.7615894039734,
+        "anchor_y": 198.90000000000146,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T12:00:00Z",
+        "end_time": "2022-06-26T12:00:00Z",
+        "price_low": "21636.2",
+        "price_high": "21888.0",
+        "pivot_time": "2022-06-26T12:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656243900.0",
+          "c_1656244800.0",
+          "c_1656245700.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "690ac686"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656245700.0::marker",
+      "semantic_object_id": "swing_local_1656245700.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1666.8476821192053,
+        "x2": null,
+        "y1": 427.57605633802996,
+        "y2": null,
+        "anchor_x": 1666.8476821192053,
+        "anchor_y": 427.57605633802996,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T12:15:00Z",
+        "end_time": "2022-06-26T12:15:00Z",
+        "price_low": "21560.0",
+        "price_high": "21823.7",
+        "pivot_time": "2022-06-26T12:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656244800.0",
+          "c_1656245700.0",
+          "c_1656246600.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "09d432b3"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656248400.0::marker",
+      "semantic_object_id": "swing_local_1656248400.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1700.1059602649007,
+        "x2": null,
+        "y1": 631.780985915495,
+        "y2": null,
+        "anchor_x": 1700.1059602649007,
+        "anchor_y": 631.780985915495,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T13:00:00Z",
+        "end_time": "2022-06-26T13:00:00Z",
+        "price_low": "21267.1",
+        "price_high": "21476.4",
+        "pivot_time": "2022-06-26T13:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656247500.0",
+          "c_1656248400.0",
+          "c_1656249300.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "9a7eb654"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656250200.0::marker",
+      "semantic_object_id": "swing_local_1656250200.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1722.2781456953642,
+        "x2": null,
+        "y1": 606.1943661971854,
+        "y2": null,
+        "anchor_x": 1722.2781456953642,
+        "anchor_y": 606.1943661971854,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T13:30:00Z",
+        "end_time": "2022-06-26T13:30:00Z",
+        "price_low": "21303.8",
+        "price_high": "21413.4",
+        "pivot_time": "2022-06-26T13:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656249300.0",
+          "c_1656250200.0",
+          "c_1656251100.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "ae4eabbe"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656252900.0::marker",
+      "semantic_object_id": "swing_local_1656252900.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1755.5364238410596,
+        "x2": null,
+        "y1": 551.32605633803,
+        "y2": null,
+        "anchor_x": 1755.5364238410596,
+        "anchor_y": 551.32605633803,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T14:15:00Z",
+        "end_time": "2022-06-26T14:15:00Z",
+        "price_low": "21382.5",
+        "price_high": "21483.9",
+        "pivot_time": "2022-06-26T14:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656252000.0",
+          "c_1656252900.0",
+          "c_1656253800.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "f202606a"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656260100.0::marker",
+      "semantic_object_id": "swing_local_1656260100.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1844.2251655629138,
+        "x2": null,
+        "y1": 635.1971830985931,
+        "y2": null,
+        "anchor_x": 1844.2251655629138,
+        "anchor_y": 635.1971830985931,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T16:15:00Z",
+        "end_time": "2022-06-26T16:15:00Z",
+        "price_low": "21262.2",
+        "price_high": "21375.0",
+        "pivot_time": "2022-06-26T16:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656259200.0",
+          "c_1656260100.0",
+          "c_1656261000.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "9da1e8db"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656261000.0::marker",
+      "semantic_object_id": "swing_local_1656261000.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1855.3112582781457,
+        "x2": null,
+        "y1": 517.3732394366198,
+        "y2": null,
+        "anchor_x": 1855.3112582781457,
+        "anchor_y": 517.3732394366198,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T16:30:00Z",
+        "end_time": "2022-06-26T16:30:00Z",
+        "price_low": "21335.1",
+        "price_high": "21431.2",
+        "pivot_time": "2022-06-26T16:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656260100.0",
+          "c_1656261000.0",
+          "c_1656261900.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "8183694b"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656263700.0::marker",
+      "semantic_object_id": "swing_local_1656263700.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1888.569536423841,
+        "x2": null,
+        "y1": 734.3366197183113,
+        "y2": null,
+        "anchor_x": 1888.569536423841,
+        "anchor_y": 734.3366197183113,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T17:15:00Z",
+        "end_time": "2022-06-26T17:15:00Z",
+        "price_low": "21120.0",
+        "price_high": "21323.3",
+        "pivot_time": "2022-06-26T17:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656262800.0",
+          "c_1656263700.0",
+          "c_1656264600.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "0a8606c2"
+    },
+    {
+      "visual_object_id": "2022-06-25 05:00:00+00:00-local-swing-swing_local_1656265500.0::marker",
+      "semantic_object_id": "swing_local_1656265500.0",
+      "semantic_object_type": "swing",
+      "shape_type": "marker",
+      "z_index": 4,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1910.7417218543046,
+        "x2": null,
+        "y1": 628.4345070422532,
+        "y2": null,
+        "anchor_x": 1910.7417218543046,
+        "anchor_y": 628.4345070422532,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T17:45:00Z",
+        "end_time": "2022-06-26T17:45:00Z",
+        "price_low": "21206.8",
+        "price_high": "21271.9",
+        "pivot_time": "2022-06-26T17:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656264600.0",
+          "c_1656265500.0",
+          "c_1656266400.0"
+        ]
+      },
+      "style_token": "local_swing",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "450f6917"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656135900.0::box",
+      "semantic_object_id": "fvg_bearish_1656135900.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 314.3443708609272,
+        "x2": 1932.9139072847681,
+        "y1": 641.8901408450729,
+        "y2": 651.371830985916,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T05:45:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21239.0",
+        "price_high": "21252.6",
+        "pivot_time": "2022-06-25T05:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656135000.0",
+          "c_1656135900.0",
+          "c_1656136800.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "4e937dab"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656139500.0::box",
+      "semantic_object_id": "fvg_bullish_1656139500.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 358.68874172185434,
+        "x2": 1932.9139072847681,
+        "y1": 616.1640845070433,
+        "y2": 618.1859154929607,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T06:45:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21286.6",
+        "price_high": "21289.5",
+        "pivot_time": "2022-06-25T06:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656138600.0",
+          "c_1656139500.0",
+          "c_1656140400.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "f2b90070"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656140400.0::box",
+      "semantic_object_id": "fvg_bullish_1656140400.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 369.7748344370861,
+        "x2": 1932.9139072847681,
+        "y1": 505.2422535211299,
+        "y2": 605.3577464788741,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T07:00:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21305.0",
+        "price_high": "21448.6",
+        "pivot_time": "2022-06-25T07:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656139500.0",
+          "c_1656140400.0",
+          "c_1656141300.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "047373c9"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656148500.0::box",
+      "semantic_object_id": "fvg_bullish_1656148500.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 469.5496688741722,
+        "x2": 1932.9139072847681,
+        "y1": 514.723943661973,
+        "y2": 521.486619718311,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T09:15:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21425.3",
+        "price_high": "21435.0",
+        "pivot_time": "2022-06-25T09:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656147600.0",
+          "c_1656148500.0",
+          "c_1656149400.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "2317dac5"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656156600.0::box",
+      "semantic_object_id": "fvg_bearish_1656156600.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 569.3245033112582,
+        "x2": 1932.9139072847681,
+        "y1": 532.5718309859167,
+        "y2": 555.6485915492976,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T11:30:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21376.3",
+        "price_high": "21409.4",
+        "pivot_time": "2022-06-25T11:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656155700.0",
+          "c_1656156600.0",
+          "c_1656157500.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "85417939"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656158400.0::box",
+      "semantic_object_id": "fvg_bearish_1656158400.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 591.4966887417219,
+        "x2": 1932.9139072847681,
+        "y1": 603.2661971831003,
+        "y2": 614.0725352112695,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T12:00:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21292.5",
+        "price_high": "21308.0",
+        "pivot_time": "2022-06-25T12:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656157500.0",
+          "c_1656158400.0",
+          "c_1656159300.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "26208b0b"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656159300.0::box",
+      "semantic_object_id": "fvg_bearish_1656159300.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 602.5827814569536,
+        "x2": 1932.9139072847681,
+        "y1": 649.3500000000004,
+        "y2": 701.011267605636,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T12:15:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21167.8",
+        "price_high": "21241.9",
+        "pivot_time": "2022-06-25T12:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656158400.0",
+          "c_1656159300.0",
+          "c_1656160200.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "725ed55d"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656171900.0::box",
+      "semantic_object_id": "fvg_bearish_1656171900.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 757.7880794701987,
+        "x2": 1932.9139072847681,
+        "y1": 729.2471830985924,
+        "y2": 798.4774647887334,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T15:45:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21028.0",
+        "price_high": "21127.3",
+        "pivot_time": "2022-06-25T15:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656171000.0",
+          "c_1656171900.0",
+          "c_1656172800.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "b0ff1262"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656177300.0::box",
+      "semantic_object_id": "fvg_bullish_1656177300.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 824.3046357615895,
+        "x2": 1932.9139072847681,
+        "y1": 755.2521126760566,
+        "y2": 766.4070422535224,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T17:15:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21074.0",
+        "price_high": "21090.0",
+        "pivot_time": "2022-06-25T17:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656176400.0",
+          "c_1656177300.0",
+          "c_1656178200.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "b5d321d1"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656182700.0::box",
+      "semantic_object_id": "fvg_bullish_1656182700.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 890.8211920529802,
+        "x2": 1932.9139072847681,
+        "y1": 691.7387323943676,
+        "y2": 719.9746478873258,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T18:45:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21140.6",
+        "price_high": "21181.1",
+        "pivot_time": "2022-06-25T18:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656181800.0",
+          "c_1656182700.0",
+          "c_1656183600.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "298be891"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656189900.0::box",
+      "semantic_object_id": "fvg_bullish_1656189900.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 979.5099337748345,
+        "x2": 1932.9139072847681,
+        "y1": 680.2352112676072,
+        "y2": 682.4661971830992,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T20:45:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21194.4",
+        "price_high": "21197.6",
+        "pivot_time": "2022-06-25T20:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656189000.0",
+          "c_1656189900.0",
+          "c_1656190800.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "435cdd74"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656190800.0::box",
+      "semantic_object_id": "fvg_bullish_1656190800.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 990.5960264900662,
+        "x2": 1932.9139072847681,
+        "y1": 584.3028169014087,
+        "y2": 648.0253521126779,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T21:00:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21243.8",
+        "price_high": "21335.2",
+        "pivot_time": "2022-06-25T21:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656189900.0",
+          "c_1656190800.0",
+          "c_1656191700.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "be94565f"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656206100.0::box",
+      "semantic_object_id": "fvg_bearish_1656206100.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1179.0596026490066,
+        "x2": 1932.9139072847681,
+        "y1": 496.45774647887447,
+        "y2": 501.1985915492969,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T01:15:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21454.4",
+        "price_high": "21461.2",
+        "pivot_time": "2022-06-26T01:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656205200.0",
+          "c_1656206100.0",
+          "c_1656207000.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "a0e3a924"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656207000.0::box",
+      "semantic_object_id": "fvg_bearish_1656207000.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1190.1456953642385,
+        "x2": 1932.9139072847681,
+        "y1": 504.2661971831003,
+        "y2": 539.6133802816912,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T01:30:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21399.3",
+        "price_high": "21450.0",
+        "pivot_time": "2022-06-26T01:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656206100.0",
+          "c_1656207000.0",
+          "c_1656207900.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "54d4cd82"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656217800.0::box",
+      "semantic_object_id": "fvg_bullish_1656217800.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1323.1788079470198,
+        "x2": 1932.9139072847681,
+        "y1": 530.8288732394376,
+        "y2": 532.1535211267619,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T04:30:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21410.0",
+        "price_high": "21411.9",
+        "pivot_time": "2022-06-26T04:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656216900.0",
+          "c_1656217800.0",
+          "c_1656218700.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "7d734f43"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656225000.0::box",
+      "semantic_object_id": "fvg_bullish_1656225000.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1411.8675496688743,
+        "x2": 1932.9139072847681,
+        "y1": 502.31408450704475,
+        "y2": 529.1556338028186,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T06:30:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21414.3",
+        "price_high": "21452.8",
+        "pivot_time": "2022-06-26T06:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656224100.0",
+          "c_1656225000.0",
+          "c_1656225900.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "cd6763a5"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656226800.0::box",
+      "semantic_object_id": "fvg_bearish_1656226800.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1434.0397350993378,
+        "x2": 1932.9139072847681,
+        "y1": 502.31408450704475,
+        "y2": 511.307746478873,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T07:00:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21439.9",
+        "price_high": "21452.8",
+        "pivot_time": "2022-06-26T07:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656225900.0",
+          "c_1656226800.0",
+          "c_1656227700.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "e9b3e1dc"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656243000.0::box",
+      "semantic_object_id": "fvg_bullish_1656243000.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1633.58940397351,
+        "x2": 1932.9139072847681,
+        "y1": 474.77535211267787,
+        "y2": 511.4471830985931,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T11:30:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21439.7",
+        "price_high": "21492.3",
+        "pivot_time": "2022-06-26T11:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656242100.0",
+          "c_1656243000.0",
+          "c_1656243900.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "8dcf09b5"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656243900.0::box",
+      "semantic_object_id": "fvg_bullish_1656243900.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1644.6754966887418,
+        "x2": 1932.9139072847681,
+        "y1": 374.45070422535355,
+        "y2": 421.998591549298,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T11:45:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21568.0",
+        "price_high": "21636.2",
+        "pivot_time": "2022-06-26T11:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656243000.0",
+          "c_1656243900.0",
+          "c_1656244800.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "387f8283"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656247500.0::box",
+      "semantic_object_id": "fvg_bearish_1656247500.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1689.0198675496688,
+        "x2": 1932.9139072847681,
+        "y1": 415.30563380282,
+        "y2": 485.86056338028175,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T12:45:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21476.4",
+        "price_high": "21577.6",
+        "pivot_time": "2022-06-26T12:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656246600.0",
+          "c_1656247500.0",
+          "c_1656248400.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "2d76fb44"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656255600.0::box",
+      "semantic_object_id": "fvg_bearish_1656255600.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1788.794701986755,
+        "x2": 1932.9139072847681,
+        "y1": 545.748591549298,
+        "y2": 629.8288732394376,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T15:00:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21269.9",
+        "price_high": "21390.5",
+        "pivot_time": "2022-06-26T15:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656254700.0",
+          "c_1656255600.0",
+          "c_1656256500.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "a38a5daf"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bullish_1656257400.0::box",
+      "semantic_object_id": "fvg_bullish_1656257400.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1810.9668874172185,
+        "x2": 1932.9139072847681,
+        "y1": 616.9309859154928,
+        "y2": 629.8288732394376,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T15:30:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21269.9",
+        "price_high": "21288.4",
+        "pivot_time": "2022-06-26T15:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656256500.0",
+          "c_1656257400.0",
+          "c_1656258300.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "42813eea"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656263700.0::box",
+      "semantic_object_id": "fvg_bearish_1656263700.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1888.569536423841,
+        "x2": 1932.9139072847681,
+        "y1": 630.5957746478889,
+        "y2": 659.6683098591566,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T17:15:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21227.1",
+        "price_high": "21268.8",
+        "pivot_time": "2022-06-26T17:15:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656262800.0",
+          "c_1656263700.0",
+          "c_1656264600.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "a79a0b72"
+    },
+    {
+      "visual_object_id": "fvg-fvg_bearish_1656266400.0::box",
+      "semantic_object_id": "fvg_bearish_1656266400.0",
+      "semantic_object_type": "fvg",
+      "shape_type": "rectangle",
+      "z_index": 1,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1921.8278145695365,
+        "x2": 1932.9139072847681,
+        "y1": 673.8211267605657,
+        "y2": 675.5640845070429,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T18:00:00Z",
+        "end_time": "2022-06-26T18:15:00Z",
+        "price_low": "21204.3",
+        "price_high": "21206.8",
+        "pivot_time": "2022-06-26T18:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656265500.0",
+          "c_1656266400.0",
+          "c_1656267300.0"
+        ]
+      },
+      "style_token": "active_fvg",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "15b7dc7e"
+    },
+    {
+      "visual_object_id": "break-line-BOS_bearish_1656157500.0",
+      "semantic_object_id": "BOS_bearish_1656157500.0",
+      "semantic_object_type": "structure_break",
+      "shape_type": "horizontal_line",
+      "z_index": 5,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 580.4105960264901,
+        "x2": 591.4966887417219,
+        "y1": 573.2873239436631,
+        "y2": 573.2873239436631,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T11:45:00Z",
+        "end_time": "2022-06-25T12:00:00Z",
+        "price_low": "21351.0",
+        "price_high": "21351.0",
+        "pivot_time": "2022-06-25T09:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656157500.0",
+          "c_1656157500.0"
+        ]
+      },
+      "style_token": "confirmed_break",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "0b809267"
+    },
+    {
+      "visual_object_id": "break-line-BOS_bearish_1656171900.0",
+      "semantic_object_id": "BOS_bearish_1656171900.0",
+      "semantic_object_type": "structure_break",
+      "shape_type": "horizontal_line",
+      "z_index": 5,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 757.7880794701987,
+        "x2": 768.8741721854304,
+        "y1": 798.3380281690152,
+        "y2": 798.3380281690152,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T15:45:00Z",
+        "end_time": "2022-06-25T16:00:00Z",
+        "price_low": "21028.2",
+        "price_high": "21028.2",
+        "pivot_time": "2022-06-25T12:30:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656171900.0",
+          "c_1656171900.0"
+        ]
+      },
+      "style_token": "confirmed_break",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "14210f5c"
+    },
+    {
+      "visual_object_id": "break-line-CHOCH_bullish_1656190800.0",
+      "semantic_object_id": "CHOCH_bullish_1656190800.0",
+      "semantic_object_type": "structure_break",
+      "shape_type": "horizontal_line",
+      "z_index": 5,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 990.5960264900662,
+        "x2": 1001.682119205298,
+        "y1": 622.7873239436631,
+        "y2": 622.7873239436631,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T21:00:00Z",
+        "end_time": "2022-06-25T21:15:00Z",
+        "price_low": "21280.0",
+        "price_high": "21280.0",
+        "pivot_time": "2022-06-25T18:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656190800.0",
+          "c_1656190800.0"
+        ]
+      },
+      "style_token": "confirmed_break",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "7e1ae32e"
+    },
+    {
+      "visual_object_id": "break-line-BOS_bullish_1656243000.0",
+      "semantic_object_id": "BOS_bullish_1656243000.0",
+      "semantic_object_type": "structure_break",
+      "shape_type": "horizontal_line",
+      "z_index": 5,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1633.58940397351,
+        "x2": 1644.6754966887418,
+        "y1": 488.0915492957756,
+        "y2": 488.0915492957756,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T11:30:00Z",
+        "end_time": "2022-06-26T11:45:00Z",
+        "price_low": "21473.2",
+        "price_high": "21473.2",
+        "pivot_time": "2022-06-26T09:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656243000.0",
+          "c_1656243000.0"
+        ]
+      },
+      "style_token": "confirmed_break",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "227f507a"
+    },
+    {
+      "visual_object_id": "break-line-CHOCH_bearish_1656248400.0",
+      "semantic_object_id": "CHOCH_bearish_1656248400.0",
+      "semantic_object_type": "structure_break",
+      "shape_type": "horizontal_line",
+      "z_index": 5,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1700.1059602649007,
+        "x2": 1733.364238410596,
+        "y1": 563.9450704225364,
+        "y2": 563.9450704225364,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T13:00:00Z",
+        "end_time": "2022-06-26T13:45:00Z",
+        "price_low": "21364.4",
+        "price_high": "21364.4",
+        "pivot_time": "2022-06-26T10:45:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656248400.0",
+          "c_1656250200.0"
+        ]
+      },
+      "style_token": "confirmed_break",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "5f048184"
+    },
+    {
+      "visual_object_id": "break-line-BOS_bearish_1656255600.0",
+      "semantic_object_id": "BOS_bearish_1656255600.0",
+      "semantic_object_type": "structure_break",
+      "shape_type": "horizontal_line",
+      "z_index": 5,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1788.794701986755,
+        "x2": 1810.9668874172185,
+        "y1": 631.780985915495,
+        "y2": 631.780985915495,
+        "anchor_x": null,
+        "anchor_y": null,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T15:00:00Z",
+        "end_time": "2022-06-26T15:30:00Z",
+        "price_low": "21267.1",
+        "price_high": "21267.1",
+        "pivot_time": "2022-06-26T13:00:00Z",
+        "event_time": null,
+        "source_candle_ids": [
+          "c_1656255600.0",
+          "c_1656256500.0"
+        ]
+      },
+      "style_token": "confirmed_break",
+      "label_text": null,
+      "label_anchor": null,
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "ac51bd04"
+    },
+    {
+      "visual_object_id": "label-BOS_bearish_1656157500.0",
+      "semantic_object_id": "BOS_bearish_1656157500.0",
+      "semantic_object_type": "text_label",
+      "shape_type": "text_label",
+      "z_index": 9,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 580.4105960264901,
+        "x2": 604.4105960264901,
+        "y1": 573.2873239436631,
+        "y2": 585.2873239436631,
+        "anchor_x": 580.4105960264901,
+        "anchor_y": 573.2873239436631,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T11:45:00Z",
+        "end_time": "2022-06-25T12:15:00Z",
+        "price_low": "21333.80",
+        "price_high": "21351.00",
+        "pivot_time": null,
+        "event_time": null,
+        "source_candle_ids": []
+      },
+      "style_token": "label_text",
+      "label_text": " BOS",
+      "label_anchor": "left",
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "0b809267"
+    },
+    {
+      "visual_object_id": "label-BOS_bearish_1656171900.0",
+      "semantic_object_id": "BOS_bearish_1656171900.0",
+      "semantic_object_type": "text_label",
+      "shape_type": "text_label",
+      "z_index": 9,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 757.7880794701987,
+        "x2": 781.7880794701987,
+        "y1": 798.3380281690152,
+        "y2": 810.3380281690152,
+        "anchor_x": 757.7880794701987,
+        "anchor_y": 798.3380281690152,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T15:45:00Z",
+        "end_time": "2022-06-25T16:15:00Z",
+        "price_low": "21011.00",
+        "price_high": "21028.20",
+        "pivot_time": null,
+        "event_time": null,
+        "source_candle_ids": []
+      },
+      "style_token": "label_text",
+      "label_text": " BOS",
+      "label_anchor": "left",
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "14210f5c"
+    },
+    {
+      "visual_object_id": "label-CHOCH_bullish_1656190800.0",
+      "semantic_object_id": "CHOCH_bullish_1656190800.0",
+      "semantic_object_type": "text_label",
+      "shape_type": "text_label",
+      "z_index": 9,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 990.5960264900662,
+        "x2": 1030.5960264900662,
+        "y1": 622.7873239436631,
+        "y2": 634.7873239436631,
+        "anchor_x": 990.5960264900662,
+        "anchor_y": 622.7873239436631,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-25T21:00:00Z",
+        "end_time": "2022-06-25T22:00:00Z",
+        "price_low": "21262.80",
+        "price_high": "21280.00",
+        "pivot_time": null,
+        "event_time": null,
+        "source_candle_ids": []
+      },
+      "style_token": "label_text",
+      "label_text": " CHOCH",
+      "label_anchor": "left",
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "7e1ae32e"
+    },
+    {
+      "visual_object_id": "label-BOS_bullish_1656243000.0",
+      "semantic_object_id": "BOS_bullish_1656243000.0",
+      "semantic_object_type": "text_label",
+      "shape_type": "text_label",
+      "z_index": 9,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1633.58940397351,
+        "x2": 1657.58940397351,
+        "y1": 488.0915492957756,
+        "y2": 500.0915492957756,
+        "anchor_x": 1633.58940397351,
+        "anchor_y": 488.0915492957756,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T11:30:00Z",
+        "end_time": "2022-06-26T12:00:00Z",
+        "price_low": "21456.00",
+        "price_high": "21473.20",
+        "pivot_time": null,
+        "event_time": null,
+        "source_candle_ids": []
+      },
+      "style_token": "label_text",
+      "label_text": " BOS",
+      "label_anchor": "left",
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "227f507a"
+    },
+    {
+      "visual_object_id": "label-CHOCH_bearish_1656248400.0",
+      "semantic_object_id": "CHOCH_bearish_1656248400.0",
+      "semantic_object_type": "text_label",
+      "shape_type": "text_label",
+      "z_index": 9,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1700.1059602649007,
+        "x2": 1740.1059602649007,
+        "y1": 563.9450704225364,
+        "y2": 575.9450704225364,
+        "anchor_x": 1700.1059602649007,
+        "anchor_y": 563.9450704225364,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T13:00:00Z",
+        "end_time": "2022-06-26T14:00:00Z",
+        "price_low": "21347.20",
+        "price_high": "21364.40",
+        "pivot_time": null,
+        "event_time": null,
+        "source_candle_ids": []
+      },
+      "style_token": "label_text",
+      "label_text": " CHOCH",
+      "label_anchor": "left",
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "5f048184"
+    },
+    {
+      "visual_object_id": "label-BOS_bearish_1656255600.0",
+      "semantic_object_id": "BOS_bearish_1656255600.0",
+      "semantic_object_type": "text_label",
+      "shape_type": "text_label",
+      "z_index": 9,
+      "visibility_status": "visible",
+      "omission_reason": null,
+      "pixel_geometry": {
+        "x1": 1788.794701986755,
+        "x2": 1812.794701986755,
+        "y1": 631.780985915495,
+        "y2": 643.780985915495,
+        "anchor_x": 1788.794701986755,
+        "anchor_y": 631.780985915495,
+        "polygon_points": null
+      },
+      "market_geometry": {
+        "start_time": "2022-06-26T15:00:00Z",
+        "end_time": "2022-06-26T15:30:00Z",
+        "price_low": "21249.90",
+        "price_high": "21267.10",
+        "pivot_time": null,
+        "event_time": null,
+        "source_candle_ids": []
+      },
+      "style_token": "label_text",
+      "label_text": " BOS",
+      "label_anchor": "left",
+      "leader_line_geometry": null,
+      "renderer_version": "2.0.0",
+      "semantic_schema_version": "1.0.0",
+      "source_object_hash": "ac51bd04"
+    }
+  ],
+  "omitted_objects_report": []
+}

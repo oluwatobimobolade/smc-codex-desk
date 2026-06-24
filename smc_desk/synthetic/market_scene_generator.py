@@ -1,20 +1,6 @@
-"""Synthetic SMC primitives with KNOWN ground truth, for perception-accuracy testing.
-
-Every builder constructs an OHLCV frame containing exactly one canonical primitive,
-placed deterministically, so we can measure whether the engine's detectors identify
-it correctly. Moves are expressed in PERCENT of price, so the same construction works
-at any scale (XRP ~0.5, BTC ~60000) — that doubles as a scale-invariance test.
-
-Each builder returns (df, truth) where truth = {"kind", "direction"} (or kind="none"
-for the chop negative control). Builders are parameterized by (base_price, seed) so
-the benchmark can generate many variants and report a robust accuracy %.
-"""
 from __future__ import annotations
-
 import random
-
 import pandas as pd
-
 
 def _df(rows: list[tuple[float, float, float, float]]) -> pd.DataFrame:
     ts = pd.date_range("2024-01-01", periods=len(rows), freq="15min")
@@ -23,13 +9,11 @@ def _df(rows: list[tuple[float, float, float, float]]) -> pd.DataFrame:
     df["volume"] = 1000.0
     return df
 
-
 def _cdl(o: float, c: float, up_w: float = 0.0, dn_w: float = 0.0) -> tuple[float, float, float, float]:
     """Candle from open/close with wick extensions as fractions of price."""
     hi = max(o, c) * (1.0 + up_w)
     lo = min(o, c) * (1.0 - dn_w)
     return (o, hi, lo, c)
-
 
 def _baseline(p: float, k: int, seed: int, step_pct: float = 0.0010) -> tuple[list, float]:
     """Quiet, small-bodied candles that establish an avg body/range without big breaks."""
@@ -45,7 +29,6 @@ def _baseline(p: float, k: int, seed: int, step_pct: float = 0.0010) -> tuple[li
         p = c
     return rows, p
 
-
 # ---------- Market structure ----------
 def bos_bull(base_price=100.0, seed=0):
     rows, p = _baseline(base_price, 16, seed)
@@ -59,7 +42,6 @@ def bos_bull(base_price=100.0, seed=0):
     rows.append(_cdl(p, p * 0.998)); rows.append(_cdl(p * 0.998, p * 0.997))
     return _df(rows), {"kind": "BOS", "direction": "bullish"}
 
-
 def bos_bear(base_price=100.0, seed=0):
     rows, p = _baseline(base_price, 16, seed)
     trough = p * 0.988
@@ -72,9 +54,7 @@ def bos_bear(base_price=100.0, seed=0):
     rows.append(_cdl(p, p * 1.002)); rows.append(_cdl(p * 1.002, p * 1.003))
     return _df(rows), {"kind": "BOS", "direction": "bearish"}
 
-
 def choch_bear(base_price=100.0, seed=0):
-    # Establish a bullish trend (BOS up), then break the protected low -> CHoCH bearish.
     df_bull, _ = bos_bull(base_price, seed)
     rows = list(df_bull[["open", "high", "low", "close"]].itertuples(index=False, name=None))
     p = rows[-1][3]
@@ -84,7 +64,6 @@ def choch_bear(base_price=100.0, seed=0):
     p = lo_ref * 0.985
     rows.append(_cdl(p, p * 1.002)); rows.append(_cdl(p * 1.002, p * 1.001))
     return _df(rows), {"kind": "CHoCH", "direction": "bearish"}
-
 
 def choch_bull(base_price=100.0, seed=0):
     df_bear, _ = bos_bear(base_price, seed)
@@ -97,7 +76,6 @@ def choch_bull(base_price=100.0, seed=0):
     rows.append(_cdl(p, p * 0.998)); rows.append(_cdl(p * 0.998, p * 0.999))
     return _df(rows), {"kind": "CHoCH", "direction": "bullish"}
 
-
 # ---------- Imbalance (FVG) ----------
 def fvg_bull(base_price=100.0, seed=0):
     rows, p = _baseline(base_price, 16, seed)
@@ -107,14 +85,12 @@ def fvg_bull(base_price=100.0, seed=0):
     rows.append(_cdl(p2o, p2o * 1.018, up_w=0.0006))           # c2 impulse (big body)
     p = p2o * 1.018
     rows.append(_cdl(p * 1.001, p * 1.004, dn_w=0.0))          # c3: low stays ABOVE c1 high -> gap
-    # ensure c3.low > c1.high
     o, hi, lo, c = rows[-1]
     if lo <= c1_hi:
         lo = c1_hi * 1.003
         rows[-1] = (o, hi, lo, c)
     rows.append(_cdl(c, c * 1.001)); rows.append(_cdl(c * 1.001, c * 1.0005))
     return _df(rows), {"kind": "fvg", "direction": "bullish"}
-
 
 def fvg_bear(base_price=100.0, seed=0):
     rows, p = _baseline(base_price, 16, seed)
@@ -131,7 +107,6 @@ def fvg_bear(base_price=100.0, seed=0):
     rows.append(_cdl(c, c * 0.999)); rows.append(_cdl(c * 0.999, c * 0.9995))
     return _df(rows), {"kind": "fvg", "direction": "bearish"}
 
-
 # ---------- Liquidity sweeps ----------
 def sweep_high(base_price=100.0, seed=0):
     rows, p = _baseline(base_price, 14, seed)
@@ -140,11 +115,9 @@ def sweep_high(base_price=100.0, seed=0):
     rows.append(_cdl(p, level, up_w=0.0006)); p = level        # swing high == level
     for f in (0.996, 0.993, 0.992):
         rows.append(_cdl(p, level * f, dn_w=0.0004)); p = level * f
-    # sweep candle: wick ABOVE level, close back BELOW
     rows.append((level * 0.999, level * 1.003, level * 0.997, level * 0.996)); p = level * 0.996
     rows.append(_cdl(p, p * 0.999)); rows.append(_cdl(p * 0.999, p * 0.998))
     return _df(rows), {"kind": "Liquidity Sweep", "direction": "bearish"}
-
 
 def sweep_low(base_price=100.0, seed=0):
     rows, p = _baseline(base_price, 14, seed)
@@ -157,17 +130,14 @@ def sweep_low(base_price=100.0, seed=0):
     rows.append(_cdl(p, p * 1.001)); rows.append(_cdl(p * 1.001, p * 1.002))
     return _df(rows), {"kind": "Liquidity Sweep", "direction": "bullish"}
 
-
 # ---------- Order block (rides on a BOS) ----------
 def ob_bull(base_price=100.0, seed=0):
     df, _ = bos_bull(base_price, seed)
     return df, {"kind": "order_block", "direction": "bullish"}
 
-
 def ob_bear(base_price=100.0, seed=0):
     df, _ = bos_bear(base_price, seed)
     return df, {"kind": "order_block", "direction": "bearish"}
-
 
 # ---------- Equal highs / lows (clustered liquidity) ----------
 def equal_highs(base_price=100.0, seed=0):
@@ -182,7 +152,6 @@ def equal_highs(base_price=100.0, seed=0):
         rows.append(_cdl(p, level * f, dn_w=0.0004)); p = level * f
     return _df(rows), {"kind": "Equal Highs", "direction": "bearish"}
 
-
 def equal_lows(base_price=100.0, seed=0):
     rows, p = _baseline(base_price, 12, seed)
     level = p * 0.990
@@ -195,12 +164,10 @@ def equal_lows(base_price=100.0, seed=0):
         rows.append(_cdl(p, level * f, up_w=0.0004)); p = level * f
     return _df(rows), {"kind": "Equal Lows", "direction": "bullish"}
 
-
 # ---------- Negative control ----------
 def chop(base_price=100.0, seed=0):
     rows, _ = _baseline(base_price, 40, seed, step_pct=0.0008)
     return _df(rows), {"kind": "none", "direction": "none"}
-
 
 BUILDERS = {
     "BOS_bull": bos_bull, "BOS_bear": bos_bear,
@@ -211,3 +178,10 @@ BUILDERS = {
     "EqualHighs": equal_highs, "EqualLows": equal_lows,
     "Chop": chop,
 }
+
+class MarketSceneGenerator:
+    """Generates synthetic OHLCV sequences representing customized market scenes."""
+    def generate_scene(self, kind: str, base_price: float = 100.0, seed: int = 42) -> tuple[pd.DataFrame, dict]:
+        if kind in BUILDERS:
+            return BUILDERS[kind](base_price, seed)
+        raise ValueError(f"Unknown scene kind '{kind}'")

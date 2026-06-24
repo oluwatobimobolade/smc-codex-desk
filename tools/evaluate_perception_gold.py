@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk.case_audit import audit_case, find_case_files
-from smc_desk.perception import (
+from smc_desk.perception_legacy import (
     EVENT_PRIMITIVES,
     ZONE_PRIMITIVES,
     annotation_set_from_case,

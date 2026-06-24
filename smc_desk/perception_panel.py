@@ -24,7 +24,7 @@ import pandas as pd
 
 from .engine import analyze_dataframe
 from .models import AnalysisResult
-from .perception import PerceptionAnnotation, greedy_match_annotations
+from .perception_legacy import PerceptionAnnotation, greedy_match_annotations
 from .rules import RuleConfig
 
 _EVENT_MAP = {"BOS": "bos", "CHoCH": "choch", "Liquidity Sweep": "liquidity_sweep"}

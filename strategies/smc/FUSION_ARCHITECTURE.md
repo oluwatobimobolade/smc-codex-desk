@@ -191,30 +191,77 @@ Until all three hold, it is not A+ no matter how persuasive the prose reads.
 
 ## Future Work
 
-- Calibrate intent rule weights against adjudicated gold cases.
-- Add more intent rules (order-block failure, stop-run cascade).
-- Wire Fusion Engine into `tools/backtest_smc_elite.py` as an optional observability flag.
-- Build a perception benchmark that compares Fusion Engine overrides against adjudicated labels.
-- Migrate Sequence Memory to consume state-machine transitions for a single temporal source of truth.
+- Human gold-set labeling (pilot V1 has 45 cases ready; labels deferred per user decision).
+- Wire PerceptionEngineV2 into the fusion pipeline as a redundant source of structure events.
+- Migrate the remaining `sequence_memory.py` to consume state-machine transitions for a single temporal source of truth.
+- Add more stress tests from the spec (Groups A, D, E, F, G, H, I, J, K, L, M, N — currently B, C, F2, G2, I1 are implemented).
+- Fill gauntlet stages 4-16 missing test categories (some are test_stage.py only, others need implementation).
 
 ## References
 
-- `smc_desk/engine.py`
-- `smc_desk/features.py`
-- `smc_desk/sequence_memory.py`
-- `smc_desk/intent_detector.py`
-- `smc_desk/fusion_engine.py`
-- `smc_desk/regime.py`
-- `tools/replay_episodes.py`
-- `tools/analyze_chart.py`
-- `tests/test_engine_dual_direction.py`
-- `tests/test_engine_hard_gates.py`
-- `tests/test_features.py`
-- `tests/test_fusion_leakage.py`
-- `tests/test_fusion_golden.py`
-- `tests/test_fusion_price_provenance.py`
-- `tests/test_fusion_engine.py`
-- `tests/test_intent_detector.py`
-- `tests/test_sequence_memory.py`
-- `tests/test_replay_episodes.py`
-- `tests/test_analyze_chart.py`
+### Core engine
+- `smc_desk/engine.py` — deterministic engine with dual-direction generator
+- `smc_desk/models.py` — Pydantic schema (AnalysisResult carries both plans)
+- `smc_desk/rules.py` — RuleConfig
+- `smc_desk/dual_lens.py` — engine ↔ vision reconciliation (untouched)
+
+### Fusion layer (our work)
+- `smc_desk/fusion_engine.py` — scores dual plans, regime penalties, log-only intent
+- `smc_desk/features.py` — numpy OHLCV feature detectors
+- `smc_desk/episode_narrative.py` — episodes from engine structure events
+- `smc_desk/sequence_memory.py` — legacy bar processor (deprecation candidate)
+- `smc_desk/intent_detector.py` — market-intent rule framework
+- `smc_desk/calibration.py` — Brier score, reliability curve, isotonic regression
+- `smc_desk/regime.py` — trend/chop classification
+- `smc_desk/state_machine.py` — setup lifecycle state machine
+- `tools/analyze_chart.py` — analysis CLI with `--fusion` and `--vision` flags
+- `tools/replay_episodes.py` — replay tool for historical fusion
+- `tools/build_fusion_gold_set.py` — gold-set candidate harvester
+- `tools/evaluate_fusion_judgment.py` — judgment evaluation with GO/NO-GO gates
+
+### Perception V2 layer (restructure branch)
+- `smc_desk/perception/` — V2 object-based perception (swings, structure, FVG, lifecycle, ontology, comparator)
+- `smc_desk/perception_legacy.py` — previous generation (backward compat)
+- `smc_desk/rendering/` — semantic scene graph + 4-mode deterministic chart renderer
+- `smc_desk/vision/` — blind vision evaluation pipeline (observe_only default)
+- `smc_desk/knowledge/` — rule cards, academy profiles, conflict matrix, retrieval
+- `smc_desk/teacher_panel/` — AI annotation committee (extractor, critic, judge, source-critic, adversarial-critic)
+- `smc_desk/synthetic/` — synthetic chart university (scene generator, ground truth, visual variants, counterfactuals)
+- `smc_desk/evaluation/` — sandbox evaluation (hidden holdout, metamorphic, counterfactual, human challenge)
+- `smc_desk/data/` — Candle schemas, provenance, quality control, adapters
+
+### Documentation
+- `strategies/smc/FUSION_ARCHITECTURE.md` — this document
+- `strategies/smc/PRECEDENCE_LADDER.md` — authored tiebreakers for every conflict type
+- `strategies/smc/ANNOTATION_MANUAL.md` — consolidated annotation rules
+- `specs/STRESS_TEST_PROGRAMME.md` — Groups A-N stress test spec
+- `specs/PERCEPTION_ANNOTATION_MANUAL_V1.md` — V2 perception annotation rules
+- `PHASE3_RENDERING_REPORT.md` — rendering pipeline (6/6 tests pass)
+- `PHASE4_VISION_INFRASTRUCTURE_REPORT.md` — vision pipeline (5/5 tests pass, accuracy UNTESTED)
+- `PHASE5_LAB_INGESTION_REPORT.md` — annotation lab (8/8 tests pass)
+
+### Test suites
+- `tests/test_engine_dual_direction.py` (5 tests)
+- `tests/test_engine_hard_gates.py` (2 tests)
+- `tests/test_features.py` (10 tests)
+- `tests/test_episode_narrative.py` (11 tests)
+- `tests/test_fusion_leakage.py` (4 tests)
+- `tests/test_fusion_golden.py` (2 tests)
+- `tests/test_fusion_price_provenance.py` (2 tests)
+- `tests/test_fusion_judgment.py` (14 tests)
+- `tests/test_calibration.py` (9 tests)
+- `tests/test_fusion_engine.py` (8 tests)
+- `tests/test_intent_detector.py` (existing)
+- `tests/test_analyze_chart.py` (4 tests)
+- `tests/test_replay_episodes.py` (2 tests)
+- `tests/test_v2_perception.py` (4 tests)
+- `tests/test_v2_verification.py` (existing)
+- `tests/test_v3_rendering.py` (6 tests)
+- `tests/test_v4_vision.py` (5 tests)
+- `tests/test_v5_annotation_lab.py` (8 tests)
+- `tests/test_gauntlet_stage1.py` through `test_gauntlet_stage16.py` (26 tests)
+- `tests/stress_tests/test_B1_causality.py` (10,000-timestamp)
+- `tests/stress_tests/test_C_minimal_pairs.py` (4 tests)
+- `tests/stress_tests/test_F2_ghost_objects.py` (1 test)
+- `tests/stress_tests/test_G2_crop_truth.py` (1 test)
+- `tests/stress_tests/test_I1_false_consensus.py` (1 test)
