@@ -35,6 +35,8 @@ class RuleConfig(BaseModel):
     min_poi_width_pct: float = Field(default=0.0, ge=0)
     require_fresh_poi: bool = True
     allowed_poi_kinds: list[str] | None = None
+    vision_authority_mode: str = Field(default="observe_only")
+
 
 
 def load_rule_config(path: str | None = None) -> RuleConfig:

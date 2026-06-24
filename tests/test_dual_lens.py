@@ -54,8 +54,8 @@ class DualLensTests(unittest.TestCase):
         }
         mismatched = {**aligned, "source_aligned": False}
 
-        aligned_recon = reconcile(_engine(), aligned)
-        mismatched_recon = reconcile(_engine(), mismatched)
+        aligned_recon = reconcile(_engine(), aligned, vision_authority_mode="calibrated_veto")
+        mismatched_recon = reconcile(_engine(), mismatched, vision_authority_mode="calibrated_veto")
 
         self.assertLess(mismatched_recon["combined_confidence"], aligned_recon["combined_confidence"])
         self.assertTrue(any("source mismatch" in item for item in mismatched_recon["conflicts"]))

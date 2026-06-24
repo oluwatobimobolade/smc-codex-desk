@@ -10,7 +10,7 @@ import pandas as pd
 
 from .engine import analyze_dataframe
 from .mtf import build_mtf_snapshot, derive_htf_consensus_bias, precompute_htf_series, snapshot_to_dict
-from .perception import perception_annotation_scaffold
+from .perception_legacy import perception_annotation_scaffold
 from .rules import RuleConfig
 from .visual_geometry import build_visual_geometry_payload
 

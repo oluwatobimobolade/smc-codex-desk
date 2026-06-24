@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .case_library import file_sha256
-from .perception import annotation_set_from_case, annotation_set_is_gold_ready
+from .perception_legacy import annotation_set_from_case, annotation_set_is_gold_ready
 
 
 GOLD_REVIEW_STATUSES = {"gold_standard", "approved"}

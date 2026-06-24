@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from smc_desk.perception import PerceptionAnnotationSet
+from smc_desk.perception_legacy import PerceptionAnnotationSet
 
 
 def import_labels(case_path: Path, labels_path: Path) -> dict:
