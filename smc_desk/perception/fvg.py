@@ -62,7 +62,7 @@ class FVGDetector:
                     detector_version=self.detector_version,
                     configuration_hash=self.configuration_hash,
                     source_candle_ids=[f"c_{c.open_time.timestamp()}" for c in (c1, c2, c3)],
-                    last_updated_at=datetime.utcnow().replace(tzinfo=timezone.utc),
+                    last_updated_at=current_time,
                     confidence=1.0,
                     direction=direction,
                     price_low=lower_bound,
