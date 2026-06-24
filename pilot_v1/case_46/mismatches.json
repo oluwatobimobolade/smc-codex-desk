@@ -1,0 +1,1072 @@
+{
+  "swings": [
+    {
+      "v1": {
+        "kind": "low",
+        "index": 7,
+        "timestamp": "2025-08-18T20:30:00+00:00",
+        "price": 115929.9
+      },
+      "v2": "swing_local_1755549000.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 14,
+        "timestamp": "2025-08-18T22:15:00+00:00",
+        "price": 116938.7
+      },
+      "v2": "swing_local_1755555300.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "low",
+        "index": 23,
+        "timestamp": "2025-08-19T00:30:00+00:00",
+        "price": 115463.8
+      },
+      "v2": "swing_local_1755563400.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 25,
+        "timestamp": "2025-08-19T01:00:00+00:00",
+        "price": 116687.7
+      },
+      "v2": "swing_local_1755551700.0",
+      "status": "TIMING_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 32,
+        "timestamp": "2025-08-19T02:45:00+00:00",
+        "price": 116012.8
+      },
+      "v2": "swing_local_1755571500.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "low",
+        "index": 37,
+        "timestamp": "2025-08-19T04:00:00+00:00",
+        "price": 114303.8
+      },
+      "v2": "swing_local_1755576000.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 41,
+        "timestamp": "2025-08-19T05:00:00+00:00",
+        "price": 115430.0
+      },
+      "v2": "swing_local_1755595800.0",
+      "status": "TIMING_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "kind": "low",
+        "index": 51,
+        "timestamp": "2025-08-19T07:30:00+00:00",
+        "price": 114560.0
+      },
+      "v2": "swing_local_1755588600.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 66,
+        "timestamp": "2025-08-19T11:15:00+00:00",
+        "price": 115608.5
+      },
+      "v2": "swing_local_1755602100.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 75,
+        "timestamp": "2025-08-19T13:30:00+00:00",
+        "price": 115847.4
+      },
+      "v2": "swing_local_1755610200.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "low",
+        "index": 81,
+        "timestamp": "2025-08-19T15:00:00+00:00",
+        "price": 113506.0
+      },
+      "v2": "swing_local_1755615600.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "low",
+        "index": 89,
+        "timestamp": "2025-08-19T17:00:00+00:00",
+        "price": 113011.0
+      },
+      "v2": "swing_local_1755622800.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "low",
+        "index": 98,
+        "timestamp": "2025-08-19T19:15:00+00:00",
+        "price": 112714.4
+      },
+      "v2": "swing_local_1755630900.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 99,
+        "timestamp": "2025-08-19T19:30:00+00:00",
+        "price": 113490.3
+      },
+      "v2": "swing_local_1755624600.0",
+      "status": "TIMING_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 104,
+        "timestamp": "2025-08-19T20:45:00+00:00",
+        "price": 113524.5
+      },
+      "v2": "swing_local_1755631800.0",
+      "status": "TIMING_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "kind": "low",
+        "index": 116,
+        "timestamp": "2025-08-19T23:45:00+00:00",
+        "price": 112666.6
+      },
+      "v2": "swing_local_1755647100.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 121,
+        "timestamp": "2025-08-20T01:00:00+00:00",
+        "price": 113353.9
+      },
+      "v2": "swing_local_1755651600.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "low",
+        "index": 123,
+        "timestamp": "2025-08-20T01:30:00+00:00",
+        "price": 112500.0
+      },
+      "v2": "swing_local_1755653400.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 135,
+        "timestamp": "2025-08-20T04:30:00+00:00",
+        "price": 113639.0
+      },
+      "v2": "swing_local_1755660600.0",
+      "status": "TIMING_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 140,
+        "timestamp": "2025-08-20T05:45:00+00:00",
+        "price": 113732.8
+      },
+      "v2": "swing_local_1755668700.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "kind": "high",
+        "index": 146,
+        "timestamp": "2025-08-20T07:15:00+00:00",
+        "price": 113805.5
+      },
+      "v2": "swing_local_1755674100.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755543600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755544500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755545400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755546300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755552600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755557100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755560700.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755562500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755565200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755569700.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755579600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755584100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755591300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755592200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755596700.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755598500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755600300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755603000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755604800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755605700.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755607500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755616500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755625500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755633600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755636300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755642600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755646200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755648000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755661500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755662400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755664200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755666000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755666900.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755669600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755671400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_local_1755672300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755549000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755555300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755563400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755565200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755571500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755576000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755579600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755588600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755602100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755610200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755615600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755622800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755630900.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755631800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755636300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755647100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755651600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755653400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755664200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755668700.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_internal_1755674100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755549000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755555300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755563400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755565200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755576000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755579600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755588600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755602100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755610200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755615600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755622800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755630900.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755636300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755647100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755651600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755653400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "swing_external_1755668700.0",
+      "status": "V2_ONLY"
+    }
+  ],
+  "fvgs": [
+    {
+      "v1": {
+        "label": "Bearish FVG",
+        "kind": "fvg",
+        "direction": "bearish",
+        "low": 114984.1,
+        "high": 115223.0,
+        "start_index": 34,
+        "end_index": 36,
+        "confidence": 0.7999999999999999,
+        "score": 0.7999999999999999,
+        "status": "mitigated",
+        "touched_count": null,
+        "mitigation_pct": 1.0,
+        "source_event_index": null,
+        "reason": "Three-candle bearish imbalance with displacement score 2.50."
+      },
+      "v2": "fvg_bearish_1755574200.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "label": "Bullish FVG",
+        "kind": "fvg",
+        "direction": "bullish",
+        "low": 114984.0,
+        "high": 115079.3,
+        "start_index": 38,
+        "end_index": 40,
+        "confidence": 0.7858876431440802,
+        "score": 0.7858876431440802,
+        "status": "mitigated",
+        "touched_count": null,
+        "mitigation_pct": 1.0,
+        "source_event_index": null,
+        "reason": "Three-candle bullish imbalance with displacement score 2.06."
+      },
+      "v2": "fvg_bullish_1755577800.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "label": "Bullish FVG",
+        "kind": "fvg",
+        "direction": "bullish",
+        "low": 114994.2,
+        "high": 115137.0,
+        "start_index": 55,
+        "end_index": 57,
+        "confidence": 0.7212166726268521,
+        "score": 0.7212166726268521,
+        "status": "mitigated",
+        "touched_count": null,
+        "mitigation_pct": 1.0,
+        "source_event_index": null,
+        "reason": "Three-candle bullish imbalance with displacement score 1.41."
+      },
+      "v2": "fvg_bullish_1755593100.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "label": "Bullish FVG",
+        "kind": "fvg",
+        "direction": "bullish",
+        "low": 115390.7,
+        "high": 115500.0,
+        "start_index": 64,
+        "end_index": 66,
+        "confidence": 0.7880526232030234,
+        "score": 0.7880526232030234,
+        "status": "mitigated",
+        "touched_count": null,
+        "mitigation_pct": 1.0,
+        "source_event_index": null,
+        "reason": "Three-candle bullish imbalance with displacement score 2.08."
+      },
+      "v2": "fvg_bullish_1755601200.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "label": "Bearish FVG",
+        "kind": "fvg",
+        "direction": "bearish",
+        "low": 115328.7,
+        "high": 115467.6,
+        "start_index": 74,
+        "end_index": 76,
+        "confidence": 0.8799999999999999,
+        "score": 0.8799999999999999,
+        "status": "fresh",
+        "touched_count": null,
+        "mitigation_pct": 0.0,
+        "source_event_index": null,
+        "reason": "Three-candle bearish imbalance with displacement score 7.20."
+      },
+      "v2": "fvg_bearish_1755573300.0",
+      "status": "MATCHED_GEOMETRY_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "label": "Bearish FVG",
+        "kind": "fvg",
+        "direction": "bearish",
+        "low": 114438.7,
+        "high": 114708.0,
+        "start_index": 77,
+        "end_index": 79,
+        "confidence": 0.8799999999999999,
+        "score": 0.8799999999999999,
+        "status": "fresh",
+        "touched_count": null,
+        "mitigation_pct": 0.0,
+        "source_event_index": null,
+        "reason": "Three-candle bearish imbalance with displacement score 5.36."
+      },
+      "v2": "fvg_bearish_1755612900.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "label": "Bullish FVG",
+        "kind": "fvg",
+        "direction": "bullish",
+        "low": 113013.0,
+        "high": 113246.0,
+        "start_index": 97,
+        "end_index": 99,
+        "confidence": 0.7999999999999999,
+        "score": 0.7999999999999999,
+        "status": "mitigated",
+        "touched_count": null,
+        "mitigation_pct": 1.0,
+        "source_event_index": null,
+        "reason": "Three-candle bullish imbalance with displacement score 3.34."
+      },
+      "v2": "fvg_bullish_1755630900.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "label": "Bearish FVG",
+        "kind": "fvg",
+        "direction": "bearish",
+        "low": 113286.2,
+        "high": 113350.0,
+        "start_index": 108,
+        "end_index": 110,
+        "confidence": 0.755506200518461,
+        "score": 0.755506200518461,
+        "status": "mitigated",
+        "touched_count": null,
+        "mitigation_pct": 1.0,
+        "source_event_index": null,
+        "reason": "Three-candle bearish imbalance with displacement score 1.76."
+      },
+      "v2": "fvg_bearish_1755627300.0",
+      "status": "MATCHED_GEOMETRY_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "label": "Bearish FVG",
+        "kind": "fvg",
+        "direction": "bearish",
+        "low": 112951.9,
+        "high": 113114.9,
+        "start_index": 121,
+        "end_index": 123,
+        "confidence": 0.7999999999999999,
+        "score": 0.7999999999999999,
+        "status": "mitigated",
+        "touched_count": null,
+        "mitigation_pct": 1.0,
+        "source_event_index": null,
+        "reason": "Three-candle bearish imbalance with displacement score 2.66."
+      },
+      "v2": "fvg_bearish_1755628200.0",
+      "status": "MATCHED_GEOMETRY_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "label": "Bullish FVG",
+        "kind": "fvg",
+        "direction": "bullish",
+        "low": 113076.4,
+        "high": 113184.7,
+        "start_index": 124,
+        "end_index": 126,
+        "confidence": 0.8795760700548346,
+        "score": 0.8795760700548346,
+        "status": "fresh",
+        "touched_count": null,
+        "mitigation_pct": 0.0,
+        "source_event_index": null,
+        "reason": "Three-candle bullish imbalance with displacement score 2.20."
+      },
+      "v2": "fvg_bullish_1755655200.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755543600.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bullish_1755550800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bullish_1755554400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755556200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755557100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755558900.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755559800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bullish_1755564300.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755566100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755567000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755572400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755581400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755586800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755610200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755612000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755613800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755621000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755632700.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bullish_1755634500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bullish_1755635400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755639900.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755640800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755644400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755652500.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bullish_1755662400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bullish_1755673200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "fvg_bearish_1755675000.0",
+      "status": "V2_ONLY"
+    }
+  ],
+  "breaks": [
+    {
+      "v1": {
+        "label": "CHoCH",
+        "direction": "bearish",
+        "index": 22,
+        "timestamp": "2025-08-19T00:15:00+00:00",
+        "price": 115875.0,
+        "reason": "Close broke internal swing low at 115929.9000.",
+        "structure_scope": "internal",
+        "broken_level": 115929.9,
+        "swept_level": null,
+        "displacement_score": 2.418,
+        "strength": "strong"
+      },
+      "v2": "BOS_bearish_1755562500.0",
+      "status": "SCOPE_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "label": "BOS",
+        "direction": "bearish",
+        "index": 34,
+        "timestamp": "2025-08-19T03:15:00+00:00",
+        "price": 115323.1,
+        "reason": "Close broke swing low at 115463.8000.",
+        "structure_scope": "swing",
+        "broken_level": 115463.8,
+        "swept_level": null,
+        "displacement_score": 1.634,
+        "strength": "valid"
+      },
+      "v2": "BOS_bearish_1755572400.0",
+      "status": "MATCHED_EXACT"
+    },
+    {
+      "v1": {
+        "label": "BOS",
+        "direction": "bearish",
+        "index": 34,
+        "timestamp": "2025-08-19T03:15:00+00:00",
+        "price": 115323.1,
+        "reason": "Close broke internal swing low at 115580.0000.",
+        "structure_scope": "internal",
+        "broken_level": 115580.0,
+        "swept_level": null,
+        "displacement_score": 1.634,
+        "strength": "valid"
+      },
+      "v2": null,
+      "status": "V1_ONLY"
+    },
+    {
+      "v1": {
+        "label": "CHoCH",
+        "direction": "bullish",
+        "index": 74,
+        "timestamp": "2025-08-19T13:15:00+00:00",
+        "price": 115701.8,
+        "reason": "Close broke internal swing high at 115574.9000.",
+        "structure_scope": "internal",
+        "broken_level": 115574.9,
+        "swept_level": null,
+        "displacement_score": 2.907,
+        "strength": "strong"
+      },
+      "v2": "BOS_bullish_1755608400.0",
+      "status": "SCOPE_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "label": "CHoCH",
+        "direction": "bearish",
+        "index": 75,
+        "timestamp": "2025-08-19T13:30:00+00:00",
+        "price": 115063.7,
+        "reason": "Close broke internal swing low at 115224.8000.",
+        "structure_scope": "internal",
+        "broken_level": 115224.8,
+        "swept_level": null,
+        "displacement_score": 7.199,
+        "strength": "strong"
+      },
+      "v2": null,
+      "status": "V1_ONLY"
+    },
+    {
+      "v1": {
+        "label": "BOS",
+        "direction": "bearish",
+        "index": 78,
+        "timestamp": "2025-08-19T14:15:00+00:00",
+        "price": 114083.3,
+        "reason": "Close broke swing low at 114560.0000.",
+        "structure_scope": "swing",
+        "broken_level": 114560.0,
+        "swept_level": null,
+        "displacement_score": 5.364,
+        "strength": "strong"
+      },
+      "v2": "CHOCH_bearish_1755612900.0",
+      "status": "CLASSIFICATION_DIFFERENCE"
+    },
+    {
+      "v1": {
+        "label": "CHoCH",
+        "direction": "bullish",
+        "index": 130,
+        "timestamp": "2025-08-20T03:15:00+00:00",
+        "price": 113566.9,
+        "reason": "Close broke internal swing high at 113353.9000.",
+        "structure_scope": "internal",
+        "broken_level": 113353.9,
+        "swept_level": null,
+        "displacement_score": 1.941,
+        "strength": "valid"
+      },
+      "v2": "CHOCH_bullish_1755657900.0",
+      "status": "TIMING_DIFFERENCE"
+    },
+    {
+      "v1": null,
+      "v2": "CHOCH_bullish_1755595800.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "BOS_bearish_1755621000.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "BOS_bearish_1755628200.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "BOS_bearish_1755647100.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "BOS_bearish_1755653400.0",
+      "status": "V2_ONLY"
+    },
+    {
+      "v1": null,
+      "v2": "BOS_bullish_1755674100.0",
+      "status": "V2_ONLY"
+    }
+  ]
+}
