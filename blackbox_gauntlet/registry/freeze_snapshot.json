@@ -1,0 +1,12 @@
+{
+    "git_commit": "a2bbc5f2f12d83761c8b7a2f7b783bfe382bf819",
+    "perception_engine_v2": "963905d569ac2da67f4cc0d0ef589ba32b6120aeca0f0d4506b4fdb5c422d55b",
+    "ontology": "57b3759193593ef413f842d08230e9dbe870f7efc25ab1b80be69e23e931076e",
+    "renderer": null,
+    "vision_schema": null,
+    "knowledge_registry": "78cc5edc3463da367e1cc20ee678ade1eaa420522438060ac5072ec6366170d3",
+    "teacher_panel_annotator": "faecf792329e1bfc8ce5576289a7e2c3201c4ad74dc51a59becee64dd34a24dc",
+    "teacher_panel_aggregator": "36b9547f71ed7e1b355af0fb5f87a391957a4935ad5e3707b44272e46475a814",
+    "evaluation_comparator": "c23b27434144796081d0458c2e7ce44c625db84cf4b63a1938674863b25f370d",
+    "thresholds": "Default Phase 5 Config"
+}
