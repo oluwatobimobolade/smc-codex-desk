@@ -1,5 +1,5 @@
 from typing import List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import uuid
 
 from smc_desk.data.schemas import Candle, DataQualityIncident, IncidentType, Severity
@@ -9,7 +9,7 @@ class DataQualityReport:
         self.instrument = instrument
         self.timeframe = timeframe
         self.incidents: List[DataQualityIncident] = []
-        self.generated_at = datetime.utcnow()
+        self.generated_at = datetime.now(timezone.utc)
 
     @property
     def is_clean(self) -> bool:
@@ -36,7 +36,7 @@ def detect_gaps(candles: List[Candle], expected_step: timedelta) -> List[DataQua
                 incident_type=IncidentType.GAP,
                 severity=Severity.HIGH,
                 details=f"Gap detected between {prev_candle.close_time} and {curr_candle.open_time}",
-                detected_at=datetime.utcnow()
+                detected_at=datetime.now(timezone.utc)
             ))
     return incidents
 
@@ -52,7 +52,7 @@ def detect_duplicates(candles: List[Candle]) -> List[DataQualityIncident]:
                 incident_type=IncidentType.DUPLICATE,
                 severity=Severity.HIGH,
                 details=f"Duplicate candle found at {candle.open_time}",
-                detected_at=datetime.utcnow()
+                detected_at=datetime.now(timezone.utc)
             ))
         seen_times.add(candle.open_time)
     return incidents
@@ -68,7 +68,7 @@ def validate_ohlc_integrity(candles: List[Candle]) -> List[DataQualityIncident]:
                 incident_type=IncidentType.MISMATCH,
                 severity=Severity.CRITICAL,
                 details=f"OHLC integrity violation at {candle.open_time}: O={candle.open}, H={candle.high}, L={candle.low}, C={candle.close}",
-                detected_at=datetime.utcnow()
+                detected_at=datetime.now(timezone.utc)
             ))
     return incidents
 

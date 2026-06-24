@@ -1,6 +1,6 @@
 import hashlib
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 from typing import Optional
 
@@ -16,7 +16,7 @@ class ProvenanceRecord(BaseModel):
     start_time: datetime
     end_time: datetime
     quality_report: Optional[DataQualityReport] = None
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
 def compute_file_hash(path: Path) -> str:
     """Computes SHA-256 hash of a file."""

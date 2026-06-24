@@ -48,7 +48,7 @@ class BinanceTradeAdapter:
                         base_asset=self.symbol.replace("USDT", ""),
                         quote_asset="USDT",
                         event_time=datetime.fromtimestamp(t['T'] / 1000, tz=timezone.utc),
-                        receive_time=datetime.utcnow().replace(tzinfo=timezone.utc),
+                        receive_time=datetime.now(timezone.utc),
                         sequence_id=t['a'],
                         price=Decimal(str(t['p'])),
                         quantity=Decimal(str(t['q'])),
