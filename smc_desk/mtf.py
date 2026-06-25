@@ -80,6 +80,7 @@ TF_TO_PANDAS_RULE: dict[TimeframeKey, str] = {
 }
 
 TF_TO_DURATION: dict[TimeframeKey, pd.Timedelta] = {
+    "15m": pd.Timedelta("15min"),
     "1h": pd.Timedelta("1h"),
     "4h": pd.Timedelta("4h"),
     "1d": pd.Timedelta("1D"),
@@ -87,9 +88,14 @@ TF_TO_DURATION: dict[TimeframeKey, pd.Timedelta] = {
 
 
 def slice_15m_to(df: pd.DataFrame, decision_time: pd.Timestamp) -> pd.DataFrame:
-    """Return the 15m slice visible to the analyzer at `decision_time`."""
+    """Return the 15m slice visible to the analyzer at `decision_time`.
+
+    Only candles that have fully closed by `decision_time` are included.
+    A candle at T with period D is visible only when T + D <= decision_time.
+    """
     timestamps = pd.to_datetime(df["timestamp"], utc=False)
-    mask = timestamps <= decision_time
+    close_times = timestamps + TF_TO_DURATION["15m"]
+    mask = close_times <= decision_time
     return df.loc[mask].reset_index(drop=True)
 
 
