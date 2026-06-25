@@ -1,0 +1,17 @@
+{
+  "frozen_at": "2026-06-24T23:59:00Z",
+  "git_commit": "c5a53621f0f0623a63a9d2d9973e52be5c2646a9",
+  "branch": "main",
+  "test_counts": {
+    "unittest_passed": 197,
+    "pytest_passed": 361,
+    "total_passed": 558
+  },
+  "ontology_hash_sha256": "44836be317b85cb6c6caea5e2612a3ea363308fcbe76f3cd9569b0f48498fc4b",
+  "ontology_file": "specs/PERCEPTION_ONTOLOGY_V2.yaml",
+  "dual_lens_unchanged": true,
+  "work_packages_active": [
+    "WP-0011-TRUTH-BOUNDARY-REPAIR"
+  ],
+  "phase": "remediation-0-baseline"
+}
