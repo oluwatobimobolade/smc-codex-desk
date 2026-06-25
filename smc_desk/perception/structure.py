@@ -1,4 +1,5 @@
 import hashlib
+from collections import defaultdict
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import List, Optional, Tuple, Dict
@@ -25,8 +26,9 @@ class ProtectedStructureState:
 
 
 class StructureDetector:
-    def __init__(self, detector_version: str = "2.0"):
+    def __init__(self, detector_version: str = "2.0", structure_break_min_bps: float = 4.0):
         self.detector_version = detector_version
+        self.structure_break_min_bps = structure_break_min_bps
         self.configuration_hash = hashlib.sha256(b"structure_v2").hexdigest()[:8]
         
     def detect(self, candles: List[Candle], swings: List[SwingObject], current_time: datetime) -> Tuple[ProtectedStructureState, List[StructureBreakObject]]:
@@ -45,6 +47,10 @@ class StructureDetector:
         
         # For simplicity in Phase 2, let's track the latest external swings
         # and check each candle to see if it breaks them.
+        confirmed_external_by_time: Dict[datetime, List[SwingObject]] = defaultdict(list)
+        for swing in swings:
+            if swing.confirmed_at is not None and swing.evidence.is_external:
+                confirmed_external_by_time[swing.confirmed_at].append(swing)
         
         active_external_high = None
         active_external_low = None
@@ -59,7 +65,7 @@ class StructureDetector:
             state.current_as_of = c.close_time
             
             # 1. Update our known swings. Did any swing get confirmed ON this candle close?
-            newly_confirmed = [s for s in swings if s.confirmed_at == c.close_time and s.evidence.is_external]
+            newly_confirmed = confirmed_external_by_time.get(c.close_time, [])
             for s in newly_confirmed:
                 if s.direction == Direction.BEARISH: # Bearish swing means a High
                     active_external_high = s
@@ -76,7 +82,10 @@ class StructureDetector:
                     if not pending_upward_break:
                         # First penetration creates the break object
                         pending_upward_break = self._create_break(c, active_external_high, Direction.BULLISH, state, current_time)
-                        breaks.append(pending_upward_break)
+                        if pending_upward_break is not None:
+                            breaks.append(pending_upward_break)
+                        else:
+                            continue
                     
                     # If the body closes above, it confirms the break
                     if c.close > active_external_high.price_high and pending_upward_break.confirmation_status == ConfirmationStatus.CANDIDATE:
@@ -89,8 +98,11 @@ class StructureDetector:
                     if not pending_downward_break:
                         # First penetration creates the break object
                         pending_downward_break = self._create_break(c, active_external_low, Direction.BEARISH, state, current_time)
-                        breaks.append(pending_downward_break)
-                        
+                        if pending_downward_break is not None:
+                            breaks.append(pending_downward_break)
+                        else:
+                            continue
+                    
                     # If the body closes below, it confirms the break
                     if c.close < active_external_low.price_low and pending_downward_break.confirmation_status == ConfirmationStatus.CANDIDATE:
                         self._confirm_break(pending_downward_break, c, state)
@@ -106,13 +118,20 @@ class StructureDetector:
         # Calculate penetration metrics
         wick_pen = candle.high - broken_swing.price_high if direction == Direction.BULLISH else broken_swing.price_low - candle.low
         body_pen = candle.close - broken_swing.price_high if direction == Direction.BULLISH else broken_swing.price_low - candle.close
+
+        # Enforce minimum structure-break threshold from ontology.
+        # Penetration must be at least structure_break_min_bps of the broken price.
+        broken_price = broken_swing.price_high if direction == Direction.BULLISH else broken_swing.price_low
+        min_penetration = broken_price * Decimal(str(self.structure_break_min_bps / 10000.0))
+        if wick_pen < min_penetration:
+            return None  # penetration below threshold; not a valid break candidate
         
         evidence = StructureBreakEvidence(
             broken_swing_id=broken_swing.object_id,
             broken_price=broken_swing.price_high if direction == Direction.BULLISH else broken_swing.price_low,
             wick_penetration=wick_pen,
             body_close_penetration=body_pen,
-            penetration_ticks=0,
+            penetration_ticks=int(wick_pen / Decimal("0.01")) if wick_pen > 0 else 0,
             penetration_atr_pct=0.0,
             candle_body_ratio=float((candle.close - candle.open) / (candle.high - candle.low)) if candle.high != candle.low else 0,
             displacement_strength=0.0,
@@ -136,7 +155,7 @@ class StructureDetector:
             configuration_hash=self.configuration_hash,
             source_candle_ids=[f"c_{candle.open_time.timestamp()}"],
             last_updated_at=current_time,
-            confidence=1.0,
+            confidence=0.0,  # not calibrated; use evidence quality metrics instead
             direction=direction,
             price_low=candle.low,
             price_high=candle.high,

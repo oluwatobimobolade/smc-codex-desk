@@ -7,6 +7,7 @@ from smc_desk.perception.swings import MultiScaleSwingDetector
 from smc_desk.perception.structure import StructureDetector, ProtectedStructureState, StructureBreakObject
 from smc_desk.perception.fvg import FVGDetector, FairValueGapObject
 from smc_desk.perception.ontology import SwingObject
+from smc_desk.rules import RuleConfig, load_rule_config
 
 
 class PerceptionSnapshot(BaseModel):
@@ -19,10 +20,19 @@ class PerceptionSnapshot(BaseModel):
 
 
 class PerceptionEngineV2:
-    def __init__(self):
-        self.swing_detector = MultiScaleSwingDetector()
-        self.structure_detector = StructureDetector()
-        self.fvg_detector = FVGDetector()
+    def __init__(self, expected_instrument: str = None, expected_timeframe: str = None, config: RuleConfig = None):
+        if config is None:
+            config = load_rule_config()
+        self.config = config
+        self.swing_detector = MultiScaleSwingDetector(config=config)
+        self.structure_detector = StructureDetector(
+            structure_break_min_bps=config.structure_break_min_bps,
+        )
+        self.fvg_detector = FVGDetector(
+            minimum_gap_bps=config.fvg.minimum_gap_bps,
+        )
+        self.expected_instrument = expected_instrument
+        self.expected_timeframe = expected_timeframe
         
     def analyze(
         self,
@@ -41,6 +51,12 @@ class PerceptionEngineV2:
         valid_candles = []
         last_time = None
         for c in candles:
+            # OOD Detection
+            if self.expected_instrument and c.instrument != self.expected_instrument:
+                raise ValueError(f"OOD mismatch: expected instrument {self.expected_instrument}, got {c.instrument}")
+            if self.expected_timeframe and c.timeframe != self.expected_timeframe:
+                raise ValueError(f"OOD mismatch: expected timeframe {self.expected_timeframe}, got {c.timeframe}")
+                
             if c.open_time > decision_time:
                 break # We can stop here assuming chronological order
             if c.close_time > decision_time:
