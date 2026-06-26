@@ -85,6 +85,111 @@ class TestLegacyBoundary:
 class TestIsolationOfLegacyComparison:
     """Legacy comparison must not influence current decision."""
 
-    def test_legacy_comparison_does_not_leak_into_decision(self):
+    def test_runtime_pipeline_passes_with_legacy_killed(self, monkeypatch):
+        """With include_legacy_comparison=False and the legacy engine patched
+        to raise on any call, the current pipeline must complete successfully."""
+        import pandas as pd
+        from smc_desk.colleague.request_contract import ColleagueRunRequest
+        from smc_desk.colleague.orchestrator import run_colleague_analysis
+        from smc_desk.rules import RuleConfig
+        from pathlib import Path
+        import tempfile
+
+        def fail_if_legacy_runs(*_args, **_kwargs):
+            raise AssertionError("Legacy engine called by current pipeline")
+
+        monkeypatch.setattr("smc_desk.engine.analyze_dataframe", fail_if_legacy_runs)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            source = tmp_path / "BTCUSDT_15m_unit.csv"
+            rows = ["timestamp,open,high,low,close,volume"]
+            for i in range(300):
+                total_minutes = i * 15
+                hour, minute = divmod(total_minutes, 60)
+                hour = hour % 24
+                day = 1 + (total_minutes // 1440)  # days since Jan 1
+                price = 100.0 + i * 0.1
+                rows.append(
+                    f"2026-01-{day:02d} {hour:02d}:{minute:02d}:00,{price},{price+0.5},{price-0.5},{price+0.1},1.0"
+                )
+            source.write_text("\n".join(rows))
+
+            output = tmp_path / "out"
+            output.mkdir()
+
+            request = ColleagueRunRequest(
+                symbol="BTCUSDT",
+                source_path=str(source),
+                output_dir=str(output),
+                decision_time="2026-01-02T12:00:00",
+                include_legacy_comparison=False,
+            )
+            config = RuleConfig()
+            result = run_colleague_analysis(request, config)
+            assert result["primary_perception_source"] == "PerceptionEngineV2"
+            assert result["legacy_engine_role"] == "disabled"
+
+    def test_decision_identical_with_legacy_on_versus_off(self):
         """Enabling legacy comparison must not alter the current decision."""
-        pass  # Verified by WP-0012A integration test
+        import pandas as pd
+        import json
+        from smc_desk.colleague.request_contract import ColleagueRunRequest
+        from smc_desk.colleague.orchestrator import run_colleague_analysis
+        from smc_desk.rules import RuleConfig
+        from pathlib import Path
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            source = tmp_path / "BTCUSDT_15m_unit.csv"
+            rows = ["timestamp,open,high,low,close,volume"]
+            for i in range(300):
+                total_minutes = i * 15
+                hour, minute = divmod(total_minutes, 60)
+                hour = hour % 24
+                day = 1 + (total_minutes // 1440)  # days since Jan 1
+                price = 100.0 + i * 0.1
+                rows.append(
+                    f"2026-01-{day:02d} {hour:02d}:{minute:02d}:00,{price},{price+0.5},{price-0.5},{price+0.1},1.0"
+                )
+            source.write_text("\n".join(rows))
+
+            # Run with legacy disabled
+            out_disabled = tmp_path / "disabled"
+            out_disabled.mkdir()
+            req_disabled = ColleagueRunRequest(
+                symbol="BTCUSDT",
+                source_path=str(source),
+                output_dir=str(out_disabled),
+                decision_time="2026-01-02T12:00:00",
+                include_legacy_comparison=False,
+            )
+            result_disabled = run_colleague_analysis(req_disabled, RuleConfig())
+
+            # Run with legacy enabled
+            out_enabled = tmp_path / "enabled"
+            out_enabled.mkdir()
+            req_enabled = ColleagueRunRequest(
+                symbol="BTCUSDT",
+                source_path=str(source),
+                output_dir=str(out_enabled),
+                decision_time="2026-01-02T12:00:00",
+                include_legacy_comparison=True,
+            )
+            result_enabled = run_colleague_analysis(req_enabled, RuleConfig())
+
+            # The current-authority outputs must be identical
+            decision_disabled = json.loads(
+                (out_disabled / "scenarios" / "decision.json").read_text()
+            )
+            decision_enabled = json.loads(
+                (out_enabled / "scenarios" / "decision.json").read_text()
+            )
+            assert decision_disabled == decision_enabled, (
+                "Legacy comparison changed the current decision"
+            )
+
+            # Legacy-specific files must only exist when legacy is enabled
+            assert (out_enabled / "legacy_comparison" / "engine_analysis.json").exists()
+            assert not (out_disabled / "legacy_comparison" / "engine_analysis.json").exists()

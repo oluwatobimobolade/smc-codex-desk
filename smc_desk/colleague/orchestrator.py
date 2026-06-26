@@ -236,22 +236,23 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
     legacy_analyzed_df = None
     legacy_payload: dict[str, Any] | None = None
     if request.include_legacy_comparison:
-        # Lazy import: legacy engine is NOT imported unless comparison is explicitly requested
-        from smc_desk.engine import analyze_dataframe, build_trade_plan_markdown  # noqa: E402
+        # Legacy comparison runs through the dedicated adapter only
+        from smc_desk.colleague.legacy_comparison import run_legacy_comparison  # noqa: E402
 
         bias_hint = mtf_graph.state.direction_bias if mtf_graph.state.direction_bias in {"bullish", "bearish"} else None
-        legacy_analysis, legacy_analyzed_df = analyze_dataframe(
-            df=context.history_15m,
+        legacy_result = run_legacy_comparison(
+            history_15m=context.history_15m,
             symbol=symbol,
             timeframe="15m",
+            decision_time=context.decision_available_at,
             config=config,
             bias_hint=bias_hint,
-            notes="legacy comparison for PerceptionEngineV2-led colleague package",
-            input_type="ohlcv",
         )
-        legacy_payload = _json_model(legacy_analysis)
+        legacy_analysis = legacy_result["legacy_analysis"]
+        legacy_analyzed_df = legacy_result["legacy_df"]
+        legacy_payload = legacy_result["legacy_payload"]
         writer.write_json("legacy_comparison/engine_analysis.json", legacy_payload)
-        writer.write_text("legacy_comparison/trade_plan.md", build_trade_plan_markdown(legacy_analysis))
+        writer.write_text("legacy_comparison/trade_plan.md", legacy_result["trade_plan_md"])
     else:
         writer.write_json(
             "legacy_comparison/status.json",
@@ -317,8 +318,8 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
             "mtf_graph": "perception/mtf_state_graph.json",
             "alignment_report": "external/alignment_report.json",
             "scenario_tree": "scenarios/scenario_tree.json",
-            "edge_count": len(mtf_graph_dict.get("edges", [])),
-            "node_count": len(mtf_graph_dict.get("nodes", [])),
+            "edge_count": len(mtf_state_graph.get("edges", [])),
+            "node_count": len(mtf_state_graph.get("nodes", [])),
         },
     )
     writer.write_json("scenarios/decision.json", decision)

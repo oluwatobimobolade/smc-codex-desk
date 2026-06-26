@@ -1,0 +1,160 @@
+project:
+  name: SMC Codex Desk
+  product: Dual-Lens Market Colleague
+  release: colleague-core-rc0
+  status: research_foundation
+  current_date: "2026-06-26"
+  last_updated: "2026-06-26"
+
+scope:
+  certified_initial_scope:
+    venue: BINANCE_USDM
+    symbol: BTCUSDT
+    market_type: perpetual
+    base_timeframe: 15m
+    derived_timeframes:
+      - 1h
+      - 4h
+      - 1d
+    timezone: UTC
+    decision_policy: completed_candles_only
+  expansion_status:
+    crypto_replication_symbols:
+      - ETHUSDT
+      - SOLUSDT
+      - XRPUSDT
+      - BNBUSDT
+    forex: not_certified
+
+authority:
+  market_truth: active
+  timeframe_reconstruction: active_research_authority
+  perception_v2: research_authority
+  colleague_orchestrator: initial_research_foundation
+  legacy_engine: isolated_comparison_only_no_active_authority_path_wp0012a_complete
+  vision: observe_only
+  kimi_webbridge: strict_alignment_contract_implemented_browser_controller_pending
+  kimi_live_alignment: live_webbridge_chart_state_passed_eth_sol_xrp_bnb_universe
+  scenario_brain: semantic_candidate_graph_initial_slice
+  historical_memory: deterministic_similar_case_retrieval_initial_slice
+  live_shadow_universe: multi_symbol_observe_only_runner_passed_initial_slice
+  outcome_tracking: resolved_case_cohort_wp0013_observation_only
+  truth_boundary: closed_candle_availability_contract_repaired_wp0011
+  human_review_loop: live_shadow_review_queue_ready_wp0014
+  ontology_authority_split: runtime_config_migrated_to_split_contracts_wp0016
+  btcusdt_live_shadow_wp0016: no_valid_live_trade_strict_ohlcv_unavailable_visual_only
+  prediction: research_only
+  paper_execution: disabled
+  live_execution: disabled
+
+active_contracts:
+  product_contract: MARKET_COLLEAGUE_PRODUCT_CONTRACT_V1_FROM_PDF
+  perception_detector_config: PERCEPTION_DETECTOR_CONFIG_V2
+  strategy_execution_config: STRATEGY_EXECUTION_CONFIG_V1
+  legacy_monolith_compatibility_reference: PERCEPTION_ONTOLOGY_V2
+  active_strategy_candidate: RASC_SMC_V1
+  strategy_profile: STRATEGY_PROFILE_SWEEP_RETRACE_V1
+  scenario_contract: SCENARIO_CONTRACT_V1
+  decision_policy: DECISION_POLICY_V1
+
+next_gate:
+  id: GATE-COLLEAGUE-CORE-001
+  description: End-to-end BTCUSDT analysis package with governance, source manifests, PerceptionEngineV2 output, MTF graph, scenario state, charts, and thesis.
+  status: passed_initial_slice_wp0002
+  evidence:
+    - analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/run_manifest.json
+    - governance/WORK_PACKAGES/WP-0002-COLLEAGUE-ORCHESTRATOR/TEST_REPORT.json
+  next_gate:
+    id: GATE-TRADINGVIEW-ALIGNMENT-001
+    description: Verified Kimi/TradingView chart-state alignment inside analysis_runs packages.
+    status: contract_tests_passed_live_controller_pending
+  scenario_gate:
+    id: GATE-MTF-SCENARIO-BRAIN-001
+    description: Rich MTF graph and scenario tree inside analysis_runs packages.
+    status: passed_initial_slice_wp0004
+    evidence:
+      - analysis_runs/BTCUSDT_20260619_2345_wp0003_wp0004_smoke/perception/mtf_state_graph.json
+      - analysis_runs/BTCUSDT_20260619_2345_wp0003_wp0004_smoke/scenarios/scenario_tree.json
+  live_alignment_gate:
+    id: GATE-LIVE-TV-ALIGNMENT-001
+    description: Real WebBridge TradingView capture populates strict chart_state and passes alignment.
+    status: passed_initial_btcusdt_wp0005
+    evidence:
+      - analysis_runs/BTCUSDT_live_tv_alignment_20260625/tradingview_alignment_manifest.json
+      - analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/external/alignment_report.json
+  memory_and_outcome_gate:
+    id: GATE-CASE-MEMORY-OUTCOME-001
+    description: Similar-case retrieval and pending outcome contract exist in colleague runs.
+    status: passed_initial_slice_wp0007_wp0008
+    evidence:
+      - analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/prediction/similar_cases.json
+      - analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/outcome/pending.json
+  live_shadow_universe_gate:
+    id: GATE-LIVE-SHADOW-UNIVERSE-001
+    description: Multi-symbol live shadow packages pass strict TradingView alignment.
+    status: passed_initial_slice_wp0009
+    evidence:
+      - analysis_runs/live_shadow_universe_20260625_eth_sol_xrp_bnb/summary.json
+      - governance/WORK_PACKAGES/WP-0009-LIVE-SHADOW-UNIVERSE/TEST_REPORT.json
+  outcome_resolution_gate:
+    id: GATE-OUTCOME-RESOLUTION-001
+    description: Pending outcome contracts resolve deterministically from future 15m candles.
+    status: passed_initial_slice_wp0010
+    evidence:
+      - analysis_runs/BTCUSDT_20260618_1200_outcome_resolution_smoke/outcome/resolution.json
+      - governance/WORK_PACKAGES/WP-0010-OUTCOME-RESOLUTION/TEST_REPORT.json
+  truth_boundary_gate:
+    id: GATE-TRUTH-BOUNDARY-001
+    description: Closed-candle availability semantics are enforced without live-shadow alignment drift.
+    status: passed_wp0011
+    evidence:
+      - governance/WORK_PACKAGES/WP-0011-TRUTH-BOUNDARY-REPAIR/TEST_REPORT.json
+      - reports/current/TRUTH_BOUNDARY_REPAIR_WP0011_REPORT.md
+  legacy_authority_gate:
+    id: GATE-LEGACY-AUTHORITY-001
+    description: Legacy engine is optional comparison evidence and not current decision/scenario authority.
+    status: passed_wp0012
+    evidence:
+      - governance/WORK_PACKAGES/WP-0012-LEGACY-AUTHORITY-ISOLATION/TEST_REPORT.json
+      - reports/current/LEGACY_AUTHORITY_ISOLATION_WP0012_REPORT.md
+  resolved_cohort_gate:
+    id: GATE-RESOLVED-COHORT-001
+    description: Fifty local colleague packages resolve deterministically from future 15m candles.
+    status: passed_wp0013_observation_only
+    evidence:
+      - analysis_runs/resolved_case_cohort_wp0013_20260626/summary.json
+      - governance/WORK_PACKAGES/WP-0013-RESOLVED-CASE-COHORT/TEST_REPORT.json
+  human_review_gate:
+    id: GATE-HUMAN-REVIEW-LOOP-001
+    description: Live-shadow WATCH/NO_SETUP cases produce blind reviewer packs with sealed engine context.
+    status: passed_wp0014_queue_ready
+    evidence:
+      - review_queues/live_shadow_wp0014_20260626/review_queue_manifest.json
+      - governance/WORK_PACKAGES/WP-0014-LIVE-SHADOW-HUMAN-REVIEW-LOOP/TEST_REPORT.json
+  ontology_split_gate:
+    id: GATE-ONTOLOGY-AUTHORITY-SPLIT-001
+    description: Runtime RuleConfig now loads split detector and strategy execution configs by default.
+    status: passed_wp0016_runtime_migrated
+    evidence:
+      - reports/current/RUNTIME_CONFIG_SPLIT_WP0016.json
+      - governance/WORK_PACKAGES/WP-0016-RUNTIME-CONFIG-SPLIT/TEST_REPORT.json
+  btcusdt_live_shadow_gate:
+    id: GATE-BTCUSDT-LIVE-SHADOW-WP0016
+    description: BTCUSDT live-shadow attempt after runtime migration.
+    status: failed_closed_ohlcv_acquisition_no_trade
+    evidence:
+      - analysis_runs/live_shadow_btcusdt_wp0016_20260626/summary.json
+      - analysis_runs/live_shadow_btcusdt_wp0016_20260626_retry/summary.json
+      - reports/current/BTCUSDT_LIVE_SHADOW_WP0016_REPORT.md
+
+known_constraints:
+  - No live capital execution.
+  - Do not tune on final holdout.
+  - Do not combine the 50-case pilot and 100-case local lab.
+  - Do not promote AI labels to human gold.
+  - Do not treat old strategies/smc documents as active authority.
+  - Do not let legacy_comparison outputs drive current colleague decisions.
+  - Do not treat resolved no-trade observations as trade performance.
+  - Do not treat reviewer drafts as gold labels before adjudication.
+  - Do not claim strategy edge, paper execution, or live execution from runtime config migration.
+  - Do not issue live signals from TradingView screenshots when verified closed OHLCV is unavailable.

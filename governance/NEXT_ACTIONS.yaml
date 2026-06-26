@@ -1,0 +1,147 @@
+next_actions:
+  - id: WP-0012A
+    priority: 1
+    title: Eliminate hidden legacy authority from active pipeline
+    owner: Legacy Isolation Engineer
+    status: COMPLETE_ACCEPTED
+    gate: 405_tests_passing_5_isolation_tests_all_green
+    priority: 1
+    title: Finish governance foundation audit
+    owner: Chief Architect
+    status: completed_initial_foundation
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0001-COLLEAGUE-FOUNDATION/WP-0001-HANDOFF.md
+      - reports/current/REPOSITORY_AUTHORITY_AUDIT.md
+  - id: WP-0001-B
+    priority: 2
+    title: Separate perception ontology from strategy and risk parameters
+    owner: Ontology Steward
+    status: completed_runtime_split_wp0016
+    evidence_required:
+      - reports/current/ONTOLOGY_CONFLICT_REPORT.md
+      - specs/STRATEGY_PROFILE_SWEEP_RETRACE_V1.yaml
+  - id: WP-0001-C
+    priority: 3
+    title: Migrate market-colleague case workflow toward PerceptionEngineV2-led orchestrator
+    owner: PerceptionEngineV2 Engineer
+    status: completed_initial_slice
+    evidence_required:
+      - analysis_runs/<run_id>/run_manifest.json
+      - analysis_runs/<run_id>/perception/objects.json
+  - id: WP-0001-D
+    priority: 4
+    title: Upgrade Kimi WebBridge to verified TradingView chart controller
+    owner: KimiWebBridge Engineer
+    status: queued
+    evidence_required:
+      - external/capture_manifest.json
+      - external/alignment_report.json
+  - id: WP-0002-NEXT
+    priority: 5
+    title: Add verified Kimi/TradingView chart-state alignment to analysis_runs packages
+    owner: KimiWebBridge Engineer
+    status: completed_contract_slice
+    evidence_required:
+      - analysis_runs/<run_id>/external/capture_manifest.json
+      - analysis_runs/<run_id>/external/alignment_report.json
+      - tests for wrong symbol/timeframe/scale/source mismatch
+  - id: WP-0003-LIVE
+    priority: 6
+    title: Make WebBridge controller populate verified chart_state from a real TradingView session
+    owner: KimiWebBridge Engineer
+    status: completed_multi_symbol_live_shadow_slice
+    evidence_required:
+      - real TradingView manifest with chart_state for 15m/1h/4h/1d
+      - PASS alignment_report on an analysis_runs package
+      - negative live-controller tests for stale or wrong chart state
+  - id: WP-0004-NEXT
+    priority: 7
+    title: Extend rich MTF scenario graph beyond FVG/structure into liquidity, inducement, OB, and breaker semantics
+    owner: Scenario Brain Engineer
+    status: completed_candidate_semantics_slice
+    evidence_required:
+      - perception ontology split for objective objects
+      - scenario graph tests for liquidity sweep and POI relationship chains
+      - human-reviewed chart cases confirming graph correctness
+  - id: WP-0007-NEXT
+    priority: 8
+    title: Promote deterministic similar-case retrieval into a reviewed historical case memory
+    owner: Case Memory Engineer
+    status: next
+    evidence_required:
+      - at least 50 comparable analysis_runs packages
+      - outcome/resolution coverage for comparable cases
+      - retrieval quality audit against human-selected similar cases
+  - id: WP-0008-NEXT
+    priority: 9
+    title: Resolve pending outcomes from future candles and produce no-edge/no-promotion reports
+    owner: Outcome Researcher
+    status: completed_initial_resolution_slice
+    evidence_required:
+      - outcome/resolution.json filled from future OHLCV
+      - unresolved/expired/target/invalidation accounting
+      - no promotion unless sample size and costs are validated
+  - id: WP-0011-NEXT
+    priority: 10
+    title: Repair truth boundary and restore green validation
+    owner: Truth Boundary Engineer
+    status: completed_wp0011
+    evidence_required:
+      - focused truth-boundary tests
+      - live-shadow alignment drift check
+      - full pytest
+  - id: WP-0012-NEXT
+    priority: 11
+    title: Isolate legacy engine from current decision authority
+    owner: Market Colleague Architect
+    status: completed_wp0012
+    evidence_required:
+      - colleague run succeeds with legacy comparison disabled
+      - final decision builder receives no legacy trade_plan object
+      - legacy output is comparison-only report data
+  - id: WP-0013-NEXT
+    priority: 12
+    title: Build a resolved-case cohort across BTC/ETH/SOL/XRP/BNB
+    owner: Outcome Researcher
+    status: completed_wp0013_observation_only
+    evidence_required:
+      - at least 50 resolved colleague packages
+      - outcome cohort summary with no-trade, watch, disabled-signal, ambiguous, and unresolved buckets
+      - no edge claim until sample size and costs survive review
+  - id: WP-0014-NEXT
+    priority: 13
+    title: Human review loop for live-shadow Watch and No Setup cases
+    owner: Adjudication Lead
+    status: completed_wp0014_queue_ready
+    evidence_required:
+      - reviewer packs from live-shadow charts
+      - disagreement cases between human review and semantic graph
+      - adjudicated gold labels separated from engine weak labels
+  - id: WP-0015-NEXT
+    priority: 14
+    title: Split ontology and strategy authority contracts
+    owner: Ontology Steward
+    status: completed_wp0015_contract_ready_runtime_migrated_wp0016
+    evidence_required:
+      - perception detector config has no risk/strategy fields
+      - strategy execution config receives sequence/risk fields
+      - audit blocks promotion until runtime migration
+  - id: WP-0016-NEXT
+    priority: 15
+    title: Migrate runtime config away from monolithic PERCEPTION_ONTOLOGY_V2
+    owner: Ontology Steward
+    status: completed_wp0016_runtime_migrated
+    evidence_required:
+      - separate Pydantic config models
+      - compatibility adapter for legacy rule files
+      - full pytest after default runtime source switch
+  - id: WP-0017-NEXT
+    priority: 16
+    title: Repair live OHLCV acquisition reliability
+    owner: Market Truth Engineer
+    status: next
+    evidence_required:
+      - TradingView OHLCV route-level health check with timeout payload logging
+      - Binance REST DNS/connectivity health check with explicit fallback status
+      - BTCUSDT live-shadow package that either passes verified closed OHLCV or cleanly records NO_VALID_LIVE_TRADE
+      - regression tests proving visual-only screenshots cannot create executable signals
