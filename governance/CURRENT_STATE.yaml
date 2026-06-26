@@ -30,8 +30,12 @@ authority:
   market_truth: active
   timeframe_reconstruction: active_research_authority
   perception_v2: research_authority
-  colleague_orchestrator: initial_research_foundation
+  colleague_orchestrator: pev2_led_mtf_driven_wp0012d
+  mtf_current: research_authority_per_timeframe_rich_relationships_wp0012b
+  event_ledger: canonical_deterministic_replayable_wp0012c
+  decision_pipeline: generic_strategy_neutral_conservative_wp0012d
   legacy_engine: isolated_comparison_only_no_active_authority_path_wp0012a_complete
+  live_candle_coordinator: pending_wp0017b
   vision: observe_only
   kimi_webbridge: strict_alignment_contract_implemented_browser_controller_pending
   kimi_live_alignment: live_webbridge_chart_state_passed_eth_sol_xrp_bnb_universe
