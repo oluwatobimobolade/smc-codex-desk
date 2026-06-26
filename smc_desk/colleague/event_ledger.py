@@ -51,6 +51,8 @@ class CanonicalEvent(BaseModel):
     object_ids: List[str]
     source_candle_ids: List[str]
     ontology_version: str
+    event_schema_version: str = "1.0.0"
+    detector_version: str = "2.0"
     provisional: bool
     metadata: Dict[str, str]
 
@@ -76,33 +78,29 @@ class EventLedger(BaseModel):
         Events are sorted by available_at, then by event_type, then by object_id.
         """
         events: List[CanonicalEvent] = []
+        seen_ids: Set[str] = set()
+
+        def _add(event: CanonicalEvent) -> None:
+            if event.event_id not in seen_ids:
+                seen_ids.add(event.event_id)
+                events.append(event)
 
         # Extract swing confirmation events
         for scale, swings in snapshot.swings.items():
             for swing in swings:
-                event = _swing_to_event(swing, scale, ontology_version)
-                events.append(event)
+                _add(_swing_to_event(swing, scale, ontology_version))
 
         # Extract structure break events
         for brk in snapshot.structure_breaks:
-            # Candidate break (wick penetration)
-            candidate_event = _break_to_candidate_event(brk, ontology_version)
-            events.append(candidate_event)
-
-            # Confirmed break (body close) if confirmed
+            _add(_break_to_candidate_event(brk, ontology_version))
             if str(brk.confirmation_status).lower() == "confirmed":
-                confirmed_event = _break_to_confirmed_event(brk, ontology_version)
-                events.append(confirmed_event)
+                _add(_break_to_confirmed_event(brk, ontology_version))
 
         # Extract FVG events
         for fvg in snapshot.fvgs:
-            created_event = _fvg_to_created_event(fvg, ontology_version)
-            events.append(created_event)
-
-            # Check mitigation/invalidation status
+            _add(_fvg_to_created_event(fvg, ontology_version))
             if fvg.evidence.is_mitigated_on_creation:
-                mitigated_event = _fvg_to_mitigated_event(fvg, ontology_version)
-                events.append(mitigated_event)
+                _add(_fvg_to_mitigated_event(fvg, ontology_version))
 
         # Sort by available_at, then event_type, then object_id for determinism
         events.sort(key=lambda e: (e.available_at, e.event_type, e.object_ids[0] if e.object_ids else ""))
@@ -112,6 +110,29 @@ class EventLedger(BaseModel):
             decision_time=snapshot.decision_time,
             ontology_version=ontology_version,
         )
+
+    def replay_idempotent(self, other: "EventLedger") -> bool:
+        """Verify that replaying the same snapshots produces identical events."""
+        if len(self.events) != len(other.events):
+            return False
+        return all(
+            e1.event_id == e2.event_id
+            and e1.available_at == e2.available_at
+            and e1.event_type == e2.event_type
+            for e1, e2 in zip(self.events, other.events)
+        )
+
+    def count_by_type(self) -> dict[str, int]:
+        counts: dict[str, int] = {}
+        for e in self.events:
+            counts[e.event_type] = counts.get(e.event_type, 0) + 1
+        return counts
+
+    def provisional_count(self) -> int:
+        return sum(1 for e in self.events if e.provisional)
+
+    def confirmed_count(self) -> int:
+        return sum(1 for e in self.events if not e.provisional)
 
 
 def _make_event_id(event_type: EventType, object_id: str, timestamp: datetime) -> str:

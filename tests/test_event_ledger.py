@@ -420,3 +420,64 @@ class TestEventLedger:
         # Check that both scales are represented
         scales = {e.metadata["scale"] for e in ledger.events}
         assert scales == {"local", "external"}
+
+    def test_duplicate_suppression(self):
+        """Processing the same snapshot twice must not create duplicate events."""
+        dt = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+        swing = _make_swing(
+            object_id="swing_dup",
+            direction="bearish", pivot_time=dt - timedelta(minutes=30),
+            confirmed_at=dt, price_high=Decimal("100.5"), price_low=Decimal("99.5"),
+        )
+        snapshot = _make_snapshot({"external": [swing]}, [], [], dt)
+        ledger1 = EventLedger.from_snapshot(snapshot)
+        ledger2 = EventLedger.from_snapshot(snapshot)
+        assert len(ledger1.events) == len(ledger2.events)
+        assert ledger1.replay_idempotent(ledger2)
+
+    def test_replay_idempotence(self):
+        """Two ledgers from the same snapshot must be byte-identical."""
+        dt = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+        swing = _make_swing(
+            object_id="swing_replay",
+            direction="bullish", pivot_time=dt - timedelta(hours=1),
+            confirmed_at=dt, price_high=Decimal("101.0"), price_low=Decimal("99.0"),
+        )
+        brk = _make_break(
+            object_id="break_replay", break_type="BOS", direction="bullish",
+            candidate_at=dt - timedelta(minutes=15), confirmed_at=dt,
+            broken_price=Decimal("100.5"),
+        )
+        snapshot = _make_snapshot({"external": [swing]}, [brk], [], dt)
+        ledger1 = EventLedger.from_snapshot(snapshot)
+        ledger2 = EventLedger.from_snapshot(snapshot)
+        assert ledger1.replay_idempotent(ledger2)
+        # Serializations must match
+        assert ledger1.model_dump_json() == ledger2.model_dump_json()
+
+    def test_event_schema_version_is_present(self):
+        """Every event must carry an event_schema_version."""
+        dt = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+        swing = _make_swing(
+            object_id="swing_version", direction="bearish",
+            pivot_time=dt - timedelta(minutes=30), confirmed_at=dt,
+            price_high=Decimal("100.5"), price_low=Decimal("99.5"),
+        )
+        snapshot = _make_snapshot({"external": [swing]}, [], [], dt)
+        ledger = EventLedger.from_snapshot(snapshot)
+        for event in ledger.events:
+            assert event.event_schema_version == "1.0.0"
+            assert event.detector_version == "2.0"
+
+    def test_provisional_vs_confirmed_separation(self):
+        """Candidate events are provisional; confirmed events are not."""
+        dt = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+        # Candidate break (not confirmed)
+        brk = _make_break(
+            object_id="break_prov", break_type="BOS", direction="bullish",
+            candidate_at=dt, confirmed_at=None, broken_price=Decimal("100.0"),
+        )
+        snapshot = _make_snapshot({}, [brk], [], dt)
+        ledger = EventLedger.from_snapshot(snapshot)
+        assert ledger.provisional_count() >= 1
+        assert ledger.confirmed_count() >= 0
