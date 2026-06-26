@@ -26,9 +26,8 @@ from smc_desk.colleague.outcome_logging import (
     unresolved_resolution_stub,
 )
 from smc_desk.colleague.similar_cases import retrieve_similar_cases
-from smc_desk.engine import analyze_dataframe, build_trade_plan_markdown
 from smc_desk.evaluation.holdout_guard import DEFAULT_HOLDOUT_POLICY, assert_not_in_holdout
-from smc_desk.mtf import build_mtf_snapshot, derive_htf_consensus_bias, snapshot_to_dict
+from smc_desk.mtf_current import build_mtf_graph
 from smc_desk.perception.engine_v2 import PerceptionEngineV2
 from smc_desk.render import render_raw_chart, render_smc_annotated
 from smc_desk.rendering.mtf_mosaic import render_mtf_mosaic
@@ -202,17 +201,45 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
     )
     _write_data_files(writer, context.timeframe_dfs)
 
-    mtf_snapshot_model = build_mtf_snapshot(context.history_15m, context.decision_available_at, config)
-    mtf_snapshot = snapshot_to_dict(mtf_snapshot_model)
-    htf_bias = derive_htf_consensus_bias(mtf_snapshot_model)
-    bias_hint = request.bias or (htf_bias if htf_bias in {"bullish", "bearish"} else None)
+    # ------------------------------------------------------------------
+    # CURRENT AUTHORITY PATH: PEV2 → MTF graph → decision
+    # No dependency on legacy engine.
+    # ------------------------------------------------------------------
 
-    writer.write_json("perception/mtf_snapshot.json", mtf_snapshot)
+    # Run PEV2 perception on every timeframe
+    perception_by_tf = _run_perception_for_timeframes(
+        timeframe_dfs=context.timeframe_dfs,
+        symbol=symbol,
+        decision_available_at=context.decision_available_at,
+        config=config,
+    )
+
+    # Build MTF graph from PEV2 snapshots (not legacy engine)
+    from smc_desk.colleague.event_ledger import EventLedger
+
+    event_ledger = EventLedger(
+        events=[],  # populated later from perception objects
+        decision_time=context.decision_available_at,
+        ontology_version=config.ontology_version if hasattr(config, "ontology_version") else "2.0.0",
+    )
+    mtf_graph = build_mtf_graph(
+        snapshots=perception_by_tf,
+        event_ledger=event_ledger,
+        decision_time=context.decision_available_at.isoformat(),
+    )
+    writer.write_json("perception/mtf_graph.json", mtf_graph.to_dict())
+
+    # ------------------------------------------------------------------
+    # LEGACY COMPARISON (isolated, optional, never influences current decision)
+    # ------------------------------------------------------------------
     legacy_analysis = None
     legacy_analyzed_df = None
     legacy_payload: dict[str, Any] | None = None
-    legacy_role = "comparison_only" if request.include_legacy_comparison else "disabled"
     if request.include_legacy_comparison:
+        # Lazy import: legacy engine is NOT imported unless comparison is explicitly requested
+        from smc_desk.engine import analyze_dataframe, build_trade_plan_markdown  # noqa: E402
+
+        bias_hint = mtf_graph.state.direction_bias if mtf_graph.state.direction_bias in {"bullish", "bearish"} else None
         legacy_analysis, legacy_analyzed_df = analyze_dataframe(
             df=context.history_15m,
             symbol=symbol,
@@ -221,35 +248,47 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
             bias_hint=bias_hint,
             notes="legacy comparison for PerceptionEngineV2-led colleague package",
             input_type="ohlcv",
-            htf_poi=mtf_snapshot_model.selected_htf_poi,
         )
         legacy_payload = _json_model(legacy_analysis)
         writer.write_json("legacy_comparison/engine_analysis.json", legacy_payload)
         writer.write_text("legacy_comparison/trade_plan.md", build_trade_plan_markdown(legacy_analysis))
-        writer.write_json("perception/mtf_snapshot_legacy_context.json", mtf_snapshot)
     else:
         writer.write_json(
             "legacy_comparison/status.json",
             {
                 "status": "disabled",
                 "role": "not_run",
-                "reason": "Legacy engine comparison disabled by include_legacy_comparison=false; current decision/scenario layers use PEV2 plus MTF context only.",
+                "reason": "Legacy engine comparison disabled; current decision/scenario layers use PEV2 + MTF current graph only.",
             },
         )
-
-    perception_by_tf = _run_perception_for_timeframes(
-        timeframe_dfs=context.timeframe_dfs,
-        symbol=symbol,
-        decision_available_at=context.decision_available_at,
-        config=config,
-    )
     writer.write_json("perception/objects.json", {"source": "PerceptionEngineV2", "timeframes": perception_by_tf})
+
+    # Current MTF graph as the primary state source (replaces legacy mtf_snapshot)
+    mtf_graph_dict = mtf_graph.to_dict()
+    # Backward-compatible wrapper: downstream functions expect .get("execution_consensus"), etc.
+    mtf_snapshot = {
+        "decision_time": mtf_graph_dict["state"].get("direction_bias", "neutral"),
+        "execution_consensus": mtf_graph_dict["state"].get("direction_bias", "neutral"),
+        "alignment": "aligned" if mtf_graph_dict["state"]["decision"] != "ABSTAIN" else "contested",
+        "agreement_count": len([n for n in mtf_graph_dict["nodes"] if n["direction"] != "neutral"]),
+        "total_count": len(mtf_graph_dict["nodes"]),
+        "selected_htf_poi": None,
+        "graph_source": "mtf_current_v1_passing_mtf_snapshot_keys_for_downstream",
+    }
+    # Add timeframe entries for downstream compat
+    for node in mtf_graph_dict["nodes"]:
+        if node["node_type"] == "timeframe":
+            mtf_snapshot[node["timeframe"]] = {
+                "bias": node["direction"],
+                "structure_state": node["metadata"],
+            }
+
     confirmed_state = build_confirmed_state(perception_by_tf, mtf_snapshot)
     provisional_state = build_provisional_state()
-    mtf_graph = build_mtf_state_graph(perception_by_tf, mtf_snapshot, None)
+    mtf_state_graph = build_mtf_state_graph(perception_by_tf, mtf_snapshot, None)
     writer.write_json("perception/confirmed_state.json", confirmed_state)
     writer.write_json("perception/provisional_state.json", provisional_state)
-    writer.write_json("perception/mtf_state_graph.json", mtf_graph)
+    writer.write_json("perception/mtf_state_graph.json", mtf_state_graph)
     tradingview_evidence = _load_tradingview_evidence(request.tradingview_manifest)
     alignment_report = build_alignment_report(
         capture=tradingview_evidence,
@@ -259,11 +298,11 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
         timeframe_dfs=context.timeframe_dfs,
     )
     source_alignment_status = alignment_report.get("status", "NOT_ATTACHED")
-    scenario_tree = build_scenario_tree(mtf_snapshot, mtf_graph, source_alignment_status=source_alignment_status)
-    decision = build_decision(mtf_snapshot, mtf_graph, source_alignment_status=source_alignment_status)
+    scenario_tree = build_scenario_tree(mtf_snapshot, mtf_state_graph, source_alignment_status=source_alignment_status)
+    decision = build_decision(mtf_snapshot, mtf_state_graph, source_alignment_status=source_alignment_status)
     event_records = build_event_ledger_records(
         perception_by_tf=perception_by_tf,
-        mtf_graph=mtf_graph,
+        mtf_graph=mtf_state_graph,
         scenario_tree=scenario_tree,
         alignment_report=alignment_report,
         decision=decision,
@@ -274,12 +313,12 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
         "scenarios/evidence_graph.json",
         {
             "status": "built",
-            "graph_version": mtf_graph.get("graph_version"),
+            "graph_version": mtf_state_graph.get("graph_version"),
             "mtf_graph": "perception/mtf_state_graph.json",
             "alignment_report": "external/alignment_report.json",
             "scenario_tree": "scenarios/scenario_tree.json",
-            "edge_count": len(mtf_graph.get("edges", [])),
-            "node_count": len(mtf_graph.get("nodes", [])),
+            "edge_count": len(mtf_graph_dict.get("edges", [])),
+            "node_count": len(mtf_graph_dict.get("nodes", [])),
         },
     )
     writer.write_json("scenarios/decision.json", decision)
@@ -338,13 +377,13 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
         decision=decision,
         legacy_analysis=legacy_payload,
         alignment_report=alignment_report,
-        mtf_graph=mtf_graph,
+        mtf_graph=mtf_graph_dict,
     )
     writer.write_text("reports/colleague_thesis.md", thesis)
     writer.write_text("reports/concise_summary.md", f"# {symbol} Summary\n\nAction: `{decision['action']}`\n")
     writer.write_text(
         "reports/technical_audit.md",
-        f"# Technical Audit\n\nPerceptionEngineV2 is primary. Legacy engine role: `{legacy_role}`. No execution authority granted.\n",
+        f"# Technical Audit\n\nPerceptionEngineV2 is primary. Legacy engine: {'comparison only' if request.include_legacy_comparison else 'disabled'}. No execution authority granted.\n",
     )
     review_legacy_note = (
         "Do not inspect `legacy_comparison/` until after your independent read."
@@ -361,7 +400,7 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
         {
             "market_truth": "active",
             "perception_source": "PerceptionEngineV2",
-            "legacy_engine": legacy_role,
+            "legacy_engine": "comparison_only" if request.include_legacy_comparison else "disabled",
             "vision": "observe_only",
             "prediction": "disabled_not_certified",
             "paper_execution": "disabled",
@@ -378,7 +417,7 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
         "decision_candle_open": context.decision_candle_open.isoformat(),
         "decision_available_at": context.decision_available_at.isoformat(),
         "primary_perception_source": "PerceptionEngineV2",
-        "legacy_engine_role": legacy_role,
+        "legacy_engine_role": "comparison_only" if request.include_legacy_comparison else "disabled",
         "storage_format": request.storage_format,
         "no_future_leakage": {
             "history_ends_at_decision_candle_open": bool(pd.Timestamp(context.history_15m["timestamp"].iloc[-1]) == context.decision_candle_open),
