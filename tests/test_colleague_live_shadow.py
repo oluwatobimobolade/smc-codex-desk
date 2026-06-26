@@ -10,6 +10,27 @@ from smc_desk.rules import RuleConfig
 
 
 def test_live_shadow_universe_isolates_symbol_runs(tmp_path: Path) -> None:
+    def fake_market(**kwargs: Any) -> tuple[Path, dict[str, Any]]:
+        symbol = kwargs["symbol"]
+        output_dir = Path(kwargs["output_dir"])
+        output_dir.mkdir(parents=True)
+        source = output_dir / f"{symbol}_15m_verified_closed.csv"
+        source.write_text(
+            "timestamp,open,high,low,close,volume,close_time,trade_count,source,is_final,is_complete\n"
+            "2025-01-01T00:00:00,1,2,0.5,1,10,2025-01-01T00:14:59.999000+00:00,2,test,true,true\n",
+            encoding="utf-8",
+        )
+        manifest = {
+            "status": "VERIFIED",
+            "fetched_at": "2025-01-01T00:15:01+00:00",
+            "source_csv": str(source),
+            "last_closed_candle_open": "2025-01-01T00:00:00+00:00",
+            "last_closed_candle_close": "2025-01-01T00:14:59.999000+00:00",
+        }
+        path = output_dir / "verified_closed_ohlcv_manifest.json"
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+        return path, manifest
+
     def fake_capture(**kwargs: Any) -> tuple[Path, dict[str, Any]]:
         symbol = kwargs["symbol"]
         output_dir = Path(kwargs["output_dir"])
@@ -20,7 +41,6 @@ def test_live_shadow_universe_isolates_symbol_runs(tmp_path: Path) -> None:
         manifest = {
             "instrument": symbol,
             "tradingview_symbol": f"BINANCE:{symbol}.P",
-            "ohlcv": {"15m": str(source)},
             "chart_state": {
                 "timeframes": {
                     "15m": {
@@ -70,6 +90,7 @@ def test_live_shadow_universe_isolates_symbol_runs(tmp_path: Path) -> None:
         symbols=["btcusd", "ethusdt"],
         output_root=tmp_path / "universe",
         config=RuleConfig(),
+        market_data_fn=fake_market,
         capture_fn=fake_capture,
         analysis_fn=fake_analysis,
     )

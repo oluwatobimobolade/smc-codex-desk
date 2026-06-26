@@ -35,7 +35,10 @@ class RunMarketContext:
 
 def parse_decision_time(value: str | None, df: pd.DataFrame) -> pd.Timestamp:
     if value is None:
-        return pd.Timestamp(df["timestamp"].iloc[-1])
+        # Timestamps are candle opens. Default to the scheduled close of the
+        # latest row so a fully closed source file does not silently step back
+        # one candle. Live callers should still pass actual fetched_at time.
+        return pd.Timestamp(df["timestamp"].iloc[-1]) + TIMEFRAME_DURATIONS["15m"]
     parsed = pd.Timestamp(value)
     if parsed.tzinfo is None:
         return parsed
@@ -160,11 +163,11 @@ def dataframe_to_candles(
                 timeframe=timeframe,
                 open_time=open_time,
                 close_time=close_time,
-                open=Decimal(str(float(row["open"]))),
-                high=Decimal(str(float(row["high"]))),
-                low=Decimal(str(float(row["low"]))),
-                close=Decimal(str(float(row["close"]))),
-                volume=Decimal(str(float(row.get("volume", 0.0)))),
+                open=Decimal(str(row["open"])),
+                high=Decimal(str(row["high"])),
+                low=Decimal(str(row["low"])),
+                close=Decimal(str(row["close"])),
+                volume=Decimal(str(row.get("volume", 0.0))),
                 trade_count=int(row.get("trade_count", 0) or 0),
                 is_closed=is_closed,
                 is_complete=is_complete,

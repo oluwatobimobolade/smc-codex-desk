@@ -315,6 +315,78 @@ def build_manifest_from_closed_data(
     }
 
 
+
+def build_live_visual_manifest(
+    *,
+    symbol: str,
+    output_dir: Path,
+    session: str = "smc-tv-visual",
+    bars: int = 500,
+    timeout_ms: int = 60000,
+) -> tuple[Path, dict[str, Any]]:
+    """Capture TradingView charts without using TradingView as OHLCV authority.
+
+    This deliberately avoids the private/unsupported TradingView data socket.
+    The returned chart state records what was requested, while explicitly
+    marking DOM-visible candle timing as unverified. Canonical candles must
+    come from Binance market truth.
+    """
+
+    del bars, timeout_ms  # retained for interface compatibility
+    symbol = symbol.strip().upper().replace("/", "").replace("-", "")
+    tradingview_symbol = expected_tradingview_symbol(symbol)
+    output_dir = output_dir.expanduser().resolve()
+    screenshots: dict[str, Path] = {}
+    timeframes: dict[str, Any] = {}
+
+    for tf, meta in TIMEFRAMES.items():
+        url = chart_url(tradingview_symbol, str(meta["interval"]))
+        webbridge_command("navigate", {"url": url, "newTab": tf == "15m"}, session=session)
+        time.sleep(3)
+        screenshot_path = output_dir / "screenshots" / f"{symbol}_{tf}.png"
+        capture_screenshot(screenshot_path, session=session)
+        screenshots[tf] = screenshot_path
+        timeframes[tf] = {
+            "tradingview_symbol": tradingview_symbol,
+            "symbol": tradingview_symbol,
+            "interval": meta["interval"],
+            "timeframe": tf,
+            "candle_type": "candles",
+            "scale": "linear",
+            "timezone": "UTC",
+            "verification_status": "requested_state_not_dom_verified",
+            "last_closed_candle_open": None,
+            "last_closed_candle_close": None,
+        }
+
+    manifest = {
+        "instrument": symbol,
+        "exchange": "BINANCE",
+        "tradingview_symbol": tradingview_symbol,
+        "captured_at": datetime.now(timezone.utc).isoformat(),
+        "capture_method": "kimi_webbridge_tradingview_visual_only",
+        "verification_status": "visual_only_unverified_candle_state",
+        "screenshots": {TIMEFRAMES[tf]["tv_label"]: str(path.resolve()) for tf, path in screenshots.items()},
+        "chart_state": {
+            "symbol": tradingview_symbol,
+            "exchange": "BINANCE",
+            "instrument": symbol,
+            "candle_type": "candles",
+            "scale": "linear",
+            "timezone": "UTC",
+            "timeframes": timeframes,
+        },
+        "notes": [
+            "Canonical OHLCV is acquired independently from Binance.",
+            "These screenshots are visual evidence only.",
+            "Visible last-closed candle timing was not independently read from the TradingView DOM.",
+        ],
+    }
+    manifest_path = output_dir / "tradingview_visual_manifest.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    return manifest_path, manifest
+
 def build_live_alignment_manifest(
     *,
     symbol: str,

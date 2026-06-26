@@ -8,11 +8,13 @@ from typing import Any, Callable
 
 from smc_desk.colleague.orchestrator import run_colleague_analysis
 from smc_desk.colleague.request_contract import ColleagueRunRequest, normalize_symbol
-from smc_desk.colleague.tradingview_live_manifest import build_live_alignment_manifest
+from smc_desk.colleague.tradingview_live_manifest import build_live_visual_manifest
+from smc_desk.data.live_ohlcv import acquire_verified_closed_ohlcv
 from smc_desk.rules import RuleConfig
 
 
 CaptureFn = Callable[..., tuple[Path, dict[str, Any]]]
+MarketDataFn = Callable[..., tuple[Path, dict[str, Any]]]
 AnalysisFn = Callable[[ColleagueRunRequest, RuleConfig], dict[str, Any]]
 
 
@@ -26,26 +28,19 @@ def _json_or_missing(path: Path) -> dict[str, Any]:
     return _read_json(path)
 
 
-def _decision_available_from_manifest(manifest: dict[str, Any]) -> str:
-    """Return the analysis availability time from a TradingView chart manifest.
-
-    The colleague request contract treats ``decision_time`` as the time at
-    which data is available for analysis. TradingView's 15m chart state carries
-    both the open of the last closed candle and its close/availability time; use
-    the close time here so the no-future-leakage slicer includes that candle
-    instead of stepping back one bar.
-    """
+def _decision_time_from_market_manifest(manifest: dict[str, Any]) -> str:
+    """Use actual acquisition time as the decision-time availability boundary."""
     try:
-        return str(manifest["chart_state"]["timeframes"]["15m"]["last_closed_candle_close"])
+        return str(manifest["fetched_at"])
     except KeyError as exc:
-        raise ValueError("Live manifest is missing chart_state.timeframes.15m.last_closed_candle_close") from exc
+        raise ValueError("Market-truth manifest is missing fetched_at") from exc
 
 
-def _source_15m_from_manifest(manifest: dict[str, Any]) -> Path:
+def _source_15m_from_market_manifest(manifest: dict[str, Any]) -> Path:
     try:
-        return Path(str(manifest["ohlcv"]["15m"])).expanduser().resolve()
+        return Path(str(manifest["source_csv"])).expanduser().resolve()
     except KeyError as exc:
-        raise ValueError("Live manifest is missing ohlcv.15m source CSV") from exc
+        raise ValueError("Market-truth manifest is missing source_csv") from exc
 
 
 def _semantic_summary(run_dir: Path) -> dict[str, Any]:
@@ -57,7 +52,7 @@ def _semantic_summary(run_dir: Path) -> dict[str, Any]:
     return summary if isinstance(summary, dict) else {}
 
 
-def _summarize_success(symbol: str, capture_manifest_path: Path, run_manifest: dict[str, Any]) -> dict[str, Any]:
+def _summarize_success(symbol: str, market_manifest_path: Path, capture_manifest_path: Path, run_manifest: dict[str, Any]) -> dict[str, Any]:
     run_dir = Path(run_manifest["files"]["request.json"]["path"]).parent
     decision = _json_or_missing(run_dir / "scenarios" / "decision.json")
     alignment = _json_or_missing(run_dir / "external" / "alignment_report.json")
@@ -67,6 +62,7 @@ def _summarize_success(symbol: str, capture_manifest_path: Path, run_manifest: d
     return {
         "symbol": symbol,
         "status": "ok",
+        "market_truth_manifest": str(market_manifest_path),
         "capture_manifest": str(capture_manifest_path),
         "run_dir": str(run_dir),
         "run_manifest": str(run_dir / "run_manifest.json"),
@@ -144,12 +140,13 @@ def run_live_shadow_universe(
     session_prefix: str = "smc-tv-live-shadow",
     allow_holdout: bool = True,
     continue_on_error: bool = True,
-    capture_fn: CaptureFn = build_live_alignment_manifest,
+    market_data_fn: MarketDataFn = acquire_verified_closed_ohlcv,
+    capture_fn: CaptureFn = build_live_visual_manifest,
     analysis_fn: AnalysisFn = run_colleague_analysis,
 ) -> dict[str, Any]:
     """Run observe-only live colleague packages for a symbol universe.
 
-    Each symbol gets its own TradingView capture and sealed colleague package.
+    Each symbol gets verified Binance market truth, a separate TradingView visual capture, and a sealed colleague package.
     Failures are isolated by symbol so one bad browser/data fetch does not hide
     whether the rest of the universe is reproducible.
     """
@@ -165,24 +162,57 @@ def run_live_shadow_universe(
         capture_dir = symbol_dir / "tradingview_capture"
         run_dir = symbol_dir / "colleague_run"
         try:
-            capture_manifest_path, capture_manifest = capture_fn(
+            market_manifest_path, market_manifest = market_data_fn(
                 symbol=symbol,
-                output_dir=capture_dir,
-                session=f"{session_prefix}-{symbol.lower()}",
-                bars=bars,
-                timeout_ms=timeout_ms,
+                output_dir=symbol_dir / "market_truth",
+                interval="15m",
+                limit=bars,
+                min_bars=min(100, max(20, bars // 2)),
+                timeout=max(10.0, float(timeout_ms) / 1000.0),
+                webbridge_session=f"{session_prefix}-market-{symbol.lower()}",
             )
+            capture_manifest_path: Path | None = None
+            visual_capture_error: dict[str, Any] | None = None
+            try:
+                capture_manifest_path, _capture_manifest = capture_fn(
+                    symbol=symbol,
+                    output_dir=capture_dir,
+                    session=f"{session_prefix}-visual-{symbol.lower()}",
+                    bars=bars,
+                    timeout_ms=timeout_ms,
+                )
+            except Exception as capture_exc:
+                visual_capture_error = {
+                    "status": "failed",
+                    "error_type": type(capture_exc).__name__,
+                    "error": str(capture_exc),
+                }
+                capture_dir.mkdir(parents=True, exist_ok=True)
+                (capture_dir / "visual_capture_error.json").write_text(
+                    json.dumps(visual_capture_error, indent=2),
+                    encoding="utf-8",
+                )
+
             request = ColleagueRunRequest(
                 symbol=symbol,
-                source_path=str(_source_15m_from_manifest(capture_manifest)),
+                source_path=str(_source_15m_from_market_manifest(market_manifest)),
                 output_dir=str(run_dir),
-                decision_time=_decision_available_from_manifest(capture_manifest),
-                tradingview_manifest=str(capture_manifest_path),
+                decision_time=_decision_time_from_market_manifest(market_manifest),
+                tradingview_manifest=None if capture_manifest_path is None else str(capture_manifest_path),
+                market_truth_manifest=str(market_manifest_path),
                 allow_holdout=allow_holdout,
                 run_id=f"{symbol}_live_shadow",
+                include_legacy_comparison=False,
             )
             run_manifest = analysis_fn(request, config)
-            results.append(_summarize_success(symbol, capture_manifest_path, run_manifest))
+            success = _summarize_success(
+                symbol,
+                market_manifest_path,
+                capture_manifest_path or capture_dir / "visual_capture_error.json",
+                run_manifest,
+            )
+            success["visual_capture"] = visual_capture_error or {"status": "ok"}
+            results.append(success)
         except Exception as exc:
             results.append(_summarize_failure(symbol, symbol_dir, exc))
             if not continue_on_error:

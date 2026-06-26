@@ -35,6 +35,7 @@ class ColleagueRunRequest(BaseModel):
     rules_path: str | None = None
     bias: Literal["bullish", "bearish"] | None = None
     tradingview_manifest: str | None = None
+    market_truth_manifest: str | None = None
     holdout_policy: str | None = None
     allow_holdout: bool = False
     chart_bars: dict[str, int] = Field(default_factory=lambda: dict(DEFAULT_CHART_BARS))

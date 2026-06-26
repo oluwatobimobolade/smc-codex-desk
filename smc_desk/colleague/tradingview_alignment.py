@@ -222,6 +222,7 @@ def build_alignment_report(
         }
 
     payload = capture.get("payload") if isinstance(capture.get("payload"), dict) else {}
+    visual_only = str(payload.get("verification_status") or "").lower() == "visual_only_unverified_candle_state"
     checks: list[dict[str, Any]] = []
 
     observed_symbol = str(payload.get("tradingview_symbol") or payload.get("symbol") or "").upper()
@@ -262,8 +263,9 @@ def build_alignment_report(
         )
         expected_open = _timestamp(expected_by_tf.get(tf, {}).get("last_closed_candle_open"))
         expected_close = _timestamp(expected_by_tf.get(tf, {}).get("last_closed_candle_close"))
-        checks.append(_check(f"chart_state_{tf}_last_closed_open", last_open == expected_open, None if expected_open is None else expected_open.isoformat(), None if last_open is None else last_open.isoformat()))
-        checks.append(_check(f"chart_state_{tf}_last_closed_close", last_close == expected_close, None if expected_close is None else expected_close.isoformat(), None if last_close is None else last_close.isoformat()))
+        timing_severity = "warning" if visual_only and last_open is None and last_close is None else "error"
+        checks.append(_check(f"chart_state_{tf}_last_closed_open", last_open == expected_open, None if expected_open is None else expected_open.isoformat(), None if last_open is None else last_open.isoformat(), severity=timing_severity))
+        checks.append(_check(f"chart_state_{tf}_last_closed_close", last_close == expected_close, None if expected_close is None else expected_close.isoformat(), None if last_close is None else last_close.isoformat(), severity=timing_severity))
         chart_state_proofs.append(tf)
 
     ohlcv_checks, ohlcv_summary = _compare_tv_ohlcv(
@@ -274,10 +276,11 @@ def build_alignment_report(
     checks.extend(ohlcv_checks)
 
     blocking_failures = [check for check in checks if check["severity"] == "error" and not check["passed"]]
-    status = "PASS" if not blocking_failures else "FAIL"
+    warning_failures = [check for check in checks if check["severity"] == "warning" and not check["passed"]]
+    status = "FAIL" if blocking_failures else "PARTIAL" if warning_failures else "PASS"
     return {
         "status": status,
-        "passed": status == "PASS",
+        "passed": status in {"PASS", "PARTIAL"},
         "authority": "TradingView/WebBridge can verify visual/chart-state alignment only; local OHLCV remains market truth.",
         "expected": expected,
         "observed": {
@@ -290,5 +293,5 @@ def build_alignment_report(
         },
         "checks": checks,
         "blocking_failures": blocking_failures,
-        "summary": "TradingView/WebBridge evidence aligned." if status == "PASS" else "TradingView/WebBridge evidence did not satisfy strict alignment.",
+        "summary": ("TradingView/WebBridge evidence aligned." if status == "PASS" else "TradingView screenshots attached, but visible candle timing remains unverified." if status == "PARTIAL" else "TradingView/WebBridge evidence did not satisfy strict alignment."),
     }

@@ -181,6 +181,14 @@ def run_colleague_analysis(request: ColleagueRunRequest, config: RuleConfig) -> 
         "storage_format": request.storage_format,
         "htf_policy": "1H/4H/1D derived from canonical 15m; incomplete HTF candles dropped.",
     }
+    if request.market_truth_manifest:
+        market_truth_path = Path(request.market_truth_manifest).expanduser().resolve()
+        source_manifest["market_truth_manifest"] = {
+            "path": str(market_truth_path),
+            "exists": market_truth_path.exists(),
+            "sha256": file_sha256(market_truth_path) if market_truth_path.exists() else None,
+            "payload": json.loads(market_truth_path.read_text(encoding="utf-8")) if market_truth_path.exists() else None,
+        }
     writer.write_json("source_manifest.json", source_manifest)
     writer.write_json("data_quality.json", context.source_quality)
     writer.write_json(
