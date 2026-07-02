@@ -1,0 +1,63 @@
+{
+  "work_package": "WP-0016-RUNTIME-CONFIG-SPLIT",
+  "date": "2026-06-26",
+  "status": "PASS_WITH_LIVE_DATA_ACQUISITION_BLOCKED",
+  "market_edge_claimed": false,
+  "execution_authority_changed": false,
+  "runtime_config_source": "split_detector_strategy_configs",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_runtime_config_split.py tests/test_ontology_authority_audit.py tests/test_phase2_pilot.py -q",
+      "result": "20 passed in 1.36s"
+    },
+    {
+      "command": ".venv/bin/python tools/audit_ontology_authority.py --output-json reports/current/RUNTIME_CONFIG_SPLIT_WP0016.json --output-md reports/current/RUNTIME_CONFIG_SPLIT_WP0016.md",
+      "result": "runtime_config_migrated_to_split_contracts"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_webbridge_capture.py tests/test_market_colleague_case.py tests/test_runtime_config_split.py tests/test_ontology_authority_audit.py -q",
+      "result": "15 passed in 1.38s"
+    },
+    {
+      "command": ".venv/bin/python tools/run_live_shadow_universe.py BTCUSDT --output-root analysis_runs/live_shadow_btcusdt_wp0016_20260626 --session-prefix smc-tv-wp0016-btc --bars 500 --timeout-ms 90000",
+      "result": "FAIL: local WebBridge HTTP wrapper timed out while waiting for TradingView OHLCV"
+    },
+    {
+      "command": ".venv/bin/python tools/run_live_shadow_universe.py BTCUSDT --output-root analysis_runs/live_shadow_btcusdt_wp0016_20260626_retry --session-prefix smc-tv-wp0016-btc-retry --bars 220 --timeout-ms 180000",
+      "result": "FAIL: TradingView OHLCV fetch timed out inside browser after 180 seconds"
+    },
+    {
+      "command": ".venv/bin/python tools/download_binance_futures_ohlcv.py --symbol BTCUSDT --interval 15m --start 2026-06-24T00:00:00Z --end 2026-06-26T23:59:00Z --source rest --output analysis_runs/live_btcusdt_wp0016_20260626/binance_rest/BTCUSDT_15m_rest_live.csv",
+      "result": "FAIL: DNS resolution error for fapi.binance.com"
+    },
+    {
+      "command": "Kimi WebBridge visual capture for BTCUSDT.P 15m/1h/4h/1d",
+      "result": "PASS: visual screenshots saved, but visual evidence is not OHLCV authority"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_runtime_config_split.py tests/test_ontology_authority_audit.py tests/test_webbridge_capture.py tests/test_market_colleague_case.py -q",
+      "result": "15 passed in 1.48s"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": "JSON/YAML parse check",
+      "result": "json_ok 32 files, yaml_ok 17 files"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "389 passed in 30.28s"
+    },
+    {
+      "command": ".venv/bin/python tools/audit_ontology_authority.py --output-json reports/current/RUNTIME_CONFIG_SPLIT_WP0016.json --output-md reports/current/RUNTIME_CONFIG_SPLIT_WP0016.md",
+      "result": "runtime_config_migrated_to_split_contracts"
+    }
+  ],
+  "primary_report": "reports/current/RUNTIME_CONFIG_SPLIT_WP0016.md",
+  "live_shadow_report": "reports/current/BTCUSDT_LIVE_SHADOW_WP0016_REPORT.md",
+  "live_shadow_status": "NO_VALID_LIVE_TRADE_STRICT_OHLCV_UNAVAILABLE",
+  "visual_evidence": "analysis_runs/live_btcusdt_wp0016_20260626/visual_only/screenshots",
+  "real_data_output": "reports/current/RUNTIME_CONFIG_SPLIT_WP0016.json"
+}

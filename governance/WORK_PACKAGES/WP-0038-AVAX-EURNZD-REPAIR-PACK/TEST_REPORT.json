@@ -1,0 +1,71 @@
+{
+  "schema": "work_package_test_report_v1",
+  "work_package": "WP-0038-AVAX-EURNZD-REPAIR-PACK",
+  "created_at": "2026-06-29T23:12:00Z",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "editable_install",
+      "command": ".venv/bin/python -m pip install -e .",
+      "status": "PASS"
+    },
+    {
+      "name": "wp0038_focused",
+      "command": ".venv/bin/python -m pytest tests/test_wp0038_avax_eurnzd_repairs.py -q",
+      "status": "PASS",
+      "result": "15 passed"
+    },
+    {
+      "name": "wp0034_to_wp0038_ai_suite",
+      "command": ".venv/bin/python -m pytest tests/test_wp0034_ai_smc_trader_brain.py tests/test_wp0035_ai_brain_integration.py tests/test_wp0036_prompt_operating_system.py tests/test_wp0037_active_range_authority.py tests/test_wp0038_avax_eurnzd_repairs.py -q",
+      "status": "PASS",
+      "result": "67 passed"
+    },
+    {
+      "name": "compileall_changed_paths",
+      "command": ".venv/bin/python -m compileall smc_desk/brain smc_desk/colleague smc_desk/gauntlet tools/audit_ai_smc_gold_readiness.py tools/replay_trade_ready_cases.py tools/run_live_ai_smc_full_system.py tests/test_wp0038_avax_eurnzd_repairs.py",
+      "status": "PASS"
+    },
+    {
+      "name": "diff_check_touched_paths",
+      "command": "git diff --check -- smc_desk/brain/ai_smc_consistency_validator.py smc_desk/colleague/orchestrator_v3.py smc_desk/brain/smc_evidence_pack_builder.py tools/run_live_ai_smc_full_system.py tools/audit_ai_smc_gold_readiness.py tools/replay_trade_ready_cases.py tests/test_wp0038_avax_eurnzd_repairs.py pyproject.toml",
+      "status": "PASS"
+    },
+    {
+      "name": "gold_readiness_audit_smoke",
+      "command": ".venv/bin/python /Users/tobimobolade/smc-codex-desk/tools/audit_ai_smc_gold_readiness.py --cases-root /tmp/smc_missing_gold_cases --minimum-cases 20",
+      "status": "PASS",
+      "result": "INSUFFICIENT_GROUND_TRUTH"
+    },
+    {
+      "name": "trade_ready_replay_audit_smoke",
+      "command": ".venv/bin/python /Users/tobimobolade/smc-codex-desk/tools/replay_trade_ready_cases.py --runs-root /Users/tobimobolade/smc-codex-desk/analysis_runs",
+      "status": "PASS",
+      "result": "22 official decision files scanned, 0 validated TRADE_PLAN_READY"
+    },
+    {
+      "name": "live_avax_eurnzd_smoke",
+      "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols AVAXUSDT EURNZD --output-root analysis_runs",
+      "status": "PARTIAL_PASS",
+      "result": "AVAXUSDT and EURNZD passed in run LIVE_FULL_SYSTEM_AI_SMC_V3_20260629_230022; later AVAX retry failed due Binance DNS."
+    },
+    {
+      "name": "live_eurnzd_corrected_smoke",
+      "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols EURNZD --output-root analysis_runs",
+      "status": "PASS",
+      "result": "EURNZD PASS VALIDATED WATCH_ONLY in LIVE_FULL_SYSTEM_AI_SMC_V3_20260629_230943"
+    },
+    {
+      "name": "full_pytest",
+      "command": ".venv/bin/python -m pytest -q",
+      "status": "PASS",
+      "result": "658 passed, 1 skipped"
+    }
+  ],
+  "execution_authority": {
+    "paper_execution": "disabled",
+    "live_execution": "disabled",
+    "capital_risk": 0,
+    "edge_claim_allowed": false
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "work_package": "WP-0002-COLLEAGUE-ORCHESTRATOR",
+  "date": "2026-06-25",
+  "status": "PASS",
+  "authority_mode": "research_foundation",
+  "commands": [
+    {
+      "command": ".venv/bin/python tools/run_market_colleague_case.py --symbol BTCUSDT --decision-time 2026-06-19T23:45:00Z --output-dir analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke",
+      "result": "PASS",
+      "notes": "Real BTCUSDT Binance USD-M futures smoke run created a complete analysis package."
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_market_colleague_case.py -q",
+      "result": "3 passed in 1.18s"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "351 passed in 26.19s"
+    }
+  ],
+  "smoke_run": {
+    "path": "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke",
+    "run_manifest": "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/run_manifest.json",
+    "symbol": "BTCUSDT",
+    "decision_candle_open": "2026-06-19T23:45:00",
+    "decision_available_at": "2026-06-20T00:00:00",
+    "action": "NO_SETUP",
+    "primary_perception_source": "PerceptionEngineV2",
+    "legacy_engine_role": "comparison_only"
+  },
+  "assertions": {
+    "package_kind_is_market_colleague_analysis_run": true,
+    "perception_v2_primary": true,
+    "legacy_engine_comparison_only": true,
+    "paper_execution_disabled": true,
+    "live_execution_disabled": true,
+    "no_future_leakage_metadata_present": true,
+    "clean_charts_created": true,
+    "annotated_chart_created": true,
+    "mtf_mosaic_created": true
+  },
+  "claims_not_made": [
+    "predictive edge",
+    "profitable strategy",
+    "human-grade visual accuracy",
+    "verified TradingView chart-state equivalence",
+    "paper or live execution readiness"
+  ]
+}

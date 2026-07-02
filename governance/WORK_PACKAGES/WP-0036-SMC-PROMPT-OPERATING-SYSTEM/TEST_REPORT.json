@@ -1,0 +1,50 @@
+{
+  "work_package": "WP-0036-SMC-PROMPT-OPERATING-SYSTEM",
+  "timestamp_utc": "2026-06-29T15:07:00Z",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0036_prompt_operating_system.py -q",
+      "result": "11 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0034_ai_smc_trader_brain.py tests/test_wp0035_ai_brain_integration.py tests/test_wp0036_prompt_operating_system.py -q",
+      "result": "45 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "636 passed, 1 skipped"
+    },
+    {
+      "command": "git diff --check -- smc_desk/brain smc_desk/colleague/orchestrator_v3.py tests/test_wp0036_prompt_operating_system.py",
+      "result": "clean"
+    }
+  ],
+  "files_added": [
+    "smc_desk/brain/prompt_system/__init__.py",
+    "smc_desk/brain/prompt_system/prompt_contract.py",
+    "smc_desk/brain/prompt_system/master_identity_prompt.py",
+    "smc_desk/brain/prompt_system/smc_doctrine_prompt.py",
+    "smc_desk/brain/prompt_system/reasoning_order_prompt.py",
+    "smc_desk/brain/prompt_system/evidence_guardrail_prompt.py",
+    "smc_desk/brain/prompt_system/trade_readiness_prompt.py",
+    "smc_desk/brain/prompt_system/target_sl_prompt.py",
+    "smc_desk/brain/prompt_system/annotation_prompt.py",
+    "smc_desk/brain/prompt_system/json_schema_prompt.py",
+    "smc_desk/brain/prompt_system/prompt_registry.py",
+    "smc_desk/brain/prompt_system/prompt_builder.py",
+    "tests/test_wp0036_prompt_operating_system.py"
+  ],
+  "files_modified": [
+    "smc_desk/brain/__init__.py",
+    "smc_desk/brain/ai_smc_trader_brain.py",
+    "smc_desk/colleague/orchestrator_v3.py"
+  ],
+  "verdict": "PASS",
+  "api_usage": "none",
+  "execution_authority": "disabled",
+  "remaining_cautions": [
+    "Prompt quality guides reasoning but does not prove chart-reading accuracy.",
+    "Validator remains the authority boundary.",
+    "Gold-set evaluation remains required before perception-quality claims."
+  ]
+}

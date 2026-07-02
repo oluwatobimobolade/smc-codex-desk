@@ -48,7 +48,7 @@ class EngineTests(unittest.TestCase):
         self.assertGreaterEqual(events[0].displacement_score, config.displacement_body_factor)
 
     def test_bullish_choch_requires_protected_high_not_internal_high(self) -> None:
-        config = RuleConfig(pivot_window=2, displacement_body_factor=1.2)
+        config = RuleConfig(displacement_body_factor=1.2)
         df = candles(
             [
                 (105, 106, 104, 105),
@@ -83,7 +83,7 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(bullish_events[0].broken_level, 110.0)
 
     def test_internal_choch_can_break_internal_high_for_entry_confirmation(self) -> None:
-        config = RuleConfig(pivot_window=2, displacement_body_factor=1.2)
+        config = RuleConfig(displacement_body_factor=1.2)
         df = candles(
             [
                 (105, 106, 104, 105),
@@ -119,7 +119,7 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(bullish_events[0].broken_level, 100.0)
 
     def test_equal_levels_are_clustered_not_pairwise_spam(self) -> None:
-        config = RuleConfig(equal_level_tolerance_pct=0.0015, equal_level_min_touches=2)
+        config = RuleConfig(equal_level_tolerance_bps=15.0, equal_level_min_touches=2)
         swings = [
             SwingPoint(kind="high", index=3, timestamp="2026-01-01T00:45:00", price=100.00),
             SwingPoint(kind="high", index=9, timestamp="2026-01-01T02:15:00", price=100.05),

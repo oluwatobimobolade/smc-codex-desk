@@ -1,0 +1,14 @@
+cost_model:
+  fee_schedule_source: actual_where_available
+  round_trip_sensitivity_bps: 4
+  round_trip_base_stress_bps: 10
+  round_trip_adverse_stress_bps: 20
+  slippage:
+    model: baseline_configurable
+    default: conservative
+  funding:
+    include_when_holding_period_crosses_funding_event: true
+  same_candle_stop_target_ambiguity:
+    assumption: conservative_ordering
+robustness_rule:
+  must_not_survive_only_lowest_cost_case: true

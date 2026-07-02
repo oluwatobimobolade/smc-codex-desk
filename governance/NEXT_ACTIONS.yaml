@@ -5,7 +5,11 @@ next_actions:
     owner: Legacy Isolation Engineer
     status: COMPLETE_ACCEPTED
     gate: 405_tests_passing_5_isolation_tests_all_green
-    priority: 1
+    evidence_required:
+      - evidence/wp0012a/baseline_commit.txt
+      - tests/test_legacy_boundary.py
+  - id: WP-0001-A
+    priority: 2
     title: Finish governance foundation audit
     owner: Chief Architect
     status: completed_initial_foundation
@@ -13,7 +17,7 @@ next_actions:
       - governance/WORK_PACKAGES/WP-0001-COLLEAGUE-FOUNDATION/WP-0001-HANDOFF.md
       - reports/current/REPOSITORY_AUTHORITY_AUDIT.md
   - id: WP-0001-B
-    priority: 2
+    priority: 3
     title: Separate perception ontology from strategy and risk parameters
     owner: Ontology Steward
     status: completed_runtime_split_wp0016
@@ -21,7 +25,7 @@ next_actions:
       - reports/current/ONTOLOGY_CONFLICT_REPORT.md
       - specs/STRATEGY_PROFILE_SWEEP_RETRACE_V1.yaml
   - id: WP-0001-C
-    priority: 3
+    priority: 4
     title: Migrate market-colleague case workflow toward PerceptionEngineV2-led orchestrator
     owner: PerceptionEngineV2 Engineer
     status: completed_initial_slice
@@ -29,7 +33,7 @@ next_actions:
       - analysis_runs/<run_id>/run_manifest.json
       - analysis_runs/<run_id>/perception/objects.json
   - id: WP-0001-D
-    priority: 4
+    priority: 5
     title: Upgrade Kimi WebBridge to verified TradingView chart controller
     owner: KimiWebBridge Engineer
     status: queued
@@ -37,7 +41,7 @@ next_actions:
       - external/capture_manifest.json
       - external/alignment_report.json
   - id: WP-0002-NEXT
-    priority: 5
+    priority: 6
     title: Add verified Kimi/TradingView chart-state alignment to analysis_runs packages
     owner: KimiWebBridge Engineer
     status: completed_contract_slice
@@ -46,7 +50,7 @@ next_actions:
       - analysis_runs/<run_id>/external/alignment_report.json
       - tests for wrong symbol/timeframe/scale/source mismatch
   - id: WP-0003-LIVE
-    priority: 6
+    priority: 7
     title: Make WebBridge controller populate verified chart_state from a real TradingView session
     owner: KimiWebBridge Engineer
     status: completed_multi_symbol_live_shadow_slice
@@ -55,7 +59,7 @@ next_actions:
       - PASS alignment_report on an analysis_runs package
       - negative live-controller tests for stale or wrong chart state
   - id: WP-0004-NEXT
-    priority: 7
+    priority: 8
     title: Extend rich MTF scenario graph beyond FVG/structure into liquidity, inducement, OB, and breaker semantics
     owner: Scenario Brain Engineer
     status: completed_candidate_semantics_slice
@@ -64,7 +68,7 @@ next_actions:
       - scenario graph tests for liquidity sweep and POI relationship chains
       - human-reviewed chart cases confirming graph correctness
   - id: WP-0007-NEXT
-    priority: 8
+    priority: 9
     title: Promote deterministic similar-case retrieval into a reviewed historical case memory
     owner: Case Memory Engineer
     status: next
@@ -73,7 +77,7 @@ next_actions:
       - outcome/resolution coverage for comparable cases
       - retrieval quality audit against human-selected similar cases
   - id: WP-0008-NEXT
-    priority: 9
+    priority: 10
     title: Resolve pending outcomes from future candles and produce no-edge/no-promotion reports
     owner: Outcome Researcher
     status: completed_initial_resolution_slice
@@ -82,7 +86,7 @@ next_actions:
       - unresolved/expired/target/invalidation accounting
       - no promotion unless sample size and costs are validated
   - id: WP-0011-NEXT
-    priority: 10
+    priority: 11
     title: Repair truth boundary and restore green validation
     owner: Truth Boundary Engineer
     status: completed_wp0011
@@ -91,7 +95,7 @@ next_actions:
       - live-shadow alignment drift check
       - full pytest
   - id: WP-0012-NEXT
-    priority: 11
+    priority: 12
     title: Isolate legacy engine from current decision authority
     owner: Market Colleague Architect
     status: completed_wp0012
@@ -100,7 +104,7 @@ next_actions:
       - final decision builder receives no legacy trade_plan object
       - legacy output is comparison-only report data
   - id: WP-0013-NEXT
-    priority: 12
+    priority: 13
     title: Build a resolved-case cohort across BTC/ETH/SOL/XRP/BNB
     owner: Outcome Researcher
     status: completed_wp0013_observation_only
@@ -109,7 +113,7 @@ next_actions:
       - outcome cohort summary with no-trade, watch, disabled-signal, ambiguous, and unresolved buckets
       - no edge claim until sample size and costs survive review
   - id: WP-0014-NEXT
-    priority: 13
+    priority: 14
     title: Human review loop for live-shadow Watch and No Setup cases
     owner: Adjudication Lead
     status: completed_wp0014_queue_ready
@@ -118,7 +122,7 @@ next_actions:
       - disagreement cases between human review and semantic graph
       - adjudicated gold labels separated from engine weak labels
   - id: WP-0015-NEXT
-    priority: 14
+    priority: 15
     title: Split ontology and strategy authority contracts
     owner: Ontology Steward
     status: completed_wp0015_contract_ready_runtime_migrated_wp0016
@@ -127,7 +131,7 @@ next_actions:
       - strategy execution config receives sequence/risk fields
       - audit blocks promotion until runtime migration
   - id: WP-0016-NEXT
-    priority: 15
+    priority: 16
     title: Migrate runtime config away from monolithic PERCEPTION_ONTOLOGY_V2
     owner: Ontology Steward
     status: completed_wp0016_runtime_migrated
@@ -136,12 +140,137 @@ next_actions:
       - compatibility adapter for legacy rule files
       - full pytest after default runtime source switch
   - id: WP-0017-NEXT
-    priority: 16
+    priority: 17
     title: Repair live OHLCV acquisition reliability
     owner: Market Truth Engineer
-    status: next
+    status: partially_completed_wp0017a_wp0017b_current_baseline_reconciled_wp0017c_live_route_smoke_still_next
     evidence_required:
       - TradingView OHLCV route-level health check with timeout payload logging
       - Binance REST DNS/connectivity health check with explicit fallback status
       - BTCUSDT live-shadow package that either passes verified closed OHLCV or cleanly records NO_VALID_LIVE_TRADE
       - regression tests proving visual-only screenshots cannot create executable signals
+  - id: WP-0017C
+    priority: 18
+    title: Reconcile V4 transfer baseline and repair FVG blocker
+    owner: Baseline Steward
+    status: completed_current_local_baseline_green
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0017C-BASELINE-RECONCILIATION/TEST_REPORT.json
+      - reports/current/BASELINE_RECONCILIATION_WP0017C_REPORT.md
+      - full pytest current local count
+  - id: WP-0018
+    priority: 18
+    title: Cognitive correctness layer
+    owner: Cognitive Architect
+    status: COMPLETE_ACCEPTED
+    gate: 478_tests_passing_cognitive_refusal_tests_green
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0018-COGNITIVE-CORRECTNESS-LAYER/TEST_REPORT.json
+      - reports/current/COGNITIVE_CORRECTNESS_WP0018_REPORT.md
+      - analysis_runs/BTCUSDT_brain_v2_wp0018_smoke/brain_v2_result.json
+  - id: WP-0019
+    priority: 19
+    title: Live OHLCV reliability repair
+    owner: Market Truth Engineer
+    status: COMPLETE_ACCEPTED
+    gate: 21_live_ohlcv_tests_passing_retry_backoff_route_health
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0019-LIVE-OHLCV-RELIABILITY-REPAIR/TEST_REPORT.json
+      - governance/WORK_PACKAGES/WP-0019-LIVE-OHLCV-RELIABILITY-REPAIR/final_report.md
+  - id: WP-0020
+    priority: 20
+    title: End-to-end market colleague gauntlet
+    owner: Market Colleague Architect
+    status: COMPLETE_ACCEPTED_VISUAL_AUDIT_AVAILABLE
+    gate: 506_tests_passing_wp0020_csv_gauntlet_visual_capture_pass
+    evidence_required:
+      - analysis_runs/WP0020_MARKET_COLLEAGUE_GAUNTLET_BTCUSDT/11_final_report/gauntlet_report.json
+      - governance/WORK_PACKAGES/WP-0020-MARKET-COLLEAGUE-GAUNTLET/TEST_REPORT.json
+      - reports/current/MARKET_COLLEAGUE_GAUNTLET_WP0020_REPORT.md
+  - id: WP-0021
+    priority: 21
+    title: Professional SMC interpretation repair
+    owner: Market Colleague Architect
+    status: COMPLETE_ACCEPTED_CORE_SLICE
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0021-PROFESSIONAL-SMC-INTERPRETATION-REPAIR/TEST_REPORT.json
+      - reports/current/PROFESSIONAL_SMC_INTERPRETATION_WP0021_REPORT.md
+      - analysis_runs/WP0021_BTCUSDT_INTERPRETATION_REPLAY_20260627/06_cognitive/final_colleague_output.json
+  - id: WP-0021A
+    priority: 21
+    title: Parent subordination and authority cleanup
+    owner: Market Colleague Architect
+    status: COMPLETE_ACCEPTED
+    gate: 516_tests_passing_authority_boundary_green
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0021A-PARENT-SUBORDINATION-AUTHORITY-CLEANUP/TEST_REPORT.json
+      - reports/current/PARENT_SUBORDINATION_AUTHORITY_CLEANUP_WP0021A_REPORT.md
+  - id: WP-0022-NEXT
+    priority: 22
+    title: Stage A/B SMC detector rebuild
+    owner: Perception Structure Engineer
+    status: COMPLETE_ACCEPTED_STAGE_AB
+    gate: 523_tests_passing_btc_replay_watch_bearish_retrace
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB/TEST_REPORT.json
+      - reports/current/SMC_DETECTOR_REBUILD_WP0022_REPORT.md
+      - analysis_runs/WP0022_BTCUSDT_DETECTOR_REBUILD_REPLAY_20260627/06_cognitive/final_colleague_output.json
+  - id: WP-0023-NEXT
+    priority: 23
+    title: Stage C/D SMC decision wiring, data depth, and story renderer
+    owner: Market Truth + Rendering Engineer
+    status: COMPLETE_ACCEPTED
+    gate: 530_tests_passing_btc_and_sol_story_gauntlets
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0023-V6-COLLEAGUE-INTEGRATION/TEST_REPORT.json
+      - analysis_runs/WP0023_BTCUSDT_V6_STORY_CHARTS_20260627
+      - analysis_runs/WP0023_SOLUSDT_V6_STORY_CHARTS_20260627
+    completed_scope:
+      - story renderer derives title/bias from V6 cognitive output
+      - story vs debug renderer separation in gauntlet
+      - dealing range uses protected external high/low pair with parent clipping
+      - data depth reporting and direct-vs-resampled validation
+      - memory supersession for contradictory prior interpretations
+      - POI lifecycle event history and quality fields
+    deferred_to_wp0024:
+      - premium/discount gates must affect POI watch quality
+      - liquidity map feeds targets, invalidation, and thesis expectations
+      - ATR threaded consistently into displacement, FVG, sweep, and swing prominence
+      - paginated/live backfill reaches depth targets in production
+      - first partial HTF candle rejection tests
+  - id: WP-0027
+    priority: 27
+    title: SMC decision quality and diagram repair
+    owner: Market Colleague Architect
+    status: COMPLETE_ACCEPTED_LOCAL_SMOKE
+    gate: 550_tests_passing_btc_sol_story_smoke_partial_visual_skipped
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0027-SMC-DECISION-QUALITY-DIAGRAM-REPAIR/TEST_REPORT.json
+      - governance/WORK_PACKAGES/WP-0027-SMC-DECISION-QUALITY-DIAGRAM-REPAIR/final_report.md
+      - analysis_runs/WP0027_DECISION_QUALITY_DIAGRAM_REPAIR_20260628/BTCUSDT/11_final_report/gauntlet_report.json
+      - analysis_runs/WP0027_DECISION_QUALITY_DIAGRAM_REPAIR_20260628/SOLUSDT/11_final_report/gauntlet_report.json
+      - DOM-verified TradingView visual reconciliation remains audit-only
+  - id: WP-0029
+    priority: 29
+    title: SMC narrative authority and professional annotation repair
+    owner: Market Colleague Architect
+    status: COMPLETE_ACCEPTED_LOCAL_SMOKE
+    gate: 562_tests_passing_btc_sol_official_watch_chart_smoke_visual_skipped
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0029-SMC-NARRATIVE-AUTHORITY-REPAIR/TEST_REPORT.json
+      - governance/WORK_PACKAGES/WP-0029-SMC-NARRATIVE-AUTHORITY-REPAIR/final_report.md
+      - analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/BTCUSDT/04b_official_charts/official_chart_manifest.json
+      - analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/SOLUSDT/04b_official_charts/official_chart_manifest.json
+      - visual capture remains audit-only and was skipped for deterministic local smoke
+  - id: WP-0024-NEXT
+    priority: 24
+    title: Stage E execution readiness — premium/discount, liquidity targets, ATR threading, visual audit
+    owner: Market Truth + Rendering Engineer
+    status: next
+    evidence_required:
+      - premium/discount gates affect POI watch quality
+      - liquidity map feeds targets, invalidation, and thesis expectations
+      - ATR is supplied consistently to displacement, FVG, sweep, and swing prominence logic
+      - paginated/live backfill reaches 15m/1h/4h/1d depth targets
+      - first partial HTF candle rejection tests
+      - DOM-verified TradingView visual reconciliation remains audit-only

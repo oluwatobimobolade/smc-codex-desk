@@ -1,0 +1,39 @@
+{
+  "work_package": "WP-0018-COGNITIVE-CORRECTNESS-LAYER",
+  "date": "2026-06-26",
+  "status": "PASS",
+  "market_edge_claimed": false,
+  "execution_authority_changed": false,
+  "git_head": "c54860a3b00a869d67a4b781b7fb9cae16c7b5c8",
+  "python_version": "Python 3.14.5",
+  "working_tree_status_lines": 107,
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_cognitive_correctness_layer.py -q",
+      "result": "9 passed in 1.15s"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk/data/truth_validator.py smc_desk/perception/regime_engine.py smc_desk/decision/contradiction_resolver.py smc_desk/decision/uncertainty_engine.py smc_desk/decision/refusal_engine.py smc_desk/colleague/decision_memory_graph.py smc_desk/colleague/orchestrator_v2.py tools/run_colleague_brain_v2.py tests/test_cognitive_correctness_layer.py",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python tools/run_colleague_brain_v2.py --symbol BTCUSDT --source data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv --output analysis_runs/BTCUSDT_brain_v2_wp0018_smoke --memory-file analysis_runs/BTCUSDT_brain_v2_wp0018_smoke/decision_memory.jsonl",
+      "result": "final_action NO_SIGNAL; truth PASS; perception completed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_cognitive_correctness_layer.py tests/test_decision_pipeline.py tests/test_market_colleague_case.py tests/test_governance_foundation.py -q",
+      "result": "40 passed in 1.50s"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "478 passed, 1 skipped in 29.43s"
+    }
+  ],
+  "real_data_smoke_run": "analysis_runs/BTCUSDT_brain_v2_wp0018_smoke/brain_v2_result.json",
+  "primary_report": "governance/WORK_PACKAGES/WP-0018-COGNITIVE-CORRECTNESS-LAYER/final_report.md",
+  "secondary_report": "reports/current/COGNITIVE_CORRECTNESS_WP0018_REPORT.md"
+}

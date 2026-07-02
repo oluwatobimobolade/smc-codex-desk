@@ -1,0 +1,24 @@
+kill_criteria:
+  - does_not_outperform_matched_controls
+  - does_not_outperform_trend_plus_fvg_without_smc_confirmation
+  - net_expectancy_non_positive_after_realistic_costs
+  - fewer_than_three_of_five_chronological_folds_positive
+  - edge_disappears_on_untouched_holdout
+  - performance_depends_on_one_short_period
+  - parameter_changes_required_after_holdout_inspection
+  - collapses_on_ETH_and_SOL_without_defensible_market_specific_reason
+  - signal_frequency_too_low_to_establish_evidence
+  - requires_constant_human_reinterpretation
+  - live_shadow_materially_differs_from_replay
+promotion_gates:
+  minimum_development_episodes: 300
+  holdout_requirement: 100_episodes_or_12_months_max_available_sample
+  aggregate_expectancy_after_10bps: positive
+  economically_tolerable_at_20bps: true
+  chronological_folds_positive_after_costs: at_least_4_of_5
+  lower_bootstrap_bound_vs_baseline_C: above_zero
+  no_single_month_cluster_dominates: true
+  direction_dependency: must_not_depend_on_one_direction_only
+  replication: ETHUSDT_and_SOLUSDT_without_retuning_or_certify_BTC_only
+  probability_calibrated: true
+  live_shadow_minimum: 90_days_without_retrospective_signal_alteration

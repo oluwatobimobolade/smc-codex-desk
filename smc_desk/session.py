@@ -22,11 +22,18 @@ def summarize_session_context(df: pd.DataFrame) -> dict[str, float | int | str |
             "latest_close": None,
         }
 
-    timestamps = pd.to_datetime(df["timestamp"], utc=False)
+    timestamps = pd.to_datetime(df["timestamp"], utc=True)
     latest_timestamp = timestamps.iloc[-1]
     current_session = classify_session_hour(int(latest_timestamp.hour))
-    same_session_mask = timestamps.map(lambda value: classify_session_hour(int(value.hour)) == current_session)
-    session_rows = df.loc[same_session_mask]
+    latest_date = latest_timestamp.normalize()
+    today_mask = timestamps.dt.normalize() == latest_date
+    today_df = df.loc[today_mask]
+    if not today_df.empty:
+        today_timestamps = pd.to_datetime(today_df["timestamp"], utc=True)
+        same_session_mask = today_timestamps.map(lambda value: classify_session_hour(int(value.hour)) == current_session)
+        session_rows = today_df.loc[same_session_mask]
+    else:
+        session_rows = df.tail(min(16, len(df)))
     if session_rows.empty:
         session_rows = df.tail(min(16, len(df)))
 
@@ -36,4 +43,5 @@ def summarize_session_context(df: pd.DataFrame) -> dict[str, float | int | str |
         "session_low": float(session_rows["low"].min()),
         "latest_close": float(df["close"].iloc[-1]),
         "bars_in_session_sample": int(len(session_rows)),
+        "session_date": str(latest_date.date()),
     }

@@ -1,0 +1,43 @@
+features:
+  market_truth:
+    - completed_15m_ohlcv
+    - derived_completed_1h_ohlcv
+    - derived_completed_4h_ohlcv
+    - derived_completed_1d_ohlcv
+    - source_hash
+    - decision_time
+  objective_regime:
+    - 4h_return_20
+    - 4h_ema50_slope_5
+    - 4h_external_structure
+    - daily_return_20
+    - daily_external_structure
+  location:
+    - 1h_fvg_low
+    - 1h_fvg_high
+    - 1h_fvg_direction
+    - 1h_fvg_age_bars
+    - 1h_fvg_width_percentile_200
+    - 1h_fvg_lifecycle_state
+    - 1h_break_provenance
+  confirmation:
+    - liquidity_level
+    - sweep_extreme
+    - rejection_close
+    - internal_protected_point
+    - confirmation_close
+    - bars_from_rejection_to_confirmation
+  displacement_attributes:
+    - has_displacement
+    - body_atr_ratio
+    - range_atr_ratio
+  execution:
+    - entry_price
+    - stop_price
+    - target_price
+    - planned_R_after_costs
+    - cost_assumption_bps
+
+knowable_at:
+  all_features: no_later_than_confirmation_close_unless_explicitly_outcome_feature
+  outcome_features: after_resolution_only

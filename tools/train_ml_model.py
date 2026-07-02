@@ -35,12 +35,12 @@ NUMERIC = ["confluence_score", "poi_score", "poi_width_pct", "planned_rr", "htf_
            "poi_age_bars", "poi_competing_count", "displacement_score", "atr_pct", "adx_at_decision",
            "premium_discount_ratio", "sweep_depth_atr", "structure_event_density",
            "body_ratio_at_decision", "range_pct_at_decision", "minute_of_session",
-           "dist_htf_atr", "dist_htf_r"]
+           "dist_htf_atr", "dist_htf_r", "atr_pct_rank", "adx_pct_rank"]
 BOOLS = ["htf_aligned", "is_killzone", "chk_directional_bias", "chk_fresh_or_partial_poi",
          "chk_premium_discount_aligned", "chk_liquidity_sweep", "chk_displacement_break",
          "chk_sweep_before_break", "chk_price_at_or_near_poi", "chk_stop_has_volatility_buffer",
          "chk_risk_reward_floor"]
-CATEG = ["session", "direction", "poi_kind", "poi_status", "setup_grade", "htf_alignment", "break_strength"]
+CATEG = ["session", "direction", "poi_kind", "poi_status", "setup_grade", "htf_alignment", "break_strength", "regime_label", "vol_band_label"]
 # Never features: ids, absolute prices, and forward-looking / label columns.
 LEAK = {"symbol", "decision_index", "decision_time", "poi_low", "poi_high", "entry_index",
         "triggered", "outcome", "r_multiple", "mfe_r", "mae_r", "verdict"}
@@ -86,6 +86,7 @@ def main():
     p.add_argument("--max-depth", type=int, default=3)
     p.add_argument("--learning-rate", type=float, default=0.05)
     p.add_argument("--output-dir", default="backtests/ml/run")
+    p.add_argument("--require-regime", help="Strictly filter for a specific regime_label (e.g. trend_aligned)")
     args = p.parse_args()
 
     paths = []
@@ -97,6 +98,14 @@ def main():
     df = df.dropna(subset=["r_multiple"]).reset_index(drop=True)
     df["t"] = pd.to_datetime(df["decision_time"], utc=True, errors="coerce")
     df = df.dropna(subset=["t"]).sort_values("t").reset_index(drop=True)
+
+    if args.require_regime:
+        if "regime_label" in df.columns:
+            n_before = len(df)
+            df = df[df["regime_label"] == args.require_regime].copy()
+            print(f"Filtered to regime '{args.require_regime}': {len(df)} rows remain (from {n_before}).")
+        else:
+            print("WARNING: --require-regime provided but 'regime_label' not in columns. Skipping filter.")
 
     X, feat_names = build_features(df)
     y = (df["r_multiple"].values > 0.0).astype(float)

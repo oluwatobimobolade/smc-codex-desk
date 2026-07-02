@@ -1,0 +1,14 @@
+{
+  "policy_version": "1.0",
+  "description": "Local-first default holdout policy. June 2026 live/research data has already been touched, so the fresh protected window starts after the current work period.",
+  "windows": [
+    {
+      "name": "future_holdout_from_2026_07_01",
+      "start": "2026-07-01T00:00:00Z",
+      "end": null,
+      "symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "BNBUSDT"],
+      "actions": ["case_generation", "state_replay", "backtest", "training", "tuning", "prediction_training"],
+      "reason": "Fresh local-first final evaluation window. Do not generate cases, tune rules, train models, or run exploratory backtests here unless explicitly performing final evaluation."
+    }
+  ]
+}

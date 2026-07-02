@@ -629,7 +629,7 @@ def _build_trade_plan_for_direction(
         and zone.direction == direction
         and zone.status in allowed_poi_statuses
         and (zone.end_index is None or len(df) - zone.end_index <= config.max_zone_age_bars)
-        and ((zone.high - zone.low) / max(current_close, 1e-9) * 100.0 >= (config.min_poi_width_bps / 10000.0))
+        and ((zone.high - zone.low) / max(current_close, 1e-9) * 10000.0 >= config.min_poi_width_bps)
     ]
 
     def poi_rank(zone: Zone) -> float:

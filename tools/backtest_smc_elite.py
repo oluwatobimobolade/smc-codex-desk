@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
 
 from smc_desk import analyze_dataframe, load_rule_config
 from smc_desk.engine import load_ohlcv_csv
+from smc_desk.evaluation.holdout_guard import DEFAULT_HOLDOUT_POLICY, assert_not_in_holdout
 
 
 @dataclass
@@ -61,6 +62,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--decision-step", type=int, default=1, help="Evaluate every N bars.")
     parser.add_argument("--limit-bars", type=int, help="Optional cap after warmup for quick smoke tests.")
     parser.add_argument("--near-miss-min", type=float, default=0.62, help="Minimum confluence to record a non-executed near miss.")
+    parser.add_argument("--holdout-policy", default=str(DEFAULT_HOLDOUT_POLICY))
+    parser.add_argument("--allow-holdout", action="store_true", help="Only for deliberate final evaluation on a locked holdout.")
     parser.add_argument(
         "--watch-entry",
         choices=["off", "price-only"],
@@ -330,6 +333,7 @@ def write_markdown(path: Path, summary: dict[str, Any]) -> None:
         "",
         f"Generated: {summary['generated_at']}",
         f"Period: {summary['period_start']} to {summary['period_end']}",
+        f"Decision period: {summary.get('decision_period_start')} to {summary.get('decision_period_end')}",
         f"Decision bars: {summary['decision_bars']}",
         "",
         "## Result",
@@ -348,6 +352,10 @@ def write_markdown(path: Path, summary: dict[str, Any]) -> None:
         lines.append(f"- {key}: missing {value} times")
     if not summary.get("missing_check_counts"):
         lines.append("- No missing-check diagnostics recorded.")
+    if summary.get("holdout_windows_touched"):
+        lines.extend(["", "## Holdout Windows Touched"])
+        for window in summary["holdout_windows_touched"]:
+            lines.append(f"- {window['name']}: {window['start']} to {window['end'] or 'open'}")
     lines.extend(["", "## Loopholes Found"])
     lines.extend(f"- {issue}" for issue in summary.get("loopholes_found", []))
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -362,6 +370,16 @@ def run_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Simulat
     last_decision_index = len(df) - args.max_hold_bars - 1
     if args.limit_bars:
         last_decision_index = min(last_decision_index, args.warmup_bars + args.limit_bars)
+    if last_decision_index < args.warmup_bars:
+        raise ValueError("No valid decision bars after warmup/max-hold constraints.")
+    holdout_matches = assert_not_in_holdout(
+        start=pd.Timestamp(df.at[args.warmup_bars, "timestamp"]),
+        end=pd.Timestamp(df.at[last_decision_index, "timestamp"]),
+        symbol=args.symbol,
+        action="backtest",
+        policy_path=args.holdout_policy,
+        allow_holdout=args.allow_holdout,
+    )
 
     trades: list[SimulatedTrade] = []
     near_misses: list[dict[str, Any]] = []
@@ -438,6 +456,8 @@ def run_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Simulat
         "source_csv": str(Path(args.ohlcv).resolve()),
         "period_start": _timestamp(df, 0),
         "period_end": _timestamp(df, len(df) - 1),
+        "decision_period_start": _timestamp(df, args.warmup_bars),
+        "decision_period_end": _timestamp(df, last_decision_index),
         "bars": int(len(df)),
         "decision_bars": decision_bars,
         "warmup_bars": args.warmup_bars,
@@ -450,6 +470,15 @@ def run_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Simulat
         "grade_counts": dict(grade_counts.most_common()),
         "missing_check_counts": dict(missing_checks.most_common()),
         "near_miss_count": len(near_misses),
+        "holdout_windows_touched": [
+            {
+                "name": window.name,
+                "start": window.start.isoformat(),
+                "end": None if window.end is None else window.end.isoformat(),
+                "reason": window.reason,
+            }
+            for window in holdout_matches
+        ],
     }
     return summarize(trades, diagnostics), trades, near_misses
 

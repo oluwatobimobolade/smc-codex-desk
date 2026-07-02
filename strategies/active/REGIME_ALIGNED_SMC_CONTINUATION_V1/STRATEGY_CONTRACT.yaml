@@ -1,0 +1,93 @@
+strategy:
+  id: RASC-SMC-V1
+  name: Regime-Aligned SMC Continuation V1
+  status: RESEARCH_CANDIDATE
+  authority: LIVE_SHADOW_ONLY
+  live_capital_risk: 0
+  paper_execution_enabled: false
+  live_execution_enabled: false
+  objective: test_incremental_value_of_smc_confirmation_after_objective_regime_and_1h_fvg_location
+
+scope:
+  venue: BINANCE_USDM
+  instrument: BTCUSDT
+  market_type: perpetual
+  canonical_timeframe: 15m
+  derived_timeframes: [1h, 4h, 1d]
+  chart_type: standard_candles
+  price_scale: linear
+  timezone: UTC
+  decision_data: completed_candles_only
+
+directional_regime:
+  source_timeframe: 4h
+  bullish:
+    all:
+      - return_20_gt_0
+      - ema_50_slope_5_gt_0
+      - external_structure_eq_bullish
+  bearish:
+    all:
+      - return_20_lt_0
+      - ema_50_slope_5_lt_0
+      - external_structure_eq_bearish
+  neutral:
+    action: no_trade
+  daily_veto:
+    bullish_blocked_when:
+      - daily_return_20_lt_0
+      - daily_external_structure_eq_bearish
+    bearish_blocked_when:
+      - daily_return_20_gt_0
+      - daily_external_structure_eq_bullish
+
+location:
+  primary_poi: qualified_1h_fvg
+  order_blocks_in_v1: excluded_until_separate_evidence
+  fvg_requirements:
+    - completed_1h_candles_only
+    - aligns_with_4h_regime
+    - created_on_or_immediately_after_confirmed_1h_directional_break
+    - active_or_partially_mitigated
+    - no_completed_1h_close_through_far_boundary
+    - exact_three_candle_provenance
+    - max_age_40_completed_1h_bars
+    - width_between_10th_and_90th_percentile_of_prior_200_1h_fvg_widths
+
+confirmation_sequence:
+  bullish:
+    - bullish_4h_regime
+    - qualified_bullish_1h_fvg
+    - price_enters_fvg
+    - price_trades_below_confirmed_local_or_internal_low
+    - 15m_candle_closes_back_above_liquidity_level
+    - within_8_completed_15m_candles_price_closes_above_relevant_internal_protected_high
+  bearish: symmetrical
+  displacement:
+    event_requirement: not_required_in_v1
+    stored_attributes: [has_displacement, body_atr_ratio, range_atr_ratio]
+
+entry:
+  method: close_of_completed_15m_structural_confirmation_candle
+  cancelled_when:
+    - confirmation_candle_incomplete
+    - 1h_fvg_invalid_before_entry
+    - confirmation_after_8_bar_deadline
+    - net_planned_R_below_1_5_after_costs
+    - market_source_or_chart_alignment_invalid
+    - setup_out_of_scope
+
+exit:
+  stop: sequence_sweep_extreme_plus_or_minus_buffer
+  target: nearest_active_1h_or_4h_external_structural_or_liquidity_level_in_trade_direction
+  expiry: 48_completed_15m_candles
+  exit_order:
+    - primary_target
+    - stop
+    - opposite_confirmed_15m_external_choch
+    - time_expiry
+
+validation:
+  required_baselines: [matched_random_entries, objective_trend_only, trend_plus_1h_fvg_touch, trend_plus_ordinary_pullback, reverse_direction]
+  required_cost_scenarios_bps_round_trip: [4, 10, 20]
+  promotion_gates_file: KILL_CRITERIA.yaml

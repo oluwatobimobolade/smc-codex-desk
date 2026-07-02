@@ -1,0 +1,409 @@
+{
+  "generated_at": "2026-06-25T14:09:47.155874+00:00",
+  "root": "/Users/tobimobolade/smc-codex-desk/case_library/local_first_lab/20260625",
+  "rows": 0,
+  "skipped": [
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20220624_0400_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20220908_2015_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20221124_1230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20230209_0430_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20230426_2045_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20230712_1300_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20230927_0515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20231212_2130_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20240227_1330_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20240514_0545_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20240729_2200_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20241014_1415_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20241230_0615_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20250316_2230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20250601_1445_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20250817_0700_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20251101_2315_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20260117_1515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20260404_0730_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BNBUSDT/BNBUSDT_20260619_2345_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20220624_0400_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20220908_2015_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20221124_1230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20230209_0430_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20230426_2045_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20230712_1300_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20230927_0515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20231212_2130_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20240227_1330_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20240514_0545_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20240729_2200_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20241014_1415_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20241230_0615_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20250316_2230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20250601_1445_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20250817_0700_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20251101_2315_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20260117_1515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20260404_0730_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/BTCUSDT/BTCUSDT_20260619_2345_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20220624_0400_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20220908_2015_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20221124_1230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20230209_0430_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20230426_2045_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20230712_1300_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20230927_0515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20231212_2130_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20240227_1330_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20240514_0545_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20240729_2200_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20241014_1415_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20241230_0615_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20250316_2230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20250601_1445_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20250817_0700_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20251101_2315_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20260117_1515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20260404_0730_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/ETHUSDT/ETHUSDT_20260619_2345_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20220624_0400_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20220908_2015_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20221124_1230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20230209_0430_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20230426_2045_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20230712_1300_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20230927_0515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20231212_2130_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20240227_1330_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20240514_0545_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20240729_2200_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20241014_1415_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20241230_0615_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20250316_2230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20250601_1445_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20250817_0700_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20251101_2315_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20260117_1515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20260404_0730_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/SOLUSDT/SOLUSDT_20260619_2345_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20220624_0400_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20220908_2015_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20221124_1230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20230209_0430_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20230426_2045_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20230712_1300_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20230927_0515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20231212_2130_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20240227_1330_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20240514_0545_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20240729_2200_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20241014_1415_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20241230_0615_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20250316_2230_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20250601_1445_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20250817_0700_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20251101_2315_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20260117_1515_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20260404_0730_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    },
+    {
+      "case_path": "case_library/local_first_lab/20260625/XRPUSDT/XRPUSDT_20260619_2345_perception_candidate/case.json",
+      "reason": "missing_or_unadjudicated_labels"
+    }
+  ],
+  "status": "no_adjudicated_rows",
+  "policy": "Dataset rows require adjudicated labels; reviewer drafts and engine weak labels alone are insufficient."
+}

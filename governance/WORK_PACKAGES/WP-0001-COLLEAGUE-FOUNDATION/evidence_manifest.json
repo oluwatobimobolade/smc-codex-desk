@@ -1,0 +1,12 @@
+{
+  "manifest_version": "1.0",
+  "work_package": "WP-0001-COLLEAGUE-FOUNDATION",
+  "evidence_files": [
+    "BASELINE_TEST_REPORT.json",
+    "BASELINE_EVIDENCE_MANIFEST.json",
+    "TEST_REPORT.json",
+    "handoff.md",
+    "final_report.md"
+  ],
+  "destructive_actions": []
+}

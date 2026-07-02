@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk.engine import analyze_dataframe, load_ohlcv_csv
+from smc_desk.evaluation.holdout_guard import DEFAULT_HOLDOUT_POLICY, assert_not_in_holdout
 from smc_desk.models import StructureEvent, Zone
 from smc_desk.mtf import build_mtf_snapshot, derive_htf_consensus_bias, precompute_htf_series
 from smc_desk.rules import load_rule_config
@@ -39,6 +40,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--displacement-timeout-bars", type=int, default=3)
     parser.add_argument("--retrace-timeout-bars", type=int, default=48)
     parser.add_argument("--confirmation-timeout-bars", type=int, default=24)
+    parser.add_argument("--holdout-policy", default=str(DEFAULT_HOLDOUT_POLICY))
+    parser.add_argument("--allow-holdout", action="store_true", help="Only for deliberate final-evaluation replay.")
     return parser.parse_args()
 
 
@@ -157,6 +160,15 @@ def replay(args: argparse.Namespace) -> dict[str, Any]:
     terminal_reasons: Counter[str] = Counter()
     attempts: set[str] = set()
     final_index = min(len(df) - 1, args.warmup_bars + args.max_bars - 1)
+    holdout_matches = assert_not_in_holdout(
+        start=pd.Timestamp(df["timestamp"].iloc[args.warmup_bars]),
+        end=pd.Timestamp(df["timestamp"].iloc[final_index]),
+        symbol=args.symbol,
+        action="state_replay",
+        policy_path=args.holdout_policy,
+        allow_holdout=args.allow_holdout,
+    )
+    state_observations: list[dict[str, Any]] = []
 
     for decision_index in range(args.warmup_bars, final_index + 1):
         history = df.iloc[: decision_index + 1].copy()
@@ -184,6 +196,19 @@ def replay(args: argparse.Namespace) -> dict[str, Any]:
         update = advance_setup(event, active, state_config)
         active = update.active_setup
         state_counts[update.display_state.value] += 1
+        bar = history.iloc[-1]
+        state_observations.append(
+            {
+                "decision_index": decision_index,
+                "decision_time": pd.Timestamp(bar["timestamp"]).isoformat(),
+                "display_state": update.display_state.value,
+                "active_attempt_id": active.attempt_id if active else None,
+                "active_direction": active.direction if active else None,
+                "htf_direction": direction,
+                "transition_count": len(update.transitions),
+                "transition_reasons": ";".join(transition.reason for transition in update.transitions),
+            }
+        )
         for transition in update.transitions:
             attempts.add(transition.attempt_id)
             row = asdict(transition)
@@ -195,6 +220,7 @@ def replay(args: argparse.Namespace) -> dict[str, Any]:
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "mode": "observability_only_no_trade_plans_or_fills",
+        "event_store_schema_version": "1.0",
         "symbol": args.symbol.upper(),
         "source_csv": str(Path(args.ohlcv).resolve()),
         "window": {
@@ -203,10 +229,20 @@ def replay(args: argparse.Namespace) -> dict[str, Any]:
             "bars_replayed": final_index - args.warmup_bars + 1,
         },
         "state_config": asdict(state_config),
+        "holdout_windows_touched": [
+            {
+                "name": window.name,
+                "start": window.start.isoformat(),
+                "end": None if window.end is None else window.end.isoformat(),
+                "reason": window.reason,
+            }
+            for window in holdout_matches
+        ],
         "attempts_started": len(attempts),
         "state_counts": dict(state_counts),
         "terminal_reasons": dict(terminal_reasons),
         "active_setup_at_end": asdict(active) if active else None,
+        "state_observations": state_observations,
         "transitions": transition_rows,
     }
 
@@ -217,6 +253,8 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "state_machine_replay.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    pd.DataFrame(result["state_observations"]).to_csv(output_dir / "state_observations.csv", index=False)
+    pd.DataFrame(result["transitions"]).to_csv(output_dir / "state_transitions.csv", index=False)
     print(f"Replayed {result['window']['bars_replayed']} closed bars for {result['symbol']}")
     print(f"Attempts: {result['attempts_started']} | state counts: {result['state_counts']}")
     print(f"Wrote {output_dir / 'state_machine_replay.json'}")

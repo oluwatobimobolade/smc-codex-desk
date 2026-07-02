@@ -1,0 +1,37 @@
+{
+  "work_package": "WP-0012-LEGACY-AUTHORITY-ISOLATION",
+  "date": "2026-06-26",
+  "status": "PASS",
+  "market_edge_claimed": false,
+  "execution_authority_changed": false,
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_market_colleague_case.py -q",
+      "result": "7 passed in 1.98s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_market_colleague_case.py tests/test_colleague_live_shadow.py tests/test_truth_boundary.py tests/test_event_ledger.py -q",
+      "result": "28 passed in 1.49s"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python tools/run_market_colleague_case.py --symbol BTCUSDT --decision-time 2026-06-19T23:45:00Z --output-dir analysis_runs/BTCUSDT_20260619_2345_wp0012_no_legacy_smoke --no-legacy-comparison --holdout-policy configs/holdout_policy.local_first.json",
+      "result": "built no-legacy package; action NO_SETUP; legacy disabled; legacy_trade_plan_used false"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "382 passed in 23.91s"
+    }
+  ],
+  "real_data_smoke_run": "analysis_runs/BTCUSDT_20260619_2345_wp0012_no_legacy_smoke/run_manifest.json",
+  "key_assertions": [
+    "colleague run succeeds with legacy comparison disabled",
+    "legacy analyze_dataframe is not called when include_legacy_comparison=false",
+    "decision.json records legacy_trade_plan_used=false",
+    "scenario_tree target_definition is not built from legacy trade_plan",
+    "authority_manifest legacy_engine=disabled for no-legacy runs"
+  ]
+}

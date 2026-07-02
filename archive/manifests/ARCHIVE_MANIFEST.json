@@ -1,0 +1,7 @@
+{
+  "manifest_version": "0.1",
+  "status": "not_started",
+  "created_at": "2026-06-25T15:00:00Z",
+  "policy": "archive-first; no source, strategy history, evidence, or failure files moved by WP-0001",
+  "moves": []
+}

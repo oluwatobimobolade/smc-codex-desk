@@ -1,0 +1,85 @@
+{
+  "work_package": "WP-0037-ACTIVE-RANGE-AI-SELF-REVIEW",
+  "timestamp_utc": "2026-06-29T17:33:00Z",
+  "verdict": "PASS",
+  "api_usage": "none",
+  "paper_execution": "disabled",
+  "live_execution": "disabled",
+  "capital_risk": 0,
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0037_active_range_authority.py tests/test_wp0035_ai_brain_integration.py tests/test_wp0036_prompt_operating_system.py -q",
+      "result": "33 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0037_active_range_authority.py tests/test_wp0036_prompt_operating_system.py -q",
+      "result": "17 passed"
+    },
+    {
+      "command": ".venv/bin/python -m compileall smc_desk/decision/active_range_resolver.py smc_desk/brain/smc_evidence_pack_builder.py smc_desk/brain/ai_smc_trader_brain.py smc_desk/brain/ai_smc_consistency_validator.py smc_desk/brain/prompt_system/prompt_builder.py tools/run_live_ai_smc_full_system.py",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols BTCUSDT SOLUSDT XAUUSD --output-root analysis_runs",
+      "result": "PASS/VALIDATED/WATCH_ONLY for BTCUSDT, SOLUSDT, XAUUSD; zero hard issues",
+      "run_dir": "/Users/tobimobolade/smc-codex-desk/analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_20260629_173159"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0034_ai_smc_trader_brain.py tests/test_wp0035_ai_brain_integration.py tests/test_wp0036_prompt_operating_system.py tests/test_wp0037_active_range_authority.py -q",
+      "result": "51 passed"
+    },
+    {
+      "command": "git diff --check -- touched WP-0037 files",
+      "result": "clean"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "642 passed, 1 skipped"
+    }
+  ],
+  "files_added": [
+    "smc_desk/decision/active_range_resolver.py",
+    "tests/test_wp0037_active_range_authority.py"
+  ],
+  "files_modified": [
+    "smc_desk/brain/smc_evidence_pack_builder.py",
+    "smc_desk/brain/ai_smc_trader_brain.py",
+    "smc_desk/brain/ai_smc_consistency_validator.py",
+    "smc_desk/brain/prompt_system/prompt_builder.py",
+    "tools/run_live_ai_smc_full_system.py",
+    "tests/test_wp0034_ai_smc_trader_brain.py",
+    "tests/test_wp0035_ai_brain_integration.py",
+    "tests/test_wp0036_prompt_operating_system.py"
+  ],
+  "live_selected_ranges": {
+    "BTCUSDT": {
+      "timeframe": "1h",
+      "direction": "bullish",
+      "range_low": 58850.0,
+      "range_high": 60758.3,
+      "width_atr": 3.4719,
+      "source": "protected_swing_pair"
+    },
+    "SOLUSDT": {
+      "timeframe": "1h",
+      "direction": "bullish",
+      "range_low": 72.09,
+      "range_high": 74.55,
+      "width_atr": 2.0271,
+      "source": "protected_swing_pair"
+    },
+    "XAUUSD": {
+      "timeframe": "1h",
+      "direction": "bearish",
+      "range_low": 4038.10009765625,
+      "range_high": 4090.39990234375,
+      "width_atr": 2.859,
+      "source": "protected_swing_pair"
+    }
+  },
+  "remaining_cautions": [
+    "Structural range correctness is improved, but market edge is not proven.",
+    "The live provider remains conservative and observe-only.",
+    "Validated sweep/displacement/active POI promotion is the next required improvement for more precise watch-state classification."
+  ]
+}

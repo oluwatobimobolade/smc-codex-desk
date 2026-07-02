@@ -1,0 +1,42 @@
+{
+  "work_package": "WP-0017C-BASELINE-RECONCILIATION",
+  "date": "2026-06-26",
+  "status": "PASS",
+  "market_edge_claimed": false,
+  "execution_authority_changed": false,
+  "git_head": "c54860a3b00a869d67a4b781b7fb9cae16c7b5c8",
+  "python_version": "Python 3.14.5",
+  "working_tree_status_lines": 98,
+  "commands": [
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_governance_foundation.py tests/test_live_ohlcv.py tests/test_live_candle_closure.py tests/test_event_ledger.py tests/stress_tests/test_C_minimal_pairs.py tests/stress_tests/test_E_event_ledger.py -q",
+      "result": "60 passed in 1.50s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/stress_tests/test_B1_causality.py tests/stress_tests/test_M_reproducibility.py tests/test_gauntlet_stage2.py tests/test_gauntlet_stage6.py tests/test_v2_perception.py tests/stress_tests/test_C_minimal_pairs.py -q",
+      "result": "10 passed in 18.53s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "469 passed, 1 skipped in 26.40s"
+    },
+    {
+      "command": ".venv/bin/python tools/check_governance_consistency.py",
+      "result": "GOVERNANCE CONSISTENCY: PASS"
+    },
+    {
+      "command": "strict YAML duplicate-key and JSON parse check",
+      "result": "strict_yaml_no_duplicates_ok 15 files, json_ok 32 files"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_tf_reconstruction.py tests/test_e2e_replay.py tests/stress_tests/test_M_reproducibility.py tests/stress_tests/test_N_operational_failure.py -q",
+      "result": "19 passed, 1 skipped in 1.57s"
+    }
+  ],
+  "primary_report": "governance/WORK_PACKAGES/WP-0017C-BASELINE-RECONCILIATION/final_report.md",
+  "secondary_report": "reports/current/BASELINE_RECONCILIATION_WP0017C_REPORT.md"
+}

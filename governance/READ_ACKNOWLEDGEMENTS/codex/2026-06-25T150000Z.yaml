@@ -1,0 +1,23 @@
+identity: Codex
+role: autonomous_coding_agent
+work_package: WP-0001-COLLEAGUE-FOUNDATION
+documents_read:
+  - governance/README_FIRST.md
+  - governance/CORE_MEMORY.md
+  - governance/CURRENT_STATE.yaml
+  - governance/NEXT_ACTIONS.yaml
+  - governance/AUTHORITY_MATRIX.yaml
+  - /Users/tobimobolade/Downloads/SMC Codex Desk.pdf
+  - /Users/tobimobolade/Downloads/Master Strategy Truth Audit.pdf
+release_understood: colleague-core-rc0 research foundation
+active_scope_understood: Binance USD-M BTCUSDT perpetual, canonical 15m, derived 1H/4H/1D, UTC, completed candles
+authority_limits_understood: no live execution, no predictive deployment, vision observe-only, engine labels not gold truth
+files_expected_to_change:
+  - governance/
+  - strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/
+  - reports/current/
+  - tests/
+uncertainties:
+  - Full repository authority audit is not yet complete.
+  - Perception ontology split requires careful migration because current engine imports depend on strategy/risk fields.
+timestamp: "2026-06-25T15:00:00Z"

@@ -3,8 +3,8 @@ project:
   product: Dual-Lens Market Colleague
   release: colleague-core-rc0
   status: research_foundation
-  current_date: "2026-06-26"
-  last_updated: "2026-06-26"
+  current_date: "2026-06-28"
+  last_updated: "2026-06-28"
 
 scope:
   certified_initial_scope:
@@ -48,6 +48,15 @@ authority:
   human_review_loop: live_shadow_review_queue_ready_wp0014
   ontology_authority_split: runtime_config_migrated_to_split_contracts_wp0016
   btcusdt_live_shadow_wp0016: no_valid_live_trade_strict_ohlcv_unavailable_visual_only
+  baseline_reconciliation: passed_wp0017c_current_local_baseline_469_passed_1_skipped
+  cognitive_correctness_layer: implemented_wp0018_observe_only_no_signal_authority
+  live_ohlcv_reliability: repaired_wp0019_retry_backoff_route_health_binance_primary
+  market_colleague_gauntlet: implemented_wp0020_end_to_end_csv_pass_visual_audit_available
+  professional_smc_interpretation: implemented_wp0021_core_external_internal_watch_state_repair_wp0021a_parent_subordination_verified
+  parent_subordination_authority_cleanup: passed_wp0021a_boundary_checker_green
+  smc_detector_rebuild: implemented_wp0022_stage_ab_internal_external_liquidity_sweep_ob_inducement
+  decision_quality_diagram_repair: passed_wp0027_protected_poi_inducement_story_chart_repair
+  smc_narrative_authority: passed_wp0029_single_official_model_watch_chart_trade_box_gating
   prediction: research_only
   paper_execution: disabled
   live_execution: disabled
@@ -151,6 +160,69 @@ next_gate:
       - analysis_runs/live_shadow_btcusdt_wp0016_20260626/summary.json
       - analysis_runs/live_shadow_btcusdt_wp0016_20260626_retry/summary.json
       - reports/current/BTCUSDT_LIVE_SHADOW_WP0016_REPORT.md
+  baseline_reconciliation_gate:
+    id: GATE-BASELINE-RECONCILIATION-WP0017C
+    description: Reconcile other-AI/V4 transfer claims against actual local code and restore green baseline.
+    status: passed_current_local_baseline
+    evidence:
+      - governance/WORK_PACKAGES/WP-0017C-BASELINE-RECONCILIATION/TEST_REPORT.json
+      - reports/current/BASELINE_RECONCILIATION_WP0017C_REPORT.md
+  cognitive_correctness_gate:
+    id: GATE-COGNITIVE-CORRECTNESS-WP0018
+    description: V2 cognitive pipeline refuses signals when market truth, regime, contradiction, or uncertainty gates fail.
+    status: passed_initial_slice_wp0018
+    evidence:
+      - governance/WORK_PACKAGES/WP-0018-COGNITIVE-CORRECTNESS-LAYER/TEST_REPORT.json
+      - reports/current/COGNITIVE_CORRECTNESS_WP0018_REPORT.md
+      - analysis_runs/BTCUSDT_brain_v2_wp0018_smoke/brain_v2_result.json
+  live_ohlcv_reliability_gate:
+    id: GATE-LIVE-OHLCV-RELIABILITY-WP0019
+    description: Live Binance OHLCV acquisition uses retry/backoff, route-health preflight, and excludes TradingView from canonical truth.
+    status: passed_initial_slice_wp0019
+    evidence:
+      - governance/WORK_PACKAGES/WP-0019-LIVE-OHLCV-RELIABILITY-REPAIR/TEST_REPORT.json
+      - governance/WORK_PACKAGES/WP-0019-LIVE-OHLCV-RELIABILITY-REPAIR/final_report.md
+  market_colleague_gauntlet_gate:
+    id: GATE-MARKET-COLLEAGUE-GAUNTLET-WP0020
+    description: CSV-backed end-to-end colleague gauntlet runs from verified OHLCV through charts, SMC annotations, cognitive refusal, visual reconciliation boundary, evidence-linked thesis, memory, and final report.
+    status: passed_visual_audit_available
+    evidence:
+      - analysis_runs/WP0020_MARKET_COLLEAGUE_GAUNTLET_BTCUSDT/11_final_report/gauntlet_report.json
+      - governance/WORK_PACKAGES/WP-0020-MARKET-COLLEAGUE-GAUNTLET/TEST_REPORT.json
+      - reports/current/MARKET_COLLEAGUE_GAUNTLET_WP0020_REPORT.md
+  professional_smc_interpretation_gate:
+    id: GATE-PROFESSIONAL-SMC-INTERPRETATION-WP0021
+    description: External/internal hierarchy, displacement quality, POI lifecycle, timeframe roles, watch states, and SMC thesis V2 prevent the BTCUSDT internal-retracement-as-HTF-conflict failure class.
+    status: passed_core_slice_wp0021
+    evidence:
+      - analysis_runs/WP0021_BTCUSDT_INTERPRETATION_REPLAY_20260627/06_cognitive/final_colleague_output.json
+      - governance/WORK_PACKAGES/WP-0021-PROFESSIONAL-SMC-INTERPRETATION-REPAIR/TEST_REPORT.json
+      - reports/current/PROFESSIONAL_SMC_INTERPRETATION_WP0021_REPORT.md
+  parent_subordination_authority_cleanup_gate:
+    id: GATE-PARENT-SUBORDINATION-AUTHORITY-WP0021A
+    description: HTF-to-LTF parent context prevents child timeframe retracements from erasing parent protected structure, exposes final_state beside final_action, and keeps legacy annotation analysis behind the comparison adapter.
+    status: passed_wp0021a
+    evidence:
+      - governance/WORK_PACKAGES/WP-0021A-PARENT-SUBORDINATION-AUTHORITY-CLEANUP/TEST_REPORT.json
+      - governance/WORK_PACKAGES/WP-0021A-PARENT-SUBORDINATION-AUTHORITY-CLEANUP/final_report.md
+      - reports/current/PARENT_SUBORDINATION_AUTHORITY_CLEANUP_WP0021A_REPORT.md
+  smc_detector_rebuild_gate:
+    id: GATE-SMC-DETECTOR-REBUILD-WP0022
+    description: PerceptionEngineV2 now emits real internal/external structure tracks, protected-swing CHoCH, swing prominence, liquidity levels, sweeps, order blocks, POI-grade FVGs, and inducement objects.
+    status: passed_wp0022_stage_ab
+    evidence:
+      - governance/WORK_PACKAGES/WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB/TEST_REPORT.json
+      - reports/current/SMC_DETECTOR_REBUILD_WP0022_REPORT.md
+      - analysis_runs/WP0022_BTCUSDT_DETECTOR_REBUILD_REPLAY_20260627/06_cognitive/final_colleague_output.json
+  smc_narrative_authority_gate:
+    id: GATE-SMC-NARRATIVE-AUTHORITY-WP0029
+    description: One final professional SMC authority selects official model/state, gates trade boxes, separates debug charts from official thesis, and writes SMC Thesis V5.
+    status: passed_local_smoke_visual_capture_skipped
+    evidence:
+      - governance/WORK_PACKAGES/WP-0029-SMC-NARRATIVE-AUTHORITY-REPAIR/TEST_REPORT.json
+      - governance/WORK_PACKAGES/WP-0029-SMC-NARRATIVE-AUTHORITY-REPAIR/final_report.md
+      - analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/BTCUSDT/06_cognitive/smc_narrative_authority.json
+      - analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/SOLUSDT/06_cognitive/smc_narrative_authority.json
 
 known_constraints:
   - No live capital execution.
@@ -163,3 +235,11 @@ known_constraints:
   - Do not treat reviewer drafts as gold labels before adjudication.
   - Do not claim strategy edge, paper execution, or live execution from runtime config migration.
   - Do not issue live signals from TradingView screenshots when verified closed OHLCV is unavailable.
+  - Treat older 389/405/426/453 test-count records as historical provenance unless superseded by the latest validation registry.
+  - Do not freeze a clean release package from a dirty working tree without recording the exact status and hashes.
+  - Do not treat WP-0020 TradingView screenshots as market truth; visual audit is available, but canonical OHLCV remains the Binance CSV source and TradingView candle timing was not DOM-verified.
+  - Do not treat WP-0021 professional SMC interpretation as predictive edge; it repairs market-story classification and watch-state language only.
+  - Do not treat WP-0021A parent-subordination as full SMC detector maturity; it fixes cross-timeframe authority and output clarity, while the base detector still needs WP-0022 Stage A/B structure primitives.
+  - Do not treat WP-0022 SMC detector primitives as strategy edge; Stage C/D decision wiring, target logic, calibration, and out-of-sample outcome testing remain separate.
+  - Do not treat WP-0027 diagram and decision-quality repairs as predictive edge; they improve interpretation, chart readability, refusal honesty, and outcome contracts only.
+  - Do not treat WP-0029 SMC Narrative Authority as predictive edge; it fixes official interpretation, chart authority, thesis sequencing, and trade-box gating only.

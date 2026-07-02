@@ -62,3 +62,27 @@ def run_legacy_comparison(
         "trade_plan_md": trade_plan_md,
         "mtf_snapshot": mtf_payload,
     }
+
+
+def run_legacy_annotation_analysis(
+    *,
+    df: pd.DataFrame,
+    symbol: str,
+    timeframe: str,
+    config: RuleConfig,
+    notes: str,
+) -> tuple[Any, pd.DataFrame]:
+    """Run the old analyzer strictly for chart annotation provenance.
+
+    WP-0020 still uses the legacy renderer's annotation vocabulary for visual
+    audit charts. This adapter keeps that dependency inside the sanctioned
+    legacy boundary so the gauntlet does not import the legacy engine directly.
+    The returned analysis is not decision authority.
+    """
+    return analyze_dataframe(
+        df=df,
+        symbol=symbol,
+        timeframe=timeframe,
+        config=config,
+        notes=notes,
+    )

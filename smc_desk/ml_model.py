@@ -146,7 +146,10 @@ def save_model(path: str | Path, model, scaler: StandardScaler,
         payload["l2"] = model.l2
     else:
         payload["model"] = "xgboost"
-        raw = model.model.save_raw(format="json")
-        payload["xgb_json"] = raw.decode("utf-8") if isinstance(raw, bytes) else raw
+        try:
+            raw = model.model.save_raw(raw_format="json")
+        except TypeError:
+            raw = model.model.save_raw(format="json")
+        payload["xgb_json"] = raw.decode("utf-8") if isinstance(raw, (bytes, bytearray)) else raw
 
     Path(path).write_text(json.dumps(payload, indent=2), encoding="utf-8")

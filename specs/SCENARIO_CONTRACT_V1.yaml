@@ -1,0 +1,29 @@
+contract_id: SCENARIO_CONTRACT_V1
+status: draft_contract
+authority: research_only
+
+required_fields:
+  scenario_id: string
+  direction: [bullish, bearish, neutral]
+  scope: [15m, 1h, 4h, 1d, mtf]
+  status: [candidate, watch, armed, triggered, paper_execute, invalidated, expired, resolved, abstain]
+  decision_time: timestamp
+  supporting_evidence: list
+  contradicting_evidence: list
+  required_confirmation_events: list
+  invalidation_events: list
+  target_definition: object
+  expiry_rule: object
+  current_action_state: [NO_SETUP, CONTEXT_FORMING, WATCH, ARMED, TRIGGERED, PAPER_EXECUTE, INVALIDATED, EXPIRED, RESOLVED, ABSTAIN]
+  probability: nullable_number
+  probability_status: [not_modelled, uncalibrated, calibrated, insufficient_support]
+  model_version: nullable_string
+  sample_support: object
+  uncertainty: object
+  alternative_scenarios: list
+
+hard_rules:
+  - no_scenario_without_confirmation_invalidation_and_expiry
+  - no_vague_prediction_without_falsifiable_event
+  - probability_must_not_be_implied_by_confidence
+  - scenario_must_trace_to_market_truth_or_operational_perception

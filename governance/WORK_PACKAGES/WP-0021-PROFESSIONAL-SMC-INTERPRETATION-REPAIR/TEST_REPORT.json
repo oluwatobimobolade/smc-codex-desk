@@ -1,0 +1,46 @@
+{
+  "work_package": "WP-0021-PROFESSIONAL-SMC-INTERPRETATION-REPAIR",
+  "date": "2026-06-27",
+  "status": "PASS_ACCEPTED_CORE_SLICE",
+  "authority_mode": "observe_only_professional_smc_interpretation",
+  "commands": [
+    {
+      "command": "PYTHONPATH=. .venv/bin/pytest tests/test_wp0021_professional_smc_interpretation.py -q",
+      "result": "4 passed in 1.56s"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/pytest tests/test_wp0021_professional_smc_interpretation.py tests/test_cognitive_correctness_layer.py tests/test_wp0020_market_colleague_gauntlet.py tests/test_smc_thesis_evidence_links.py -q",
+      "result": "16 passed in 1.38s"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python -m compileall -q smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python tools/run_wp0020_market_colleague_gauntlet.py --symbol BTCUSDT --mode csv --source analysis_runs/WP0020_LIVE_BTCUSDT_20260627_095711/01_verified_ohlcv/BTCUSDT_15m_verified_closed.csv --visual-mode skip --out analysis_runs/WP0021_BTCUSDT_INTERPRETATION_REPLAY_20260627",
+      "result": "PARTIAL_PASS due visual skipped; contradiction_result=ALIGN; watch_state=WATCH_BEARISH_RETRACE_TO_SUPPLY; final_colleague_action=NO_SIGNAL"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/pytest -q",
+      "result": "510 passed, 1 skipped in 88.79s"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python tools/check_governance_consistency.py",
+      "result": "GOVERNANCE CONSISTENCY: PASS"
+    }
+  ],
+  "btc_regression_run": "analysis_runs/WP0021_BTCUSDT_INTERPRETATION_REPLAY_20260627",
+  "btc_regression_result": {
+    "four_hour_external_bias": "bearish",
+    "one_hour_external_bias": "bearish",
+    "one_hour_internal_state": "bullish_retracement",
+    "fifteen_minute_role": "entry_confirmation",
+    "contradiction_result": "ALIGN",
+    "watch_state": "WATCH_BEARISH_RETRACE_TO_SUPPLY",
+    "final_action": "NO_SIGNAL"
+  },
+  "market_edge_claimed": false,
+  "paper_execution": "disabled",
+  "live_execution": "disabled",
+  "capital_risk": 0
+}

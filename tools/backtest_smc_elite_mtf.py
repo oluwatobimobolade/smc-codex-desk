@@ -25,6 +25,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from smc_desk.engine import analyze_dataframe, load_ohlcv_csv
+from smc_desk.evaluation.holdout_guard import DEFAULT_HOLDOUT_POLICY, assert_not_in_holdout
 from smc_desk.mtf import build_mtf_snapshot, derive_htf_consensus_bias, precompute_htf_series, snapshot_to_dict
 from smc_desk.rules import load_rule_config
 from tools.backtest_smc_elite import (
@@ -101,6 +102,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-date", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"), help="Folder date for the run.")
     parser.add_argument("--data-manifest", help="Optional path to a JSON file with data provenance to copy into data_manifest.json.")
     parser.add_argument("--hypothesis", default="", help="One-line hypothesis for this run, used in research_notes.")
+    parser.add_argument("--holdout-policy", default=str(DEFAULT_HOLDOUT_POLICY))
+    parser.add_argument("--allow-holdout", action="store_true", help="Only for deliberate final evaluation on a locked holdout.")
     parser.add_argument(
         "--include-watch-retrace",
         choices=["off", "on"],
@@ -140,6 +143,16 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
         last_decision_index = min(last_decision_index, args.warmup_bars + args.limit_bars)
     if args.max_decisions is not None and args.max_decisions <= 0:
         raise ValueError("--max-decisions must be positive")
+    if last_decision_index < args.warmup_bars:
+        raise ValueError("No valid decision bars after warmup/max-hold constraints.")
+    holdout_matches = assert_not_in_holdout(
+        start=pd.Timestamp(df.at[args.warmup_bars, "timestamp"]),
+        end=pd.Timestamp(df.at[last_decision_index, "timestamp"]),
+        symbol=args.symbol,
+        action="backtest",
+        policy_path=args.holdout_policy,
+        allow_holdout=args.allow_holdout,
+    )
 
     precomputed = precompute_htf_series(df)
 
@@ -383,6 +396,8 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
         "source_csv": str(Path(args.ohlcv).resolve()),
         "period_start": _timestamp(df, 0),
         "period_end": _timestamp(df, len(df) - 1),
+        "decision_period_start": _timestamp(df, args.warmup_bars),
+        "decision_period_end": _timestamp(df, last_decision_index),
         "bars": int(len(df)),
         "decision_bars": decision_bars,
         "warmup_bars": args.warmup_bars,
@@ -409,6 +424,15 @@ def run_mtf_backtest(args: argparse.Namespace) -> tuple[dict[str, Any], list[Sim
         "execute_count": sum(1 for d in decisions if d.verdict == "Execute"),
         "pass_count": sum(1 for d in decisions if d.verdict == "Pass"),
         "fusion_enabled": args.fusion,
+        "holdout_windows_touched": [
+            {
+                "name": window.name,
+                "start": window.start.isoformat(),
+                "end": None if window.end is None else window.end.isoformat(),
+                "reason": window.reason,
+            }
+            for window in holdout_matches
+        ],
     }
     if args.fusion:
         diagnostics["fusion_verdict_counts"] = dict(Counter(d.fusion_verdict for d in decisions).most_common())

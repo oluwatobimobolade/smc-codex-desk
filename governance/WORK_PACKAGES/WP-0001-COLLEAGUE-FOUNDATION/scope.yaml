@@ -1,0 +1,21 @@
+work_package: WP-0001-COLLEAGUE-FOUNDATION
+status: in_progress
+in_scope:
+  - governance foundation
+  - active strategy candidate contract
+  - baseline repository authority labels
+  - tests for authority claims
+out_of_scope:
+  - destructive cleanup
+  - strategy parameter optimization
+  - final strategy truth audit completion
+  - live execution
+  - forex support
+authority_mode: research_foundation
+frozen_assets_to_preserve:
+  - case_library/local_first_lab/20260625
+  - configs/holdout_policy.local_first.json
+  - data/ohlcv/binance_futures
+contamination_controls:
+  - do_not_tune_on_future_holdout_from_2026_07_01
+  - do_not_merge_50_case_pilot_with_100_case_lab

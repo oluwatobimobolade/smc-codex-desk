@@ -1,0 +1,46 @@
+{
+  "work_package": "WP-0002-COLLEAGUE-ORCHESTRATOR",
+  "date": "2026-06-25",
+  "primary_files": [
+    "smc_desk/colleague/__init__.py",
+    "smc_desk/colleague/request_contract.py",
+    "smc_desk/colleague/run_context.py",
+    "smc_desk/colleague/analysis_package.py",
+    "smc_desk/colleague/decision_summary.py",
+    "smc_desk/colleague/thesis_builder.py",
+    "smc_desk/colleague/orchestrator.py",
+    "tools/run_market_colleague_case.py",
+    "tests/test_market_colleague_case.py"
+  ],
+  "governance_files": [
+    "governance/CURRENT_STATE.yaml",
+    "governance/CAPABILITY_MATRIX.yaml",
+    "governance/NEXT_ACTIONS.yaml",
+    "governance/DOCUMENT_INDEX.yaml",
+    "governance/DECISION_LOG.md",
+    "governance/OPEN_RISKS.md",
+    "governance/FAILURE_REGISTER.md",
+    "evidence/VALIDATION_REGISTRY.json"
+  ],
+  "run_evidence": [
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/request.json",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/source_manifest.json",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/data_quality.json",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/decision_time.json",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/perception/objects.json",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/perception/mtf_state_graph.json",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/scenarios/decision.json",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/authority_manifest.json",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/reports/colleague_thesis.md",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/run_manifest.json"
+  ],
+  "visual_evidence": [
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/charts/clean/BTCUSDT_15m_clean.png",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/charts/clean/BTCUSDT_1h_clean.png",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/charts/clean/BTCUSDT_4h_clean.png",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/charts/clean/BTCUSDT_1d_clean.png",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/charts/mtf_mosaic.png",
+    "analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/charts/perception/BTCUSDT_15m_legacy_comparison_annotated.png"
+  ],
+  "validation": "governance/WORK_PACKAGES/WP-0002-COLLEAGUE-ORCHESTRATOR/TEST_REPORT.json"
+}

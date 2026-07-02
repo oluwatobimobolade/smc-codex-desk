@@ -1,0 +1,17 @@
+entry:
+  method: close_of_completed_15m_structural_confirmation_candle
+  fill_assumption: confirmation_close
+  direction_source: objective_4h_regime_with_daily_veto
+  location_source: qualified_1h_fvg
+  confirmation_source: 15m_sweep_rejection_then_internal_protected_break
+  cancellation:
+    - confirmation_candle_incomplete
+    - fvg_invalidated_before_confirmation
+    - confirmation_after_8_bar_deadline
+    - source_alignment_invalid
+    - net_planned_R_below_1_5_after_costs
+  forbidden:
+    - hindsight_retracement_entry
+    - midpoint_limit_fill_without_predefined_rule
+    - market_on_close_outside_confirmation_contract
+    - using_future_candles_to_select_entry

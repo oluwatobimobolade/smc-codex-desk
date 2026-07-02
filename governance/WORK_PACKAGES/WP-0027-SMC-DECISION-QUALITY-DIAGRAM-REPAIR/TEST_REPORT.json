@@ -1,0 +1,47 @@
+{
+  "work_package": "WP-0027-SMC-DECISION-QUALITY-DIAGRAM-REPAIR",
+  "date": "2026-06-28",
+  "status": "PASS_WITH_VISUAL_CAPTURE_SKIPPED_FOR_SMOKE",
+  "authority": {
+    "paper_execution": "disabled",
+    "live_execution": "disabled",
+    "capital_risk": 0,
+    "market_edge_claimed": false
+  },
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wait_for_retrace_to_ltf_supply.py tests/test_15m_choch_not_enough_without_poi_context.py tests/test_sol_topside_raid_then_bearish_displacement.py tests/test_outcome_contract_for_inducement_case.py tests/test_story_chart_shows_watch_state.py tests/test_active_poi_must_be_inside_protected_range.py tests/test_btc_rejects_far_supply_above_protected_high.py tests/test_story_chart_hides_internal_noise.py -q",
+      "result": "9 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_story_chart_shows_watch_state.py tests/test_wp0023_v6_story_renderer.py tests/test_story_chart_hides_internal_noise.py -q",
+      "result": "11 passed"
+    },
+    {
+      "command": ".venv/bin/python -m compileall smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python tools/check_governance_consistency.py",
+      "result": "GOVERNANCE CONSISTENCY: PASS"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "550 passed, 1 skipped in 80.86s"
+    },
+    {
+      "command": ".venv/bin/python tools/run_wp0020_market_colleague_gauntlet.py --symbol BTCUSDT --source data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv --out analysis_runs/WP0027_DECISION_QUALITY_DIAGRAM_REPAIR_20260628/BTCUSDT --mode csv --visual-mode skip",
+      "result": "PARTIAL_PASS; failed_layer=07_tradingview_visual; story_charts_generated=4; final_action=NO_SIGNAL"
+    },
+    {
+      "command": ".venv/bin/python tools/run_wp0020_market_colleague_gauntlet.py --symbol SOLUSDT --source data/ohlcv/binance_futures/SOLUSDT/SOLUSDT_15m_4year.csv --out analysis_runs/WP0027_DECISION_QUALITY_DIAGRAM_REPAIR_20260628/SOLUSDT --mode csv --visual-mode skip",
+      "result": "PARTIAL_PASS; failed_layer=07_tradingview_visual; story_charts_generated=4; final_action=NO_SIGNAL"
+    }
+  ],
+  "artifacts": {
+    "btc_gauntlet": "analysis_runs/WP0027_DECISION_QUALITY_DIAGRAM_REPAIR_20260628/BTCUSDT",
+    "sol_gauntlet": "analysis_runs/WP0027_DECISION_QUALITY_DIAGRAM_REPAIR_20260628/SOLUSDT",
+    "btc_story_charts": "analysis_runs/WP0027_DECISION_QUALITY_DIAGRAM_REPAIR_20260628/BTCUSDT/04a_story_charts",
+    "sol_story_charts": "analysis_runs/WP0027_DECISION_QUALITY_DIAGRAM_REPAIR_20260628/SOLUSDT/04a_story_charts"
+  }
+}

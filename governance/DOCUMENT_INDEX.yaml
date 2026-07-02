@@ -1,0 +1,132 @@
+documents:
+  governance:
+    - path: governance/README_FIRST.md
+      authority: required_first_read
+    - path: governance/CORE_MEMORY.md
+      authority: project_memory
+    - path: governance/CURRENT_STATE.yaml
+      authority: machine_readable_current_state
+    - path: governance/AUTHORITY_MATRIX.yaml
+      authority: authority_boundaries
+    - path: governance/CAPABILITY_MATRIX.yaml
+      authority: capability_status
+    - path: governance/DATASET_REGISTRY.yaml
+      authority: dataset_status
+  external_controlling_sources:
+    - path: /Users/tobimobolade/Downloads/SMC Codex Desk.pdf
+      authority: product_constitution
+    - path: /Users/tobimobolade/Downloads/Master Strategy Truth Audit.pdf
+      authority: strategy_and_repository_directive
+  active_strategy_candidate:
+    - path: strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/README.md
+      authority: active_research_candidate_summary
+    - path: strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/STRATEGY_CONTRACT.yaml
+      authority: active_strategy_contract
+  active_specs:
+    - path: specs/PERCEPTION_ONTOLOGY_V2.yaml
+      authority: perception_ontology_pending_split
+    - path: specs/STRATEGY_PROFILE_SWEEP_RETRACE_V1.yaml
+      authority: strategy_profile_contract
+    - path: specs/SCENARIO_CONTRACT_V1.yaml
+      authority: scenario_contract
+    - path: specs/DECISION_POLICY_V1.yaml
+      authority: decision_policy
+    - path: specs/LOCAL_FIRST_RESEARCH_LAB.md
+      authority: local_first_lab_workflow
+    - path: specs/PERCEPTION_DETECTOR_CONFIG_V2.yaml
+      authority: split_perception_detector_config_target
+    - path: specs/STRATEGY_EXECUTION_CONFIG_V1.yaml
+      authority: split_strategy_execution_config_target
+    - path: specs/AUTHORITY_CONFIG_SPLIT_WP0015.yaml
+      authority: ontology_strategy_split_manifest
+  transitional_tools:
+    - path: tools/run_market_colleague_case.py
+      authority: entrypoint_for_colleague_orchestrator
+    - path: smc_desk/colleague/
+      authority: market_colleague_analysis_run_orchestrator
+    - path: governance/WORK_PACKAGES/WP-0002-COLLEAGUE-ORCHESTRATOR/
+      authority: colleague_orchestrator_work_package
+    - path: governance/WORK_PACKAGES/WP-0003-TRADINGVIEW-ALIGNMENT/
+      authority: tradingview_alignment_contract_work_package
+    - path: governance/WORK_PACKAGES/WP-0004-MTF-SCENARIO-BRAIN/
+      authority: mtf_scenario_graph_work_package
+    - path: governance/WORK_PACKAGES/WP-0005-LIVE-WEBBRIDGE-ALIGNMENT/
+      authority: live_webbridge_alignment_work_package
+    - path: governance/WORK_PACKAGES/WP-0006-SEMANTIC-CANDIDATE-GRAPH/
+      authority: semantic_candidate_graph_work_package
+    - path: governance/WORK_PACKAGES/WP-0007-HISTORICAL-CASE-MEMORY/
+      authority: historical_case_memory_work_package
+    - path: governance/WORK_PACKAGES/WP-0008-OUTCOME-LEDGER/
+      authority: outcome_ledger_work_package
+    - path: governance/WORK_PACKAGES/WP-0009-LIVE-SHADOW-UNIVERSE/
+      authority: live_shadow_universe_work_package
+    - path: governance/WORK_PACKAGES/WP-0010-OUTCOME-RESOLUTION/
+      authority: outcome_resolution_work_package
+    - path: governance/WORK_PACKAGES/WP-0011-TRUTH-BOUNDARY-REPAIR/
+      authority: truth_boundary_repair_work_package
+    - path: governance/WORK_PACKAGES/WP-0012-LEGACY-AUTHORITY-ISOLATION/
+      authority: legacy_authority_isolation_work_package
+    - path: governance/WORK_PACKAGES/WP-0013-RESOLVED-CASE-COHORT/
+      authority: resolved_case_cohort_work_package
+    - path: governance/WORK_PACKAGES/WP-0014-LIVE-SHADOW-HUMAN-REVIEW-LOOP/
+      authority: live_shadow_human_review_work_package
+    - path: governance/WORK_PACKAGES/WP-0015-ONTOLOGY-AUTHORITY-SPLIT/
+      authority: ontology_authority_split_work_package
+    - path: governance/WORK_PACKAGES/WP-0016-RUNTIME-CONFIG-SPLIT/
+      authority: runtime_config_split_work_package
+    - path: governance/WORK_PACKAGES/WP-0017C-BASELINE-RECONCILIATION/
+      authority: baseline_reconciliation_work_package
+    - path: tools/run_live_shadow_universe.py
+      authority: multi_symbol_live_shadow_entrypoint
+    - path: tools/resolve_colleague_outcome.py
+      authority: outcome_resolution_entrypoint
+    - path: analysis_runs/BTCUSDT_20260619_2345_wp0002_smoke/
+      authority: real_data_smoke_evidence
+    - path: analysis_runs/BTCUSDT_20260619_2345_wp0003_wp0004_smoke/
+      authority: alignment_and_scenario_smoke_evidence
+    - path: analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/
+      authority: live_tradingview_aligned_colleague_evidence
+    - path: analysis_runs/live_shadow_universe_20260625_eth_sol_xrp_bnb/
+      authority: multi_symbol_live_shadow_evidence
+    - path: analysis_runs/BTCUSDT_20260618_1200_outcome_resolution_smoke/
+      authority: historical_outcome_resolution_evidence
+    - path: reports/current/TRUTH_BOUNDARY_REPAIR_WP0011_REPORT.md
+      authority: truth_boundary_repair_report
+    - path: reports/current/LEGACY_AUTHORITY_ISOLATION_WP0012_REPORT.md
+      authority: legacy_authority_isolation_report
+    - path: reports/current/RESOLVED_CASE_COHORT_WP0013_REPORT.md
+      authority: resolved_case_cohort_report
+    - path: reports/current/LIVE_SHADOW_REVIEW_LOOP_WP0014_REPORT.md
+      authority: live_shadow_review_loop_report
+    - path: reports/current/ONTOLOGY_AUTHORITY_SPLIT_WP0015_REPORT.md
+      authority: ontology_authority_split_report
+    - path: reports/current/ONTOLOGY_AUTHORITY_AUDIT_WP0015.json
+      authority: ontology_authority_audit_machine_readable
+    - path: reports/current/RUNTIME_CONFIG_SPLIT_WP0016.md
+      authority: runtime_config_split_report
+    - path: reports/current/RUNTIME_CONFIG_SPLIT_WP0016.json
+      authority: runtime_config_split_machine_readable_audit
+    - path: reports/current/BTCUSDT_LIVE_SHADOW_WP0016_REPORT.md
+      authority: btcusdt_live_shadow_failure_report
+    - path: reports/current/BASELINE_RECONCILIATION_WP0017C_REPORT.md
+      authority: current_local_baseline_reconciliation_report
+    - path: tools/run_wp0020_market_colleague_gauntlet.py
+      authority: wp0020_market_colleague_gauntlet_entrypoint
+    - path: smc_desk/colleague/wp0020_gauntlet.py
+      authority: wp0020_market_colleague_gauntlet_orchestrator
+    - path: governance/WORK_PACKAGES/WP-0020-MARKET-COLLEAGUE-GAUNTLET/
+      authority: wp0020_market_colleague_gauntlet_work_package
+    - path: reports/current/MARKET_COLLEAGUE_GAUNTLET_WP0020_REPORT.md
+      authority: wp0020_market_colleague_gauntlet_report
+    - path: analysis_runs/WP0020_MARKET_COLLEAGUE_GAUNTLET_BTCUSDT/
+      authority: wp0020_btcusdt_csv_gauntlet_evidence
+    - path: analysis_runs/BTCUSDT_20260619_2345_wp0012_no_legacy_smoke/
+      authority: no_legacy_colleague_smoke_evidence
+    - path: analysis_runs/resolved_case_cohort_wp0013_20260626/
+      authority: resolved_case_cohort_evidence
+    - path: review_queues/live_shadow_wp0014_20260626/
+      authority: live_shadow_human_review_queue
+    - path: analysis_runs/live_btcusdt_wp0016_20260626/visual_only/screenshots/
+      authority: btcusdt_visual_only_kimi_screenshots_not_ohlcv_authority
+    - path: tools/smc_webbridge_analyst.py
+      authority: transitional_tradingview_capture_tool

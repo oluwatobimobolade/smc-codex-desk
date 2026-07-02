@@ -1,0 +1,26 @@
+{
+  "manifest_version": "1.0",
+  "work_package": "WP-0001-COLLEAGUE-FOUNDATION",
+  "created_at": "2026-06-25T15:00:00Z",
+  "controlling_sources": [
+    "/Users/tobimobolade/Downloads/SMC Codex Desk.pdf",
+    "/Users/tobimobolade/Downloads/Master Strategy Truth Audit.pdf"
+  ],
+  "extracted_text": [
+    "tmp/pdfs/smc_codex_desk.txt",
+    "tmp/pdfs/master_strategy_truth_audit.txt"
+  ],
+  "primary_outputs": [
+    "governance/README_FIRST.md",
+    "governance/CORE_MEMORY.md",
+    "governance/CURRENT_STATE.yaml",
+    "governance/CAPABILITY_MATRIX.yaml",
+    "governance/DATASET_REGISTRY.yaml",
+    "governance/AUTHORITY_MATRIX.yaml",
+    "governance/STRATEGY_TRUTH_AUDIT.md",
+    "governance/STRATEGY_EVIDENCE_REGISTRY.yaml",
+    "strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/STRATEGY_CONTRACT.yaml",
+    "reports/current/REPOSITORY_AUTHORITY_AUDIT.md"
+  ],
+  "validation": "governance/WORK_PACKAGES/WP-0001-COLLEAGUE-FOUNDATION/TEST_REPORT.json"
+}

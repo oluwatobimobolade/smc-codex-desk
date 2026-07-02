@@ -1,0 +1,51 @@
+{
+  "work_package": "WP-0035-AI-BRAIN-PIPELINE-INTEGRATION",
+  "timestamp_utc": "2026-06-29T14:51:56Z",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0035_ai_brain_integration.py -q",
+      "result": "16 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0034_ai_smc_trader_brain.py tests/test_wp0035_ai_brain_integration.py -q",
+      "result": "34 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "625 passed, 1 skipped"
+    },
+    {
+      "command": "git diff --check -- smc_desk/brain smc_desk/colleague/orchestrator_v3.py smc_desk/data/historical_backfill.py smc_desk/eval smc_desk/gauntlet tests/test_wp0035_ai_brain_integration.py smc_desk/rendering/smc_trader_annotation_renderer.py",
+      "result": "clean"
+    }
+  ],
+  "files_added": [
+    "smc_desk/brain/llm_provider.py",
+    "smc_desk/brain/providers/__init__.py",
+    "smc_desk/brain/providers/manual_provider.py",
+    "smc_desk/brain/providers/openai_provider.py",
+    "smc_desk/brain/providers/claude_provider.py",
+    "smc_desk/brain/providers/kimi_provider.py",
+    "smc_desk/colleague/orchestrator_v3.py",
+    "smc_desk/gauntlet/__init__.py",
+    "smc_desk/gauntlet/wp0035_ai_brain_gauntlet.py",
+    "smc_desk/data/historical_backfill.py",
+    "smc_desk/eval/__init__.py",
+    "smc_desk/eval/gold_set_loader.py",
+    "smc_desk/eval/ai_smc_gold_evaluator.py",
+    "tests/test_wp0035_ai_brain_integration.py"
+  ],
+  "files_modified": [
+    "smc_desk/brain/__init__.py",
+    "smc_desk/brain/ai_smc_consistency_validator.py",
+    "smc_desk/rendering/smc_trader_annotation_renderer.py"
+  ],
+  "verdict": "PASS",
+  "api_usage": "none",
+  "execution_authority": "disabled",
+  "remaining_cautions": [
+    "Real provider can be injected but was not called in tests.",
+    "Stub provider runs are marked NOT_REAL_AI_REASONING and cannot produce PASS.",
+    "Gold-set perception quality remains unproven until adjudicated real cases are loaded."
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "work_package": "WP-0024-CONTRACT-TRUTH-REPAIR",
+  "status": "PASS_ACCEPTED",
+  "date": "2026-06-27",
+  "authority": {
+    "market_edge_claimed": false,
+    "paper_execution": "disabled",
+    "live_execution": "disabled",
+    "capital_risk": 0
+  },
+  "checks": [
+    {
+      "name": "focused_contract_tests",
+      "command": ".venv/bin/python -m pytest tests/test_wp0020_market_colleague_gauntlet.py tests/test_wp0023_v6_story_renderer.py tests/decision/test_btc_supply_retrace_regression.py tests/test_cognitive_stress_false_confidence.py tests/test_chart_recreation_integrity.py tests/test_smc_annotation_correctness.py -q",
+      "result": "22 passed in 2.99s"
+    },
+    {
+      "name": "visual_reconciliation_boundary",
+      "command": ".venv/bin/python -m pytest tests/test_visual_reconciliation_boundary.py -q",
+      "result": "2 passed in 0.98s"
+    },
+    {
+      "name": "governance_consistency",
+      "command": ".venv/bin/python tools/check_governance_consistency.py",
+      "result": "GOVERNANCE CONSISTENCY: PASS"
+    },
+    {
+      "name": "full_pytest",
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "532 passed, 1 skipped in 86.30s"
+    },
+    {
+      "name": "btc_gauntlet_contract_package",
+      "command": ".venv/bin/python tools/run_wp0020_market_colleague_gauntlet.py --symbol BTCUSDT --source data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv --out analysis_runs/WP0024_BTCUSDT_CONTRACT_REPAIR_20260627 --mode csv --visual-mode skip",
+      "result": {
+        "status": "PARTIAL_PASS",
+        "failed_layer": "07_tradingview_visual",
+        "clean_charts_generated": 4,
+        "legacy_debug_charts_generated": 4,
+        "decision_authority_story_charts_generated": 4,
+        "research_event_count": 2264,
+        "pending_outcome_contract": "pending_observation"
+      }
+    }
+  ]
+}

@@ -1,14 +1,61 @@
 {
   "status": "PASS",
   "suites": {
-    "unittest": {
-      "exit_code": 0
-    },
-    "pytest": {
-      "exit_code": 0
-    },
-    "stress": {
-      "exit_code": 0
-    }
+    "unittest": {"exit_code": 0},
+    "pytest": {"exit_code": 0},
+    "stress": {"exit_code": 0}
+  },
+  "latest_validation": {
+    "id": "WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB",
+    "date": "2026-06-27",
+    "authority_mode": "observe_only_detector_research",
+    "commands": [
+      {
+        "command": "PYTHONPATH=. .venv/bin/pytest tests/test_wp0022_smc_detector_rebuild.py -q",
+        "result": "7 passed"
+      },
+      {
+        "command": "PYTHONPATH=. .venv/bin/pytest tests/test_wp0022_smc_detector_rebuild.py tests/test_gauntlet_stage3.py tests/test_gauntlet_stage5.py tests/stress_tests/test_C_minimal_pairs.py tests/stress_tests/test_D_swing_structure.py tests/test_v2_perception.py tests/test_perception_bridge.py tests/test_event_ledger.py tests/test_wp0021_professional_smc_interpretation.py tests/decision/test_btc_supply_retrace_regression.py tests/test_wp0020_market_colleague_gauntlet.py -q",
+        "result": "55 passed in 1.37s"
+      },
+      {
+        "command": "PYTHONPATH=. .venv/bin/python -m compileall -q smc_desk/perception smc_desk/perception_bridge.py tests/test_wp0022_smc_detector_rebuild.py",
+        "result": "passed"
+      },
+      {
+        "command": "PYTHONPATH=. .venv/bin/python tools/run_wp0020_market_colleague_gauntlet.py --symbol BTCUSDT --mode csv --source analysis_runs/WP0020_LIVE_BTCUSDT_20260627_095711/01_verified_ohlcv/BTCUSDT_15m_verified_closed.csv --visual-mode skip --out analysis_runs/WP0022_BTCUSDT_DETECTOR_REBUILD_REPLAY_20260627",
+        "result": "PARTIAL_PASS due visual skipped; contradiction_result=ALIGN; final_state=WATCH_BEARISH_RETRACE_TO_SUPPLY; final_colleague_action=NO_SIGNAL"
+      },
+      {
+        "command": "PYTHONPATH=. .venv/bin/pytest -q",
+        "result": "523 passed, 1 skipped in 86.34s"
+      },
+      {
+        "command": "PYTHONPATH=. .venv/bin/python tools/check_governance_consistency.py",
+        "result": "GOVERNANCE CONSISTENCY: PASS"
+      },
+      {
+        "command": "PYTHONPATH=. .venv/bin/python tools/check_authority_boundaries.py",
+        "result": "AUTHORITY BOUNDARY CHECK: PASS"
+      },
+      {
+        "command": "PYTHONPATH=. .venv/bin/python - <<'PY' ... parse evidence/VALIDATION_REGISTRY.json governance/WORK_PACKAGES/WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB/TEST_REPORT.json governance/CURRENT_STATE.yaml governance/NEXT_ACTIONS.yaml",
+        "result": "PARSE PASS for validation registry, WP-0022 test report, current state, and next actions"
+      }
+    ],
+    "report": "governance/WORK_PACKAGES/WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB/TEST_REPORT.json",
+    "secondary_reports": [
+      "governance/WORK_PACKAGES/WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB/final_report.md",
+      "reports/current/SMC_DETECTOR_REBUILD_WP0022_REPORT.md",
+      "analysis_runs/WP0022_BTCUSDT_DETECTOR_REBUILD_REPLAY_20260627/11_final_report/gauntlet_report.json",
+      "analysis_runs/WP0022_BTCUSDT_DETECTOR_REBUILD_REPLAY_20260627/06_cognitive/final_colleague_output.json"
+    ],
+    "real_data_smoke_run": "saved_live_btcusdt_csv_detector_rebuild_replay_visual_skipped",
+    "previous_baseline": "WP-0021A-PARENT-SUBORDINATION-AUTHORITY-CLEANUP (516 passed, 1 skipped)",
+    "git_head": "c54860a3b00a869d67a4b781b7fb9cae16c7b5c8",
+    "python_version": "Python 3.14.5",
+    "working_tree_status_lines": 134,
+    "market_edge_claimed": false,
+    "execution_authority_changed": false
   }
 }

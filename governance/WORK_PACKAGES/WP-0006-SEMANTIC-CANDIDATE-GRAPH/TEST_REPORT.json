@@ -1,0 +1,23 @@
+{
+  "work_package": "WP-0006-SEMANTIC-CANDIDATE-GRAPH",
+  "date": "2026-06-25",
+  "status": "PASS_INITIAL_SLICE",
+  "evidence": {
+    "code": "smc_desk/colleague/smc_semantics.py",
+    "graph": "analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/perception/mtf_state_graph.json"
+  },
+  "observed": {
+    "graph_version": "0.3",
+    "semantic_authority": "candidate_semantics_not_gold_truth",
+    "semantic_counts": {
+      "liquidity_pool_candidate": 13,
+      "order_block_proxy": 4,
+      "breaker_candidate": 2,
+      "inducement_candidate": 1
+    }
+  },
+  "validation": {
+    "focused": "12 passed in 1.38s",
+    "full_pytest": "354 passed in 25.18s"
+  }
+}

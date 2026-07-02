@@ -18,6 +18,8 @@ use, ``atr_pct_rank`` must come from a *trailing* window, never the full history
 """
 from __future__ import annotations
 
+import pandas as pd
+import numpy as np
 from dataclasses import dataclass
 
 # Regime labels
@@ -65,3 +67,63 @@ def vol_band(atr_pct_rank: float | None, cfg: RegimeConfig = RegimeConfig()) -> 
 def is_favorable(regime: str) -> bool:
     """The thesis 'good' regime: strong trend, setup aligned with HTF bias."""
     return regime == TREND_ALIGNED
+
+
+def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
+    """Compute ATR (Average True Range) for volatility normalization."""
+    high = df["high"]
+    low = df["low"]
+    close = df["close"]
+    tr1 = high - low
+    tr2 = (high - close.shift()).abs()
+    tr3 = (low - close.shift()).abs()
+    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+    return tr.rolling(window=period).mean()
+
+
+def compute_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
+    """Compute ADX (Average Directional Index) for trend strength."""
+    high = df["high"]
+    low = df["low"]
+    close = df["close"]
+
+    plus_dm = high.diff()
+    minus_dm = -low.diff()
+    plus_dm = plus_dm.where((plus_dm > minus_dm) & (plus_dm > 0), 0.0)
+    minus_dm = minus_dm.where((minus_dm > plus_dm) & (minus_dm > 0), 0.0)
+
+    tr1 = high - low
+    tr2 = (high - close.shift()).abs()
+    tr3 = (low - close.shift()).abs()
+    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+
+    atr = tr.rolling(window=period).mean()
+    plus_di = 100 * (plus_dm.rolling(window=period).mean() / atr)
+    minus_di = 100 * (minus_dm.rolling(window=period).mean() / atr)
+
+    dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di)
+    adx = dx.rolling(window=period).mean()
+    return adx
+
+
+def compute_regime_series(df: pd.DataFrame, period: int = 14, lookback: int = 500) -> pd.DataFrame:
+    """
+    Compute rolling ATR, ADX, and their rolling percentile ranks.
+    atr_pct_rank is computed using a rolling rank over `lookback` periods.
+    """
+    if df.empty:
+        return pd.DataFrame(columns=["atr", "adx", "atr_pct_rank", "adx_pct_rank"])
+
+    atr = compute_atr(df, period=period)
+    adx = compute_adx(df, period=period)
+
+    # Pandas rolling.rank(pct=True) calculates the percentile rank in [0, 1]
+    atr_pct_rank = atr.rolling(window=lookback, min_periods=period).rank(pct=True)
+    adx_pct_rank = adx.rolling(window=lookback, min_periods=period).rank(pct=True)
+
+    return pd.DataFrame({
+        "atr": atr,
+        "adx": adx,
+        "atr_pct_rank": atr_pct_rank,
+        "adx_pct_rank": adx_pct_rank
+    })

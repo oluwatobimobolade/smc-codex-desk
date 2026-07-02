@@ -14,3 +14,12 @@ class ProviderRegistry:
         return self._providers[name]
 
 registry = ProviderRegistry()
+
+try:
+    from smc_desk.vision.claude_provider import ClaudeVisionProvider
+    import os
+    # Only register if we have a key available
+    if "ANTHROPIC_API_KEY" in os.environ:
+        registry.register("claude", ClaudeVisionProvider())
+except ImportError:
+    pass

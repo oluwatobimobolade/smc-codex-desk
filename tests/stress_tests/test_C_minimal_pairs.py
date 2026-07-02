@@ -60,7 +60,24 @@ def test_c2_0_gap_vs_fvg():
     assert snap_fvg.fvgs[0].price_high == 111
 
 def test_c3_partial_vs_full_mitigation():
-    pass
+    t0 = datetime(2026, 1, 1, tzinfo=UTC)
+    c1 = create_candle(t0, t0 + timedelta(minutes=15), 100, 100, 95, 98)
+    c2 = create_candle(t0 + timedelta(minutes=15), t0 + timedelta(minutes=30), 101, 112, 101, 111)
+    c3 = create_candle(t0 + timedelta(minutes=30), t0 + timedelta(minutes=45), 111, 115, 110, 114)
+    # This candle both trades through the full bullish FVG and body-closes beyond it.
+    # It should terminally invalidate the FVG once, not first consume it and then
+    # attempt a second terminal transition.
+    c4 = create_candle(t0 + timedelta(minutes=45), t0 + timedelta(minutes=60), 114, 116, 95, 98)
+
+    snapshot = PerceptionEngineV2().analyze([c1, c2, c3, c4], c4.close_time)
+
+    assert len(snapshot.fvgs) == 1
+    fvg = snapshot.fvgs[0]
+    assert fvg.mitigation_percent == 100.0
+    assert fvg.terminal_reason == "invalidated"
+    event_types = [event.event_type for event in fvg.events]
+    assert "OBJECT_INVALIDATED" in event_types
+    assert "OBJECT_FULLY_MITIGATED" not in event_types
 
 def test_c4_internal_vs_external_break():
     pass

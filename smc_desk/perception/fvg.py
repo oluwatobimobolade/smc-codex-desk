@@ -4,12 +4,12 @@ from decimal import Decimal
 from typing import List, Optional
 
 from smc_desk.data.schemas import Candle
-from smc_desk.perception.ontology import Direction, SMCObjectBase, FairValueGapEvidence, MitigationStatus
+from smc_desk.perception.ontology import Direction, FairValueGapEvidence, FairValueGapObject, MitigationStatus
 from smc_desk.perception.lifecycle import EventType, SMCEvent, apply_event
 
 
-class FairValueGapObject(SMCObjectBase):
-    evidence: FairValueGapEvidence
+def _status_value(value):
+    return getattr(value, "value", value)
 
 
 class FVGDetector:
@@ -43,9 +43,11 @@ class FVGDetector:
                 gap_size = upper_bound - lower_bound
                 gap_bps = float(gap_size / c2.close * 10000)
 
-                # Enforce minimum gap threshold from ontology.
-                if gap_bps < self.minimum_gap_bps:
+                # Imbalances must be > 0.0 to be a raw FVG
+                if gap_bps <= 0:
                     continue
+
+                is_qualified = gap_bps >= self.minimum_gap_bps
                 
                 evidence = FairValueGapEvidence(
                     gap_size_ticks=int(gap_size / Decimal("0.01")) if gap_size > 0 else 0,
@@ -74,9 +76,9 @@ class FVGDetector:
                     direction=direction,
                     price_low=lower_bound,
                     price_high=upper_bound,
-                    evidence=evidence
+                    evidence=evidence,
+                    metadata={"is_qualified": is_qualified, "is_raw": True}
                 )
-                
                 creation_event = SMCEvent(
                     event_type=EventType.OBJECT_CREATED,
                     timestamp=c3.open_time,
@@ -103,7 +105,9 @@ class FVGDetector:
                 
                 fvgs.append(fvg)
                 
-        # Process mitigation lifecycle + first-touch detection
+        # Process mitigation lifecycle + first-touch detection.
+        # Invalidation by body close wins before full/partial mitigation because
+        # the object can only enter one terminal state.
         for fvg in fvgs:
             first_touch_recorded = False
             for c in candles:
@@ -111,54 +115,34 @@ class FVGDetector:
                     continue
                 if c.close_time > current_time:
                     break
-                
-                if fvg.mitigation_status == MitigationStatus.FULL:
+                if _status_value(fvg.mitigation_status) == MitigationStatus.FULL.value or _status_value(fvg.activity_status) == "terminal":
                     continue
 
                 if fvg.direction == Direction.BULLISH:
                     touched = c.low <= fvg.price_high
-                    if touched:
-                        # First-touch event (recorded once, before any mitigation)
-                        if not first_touch_recorded:
-                            first_touch_recorded = True
-                            apply_event(
-                                fvg,
-                                SMCEvent(
-                                    event_type=EventType.OBJECT_FIRST_TOUCHED,
-                                    timestamp=c.close_time,
-                                    trigger_candle_id=f"c_{c.open_time.timestamp()}",
-                                    details=f"Bullish FVG first touched by low {c.low} at {c.close_time}",
-                                ),
-                            )
-                            # Compute mitigation percentage
-                            gap_size = float(fvg.price_high - fvg.price_low)
-                            penetration = float(fvg.price_high - c.low)
-                            fvg.mitigation_percent = min(100.0, max(0.0, (penetration / gap_size * 100) if gap_size > 0 else 100.0))
-                            fvg.mitigated_price = c.low
+                    if not touched:
+                        continue
 
-                    if touched and c.low <= fvg.price_low:
+                    if not first_touch_recorded:
+                        first_touch_recorded = True
                         apply_event(
                             fvg,
                             SMCEvent(
-                                event_type=EventType.OBJECT_FULLY_MITIGATED,
+                                event_type=EventType.OBJECT_FIRST_TOUCHED,
                                 timestamp=c.close_time,
                                 trigger_candle_id=f"c_{c.open_time.timestamp()}",
-                                details="Bullish FVG fully mitigated",
-                            ),
-                        )
-                        fvg.mitigation_percent = 100.0
-                    elif touched:
-                        apply_event(
-                            fvg,
-                            SMCEvent(
-                                event_type=EventType.OBJECT_PARTIALLY_MITIGATED,
-                                timestamp=c.close_time,
-                                trigger_candle_id=f"c_{c.open_time.timestamp()}",
-                                details=f"Bullish FVG partially mitigated ({fvg.mitigation_percent:.1f}%)",
+                                details=f"Bullish FVG first touched by low {c.low} at {c.close_time}",
                             ),
                         )
 
-                    # Invalidation: body closes below the entire FVG
+                    gap_size = float(fvg.price_high - fvg.price_low)
+                    penetration = float(fvg.price_high - c.low)
+                    fvg.mitigation_percent = min(
+                        100.0,
+                        max(0.0, (penetration / gap_size * 100) if gap_size > 0 else 100.0),
+                    )
+                    fvg.mitigated_price = c.low
+
                     if c.close < fvg.price_low:
                         apply_event(
                             fvg,
@@ -170,49 +154,56 @@ class FVGDetector:
                             ),
                         )
                         fvg.mitigation_percent = 100.0
+                        continue
 
-                elif fvg.direction == Direction.BEARISH:
-                    touched = c.high >= fvg.price_low
-                    if touched:
-                        if not first_touch_recorded:
-                            first_touch_recorded = True
-                            apply_event(
-                                fvg,
-                                SMCEvent(
-                                    event_type=EventType.OBJECT_FIRST_TOUCHED,
-                                    timestamp=c.close_time,
-                                    trigger_candle_id=f"c_{c.open_time.timestamp()}",
-                                    details=f"Bearish FVG first touched by high {c.high} at {c.close_time}",
-                                ),
-                            )
-                            gap_size = float(fvg.price_low - fvg.price_high)
-                            penetration = float(c.high - fvg.price_low)
-                            fvg.mitigation_percent = min(100.0, max(0.0, (penetration / gap_size * 100) if gap_size > 0 else 100.0))
-                            fvg.mitigated_price = c.high
-
-                    if touched and c.high >= fvg.price_high:
+                    if c.low <= fvg.price_low:
                         apply_event(
                             fvg,
                             SMCEvent(
                                 event_type=EventType.OBJECT_FULLY_MITIGATED,
                                 timestamp=c.close_time,
                                 trigger_candle_id=f"c_{c.open_time.timestamp()}",
-                                details="Bearish FVG fully mitigated",
+                                details="Bullish FVG fully mitigated",
                             ),
                         )
                         fvg.mitigation_percent = 100.0
-                    elif touched:
+                        continue
+
+                    apply_event(
+                        fvg,
+                        SMCEvent(
+                            event_type=EventType.OBJECT_PARTIALLY_MITIGATED,
+                            timestamp=c.close_time,
+                            trigger_candle_id=f"c_{c.open_time.timestamp()}",
+                            details=f"Bullish FVG partially mitigated ({fvg.mitigation_percent:.1f}%)",
+                        ),
+                    )
+
+                elif fvg.direction == Direction.BEARISH:
+                    touched = c.high >= fvg.price_low
+                    if not touched:
+                        continue
+
+                    if not first_touch_recorded:
+                        first_touch_recorded = True
                         apply_event(
                             fvg,
                             SMCEvent(
-                                event_type=EventType.OBJECT_PARTIALLY_MITIGATED,
+                                event_type=EventType.OBJECT_FIRST_TOUCHED,
                                 timestamp=c.close_time,
                                 trigger_candle_id=f"c_{c.open_time.timestamp()}",
-                                details=f"Bearish FVG partially mitigated ({fvg.mitigation_percent:.1f}%)",
+                                details=f"Bearish FVG first touched by high {c.high} at {c.close_time}",
                             ),
                         )
 
-                    # Invalidation: body closes above the entire FVG
+                    gap_size = float(fvg.price_high - fvg.price_low)
+                    penetration = float(c.high - fvg.price_low)
+                    fvg.mitigation_percent = min(
+                        100.0,
+                        max(0.0, (penetration / gap_size * 100) if gap_size > 0 else 100.0),
+                    )
+                    fvg.mitigated_price = c.high
+
                     if c.close > fvg.price_high:
                         apply_event(
                             fvg,
@@ -224,6 +215,29 @@ class FVGDetector:
                             ),
                         )
                         fvg.mitigation_percent = 100.0
-                            )
-                            
+                        continue
+
+                    if c.high >= fvg.price_high:
+                        apply_event(
+                            fvg,
+                            SMCEvent(
+                                event_type=EventType.OBJECT_FULLY_MITIGATED,
+                                timestamp=c.close_time,
+                                trigger_candle_id=f"c_{c.open_time.timestamp()}",
+                                details="Bearish FVG fully mitigated",
+                            ),
+                        )
+                        fvg.mitigation_percent = 100.0
+                        continue
+
+                    apply_event(
+                        fvg,
+                        SMCEvent(
+                            event_type=EventType.OBJECT_PARTIALLY_MITIGATED,
+                            timestamp=c.close_time,
+                            trigger_candle_id=f"c_{c.open_time.timestamp()}",
+                            details=f"Bearish FVG partially mitigated ({fvg.mitigation_percent:.1f}%)",
+                        ),
+                    )
+
         return fvgs

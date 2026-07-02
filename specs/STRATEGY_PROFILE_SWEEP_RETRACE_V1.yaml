@@ -1,0 +1,32 @@
+profile_id: STRATEGY_PROFILE_SWEEP_RETRACE_V1
+status: transitional_strategy_profile
+authority: research_only
+purpose: Separate strategy sequence, entry, stop, target, expiry, and risk concerns from perception ontology.
+
+active_candidate:
+  reference: strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/STRATEGY_CONTRACT.yaml
+  canonical_name: Regime-Aligned SMC Continuation V1
+
+perception_inputs:
+  allowed:
+    - swings
+    - protected_levels
+    - BOS
+    - CHoCH
+    - FVG
+    - liquidity_sweep
+    - lifecycle_status
+  forbidden:
+    - risk_percent
+    - confluence_grade_as_perception_truth
+    - target_selection_as_perception_truth
+
+strategy_outputs:
+  states: [NO_SETUP, CONTEXT_FORMING, WATCH, ARMED, TRIGGERED, PAPER_EXECUTE, INVALIDATED, EXPIRED, RESOLVED, ABSTAIN]
+  entry_policy: confirmation_candle_close
+  stop_policy: sequence_invalidation_with_buffer
+  target_policy: nearest_active_1h_or_4h_external_level
+  expiry_policy: 48_completed_15m_candles_after_entry
+  capital_risk: 0
+
+migration_note: Current RuleConfig still mixes perception and strategy fields. This profile is the target separation contract; code migration is pending.

@@ -99,7 +99,41 @@ def slice_15m_to(df: pd.DataFrame, decision_time: pd.Timestamp) -> pd.DataFrame:
     return df.loc[mask].reset_index(drop=True)
 
 
-def resample_ohlcv(df: pd.DataFrame, target_tf: TimeframeKey, decision_time: pd.Timestamp) -> pd.DataFrame:
+def resample_to_ny_close_daily(df_15m: pd.DataFrame) -> pd.DataFrame:
+    """Resample 15m OHLCV to daily candles ending at the 17:00 New York Close (EST/EDT)."""
+    if df_15m.empty:
+        return df_15m.copy()
+    
+    df = df_15m.copy()
+    df["_ts"] = pd.to_datetime(df["timestamp"], utc=False)
+    if df["_ts"].dt.tz is None:
+        df["_ts"] = df["_ts"].dt.tz_localize("UTC")
+    else:
+        df["_ts"] = df["_ts"].dt.tz_convert("UTC")
+        
+    df["_ts_eastern"] = df["_ts"].dt.tz_convert("US/Eastern")
+    df["_ts_shifted"] = df["_ts_eastern"] - pd.Timedelta(hours=17)
+    
+    indexed = df.set_index("_ts_shifted")
+    resampled = indexed.resample("1D", label="left", closed="left").agg(
+        {
+            "open": "first",
+            "high": "max",
+            "low": "min",
+            "close": "last",
+            "volume": "sum",
+        }
+    )
+    resampled = resampled.dropna(subset=["open", "high", "low", "close"])
+    
+    unshifted_index = resampled.index + pd.Timedelta(hours=17)
+    resampled["timestamp"] = unshifted_index.tz_convert("UTC").tz_localize(None)
+    resampled = resampled.reset_index(drop=True)
+    resampled["_close_visible_at"] = resampled["timestamp"] + pd.Timedelta("1D")
+    return resampled
+
+
+def resample_ohlcv(df: pd.DataFrame, target_tf: TimeframeKey, decision_time: pd.Timestamp, daily_session_profile: str = "exchange_daily_utc") -> pd.DataFrame:
     """Resample visible 15m history to a higher timeframe without future leakage.
 
     Only HTF candles whose close time is at or before `decision_time`
@@ -113,11 +147,11 @@ def resample_ohlcv(df: pd.DataFrame, target_tf: TimeframeKey, decision_time: pd.
     if df.empty:
         return df.copy()
 
-    precomputed = precompute_htf_series(df)
+    precomputed = precompute_htf_series(df, daily_session_profile=daily_session_profile)
     return slice_precomputed_htf(precomputed[target_tf], target_tf, decision_time)
 
 
-def precompute_htf_series(df_15m: pd.DataFrame) -> dict[TimeframeKey, pd.DataFrame]:
+def precompute_htf_series(df_15m: pd.DataFrame, daily_session_profile: str = "exchange_daily_utc") -> dict[TimeframeKey, pd.DataFrame]:
     """Resample the full 15m history to each HTF, preserving full data.
 
     Exchange 15m timestamps are candle OPENS (candle at 00:00 covers
@@ -135,6 +169,10 @@ def precompute_htf_series(df_15m: pd.DataFrame) -> dict[TimeframeKey, pd.DataFra
     indexed = df_15m.assign(_ts=pd.to_datetime(df_15m["timestamp"], utc=False)).set_index("_ts")
     result: dict[TimeframeKey, pd.DataFrame] = {}
     for tf, rule in TF_TO_PANDAS_RULE.items():
+        if tf == "1d" and daily_session_profile == "new_york_close_daily":
+            result[tf] = resample_to_ny_close_daily(df_15m)
+            continue
+
         resampled = indexed.resample(rule, label="left", closed="left").agg(
             {
                 "open": "first",
@@ -340,11 +378,12 @@ def build_mtf_snapshot(
     """Compute the full HTF context at a single decision timestamp."""
     visible_15m = slice_15m_to(df_15m, decision_time)
     contexts: dict[TimeframeKey, HtfContext] = {}
+    profile = getattr(config, "daily_session_profile", "exchange_daily_utc")
     for tf in timeframes:
         if precomputed is not None and tf in precomputed:
             htf_slice = slice_precomputed_htf(precomputed[tf], tf, decision_time)
         else:
-            htf_slice = resample_ohlcv(visible_15m, tf, decision_time)
+            htf_slice = resample_ohlcv(visible_15m, tf, decision_time, daily_session_profile=profile)
         contexts[tf] = _context_for(tf, htf_slice, decision_time, config)
 
     biases = [contexts[tf].bias for tf in timeframes]

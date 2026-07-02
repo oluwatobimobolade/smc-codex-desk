@@ -1,0 +1,51 @@
+states:
+  NO_SETUP:
+    description: No objective directional regime and qualified location.
+  CONTEXT_FORMING:
+    description: Objective regime may exist, but qualified 1H location is not complete.
+  WATCH:
+    description: Directional regime exists and a relevant 1H pullback FVG location has been identified, but 15m confirmation sequence is incomplete.
+    required_fields: [scenario_direction, supporting_evidence, missing_conditions, confirmation, invalidation, expiry]
+  ARMED:
+    description: Price is inside qualified 1H FVG and required liquidity/rejection event occurred. Final 15m protected-point break is missing.
+  TRIGGERED:
+    description: Final 15m structural confirmation occurred. Fill, stop, target, costs, and risk checks are being evaluated.
+  PAPER_EXECUTE:
+    description: All research conditions pass. Record simulated decision only. No live order.
+  INVALIDATED:
+    description: Explicit invalidation event occurred before execution or during active paper outcome.
+  EXPIRED:
+    description: Maximum horizon elapsed without required confirmation or resolution.
+  RESOLVED:
+    description: Paper outcome reached target, stop, opposite CHoCH, or expiry.
+  ABSTAIN:
+    description: Data, source alignment, structure, regime, or evidence is insufficient.
+
+transitions:
+  - from: NO_SETUP
+    to: CONTEXT_FORMING
+    when: objective_4h_regime_exists
+  - from: CONTEXT_FORMING
+    to: WATCH
+    when: qualified_1h_fvg_exists_and_daily_not_vetoing
+  - from: WATCH
+    to: ARMED
+    when: price_inside_fvg_and_liquidity_rejection_occurs
+  - from: ARMED
+    to: TRIGGERED
+    when: 15m_close_breaks_relevant_internal_protected_point_within_8_bars
+  - from: TRIGGERED
+    to: PAPER_EXECUTE
+    when: entry_stop_target_cost_and_min_R_checks_pass
+  - from: WATCH
+    to: INVALIDATED
+    when: 1h_fvg_invalidated_or_regime_veto_appears
+  - from: ARMED
+    to: EXPIRED
+    when: 8_completed_15m_bars_elapsed_without_confirmation
+  - from: PAPER_EXECUTE
+    to: RESOLVED
+    when: target_stop_opposite_choch_or_48_bar_expiry_occurs
+  - from: "*"
+    to: ABSTAIN
+    when: source_mismatch_or_uncertified_context_or_data_quality_failure

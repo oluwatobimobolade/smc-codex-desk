@@ -1,0 +1,26 @@
+{
+  "work_package": "WP-0010-OUTCOME-RESOLUTION",
+  "date": "2026-06-25",
+  "status": "PASS_HISTORICAL_RESOLUTION_SLICE",
+  "evidence": {
+    "code": "smc_desk/colleague/outcome_resolution.py",
+    "tool": "tools/resolve_colleague_outcome.py",
+    "test": "tests/test_colleague_outcome_resolution.py",
+    "historical_run": "analysis_runs/BTCUSDT_20260618_1200_outcome_resolution_smoke/run_manifest.json",
+    "resolution": "analysis_runs/BTCUSDT_20260618_1200_outcome_resolution_smoke/outcome/resolution.json"
+  },
+  "observed": {
+    "symbol": "BTCUSDT",
+    "decision_action": "NO_SETUP",
+    "resolution_status": "resolved_no_setup_observation",
+    "future_bars_available": 96,
+    "future_bars_required": 96,
+    "market_edge_claimed": false,
+    "paper_execution_enabled": false,
+    "live_execution_enabled": false
+  },
+  "validation": {
+    "focused": "13 passed in 1.25s",
+    "full_pytest": "361 passed in 26.08s"
+  }
+}

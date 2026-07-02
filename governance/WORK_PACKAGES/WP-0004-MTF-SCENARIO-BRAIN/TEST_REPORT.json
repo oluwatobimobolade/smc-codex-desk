@@ -1,0 +1,28 @@
+{
+  "work_package": "WP-0004-MTF-SCENARIO-BRAIN",
+  "date": "2026-06-25",
+  "status": "PASS_INITIAL_SLICE",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_market_colleague_case.py -q",
+      "result": "4 passed in 1.32s"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "352 passed in 25.68s"
+    }
+  ],
+  "real_data_smoke": "analysis_runs/BTCUSDT_20260619_2345_wp0003_wp0004_smoke/perception/mtf_state_graph.json",
+  "assertions": {
+    "graph_version_0_2": true,
+    "market_story_present": true,
+    "decision_state_node_present": true,
+    "scenario_tree_version_0_2": true,
+    "evidence_graph_built": true
+  },
+  "full_smc_semantics_complete": false
+}

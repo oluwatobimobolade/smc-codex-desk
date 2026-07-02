@@ -1,0 +1,58 @@
+datasets:
+  BINANCE-USDM-LOCAL-4Y-20260620:
+    purpose: canonical local crypto OHLCV research source
+    venue: BINANCE_USDM
+    symbols: [BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, BNBUSDT]
+    base_timeframe: 15m
+    derived_timeframes: [1h, 4h, 1d]
+    path: data/ohlcv/binance_futures
+    contamination_status: development_touched
+    frozen: false
+    authority: market_truth_research_source
+    allowed_uses:
+      - data_quality_testing
+      - development_replay
+      - local_case_generation_outside_locked_holdout
+    prohibited_uses:
+      - final_holdout_claims_without_holdout_guard
+      - profitability_claims_without_validation
+  LAB-20260625-100:
+    purpose: local-first blind review workflow lab
+    cases: 100
+    path: case_library/local_first_lab/20260625
+    selection_method: evenly_spaced_local_case_generation
+    frozen: false
+    contamination_status: workflow_development
+    reviewer_status: unlabelled
+    allowed_uses:
+      - workflow_development
+      - reviewer_training
+      - desktop_ai_packet_testing
+    prohibited_uses:
+      - final_perception_accuracy_claims
+      - prediction_training
+      - gold_label_claims
+  BTCUSDT-MARKET-COLLEAGUE-SMOKE-20260619-2345:
+    purpose: market-colleague workflow smoke case
+    cases: 1
+    path: case_library/market_colleague/BTCUSDT/20260619_2345_smoke
+    contamination_status: development_smoke
+    frozen: false
+    allowed_uses:
+      - package_contract_validation
+      - rendering_smoke
+    prohibited_uses:
+      - performance_measurement
+      - predictive_claims
+  FUTURE-HOLDOUT-FROM-20260701:
+    purpose: untouched future evaluation window
+    policy: configs/holdout_policy.local_first.json
+    start: "2026-07-01T00:00:00Z"
+    frozen: true
+    contamination_status: protected
+    allowed_uses:
+      - explicit_final_evaluation_with_allow_holdout_recorded
+    prohibited_uses:
+      - exploratory_training
+      - tuning
+      - case_generation_without_final_evaluation_context

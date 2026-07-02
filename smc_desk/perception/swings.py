@@ -42,13 +42,21 @@ class SwingDetector:
             if is_high or is_low:
                 direction = Direction.BULLISH if is_low else Direction.BEARISH
                 
-                # To calculate prominence_atr_pct we would need ATR.
-                # For now, we will pass a placeholder of 0.0, we can inject an ATR array later if needed.
+                prominence_price, prominence_atr_pct = _swing_prominence(
+                    pivot_index=i,
+                    candles=candles,
+                    is_high=is_high,
+                    bars_left=self.bars_left,
+                    bars_right=self.bars_right,
+                )
                 evidence = SwingEvidence(
                     bars_left=self.bars_left,
                     bars_right=self.bars_right,
-                    prominence_atr_pct=0.0,
-                    is_external=(self.scale_name == "external")
+                    prominence_atr_pct=prominence_atr_pct,
+                    is_external=(self.scale_name == "external"),
+                    scale_name=self.scale_name,  # type: ignore[arg-type]
+                    pivot_index=i,
+                    prominence_price=prominence_price,
                 )
                 
                 # We record the candidate time as the close of the pivot candle.
@@ -101,12 +109,47 @@ class SwingDetector:
         return swings
 
 class MultiScaleSwingDetector:
-    def __init__(self):
+    def __init__(self, config=None):
+        if config is None:
+            from smc_desk.rules import load_rule_config
+            config = load_rule_config()
+        scales = config.swing_scales
         self.detectors = [
-            SwingDetector(bars_left=1, bars_right=1, scale_name="local"),
-            SwingDetector(bars_left=3, bars_right=3, scale_name="internal"),
-            SwingDetector(bars_left=5, bars_right=5, scale_name="external")
+            SwingDetector(bars_left=scales.local, bars_right=scales.local, scale_name="local"),
+            SwingDetector(bars_left=scales.internal, bars_right=scales.internal, scale_name="internal"),
+            SwingDetector(bars_left=scales.external, bars_right=scales.external, scale_name="external"),
         ]
         
     def detect(self, candles: List[Candle], current_time: datetime) -> Dict[str, List[SwingObject]]:
         return {d.scale_name: d.detect(candles, current_time) for d in self.detectors}
+
+
+def _swing_prominence(
+    *,
+    pivot_index: int,
+    candles: List[Candle],
+    is_high: bool,
+    bars_left: int,
+    bars_right: int,
+) -> tuple[Decimal, float]:
+    pivot = candles[pivot_index]
+    left = candles[pivot_index - bars_left : pivot_index]
+    right = candles[pivot_index + 1 : pivot_index + bars_right + 1]
+    window = left + [pivot] + right
+    avg_range = _average_range(window)
+    if is_high:
+        neighbour = max((c.high for c in left + right), default=pivot.high)
+        prominence = max(Decimal("0"), pivot.high - neighbour)
+    else:
+        neighbour = min((c.low for c in left + right), default=pivot.low)
+        prominence = max(Decimal("0"), neighbour - pivot.low)
+    if avg_range <= 0:
+        return prominence, 0.0
+    return prominence, float(prominence / avg_range)
+
+
+def _average_range(candles: List[Candle]) -> Decimal:
+    if not candles:
+        return Decimal("0")
+    total = sum((c.high - c.low for c in candles), Decimal("0"))
+    return total / Decimal(len(candles))

@@ -1,0 +1,22 @@
+stop:
+  long: sweep_low_minus_buffer
+  short: sweep_high_plus_buffer
+  buffer: max_2_ticks_or_0_15_atr14_15m
+  calculation_time: confirmation_close
+  rule: no_retrospective_tightening
+
+target:
+  primary: nearest_active_1h_or_4h_external_structural_or_liquidity_level_in_trade_direction
+  minimum_net_planned_R_after_costs: 1.5
+  fixed_3R: not_mandatory_in_v1
+
+resolution:
+  full_position_exit_only: true
+  first_event_wins:
+    - target
+    - stop
+    - opposite_confirmed_15m_external_choch
+    - 48_completed_15m_candle_expiry
+  no_partials: true
+  no_break_even: true
+  no_trailing_stop: true

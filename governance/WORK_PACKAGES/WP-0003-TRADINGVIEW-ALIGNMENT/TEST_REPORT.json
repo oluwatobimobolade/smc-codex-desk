@@ -1,0 +1,27 @@
+{
+  "work_package": "WP-0003-TRADINGVIEW-ALIGNMENT",
+  "date": "2026-06-25",
+  "status": "PASS_CONTRACT_SLICE",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_market_colleague_case.py -q",
+      "result": "4 passed in 1.32s"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "352 passed in 25.68s"
+    }
+  ],
+  "real_data_smoke": "analysis_runs/BTCUSDT_20260619_2345_wp0003_wp0004_smoke/external/alignment_report.json",
+  "assertions": {
+    "not_attached_is_not_verified": true,
+    "correct_verified_manifest_passes": true,
+    "wrong_symbol_fails": true,
+    "source_mismatch_blocks_decision": true
+  },
+  "live_browser_controller_complete": false
+}

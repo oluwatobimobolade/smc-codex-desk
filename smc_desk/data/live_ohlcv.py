@@ -8,6 +8,8 @@ external visual evidence and must not be used as the primary market-truth feed.
 A candle is accepted as confirmed only when Binance's own kline close time is
 strictly earlier than or equal to Binance server time. The currently forming
 candle is always excluded.
+
+Retry is conservative: 3 attempts max per route with 1s / 2s / 4s backoff.
 """
 
 import csv
@@ -20,8 +22,12 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 from urllib.parse import urlencode
+
+
+MAX_RETRY_ATTEMPTS = 3
+RETRY_BACKOFF_SECONDS = (1.0, 2.0, 4.0)
 
 
 BINANCE_FAPI_BASE = "https://fapi.binance.com"
@@ -341,6 +347,32 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
+def execute_with_retry(
+    fn: Callable[[], Any],
+    *,
+    max_attempts: int = MAX_RETRY_ATTEMPTS,
+    backoff: Sequence[float] = RETRY_BACKOFF_SECONDS,
+) -> tuple[Any, int]:
+    """Call *fn* up to *max_attempts* times with backoff.
+
+    Returns:
+        (result, attempt_number) on success (1-indexed).
+    Raises:
+        The last exception if all attempts fail.
+    """
+    last_exc: Exception | None = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return fn(), attempt
+        except Exception as exc:
+            last_exc = exc
+            if attempt < max_attempts:
+                delay = backoff[min(attempt - 1, len(backoff) - 1)]
+                time.sleep(delay)
+    assert last_exc is not None
+    raise last_exc
+
+
 def acquire_verified_closed_ohlcv(
     *,
     symbol: str,
@@ -407,7 +439,7 @@ def acquire_verified_closed_ohlcv(
         started_dt = datetime.now(timezone.utc)
         started = time.monotonic()
         try:
-            raw_rows, server_time_ms, route_details = route()
+            (raw_rows, server_time_ms, route_details), retry_attempts = execute_with_retry(route)
             rows, verification = _parse_and_verify_klines(
                 raw_rows,
                 symbol=symbol,
@@ -424,7 +456,7 @@ def acquire_verified_closed_ohlcv(
                     started_at=started_dt.isoformat(),
                     finished_at=finished_dt.isoformat(),
                     latency_ms=int((time.monotonic() - started) * 1000),
-                    details={**route_details, **verification, "dns": dns},
+                    details={**route_details, **verification, "dns": dns, "retry_attempts": retry_attempts},
                 )
             )
 
@@ -470,7 +502,7 @@ def acquire_verified_closed_ohlcv(
                     latency_ms=int((time.monotonic() - started) * 1000),
                     error_type=type(exc).__name__,
                     error=str(exc),
-                    details={"dns": dns},
+                    details={"dns": dns, "retry_attempts_exhausted": True},
                 )
             )
 

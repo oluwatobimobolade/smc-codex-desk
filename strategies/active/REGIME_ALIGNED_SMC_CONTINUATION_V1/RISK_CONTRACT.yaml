@@ -1,0 +1,13 @@
+research:
+  capital_risk: 0
+live_shadow:
+  capital_risk: 0
+after_paper_certification:
+  simulated_risk_per_trade_pct: 0.25
+  max_open_positions: 1
+  max_active_setup_per_1h_fvg: 1
+forbidden:
+  - automatic_2_percent_a_plus_risk
+  - sizing_based_on_confluence_score
+  - live_capital_risk_in_v1
+  - leverage_escalation

@@ -1,0 +1,100 @@
+ M blackbox_gauntlet/registry/freeze_snapshot.json
+ M evidence/VALIDATION_REGISTRY.json
+ M smc_desk/engine.py
+ M smc_desk/evaluation/adjudication.py
+ M smc_desk/evaluation/human_challenge.py
+ M smc_desk/evaluation/metrics.py
+ M smc_desk/ml_model.py
+ M smc_desk/perception/lifecycle.py
+ M smc_desk/perception/ontology.py
+ M smc_desk/perception/structure.py
+ M smc_desk/perception/swings.py
+ M smc_desk/regime.py
+ M smc_desk/render.py
+ M smc_desk/rules.py
+ M smc_desk/vision/prompt_templates.py
+ M smc_desk/vision/provider_registry.py
+ D specs/ONTOLOGY_V2.yaml
+ M tests/test_engine.py
+ M tests/test_perception_gold_batch.py
+ M tools/backtest_smc_elite.py
+ M tools/backtest_smc_elite_mtf.py
+ M tools/build_perception_gold_batch.py
+ M tools/build_research_dataset.py
+ M tools/freeze_system.py
+ M tools/replay_setup_states.py
+ M tools/train_ml_model.py
+?? analysis_runs/
+?? archive/
+?? configs/
+?? datasets/
+?? dummy.png
+?? dummy_clean.png
+?? evaluation/calibration_set/
+?? evaluation/pilot_rc1/
+?? evidence/pre_live_integration/
+?? governance/
+?? perception_pilot_reviewer_pack.zip
+?? pilot_v1/reviewer_packs/
+?? review_queues/
+?? smc_desk/colleague/__init__.py
+?? smc_desk/colleague/analysis_package.py
+?? smc_desk/colleague/decision_summary.py
+?? smc_desk/colleague/event_ledger.py
+?? smc_desk/colleague/live_shadow.py
+?? smc_desk/colleague/orchestrator.py
+?? smc_desk/colleague/outcome_logging.py
+?? smc_desk/colleague/outcome_resolution.py
+?? smc_desk/colleague/request_contract.py
+?? smc_desk/colleague/similar_cases.py
+?? smc_desk/colleague/smc_semantics.py
+?? smc_desk/colleague/thesis_builder.py
+?? smc_desk/colleague/tradingview_alignment.py
+?? smc_desk/colleague/tradingview_live_manifest.py
+?? smc_desk/evaluation/annotation_schema.py
+?? smc_desk/evaluation/holdout_guard.py
+?? smc_desk/prediction/
+?? smc_desk/vision/claude_provider.py
+?? smc_desk/vision/kimi_webbridge.py
+?? specs/AUTHORITY_CONFIG_SPLIT_WP0015.yaml
+?? specs/DECISION_POLICY_V1.yaml
+?? specs/LOCAL_FIRST_RESEARCH_LAB.md
+?? specs/MASTER_DEVELOPMENT_PROMPT.md
+?? specs/PERCEPTION_DETECTOR_CONFIG_V2.yaml
+?? specs/PERCEPTION_ONTOLOGY_V2.yaml
+?? specs/SCENARIO_CONTRACT_V1.yaml
+?? specs/STRATEGY_EXECUTION_CONFIG_V1.yaml
+?? specs/STRATEGY_PROFILE_SWEEP_RETRACE_V1.yaml
+?? strategies/active/
+?? tests/prediction/
+?? tests/stress_tests/test_E_event_ledger.py
+?? tests/stress_tests/test_L_out_of_distribution.py
+?? tests/stress_tests/test_M_reproducibility.py
+?? tests/stress_tests/test_N_operational_failure.py
+?? tests/test_colleague_live_shadow.py
+?? tests/test_colleague_outcome_resolution.py
+?? tests/test_evaluation_metrics.py
+?? tests/test_event_ledger.py
+?? tests/test_governance_foundation.py
+?? tests/test_live_shadow_review_queue.py
+?? tests/test_local_first_roadmap.py
+?? tests/test_market_colleague_case.py
+?? tests/test_ontology_authority_audit.py
+?? tests/test_phase2_pilot.py
+?? tests/test_resolved_case_cohort.py
+?? tests/test_runtime_config_split.py
+?? tests/vision/
+?? tools/audit_ontology_authority.py
+?? tools/build_desktop_ai_review_packet.py
+?? tools/build_live_shadow_review_queue.py
+?? tools/build_local_case_lab.py
+?? tools/build_resolved_case_cohort.py
+?? tools/build_tradingview_alignment_manifest.py
+?? tools/export_adjudication_dataset.py
+?? tools/measure_review_agreement.py
+?? tools/pilot_runner.py
+?? tools/replay_setup_universe.py
+?? tools/resolve_colleague_outcome.py
+?? tools/run_live_shadow_universe.py
+?? tools/run_market_colleague_case.py
+?? tools/sync_market_data.py

@@ -1,0 +1,12 @@
+baselines:
+  A_matched_random_entries:
+    match_on: [instrument, direction_balance, session, volatility_percentile, stop_distance, target_distance, holding_horizon]
+  B_objective_trend_only:
+    description: Enter in 4H trend direction without SMC location or confirmation.
+  C_trend_plus_1h_fvg:
+    description: Same trend and FVG, enter on first FVG touch without 15m sweep and structure break.
+  D_trend_plus_ordinary_pullback:
+    description: Use simple moving-average or ATR pullback instead of SMC FVG.
+  E_reverse_direction:
+    description: Apply exact event timestamps but reverse trade direction.
+primary_question: Does the SMC confirmation sequence provide incremental value beyond trend and location alone?

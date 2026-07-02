@@ -1,0 +1,26 @@
+active_strategy:
+  id: RASC-SMC-V1
+  path: strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1
+  status: RESEARCH_CANDIDATE
+  authority: LIVE_SHADOW_ONLY
+  capital_risk: 0
+
+strategy_authority_order:
+  - governance/STRATEGY_EVIDENCE_REGISTRY.yaml
+  - strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/STRATEGY_CONTRACT.yaml
+  - strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/STATE_MACHINE.yaml
+  - strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/ENTRY_CONTRACT.yaml
+  - strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/EXIT_CONTRACT.yaml
+  - strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/RISK_CONTRACT.yaml
+  - strategies/smc/ historical research documents
+
+legacy_strategy_material:
+  authority: historical_or_research_only_until_classified
+  paths:
+    - strategies/smc/
+    - smc_elite_prompt.md
+
+promotion_authority:
+  required: release_council_after_validation
+  current_status: not_promoted
+  live_execution_authority: prohibited

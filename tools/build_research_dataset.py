@@ -40,6 +40,7 @@ from smc_desk.engine import (
 )
 from smc_desk.mtf import TF_TO_DURATION, derive_htf_consensus_bias, precompute_htf_series
 from smc_desk.rules import load_rule_config
+from smc_desk.regime import compute_regime_series, classify, vol_band, RegimeConfig
 from tools.backtest_management import simulate_managed_trade
 
 CHECKLIST_KEYS = [
@@ -55,41 +56,6 @@ CHECKLIST_KEYS = [
 ]
 
 
-def _compute_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
-    """Compute ATR (Average True Range) for volatility normalization."""
-    high = df["high"]
-    low = df["low"]
-    close = df["close"]
-    tr1 = high - low
-    tr2 = (high - close.shift()).abs()
-    tr3 = (low - close.shift()).abs()
-    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    return tr.rolling(window=period).mean()
-
-
-def _compute_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
-    """Compute ADX (Average Directional Index) for trend strength."""
-    high = df["high"]
-    low = df["low"]
-    close = df["close"]
-    
-    plus_dm = high.diff()
-    minus_dm = -low.diff()
-    plus_dm = plus_dm.where((plus_dm > minus_dm) & (plus_dm > 0), 0.0)
-    minus_dm = minus_dm.where((minus_dm > plus_dm) & (minus_dm > 0), 0.0)
-    
-    tr1 = high - low
-    tr2 = (high - close.shift()).abs()
-    tr3 = (low - close.shift()).abs()
-    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    
-    atr = tr.rolling(window=period).mean()
-    plus_di = 100 * (plus_dm.rolling(window=period).mean() / atr)
-    minus_di = 100 * (minus_dm.rolling(window=period).mean() / atr)
-    
-    dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di)
-    adx = dx.rolling(window=period).mean()
-    return adx
 
 
 def _premium_discount_ratio(price: float, range_low: float, range_high: float) -> float:
@@ -335,6 +301,11 @@ def build_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
             return []
 
     precomputed = precompute_htf_series(df)
+
+    # Precompute regime metrics (ADX, ATR, and percentiles)
+    regime_df = compute_regime_series(df)
+    regime_cfg = RegimeConfig()
+
     rows: list[dict[str, Any]] = []
     index = first_decision_index
     decisions_seen = 0
@@ -389,13 +360,16 @@ def build_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
         close = float(df.at[index, "close"])
         htf_aligned = plan.direction in {"bullish", "bearish"} and alignment == plan.direction
 
-        # --- Enriched continuous features ---
-        atr_series = _compute_atr(history, period=14)
-        atr_at_decision = float(atr_series.iloc[index]) if index < len(atr_series) and not pd.isna(atr_series.iloc[index]) else 0.0
-        atr_pct = atr_at_decision / max(close, 1e-9) if atr_at_decision > 0 else 0.0
+        # Extract regime metrics from precomputed DataFrame
+        atr_at_decision = float(regime_df.at[index, "atr"]) if index in regime_df.index and not pd.isna(regime_df.at[index, "atr"]) else 0.0
+        adx_at_decision = float(regime_df.at[index, "adx"]) if index in regime_df.index and not pd.isna(regime_df.at[index, "adx"]) else 0.0
+        atr_pct_rank = float(regime_df.at[index, "atr_pct_rank"]) if index in regime_df.index and not pd.isna(regime_df.at[index, "atr_pct_rank"]) else 0.0
+        adx_pct_rank = float(regime_df.at[index, "adx_pct_rank"]) if index in regime_df.index and not pd.isna(regime_df.at[index, "adx_pct_rank"]) else 0.0
         
-        adx_series = _compute_adx(history, period=14)
-        adx_at_decision = float(adx_series.iloc[index]) if index < len(adx_series) and not pd.isna(adx_series.iloc[index]) else 0.0
+        regime_label = classify(adx_at_decision, htf_aligned, regime_cfg)
+        vol_band_label = vol_band(atr_pct_rank, regime_cfg)
+
+        atr_pct = atr_at_decision / max(close, 1e-9) if atr_at_decision > 0 else 0.0
         
         range_low = float(analysis.metrics.get("range_low", 0.0))
         range_high = float(analysis.metrics.get("range_high", 0.0))
@@ -527,6 +501,10 @@ def build_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
             "atr_at_decision": round(atr_at_decision, 4),
             "atr_pct": round(atr_pct, 6),
             "adx_at_decision": round(adx_at_decision, 3),
+            "atr_pct_rank": round(atr_pct_rank, 3),
+            "adx_pct_rank": round(adx_pct_rank, 3),
+            "regime_label": regime_label,
+            "vol_band_label": vol_band_label,
             "premium_discount_ratio": round(pd_ratio, 3),
             "sweep_depth_atr": round(sweep_depth, 3),
             "sweep_recency_bars": sweep_recency,

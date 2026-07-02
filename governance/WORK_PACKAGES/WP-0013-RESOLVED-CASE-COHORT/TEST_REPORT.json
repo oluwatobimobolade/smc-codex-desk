@@ -1,0 +1,26 @@
+{
+  "work_package": "WP-0013-RESOLVED-CASE-COHORT",
+  "date": "2026-06-26",
+  "status": "PASS",
+  "market_edge_claimed": false,
+  "execution_authority_changed": false,
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_resolved_case_cohort.py -q",
+      "result": "2 passed"
+    },
+    {
+      "command": ".venv/bin/python tools/build_resolved_case_cohort.py --symbols BTCUSDT ETHUSDT SOLUSDT XRPUSDT BNBUSDT --cases-per-symbol 10 --horizon-bars 96 --output-root analysis_runs/resolved_case_cohort_wp0013_20260626 --holdout-policy configs/holdout_policy.local_first.json",
+      "result": "50 total packages, 50 resolved, 0 unresolved, all NO_SETUP observations"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_resolved_case_cohort.py tests/test_live_shadow_review_queue.py tests/test_ontology_authority_audit.py tests/test_market_colleague_case.py tests/test_colleague_outcome_resolution.py -q",
+      "result": "17 passed in 2.03s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "386 passed in 25.89s"
+    }
+  ],
+  "real_data_output": "analysis_runs/resolved_case_cohort_wp0013_20260626/summary.json"
+}

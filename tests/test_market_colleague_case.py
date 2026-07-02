@@ -161,7 +161,8 @@ def test_market_colleague_runs_with_legacy_comparison_disabled(tmp_path: Path, m
     def fail_if_legacy_runs(*_args, **_kwargs):
         raise AssertionError("legacy analyze_dataframe should not run when include_legacy_comparison=false")
 
-    monkeypatch.setattr("smc_desk.colleague.orchestrator.analyze_dataframe", fail_if_legacy_runs)
+    # Patch the underlying import, not the orchestrator (which no longer top-level imports it)
+    monkeypatch.setattr("smc_desk.engine.analyze_dataframe", fail_if_legacy_runs)
     source = tmp_path / "BTCUSDT_15m_unit.csv"
     _candles().to_csv(source, index=False)
 

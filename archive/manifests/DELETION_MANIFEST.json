@@ -1,0 +1,7 @@
+{
+  "manifest_version": "0.1",
+  "status": "no_deletions_approved",
+  "created_at": "2026-06-25T15:00:00Z",
+  "policy": "destructive cleanup requires dry-run plan, hashes, reference check, and explicit approval",
+  "deletions": []
+}

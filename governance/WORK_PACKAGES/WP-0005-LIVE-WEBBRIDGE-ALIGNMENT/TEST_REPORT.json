@@ -1,0 +1,19 @@
+{
+  "work_package": "WP-0005-LIVE-WEBBRIDGE-ALIGNMENT",
+  "date": "2026-06-25",
+  "status": "PASS_INITIAL_BTCUSDT_SMOKE",
+  "evidence": {
+    "manifest": "analysis_runs/BTCUSDT_live_tv_alignment_20260625/tradingview_alignment_manifest.json",
+    "run_manifest": "analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/run_manifest.json",
+    "alignment_report": "analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/external/alignment_report.json"
+  },
+  "observed": {
+    "alignment_status": "PASS",
+    "blocking_failures": 0,
+    "decision_action": "NO_SETUP"
+  },
+  "validation": {
+    "focused": "12 passed in 1.38s",
+    "full_pytest": "354 passed in 25.18s"
+  }
+}

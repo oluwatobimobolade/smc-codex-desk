@@ -1,0 +1,53 @@
+{
+  "work_package": "WP-0029-SMC-NARRATIVE-AUTHORITY-REPAIR",
+  "date": "2026-06-28",
+  "status": "PASS_WITH_VISUAL_CAPTURE_SKIPPED_FOR_SMOKE",
+  "authority": {
+    "paper_execution": "disabled",
+    "live_execution": "disabled",
+    "capital_risk": 0,
+    "market_edge_claimed": false,
+    "debug_charts_decision_authority": false,
+    "official_authority": "smc_narrative_authority_v1"
+  },
+  "commands": [
+    {
+      "command": ".venv/bin/python -m compileall smc_desk/colleague/smc_narrative_authority.py smc_desk/rendering/watch_chart_renderer.py smc_desk/rendering/trade_plan_chart_renderer.py smc_desk/colleague/smc_thesis_v5.py smc_desk/colleague/orchestrator_v2.py smc_desk/colleague/wp0020_gauntlet.py tests/wp0029_fixtures.py tests/test_smc_narrative_authority_selects_one_model.py tests/test_move_started_not_chaseable_state.py tests/test_watch_state_blocks_trade_box.py tests/test_trade_box_only_when_trade_plan_ready.py tests/test_official_chart_uses_narrative_authority.py tests/test_debug_chart_not_used_as_official_thesis.py tests/test_sol_current_case_wait_for_retrace.py tests/test_btc_current_case_wait_for_retrace.py tests/test_inducement_conditions_written.py tests/test_continuation_conditions_written.py tests/test_thesis_follows_smc_sequence.py",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_smc_narrative_authority_selects_one_model.py tests/test_move_started_not_chaseable_state.py tests/test_watch_state_blocks_trade_box.py tests/test_trade_box_only_when_trade_plan_ready.py tests/test_official_chart_uses_narrative_authority.py tests/test_debug_chart_not_used_as_official_thesis.py tests/test_sol_current_case_wait_for_retrace.py tests/test_btc_current_case_wait_for_retrace.py tests/test_inducement_conditions_written.py tests/test_continuation_conditions_written.py tests/test_thesis_follows_smc_sequence.py -q",
+      "result": "11 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0020_market_colleague_gauntlet.py tests/test_smc_thesis_evidence_links.py tests/test_wp0023_v6_story_renderer.py tests/test_story_chart_hides_internal_noise.py tests/test_story_chart_shows_watch_state.py tests/test_review_flags_prevent_clean_pass.py tests/test_outcome_contract_for_inducement_case.py tests/test_wait_for_retrace_to_ltf_supply.py tests/test_inducement_vs_continuation_classifier.py tests/test_15m_choch_not_enough_without_poi_context.py -q",
+      "result": "22 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_smc_narrative_authority_selects_one_model.py tests/test_move_started_not_chaseable_state.py tests/test_watch_state_blocks_trade_box.py tests/test_trade_box_only_when_trade_plan_ready.py tests/test_official_chart_uses_narrative_authority.py tests/test_debug_chart_not_used_as_official_thesis.py tests/test_sol_current_case_wait_for_retrace.py tests/test_btc_current_case_wait_for_retrace.py tests/test_inducement_conditions_written.py tests/test_continuation_conditions_written.py tests/test_thesis_follows_smc_sequence.py tests/test_wp0020_market_colleague_gauntlet.py tests/test_smc_thesis_evidence_links.py tests/test_review_flags_prevent_clean_pass.py tests/test_outcome_contract_for_inducement_case.py -q",
+      "result": "17 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "562 passed, 1 skipped in 98.31s"
+    },
+    {
+      "command": ".venv/bin/python tools/run_wp0020_market_colleague_gauntlet.py --symbol BTCUSDT --source data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv --out analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/BTCUSDT --mode csv --visual-mode skip",
+      "result": "PARTIAL_PASS; failed_layer=07_tradingview_visual; official_state=REVIEW_REQUIRED; official_trade_plan_state=WATCH_ONLY; show_trade_box=false; final_action=NO_SIGNAL"
+    },
+    {
+      "command": ".venv/bin/python tools/run_wp0020_market_colleague_gauntlet.py --symbol SOLUSDT --source data/ohlcv/binance_futures/SOLUSDT/SOLUSDT_15m_4year.csv --out analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/SOLUSDT --mode csv --visual-mode skip",
+      "result": "PARTIAL_PASS; failed_layer=07_tradingview_visual; official_state=POI_TOUCHED_AWAIT_CONFIRMATION; official_trade_plan_state=WATCH_ONLY; show_trade_box=false; final_action=NO_SIGNAL"
+    }
+  ],
+  "artifacts": {
+    "btc_gauntlet": "analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/BTCUSDT",
+    "sol_gauntlet": "analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/SOLUSDT",
+    "btc_authority": "analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/BTCUSDT/06_cognitive/smc_narrative_authority.json",
+    "sol_authority": "analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/SOLUSDT/06_cognitive/smc_narrative_authority.json",
+    "btc_official_chart_manifest": "analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/BTCUSDT/04b_official_charts/official_chart_manifest.json",
+    "sol_official_chart_manifest": "analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/SOLUSDT/04b_official_charts/official_chart_manifest.json",
+    "btc_thesis_v5": "analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/BTCUSDT/09_smc_thesis/smc_trade_thesis_v5.md",
+    "sol_thesis_v5": "analysis_runs/WP0029_NARRATIVE_AUTHORITY_REPAIR_20260628/SOLUSDT/09_smc_thesis/smc_trade_thesis_v5.md"
+  }
+}

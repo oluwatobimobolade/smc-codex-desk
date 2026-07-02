@@ -51,7 +51,9 @@ class SwingEvidence(SMCObjectEvidence):
     bars_right: int
     prominence_atr_pct: float
     is_external: bool
-    # Will add displacement tracking metrics here later, as updates
+    scale_name: Optional[Literal["local", "internal", "external"]] = None
+    pivot_index: Optional[int] = None
+    prominence_price: Optional[Decimal] = None
 
 
 class StructureBreakEvidence(SMCObjectEvidence):
@@ -65,6 +67,11 @@ class StructureBreakEvidence(SMCObjectEvidence):
     displacement_strength: float
     is_internal: bool
     is_unconfirmed_probe: bool
+    structure_scope: Literal["internal", "external"] = "external"
+    protected_swing_id: Optional[str] = None
+    last_bos_swing_id: Optional[str] = None
+    broke_protected_swing: bool = False
+    valid_choch: bool = False
 
 
 class FairValueGapEvidence(SMCObjectEvidence):
@@ -72,11 +79,18 @@ class FairValueGapEvidence(SMCObjectEvidence):
     gap_size_bps: float
     atr_ratio: float
     is_mitigated_on_creation: bool
+    origin_break_id: Optional[str] = None
+    poi_grade: bool = False
+    location_context: Optional[str] = None
 
 
 class LiquidityLevelEvidence(SMCObjectEvidence):
     constituent_swing_ids: List[str]
     max_deviation_ticks: int
+    level_kind: Literal["swing_high", "swing_low", "equal_highs", "equal_lows"] = "swing_high"
+    side: Literal["buy_side", "sell_side"] = "buy_side"
+    touch_count: int = 1
+    tolerance_bps: float = 0.0
 
 
 class SweepEvidence(SMCObjectEvidence):
@@ -84,11 +98,27 @@ class SweepEvidence(SMCObjectEvidence):
     sweep_candle_id: str
     penetration_ticks: int
     subsequent_displacement: Optional[float] = None
+    swept_price: Optional[Decimal] = None
+    reclaim_close: Optional[Decimal] = None
+    reclaim_confirmed: bool = True
 
 
 class OrderBlockEvidence(SMCObjectEvidence):
-    originating_fvg_id: str
+    originating_fvg_id: Optional[str] = None
     volume_ratio: float
+    structure_break_id: Optional[str] = None
+    source_candle_id: Optional[str] = None
+    body_ratio: float = 0.0
+    poi_grade: bool = True
+
+
+class InducementEvidence(SMCObjectEvidence):
+    source_swing_id: str
+    related_order_block_id: Optional[str] = None
+    related_break_id: Optional[str] = None
+    liquidity_side: Literal["buy_side", "sell_side"]
+    inducement_taken: bool = False
+    sweep_id: Optional[str] = None
 
 
 class SMCObjectBase(BaseModel):
@@ -125,6 +155,7 @@ class SMCObjectBase(BaseModel):
     source_candle_ids: List[str]
     last_updated_at: datetime  # System clock time when the object was last modified
     events: List[Any] = Field(default_factory=list) # SMCEvent objects
+    metadata: dict[str, Any] = Field(default_factory=dict)
     
     confidence: float
     direction: Direction
@@ -144,6 +175,8 @@ class SwingObject(SMCObjectBase):
 class StructureBreakObject(SMCObjectBase):
     object_type: Literal["structure_break"] = "structure_break"
     evidence: StructureBreakEvidence
+    break_type: Literal["BOS", "CHOCH"]
+    structure_scope: Literal["internal", "external"] = "external"
     
     # CHoCH vs BOS can be inferred or explicitly flagged
     is_choch: bool
@@ -171,6 +204,11 @@ class OrderBlockObject(SMCObjectBase):
     evidence: OrderBlockEvidence
 
 
+class InducementObject(SMCObjectBase):
+    object_type: Literal["inducement"] = "inducement"
+    evidence: InducementEvidence
+
+
 SMCObject = Annotated[
     Union[
         SwingObject,
@@ -178,7 +216,8 @@ SMCObject = Annotated[
         FairValueGapObject,
         LiquidityLevelObject,
         SweepObject,
-        OrderBlockObject
+        OrderBlockObject,
+        InducementObject,
     ],
     Field(discriminator="object_type")
 ]

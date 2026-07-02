@@ -1,0 +1,43 @@
+policy_id: DECISION_POLICY_V1
+status: draft_contract
+authority: research_only
+
+allowed_actions:
+  - NO_SETUP
+  - INSUFFICIENT_CONTEXT
+  - AMBIGUOUS_STRUCTURE
+  - OUT_OF_SCOPE
+  - SOURCE_MISMATCH
+  - UNCALIBRATED_REGIME
+  - MODEL_DISAGREEMENT
+  - NEGATIVE_EXPECTANCY
+  - WATCH
+  - ARMED
+  - PAPER_EXECUTE
+
+paper_execute_gate:
+  required:
+    - data_quality_passes
+    - source_identity_passes
+    - inside_certified_scope
+    - perception_confidence_passes
+    - context_sufficient
+    - sequence_state_confirmed
+    - historical_support_sufficient
+    - calibration_current
+    - models_broadly_agree
+    - ood_score_passes
+    - expected_value_after_costs_positive
+    - conservative_lower_bound_positive
+    - no_drift_alert_active
+    - no_critical_operational_fault
+  current_status: disabled_until_validation
+
+downgrade_rules:
+  source_mismatch: SOURCE_MISMATCH
+  unverified_screenshot: INSUFFICIENT_CONTEXT
+  neutral_regime_in_v1: NO_SETUP
+  ambiguous_protected_structure: AMBIGUOUS_STRUCTURE
+  insufficient_historical_support: UNCALIBRATED_REGIME
+  model_disagreement: MODEL_DISAGREEMENT
+  negative_expected_value: NEGATIVE_EXPECTANCY

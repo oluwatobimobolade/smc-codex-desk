@@ -1,0 +1,27 @@
+split_id: AUTHORITY_CONFIG_SPLIT_WP0015
+status: split_contract_created_code_migration_pending
+date: "2026-06-26"
+
+current_runtime_source:
+  path: specs/PERCEPTION_ONTOLOGY_V2.yaml
+  status: monolithic_runtime_config
+  reason: RuleConfig still loads this file for backward compatibility.
+
+target_split:
+  perception_detector_config:
+    path: specs/PERCEPTION_DETECTOR_CONFIG_V2.yaml
+    authority: perception_geometry_and_object_detection_only
+  strategy_execution_config:
+    path: specs/STRATEGY_EXECUTION_CONFIG_V1.yaml
+    authority: sequence_filters_risk_decision_and_execution_controls
+
+non_goals:
+  - no runtime migration in WP-0015
+  - no paper execution enablement
+  - no live execution enablement
+  - no market edge claim
+
+next_required_migration:
+  - introduce separate Pydantic config models for detector and strategy config
+  - adapt RuleConfig callers behind a compatibility layer
+  - prove full suite before changing default runtime config source

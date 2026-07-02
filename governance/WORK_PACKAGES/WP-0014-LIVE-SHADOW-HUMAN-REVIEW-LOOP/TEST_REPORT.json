@@ -1,0 +1,26 @@
+{
+  "work_package": "WP-0014-LIVE-SHADOW-HUMAN-REVIEW-LOOP",
+  "date": "2026-06-26",
+  "status": "PASS",
+  "market_edge_claimed": false,
+  "execution_authority_changed": false,
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_live_shadow_review_queue.py -q",
+      "result": "1 passed"
+    },
+    {
+      "command": ".venv/bin/python tools/build_live_shadow_review_queue.py --analysis-root analysis_runs/live_shadow_universe_20260625_eth_sol_xrp_bnb --output-dir review_queues/live_shadow_wp0014_20260626 --actions WATCH NO_SETUP --reviewers reviewer_a reviewer_b",
+      "result": "ready_for_review, 4 cases"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_resolved_case_cohort.py tests/test_live_shadow_review_queue.py tests/test_ontology_authority_audit.py tests/test_market_colleague_case.py tests/test_colleague_outcome_resolution.py -q",
+      "result": "17 passed in 2.03s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "386 passed in 25.89s"
+    }
+  ],
+  "real_data_output": "review_queues/live_shadow_wp0014_20260626/review_queue_manifest.json"
+}

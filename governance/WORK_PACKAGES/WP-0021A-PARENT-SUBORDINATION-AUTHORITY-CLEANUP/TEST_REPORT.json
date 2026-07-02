@@ -1,0 +1,45 @@
+{
+  "work_package": "WP-0021A-PARENT-SUBORDINATION-AUTHORITY-CLEANUP",
+  "date": "2026-06-27",
+  "status": "PASS_ACCEPTED",
+  "authority_mode": "observe_only_parent_subordination_and_boundary_cleanup",
+  "commands": [
+    {
+      "command": "PYTHONPATH=. .venv/bin/pytest tests/decision/test_btc_supply_retrace_regression.py tests/test_wp0021_professional_smc_interpretation.py -q",
+      "result": "10 passed in 1.51s"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python tools/check_authority_boundaries.py",
+      "result": "AUTHORITY BOUNDARY CHECK: PASS"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/pytest tests/test_smc_annotation_correctness.py tests/decision/test_btc_supply_retrace_regression.py tests/test_wp0021_professional_smc_interpretation.py tests/test_wp0020_market_colleague_gauntlet.py -q",
+      "result": "13 passed in 1.26s"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python -m compileall -q smc_desk/colleague/legacy_comparison.py smc_desk/colleague/wp0020_gauntlet.py tests/test_smc_annotation_correctness.py tests/decision/test_btc_supply_retrace_regression.py",
+      "result": "passed"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/pytest -q",
+      "result": "516 passed, 1 skipped in 69.60s"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python tools/check_governance_consistency.py",
+      "result": "GOVERNANCE CONSISTENCY: PASS"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python tools/check_authority_boundaries.py",
+      "result": "AUTHORITY BOUNDARY CHECK: PASS"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python - <<'PY' ... parse evidence/VALIDATION_REGISTRY.json governance/CURRENT_STATE.yaml governance/NEXT_ACTIONS.yaml",
+      "result": "PARSE PASS for validation registry, current state, and next actions"
+    }
+  ],
+  "authority_boundary": "PASS",
+  "market_edge_claimed": false,
+  "paper_execution": "disabled",
+  "live_execution": "disabled",
+  "capital_risk": 0
+}

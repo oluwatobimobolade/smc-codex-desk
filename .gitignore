@@ -64,3 +64,19 @@ tmp/
 # Old artifacts
 outputs/
 .playwright-cli/
+
+# Analysis run evidence packages (large binary artifacts, ~GBs)
+analysis_runs/
+
+# Temporary verification artifacts
+tmp_verification_charts_review/
+dummy.png
+dummy_clean.png
+
+# Generated run/evaluation artifact bundles (keep code, exclude outputs)
+tests/vision/cases/
+evaluation/pilot_rc1/
+evaluation/calibration_set/
+pilot_v1/reviewer_packs/
+review_queues/
+perception_pilot_reviewer_pack.zip

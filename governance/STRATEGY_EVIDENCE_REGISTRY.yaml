@@ -1,0 +1,81 @@
+rules:
+  daily_4h_1h_alignment:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: objective_4h_regime_plus_daily_veto
+    evidence: [Master Strategy Truth Audit.pdf, strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/STRATEGY_CONTRACT.yaml]
+    must_test: true
+  protected_structure:
+    status: OPERATIONAL_DEFINITION
+    active_v1_policy: perception_definition_not_strategy_direction_alone
+    evidence: [strategies/smc/STRUCTURE_DOCTRINE.md, smc_desk/perception/structure.py]
+  internal_external_structure:
+    status: OPERATIONAL_DEFINITION
+    active_v1_policy: internal_for_15m_confirmation_external_for_context
+    evidence: [strategies/smc/STRUCTURE_DOCTRINE.md]
+  liquidity_sweeps:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: required_confirmation_sequence_component
+    must_test_incremental_value: true
+  displacement:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: store_attributes_not_required_for_event_existence
+  fvgs:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: qualified_1h_fvg_location
+  order_blocks:
+    status: UNKNOWN
+    active_v1_policy: excluded
+  premium_discount:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: not_mandatory_in_v1
+  freshness_mitigation:
+    status: OPERATIONAL_DEFINITION
+    active_v1_policy: fvg_active_or_partial_no_close_through_far_boundary
+  inducement:
+    status: UNKNOWN
+    active_v1_policy: excluded
+  sessions:
+    status: UNKNOWN
+    active_v1_policy: stratification_feature_not_hard_gate
+  news_filters:
+    status: UNKNOWN
+    active_v1_policy: excluded
+  five_minute_confirmation:
+    status: DEPRECATED_FOR_V1
+    active_v1_policy: excluded
+  fifteen_minute_confirmation:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: core_sequence
+  fixed_3r_target:
+    status: FAILED_OR_UNSUPPORTED
+    active_v1_policy: excluded
+  liquidity_targets:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: nearest_active_1h_or_4h_external_level
+  atr_stop_buffers:
+    status: EMPIRICALLY_SUPPORTED_PRINCIPLE
+    active_v1_policy: max_2_ticks_or_0_15_atr14
+  confluence_scores:
+    status: FAILED_OR_UNSUPPORTED
+    active_v1_policy: no_sizing_or_authority_by_score
+  risk_1pct_2pct:
+    status: DEPRECATED_FOR_V1
+    active_v1_policy: capital_risk_zero
+  fixed_holding_period:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: 48_completed_15m_expiry
+  retracement_entries:
+    status: DEPRECATED_FOR_V1
+    active_v1_policy: excluded
+  market_on_close_entries:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: confirmation_candle_close_only
+  state_machine_sequence:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: canonical_states_defined
+  vision_veto_downgrade:
+    status: PROJECT_HYPOTHESIS
+    active_v1_policy: source_mismatch_or_unverified_capture_can_abstain_not_override_prices
+  ml_setup_scoring:
+    status: FAILED_OR_UNSUPPORTED
+    active_v1_policy: excluded_from_active_strategy

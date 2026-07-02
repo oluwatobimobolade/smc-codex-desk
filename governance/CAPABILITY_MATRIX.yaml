@@ -1,0 +1,249 @@
+capabilities:
+  market_data_binance_usdm_15m:
+    name: Binance USD-M canonical 15m OHLCV
+    owner: Market Truth Engineer
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: true
+    certified: false
+    authority_mode: research_authority
+    evidence:
+      - data/ohlcv/binance_futures/DATA_QUALITY_SUMMARY.md
+      - reports/LOCAL_FIRST_RESEARCH_LAB_IMPLEMENTATION_REPORT_2026-06-25.md
+    known_failures:
+      - native Binance HTF volume metadata mismatch on isolated 2025-01-29 1H candles
+    next_required_test: current live-tail and native reconciliation package
+  timeframe_reconstruction:
+    name: 15m to 1H/4H/1D reconstruction
+    owner: Market Truth Engineer
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: true
+    certified: false
+    authority_mode: active_research_authority
+    evidence:
+      - tools/derive_htf_from_15m.py
+      - tools/compare_resampled_to_native.py
+    known_failures: []
+    next_required_test: per-derived-candle provenance with source candle IDs
+  market_colleague_case_workflow:
+    name: Market-colleague analysis run package
+    owner: Chief Architect
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: true
+    human_adjudicated: false
+    certified: false
+    authority_mode: research_foundation
+    evidence:
+      - tools/run_market_colleague_case.py
+      - reports/MARKET_COLLEAGUE_CASE_WORKFLOW_REPORT_2026-06-25.md
+      - reports/current/COLLEAGUE_ORCHESTRATOR_WP0002_REPORT.md
+      - reports/current/TRADINGVIEW_ALIGNMENT_WP0003_REPORT.md
+      - reports/current/MTF_SCENARIO_BRAIN_WP0004_REPORT.md
+      - reports/current/LIVE_WEBBRIDGE_ALIGNMENT_WP0005_REPORT.md
+      - reports/current/SEMANTIC_CASE_MEMORY_OUTCOME_WP0006_0008_REPORT.md
+      - reports/current/LIVE_SHADOW_UNIVERSE_WP0009_REPORT.md
+      - reports/current/OUTCOME_RESOLUTION_WP0010_REPORT.md
+      - reports/current/TRUTH_BOUNDARY_REPAIR_WP0011_REPORT.md
+      - reports/current/LEGACY_AUTHORITY_ISOLATION_WP0012_REPORT.md
+      - reports/current/RESOLVED_CASE_COHORT_WP0013_REPORT.md
+      - reports/current/LIVE_SHADOW_REVIEW_LOOP_WP0014_REPORT.md
+      - reports/current/ONTOLOGY_AUTHORITY_SPLIT_WP0015_REPORT.md
+      - reports/current/RUNTIME_CONFIG_SPLIT_WP0016.md
+      - reports/current/BTCUSDT_LIVE_SHADOW_WP0016_REPORT.md
+      - reports/current/BASELINE_RECONCILIATION_WP0017C_REPORT.md
+    known_failures:
+      - OB, inducement, breaker, and liquidity objects are candidate/proxy semantics, not adjudicated gold labels
+      - similar-case retrieval is deterministic context, not calibrated forecast probability
+      - BTCUSDT live-shadow failed because verified live OHLCV could not be acquired; visual screenshots remained observe-only
+      - historical evidence files preserve older 389/405/426/453 test-count claims; latest validation registry supersedes them
+    next_required_test: live OHLCV reliability repair and adjudicated human review completion
+  market_colleague_gauntlet:
+    name: End-to-end market colleague gauntlet
+    owner: Market Colleague Architect
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: true
+    human_adjudicated: false
+    certified: false
+    authority_mode: observe_only_research_foundation
+    evidence:
+      - tools/run_wp0020_market_colleague_gauntlet.py
+      - smc_desk/colleague/wp0020_gauntlet.py
+      - analysis_runs/WP0020_MARKET_COLLEAGUE_GAUNTLET_BTCUSDT/11_final_report/gauntlet_report.json
+      - governance/WORK_PACKAGES/WP-0020-MARKET-COLLEAGUE-GAUNTLET/TEST_REPORT.json
+      - reports/current/MARKET_COLLEAGUE_GAUNTLET_WP0020_REPORT.md
+    known_failures:
+      - CSV gauntlet passed with TradingView screenshots available, but the visual manifest still marks candle-state timing as visual-only and not DOM-verified.
+      - This validates observation/recreation/reasoning plumbing only; it does not certify strategy edge or execution.
+    next_required_test: add DOM-verified TradingView chart-state extraction while keeping any mismatch as REVIEW_REQUIRED rather than market truth
+  perception_engine_v2:
+    name: PerceptionEngineV2
+    owner: Ontology Steward
+    implemented: true
+    unit_tested: true
+    integration_tested: partial
+    real_data_tested: partial
+    human_adjudicated: false
+    certified: false
+    authority_mode: research_authority
+    evidence:
+      - smc_desk/perception/engine_v2.py
+      - specs/PERCEPTION_ONTOLOGY_V2.yaml
+      - specs/PERCEPTION_DETECTOR_CONFIG_V2.yaml
+      - reports/current/ONTOLOGY_AUTHORITY_AUDIT_WP0015.json
+      - reports/current/RUNTIME_CONFIG_SPLIT_WP0016.json
+    known_failures:
+      - incomplete support for OB, inducement, supply/demand, breakers, scenario semantics
+    next_required_test: semantic object audit after split runtime migration
+  kimi_webbridge_tradingview:
+    name: Kimi WebBridge TradingView alignment contract
+    owner: KimiWebBridge Engineer
+    implemented: partial
+    unit_tested: true
+    integration_tested: partial
+    real_data_tested: true
+    certified: false
+    authority_mode: observe_only
+    evidence:
+      - tools/smc_webbridge_analyst.py
+      - tools/build_tradingview_alignment_manifest.py
+      - smc_desk/vision/kimi_webbridge.py
+      - smc_desk/colleague/tradingview_alignment.py
+      - smc_desk/colleague/tradingview_live_manifest.py
+      - smc_desk/colleague/live_shadow.py
+      - tests/test_market_colleague_case.py
+      - analysis_runs/BTCUSDT_20260619_2345_wp0003_wp0004_smoke/external/alignment_report.json
+      - analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/external/alignment_report.json
+      - analysis_runs/live_shadow_universe_20260625_eth_sol_xrp_bnb/summary.json
+      - analysis_runs/live_btcusdt_wp0016_20260626/visual_only/screenshots/
+    known_failures:
+      - screenshot-only manifests now correctly fail strict alignment
+      - live shadow uses TradingView/WebBridge as observe-only evidence, not market authority
+      - Kimi visual screenshots can succeed while TradingView OHLCV extraction times out
+      - external screenshot helper expected base64 but WebBridge v1.10.0 returned a local path; direct daemon path copy was used for WP-0016 evidence
+    next_required_test: live OHLCV route health checks, smaller retry windows, and periodic repeated live shadow runs
+  semantic_candidate_graph:
+    name: SMC semantic candidate graph
+    owner: Scenario Brain Engineer
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: true
+    human_adjudicated: false
+    certified: false
+    authority_mode: research_context_only
+    evidence:
+      - smc_desk/colleague/smc_semantics.py
+      - analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/perception/mtf_state_graph.json
+    known_failures:
+      - order blocks are proxies from FVG origin, not certified OB labels
+      - inducement and breaker are candidates requiring sweep/displacement or human review
+    next_required_test: human-reviewed semantic graph quality audit
+  historical_case_memory:
+    name: Deterministic similar-case retrieval
+    owner: Case Memory Engineer
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: true
+    human_adjudicated: false
+    certified: false
+    authority_mode: research_context_only
+    evidence:
+      - smc_desk/colleague/similar_cases.py
+      - analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/prediction/similar_cases.json
+    known_failures:
+      - matching is signature overlap only, not outcome-calibrated retrieval
+    next_required_test: retrieval audit after 50+ resolved cases
+  outcome_contracts:
+    name: Pending outcome contracts, event ledger, and future-candle resolver
+    owner: Outcome Researcher
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: true
+    certified: false
+    authority_mode: research_observation_only
+    evidence:
+      - smc_desk/colleague/outcome_logging.py
+      - smc_desk/colleague/outcome_resolution.py
+      - tools/resolve_colleague_outcome.py
+      - tools/build_resolved_case_cohort.py
+      - analysis_runs/resolved_case_cohort_wp0013_20260626/summary.json
+      - analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/outcome/pending.json
+      - analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/perception/event_ledger.jsonl
+      - analysis_runs/BTCUSDT_20260618_1200_outcome_resolution_smoke/outcome/resolution.json
+    known_failures:
+      - live-shadow outcomes due on 2026-06-26 are still pending until future candles arrive
+      - resolver is not yet a fee/slippage backtest engine
+    next_required_test: resolved cohort containing WATCH/disabled-signal buckets plus cost-aware hypothetical tracking
+  human_review_loop:
+    name: Live-shadow human review queue
+    owner: Adjudication Lead
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: true
+    human_adjudicated: false
+    certified: false
+    authority_mode: review_queue_only_not_gold_truth
+    evidence:
+      - tools/build_live_shadow_review_queue.py
+      - review_queues/live_shadow_wp0014_20260626/review_queue_manifest.json
+      - reports/current/LIVE_SHADOW_REVIEW_LOOP_WP0014_REPORT.md
+    known_failures:
+      - reviewer templates are blank until humans fill them
+      - no adjudicated labels exist from this queue yet
+    next_required_test: completed reviewer_a/reviewer_b files plus adjudicator resolution
+  truth_boundary:
+    name: Closed-candle availability and causality boundary
+    owner: Truth Boundary Engineer
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: true
+    certified: false
+    authority_mode: research_foundation
+    evidence:
+      - smc_desk/colleague/run_context.py
+      - smc_desk/mtf.py
+      - tests/test_truth_boundary.py
+      - governance/WORK_PACKAGES/WP-0011-TRUTH-BOUNDARY-REPAIR/TEST_REPORT.json
+    known_failures:
+      - Historical CSVs do not carry real live ingestion latency; availability is modelled by scheduled candle close for historical research.
+    next_required_test: explicit live ingestion timestamps and provider-delay accounting
+  baseline_reconciliation:
+    name: Current local baseline reconciliation
+    owner: Baseline Steward
+    implemented: true
+    unit_tested: true
+    integration_tested: true
+    real_data_tested: false
+    certified: false
+    authority_mode: baseline_integrity_only
+    evidence:
+      - governance/WORK_PACKAGES/WP-0017C-BASELINE-RECONCILIATION/TEST_REPORT.json
+      - reports/current/BASELINE_RECONCILIATION_WP0017C_REPORT.md
+    known_failures:
+      - working tree remains dirty and must be intentionally frozen or cleaned before release packaging
+    next_required_test: live OHLCV route smoke under the repaired 469-pass baseline
+  prediction_models:
+    name: Predictive research scaffolding
+    owner: Quant Researcher
+    implemented: partial
+    unit_tested: partial
+    integration_tested: partial
+    real_data_tested: false
+    certified: false
+    authority_mode: research_only
+    evidence:
+      - smc_desk/prediction/
+    known_failures:
+      - no validated event dataset or calibrated live forecast authority
+    next_required_test: matched controls and walk-forward after setup events are frozen

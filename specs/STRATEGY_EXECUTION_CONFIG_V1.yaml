@@ -1,0 +1,32 @@
+config_id: STRATEGY_EXECUTION_CONFIG_V1
+status: split_contract_ready_code_migration_pending
+authority: strategy_sequence_risk_and_decision_parameters
+source_monolith: specs/PERCEPTION_ONTOLOGY_V2.yaml
+strategy_profile: specs/STRATEGY_PROFILE_SWEEP_RETRACE_V1.yaml
+decision_policy: specs/DECISION_POLICY_V1.yaml
+
+sequence_context:
+  confirmation_lookback: 24
+  max_zone_age_bars: 160
+
+poi_and_approach:
+  poi_proximity_atr: 2.0
+  htf_poi_watch_distance_atr: 1.5
+  htf_approach_lookback_bars: 4
+  min_poi_width_bps: 0.0
+  require_fresh_poi: true
+
+risk_management:
+  risk_reward_floor: 3.0
+  structural_stop_margin_bps: 10.0
+  stop_buffer_atr_mult: 0.75
+  capital_risk: 0
+
+authority_modes:
+  vision_authority_mode: observe_only
+  paper_execution: disabled
+  live_execution: disabled
+
+promotion_policy:
+  market_edge_claimed: false
+  reason: This file defines research parameters only. It does not certify a trading edge.

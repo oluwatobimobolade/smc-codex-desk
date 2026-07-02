@@ -1,0 +1,38 @@
+authority_levels:
+  level_1_market_truth:
+    examples: [ohlcv, timestamps, venue, contract, fees, funding, candle_completion]
+    authority: highest_factual_authority
+    current_implementation: [smc_desk/data, tools/sync_market_data.py, data/ohlcv/binance_futures]
+  level_2_mathematical_geometry:
+    examples: [price_crossed_level, body_close, fvg_boundaries, mitigation_percentage]
+    authority: deterministic_within_data_and_definition
+    current_implementation: [smc_desk/perception, smc_desk/engine.py]
+  level_3_operational_perception:
+    examples: [swing, protected_high, protected_low, BOS, CHoCH, liquidity_sweep]
+    authority: frozen_ontology_research_authority
+    current_implementation: [specs/PERCEPTION_ONTOLOGY_V2.yaml, smc_desk/perception]
+  level_4_human_adjudicated_interpretation:
+    examples: [ambiguous_structure_significance, professional_scenario_relevance]
+    authority: reference_under_review_process
+    current_implementation: [smc_desk/evaluation, tools/build_local_case_lab.py]
+  level_5_empirical_outcome_evidence:
+    examples: [target_first_rate, expected_R, walk_forward_result]
+    authority: conditional_on_scope_and_methodology
+    current_implementation: [backtests, smc_desk/prediction]
+  level_6_ai_or_trader_narrative:
+    examples: [intent_story, likely_manipulation, institutional_accumulation]
+    authority: hypothesis_only
+    current_implementation: [reports, colleague_thesis]
+
+permissions:
+  may_modify_market_truth: [Market Truth Engineer, Release Manager]
+  may_modify_ontology: [Ontology Steward proposal, Trader review, Evaluation review, Architect review, release approval]
+  may_modify_active_strategy_candidate: [Strategy Engineer, Quant Researcher, Release Manager]
+  may_grant_predictive_authority: [Release Council after validation, holdout, live shadow, calibration]
+  may_grant_live_execution_authority: []
+
+prohibited_overrides:
+  - lower_authority_level_may_not_silently_override_higher_level
+  - vision_may_not_override_ohlcv_price_authority
+  - ai_labels_may_not_become_gold_without_human_adjudication
+  - profitability_claims_require_economic_evidence

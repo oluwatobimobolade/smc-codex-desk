@@ -1,0 +1,150 @@
+{
+  "audit_version": "1.0",
+  "generated_at": "2026-06-26T12:17:21.572094+00:00",
+  "git_commit": "a2d92e074e813e833248d225b39be6cfe16c4dbe",
+  "test_baseline": "453 tests",
+  "verdict": "APPROVED_FOR_NEXT_RESEARCH_PHASE",
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "implemented_tested": 2,
+    "not_runnable_locally": 13
+  },
+  "stages": [
+    {
+      "stage": 0,
+      "name": "Baseline Freeze",
+      "status": "PASS",
+      "detail": "commit=a2d92e074e81, tests=453"
+    },
+    {
+      "stage": 1,
+      "name": "Clean Clone Reproducibility",
+      "status": "NOT_RUN",
+      "detail": "Requires independent environment setup outside this workspace"
+    },
+    {
+      "stage": 2,
+      "name": "Governance Consistency",
+      "status": "PASS",
+      "detail": "GOVERNANCE CONSISTENCY: PASS\nNo inconsistencies found."
+    },
+    {
+      "stage": 3,
+      "name": "Legacy Authority Isolation",
+      "status": "PASS",
+      "detail": "AUTHORITY BOUNDARY CHECK: PASS\nNo legacy engine imports found in active-authority packages."
+    },
+    {
+      "stage": 4,
+      "name": "REST Market Truth",
+      "status": "NOT_RUNNABLE_LOCALLY",
+      "detail": "Requires Binance API + WebSocket connectivity"
+    },
+    {
+      "stage": 5,
+      "name": "Live Candle Coordinator",
+      "status": "NOT_RUNNABLE_LOCALLY",
+      "detail": "Requires Binance API + WebSocket connectivity"
+    },
+    {
+      "stage": 6,
+      "name": "Timeframe Reconstruction",
+      "status": "NOT_RUN",
+      "detail": "Tests exist but external audit tooling not yet integrated"
+    },
+    {
+      "stage": 7,
+      "name": "PEV2 Causality",
+      "status": "IMPLEMENTED_TESTED",
+      "detail": "B1 10k-timestamp causality test passes (tests/stress_tests/test_B1_causality.py)"
+    },
+    {
+      "stage": 8,
+      "name": "FVG Lifecycle",
+      "status": "PARTIALLY_IMPLEMENTED",
+      "detail": "FVG_CREATED and FVG_MITIGATED events exist; FIRST_TOUCHED, PARTIALLY_MITIGATED pending"
+    },
+    {
+      "stage": 9,
+      "name": "Event Ledger Replay",
+      "status": "PASS",
+      "detail": "14 event ledger tests pass (duplicate suppression, replay idempotence, versioning)"
+    },
+    {
+      "stage": 10,
+      "name": "MTF Graph Integrity",
+      "status": "PASS",
+      "detail": "8 MTF tests pass (per-timeframe completeness, rich relationships, determinism)"
+    },
+    {
+      "stage": 11,
+      "name": "Decision Pipeline",
+      "status": "PASS",
+      "detail": "17 decision tests pass (no-legacy, determinism, state transitions, evidence completeness)"
+    },
+    {
+      "stage": 12,
+      "name": "End-to-End Replay",
+      "status": "NOT_RUN",
+      "detail": "Requires recorded WS stream fixture creation"
+    },
+    {
+      "stage": 13,
+      "name": "Stage 13",
+      "status": "NOT_RUN",
+      "detail": "Pending dedicated audit tooling"
+    },
+    {
+      "stage": 14,
+      "name": "Stage 14",
+      "status": "NOT_RUN",
+      "detail": "Pending dedicated audit tooling"
+    },
+    {
+      "stage": 15,
+      "name": "Stage 15",
+      "status": "NOT_RUN",
+      "detail": "Pending dedicated audit tooling"
+    },
+    {
+      "stage": 16,
+      "name": "Stage 16",
+      "status": "NOT_RUN",
+      "detail": "Pending dedicated audit tooling"
+    },
+    {
+      "stage": 17,
+      "name": "Stage 17",
+      "status": "NOT_RUN",
+      "detail": "Pending dedicated audit tooling"
+    },
+    {
+      "stage": 18,
+      "name": "Stage 18",
+      "status": "NOT_RUN",
+      "detail": "Pending dedicated audit tooling"
+    },
+    {
+      "stage": 19,
+      "name": "Stage 19",
+      "status": "NOT_RUN",
+      "detail": "Pending dedicated audit tooling"
+    },
+    {
+      "stage": 20,
+      "name": "Stage 20",
+      "status": "NOT_RUN",
+      "detail": "Pending dedicated audit tooling"
+    }
+  ],
+  "claims": {
+    "legacy_authority_isolated": true,
+    "governance_consistent": true,
+    "no_paper_execute": true,
+    "dual_lens_unchanged": true,
+    "strategy_authority": "disabled",
+    "execution_authority": "disabled",
+    "prediction_authority": "disabled"
+  }
+}

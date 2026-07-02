@@ -1,0 +1,44 @@
+{
+  "work_package": "WP-0031-INTRADAY-DOCTRINE-AUDIT",
+  "timestamp_utc": "2026-06-29T10:04:41Z",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_truth_boundary.py -q",
+      "result": "10 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0031_doctrine_profile.py tests/test_wp0031_setup_and_targets.py tests/test_wp0031_stop_and_rejection.py tests/test_wp0031_trade_rejections.py tests/test_wp0031_narrative_and_charts.py -q",
+      "result": "29 passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "clean"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "591 passed, 1 skipped"
+    }
+  ],
+  "fixes_applied": [
+    {
+      "file": "smc_desk/colleague/run_context.py",
+      "summary": "Restored timestamp-gap detection by setting contains_gap when a candle open time does not equal the previous candle close time."
+    },
+    {
+      "files": [
+        "smc_desk/evaluation/human_challenge.py",
+        "smc_desk/regime.py",
+        "smc_desk/vision/provider_registry.py",
+        "tools/build_research_dataset.py",
+        "tools/train_ml_model.py"
+      ],
+      "summary": "Removed whitespace/EOF issues reported by git diff --check."
+    }
+  ],
+  "verdict": "PASS_AFTER_REPAIR",
+  "remaining_cautions": [
+    "Large dirty worktree still needs product-level review before acceptance.",
+    "External vision providers must remain non-authoritative in the no-API/local-first phase.",
+    "Green tests do not imply trading edge or live execution readiness."
+  ]
+}

@@ -63,6 +63,8 @@ class PerceptionGoldBatchTests(unittest.TestCase):
             audit = audit_case(case_path)
             brief = (case_path.parent / "blind_review.md").read_text()
             adjudicated = json.loads((case_path.parent / "adjudicated.json").read_text())
+            weak_labels = json.loads((case_path.parent / "engine_weak_labels.json").read_text())
+            case_manifest = json.loads((case_path.parent / "case_manifest.json").read_text())
 
         self.assertTrue(audit["usable_for_machine_research"])
         self.assertFalse(audit["usable_for_perception_evaluation"])
@@ -70,6 +72,10 @@ class PerceptionGoldBatchTests(unittest.TestCase):
         self.assertNotIn("engine overlay", brief.lower())
         self.assertEqual(adjudicated["perception_annotations"]["reviewer_ids"], ["reviewer_a", "reviewer_b"])
         self.assertEqual(adjudicated["perception_annotations"]["label_status"], "draft")
+        self.assertEqual(weak_labels["truth_status"], "weak_operational_labels_only")
+        self.assertIn("not_gold_truth", weak_labels["provenance"])
+        self.assertTrue(case_manifest["no_future_leakage"]["analysis_window_ends_at_decision"])
+        self.assertEqual(case_manifest["truth_policy"]["engine_weak_labels"], "weak_operational_labels_only_not_gold_truth")
 
 
 if __name__ == "__main__":

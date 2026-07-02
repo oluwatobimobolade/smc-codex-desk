@@ -1,0 +1,18 @@
+{
+  "work_package": "WP-0007-HISTORICAL-CASE-MEMORY",
+  "date": "2026-06-25",
+  "status": "PASS_INITIAL_SLICE",
+  "evidence": {
+    "code": "smc_desk/colleague/similar_cases.py",
+    "retrieval": "analysis_runs/BTCUSDT_live_tv_aligned_colleague_20260625/prediction/similar_cases.json"
+  },
+  "observed": {
+    "status": "retrieved",
+    "matches": 2,
+    "authority": "research_context_only_not_predictive_probability"
+  },
+  "validation": {
+    "focused": "12 passed in 1.38s",
+    "full_pytest": "354 passed in 25.18s"
+  }
+}

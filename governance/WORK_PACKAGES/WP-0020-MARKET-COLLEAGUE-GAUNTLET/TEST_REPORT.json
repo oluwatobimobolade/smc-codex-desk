@@ -1,0 +1,55 @@
+{
+  "work_package": "WP-0020-MARKET-COLLEAGUE-GAUNTLET",
+  "date": "2026-06-27",
+  "status": "PASS_ACCEPTED",
+  "authority_mode": "observe_only_research_foundation",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0020_market_colleague_gauntlet.py tests/test_chart_recreation_integrity.py tests/test_smc_annotation_correctness.py tests/test_visual_reconciliation_boundary.py tests/test_smc_thesis_evidence_links.py tests/test_cognitive_stress_false_confidence.py -q",
+      "result": "10 passed in 1.19s"
+    },
+    {
+      "command": ".venv/bin/python tools/run_wp0020_market_colleague_gauntlet.py --symbol BTCUSDT --source data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv --out analysis_runs/WP0020_MARKET_COLLEAGUE_GAUNTLET_BTCUSDT --mode csv --visual-mode capture",
+      "result": "PASS; tradingview_screenshots_captured=4; final_colleague_action=NO_SIGNAL"
+    },
+    {
+      "command": "PIL screenshot sanity check over analysis_runs/WP0020_MARKET_COLLEAGUE_GAUNTLET_BTCUSDT/07_tradingview_visual/screenshots/*.png",
+      "result": "4 screenshots present, 2400x1366 each, nonblank pixel extrema"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "506 passed, 1 skipped in 71.34s"
+    },
+    {
+      "command": ".venv/bin/python tools/check_governance_consistency.py",
+      "result": "GOVERNANCE CONSISTENCY: PASS"
+    }
+  ],
+  "gauntlet_report": "analysis_runs/WP0020_MARKET_COLLEAGUE_GAUNTLET_BTCUSDT/11_final_report/gauntlet_report.json",
+  "summary": {
+    "live_route_result": "SKIPPED",
+    "route_failure_or_success_reason": "csv_mode_uses_local_verified_source",
+    "clean_charts_generated": 4,
+    "annotated_charts_generated": 4,
+    "tradingview_screenshots_captured": 4,
+    "visual_reconciliation_result": "VISUAL_AUDIT_AVAILABLE",
+    "perception_event_count": 316,
+    "regime_result": "ranging",
+    "contradiction_result": "INVALIDATE_ALL",
+    "uncertainty_score": 0.6562,
+    "refusal_result": "NO_SIGNAL",
+    "final_colleague_action": "NO_SIGNAL",
+    "thesis_generated": true,
+    "memory_record_count": 1,
+    "final_gauntlet_status": "PASS",
+    "failed_layer": null
+  },
+  "market_edge_claimed": false,
+  "paper_execution": "disabled",
+  "live_execution": "disabled",
+  "capital_risk": 0
+}
