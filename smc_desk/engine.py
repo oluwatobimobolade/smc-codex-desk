@@ -632,6 +632,50 @@ def _build_trade_plan_for_direction(
         and ((zone.high - zone.low) / max(current_close, 1e-9) * 10000.0 >= config.min_poi_width_bps)
     ]
 
+    order_block_candidates = [zone for zone in poi_candidates if zone.kind == "order_block"]
+
+    def is_deeper(candidate: Zone, reference: Zone) -> bool:
+        candidate_center = (candidate.low + candidate.high) / 2.0
+        reference_center = (reference.low + reference.high) / 2.0
+        if direction == "bullish":
+            return candidate_center < reference_center
+        if direction == "bearish":
+            return candidate_center > reference_center
+        return False
+
+    def reaction_context_adjustment(zone: Zone) -> tuple[float, str | None]:
+        """Prefer the deeper origin OB when a shallow zone sits in front of it.
+
+        The closest POI often supplies inducement/liquidity. FVGs may react, but
+        they are secondary unless no protected-range-valid OB sits behind them.
+        This ranking only changes POI preference; it does not create execution
+        permission without sweep, displacement, confirmation, stop, and RR.
+        """
+        same_tf_deeper_obs = [
+            ob
+            for ob in order_block_candidates
+            if ob is not zone and is_deeper(ob, zone)
+        ]
+        front_zones = [
+            other
+            for other in poi_candidates
+            if other is not zone and is_deeper(zone, other)
+        ]
+        if zone.kind == "order_block":
+            if same_tf_deeper_obs:
+                return -0.10, "shallow_ob_may_be_inducement_in_front_of_deeper_ob"
+            if front_zones:
+                return 0.14, "deeper_origin_ob_preferred_after_front_inducement"
+            return 0.04, "standalone_order_block_reaction_candidate"
+        if zone.kind == "fvg":
+            overlaps_ob = any(max(zone.low, ob.low) <= min(zone.high, ob.high) for ob in order_block_candidates)
+            if overlaps_ob:
+                return 0.03, "fvg_overlaps_order_block_confluence"
+            if same_tf_deeper_obs:
+                return -0.12, "fvg_is_path_or_inducement_before_deeper_ob"
+            return -0.05, "fvg_secondary_reaction_candidate"
+        return 0.0, None
+
     def poi_rank(zone: Zone) -> float:
         center = (zone.low + zone.high) / 2.0
         distance_penalty = min(0.25, abs(center - current_close) / max(atr, 1e-9) * 0.035)
@@ -640,11 +684,12 @@ def _build_trade_plan_for_direction(
             or (direction == "bearish" and zone.low >= midpoint)
         ) else 0.0
         status_bonus = 0.06 if zone.status == "fresh" else 0.02 if zone.status == "partial" else 0.0
+        reaction_bonus, _ = reaction_context_adjustment(zone)
         if poi_selection == "nearest":
-            return max(0.0, min(1.0, zone.score + status_bonus - distance_penalty * 1.4))
+            return max(0.0, min(1.0, zone.score + status_bonus + reaction_bonus * 0.6 - distance_penalty * 1.4))
         if poi_selection == "best_location":
-            return max(0.0, min(1.0, zone.score + location_bonus * 1.5 + status_bonus))
-        return max(0.0, min(1.0, zone.score + location_bonus + status_bonus - distance_penalty))
+            return max(0.0, min(1.0, zone.score + location_bonus * 1.5 + status_bonus + reaction_bonus))
+        return max(0.0, min(1.0, zone.score + location_bonus + status_bonus + reaction_bonus - distance_penalty))
 
     if direction == "bullish":
         future_or_near = [zone for zone in poi_candidates if zone.low <= current_close + atr * config.poi_proximity_atr]
@@ -667,6 +712,7 @@ def _build_trade_plan_for_direction(
                 if config.require_fresh_poi
                 else "Prefer the selected bullish POI only while it remains fresh or partially mitigated in discount."
             ),
+            "Treat FVG-only pockets as secondary; prefer the deeper origin OB when a shallow POI sits in front as inducement.",
         ]
     elif direction == "bearish":
         future_or_near = [zone for zone in poi_candidates if zone.high >= current_close - atr * config.poi_proximity_atr]
@@ -689,6 +735,7 @@ def _build_trade_plan_for_direction(
                 if config.require_fresh_poi
                 else "Prefer the selected bearish POI only while it remains fresh or partially mitigated in premium."
             ),
+            "Treat FVG-only pockets as secondary; prefer the deeper origin OB when a shallow POI sits in front as inducement.",
         ]
     else:
         targets = []
@@ -798,6 +845,10 @@ def _build_trade_plan_for_direction(
         warnings.append("Sweep and structure break are out of sequence; wait for a clean sweep-then-break model.")
     if selected_poi and not poi_location_ok:
         warnings.append("Selected POI is not cleanly aligned with premium/discount rules.")
+    if selected_poi:
+        _, reaction_note = reaction_context_adjustment(selected_poi)
+        if reaction_note:
+            warnings.append(f"POI reaction-context note: {reaction_note}.")
     if selected_poi and not price_near_poi:
         warnings.append("Price is not at or near the selected POI; treat this as a watchlist scenario.")
     if selected_poi and not has_stop_buffer:

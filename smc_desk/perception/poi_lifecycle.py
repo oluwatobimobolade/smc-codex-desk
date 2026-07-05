@@ -398,7 +398,7 @@ def build_poi_selection(pois_by_tf: Mapping[str, list[Mapping[str, Any]]], *, di
     if selected is None and parent_scope:
         status = "WATCH_NEW_LOWER_SUPPLY_FORMATION" if direction == "bearish" else "WATCH_NEW_HIGHER_DEMAND_FORMATION"
     return {
-        "method": "ranked_active_poi_v2_protected_range_first",
+        "method": "ranked_active_poi_v3_protected_range_first_deeper_ob_reaction_priority",
         "status": status,
         "selected_active_poi": selected,
         "selected_poi_id": None if selected is None else selected.get("poi_id"),
@@ -453,11 +453,24 @@ def _dedupe_candidates(pois_by_tf: Mapping[str, list[Mapping[str, Any]]], *, dir
 
 def _rank_candidates(candidates: list[dict[str, Any]], *, direction: str) -> list[dict[str, Any]]:
     ranked: list[dict[str, Any]] = []
+    reaction_context = _reaction_context_by_candidate(candidates, direction=direction)
     for poi in candidates:
-        score, reasons, breakdown = _poi_rank_score(poi, timeframe=str(poi.get("timeframe", "")), direction=direction)
+        context = reaction_context.get(_candidate_key(poi), {})
+        score, reasons, breakdown = _poi_rank_score(
+            poi,
+            timeframe=str(poi.get("timeframe", "")),
+            direction=direction,
+            reaction_context=context,
+        )
         poi["selection_score"] = round(score, 4)
         poi["selection_reasons"] = reasons
         poi["score_breakdown"] = {key: round(value, 4) for key, value in breakdown.items()}
+        if context:
+            poi["reaction_role"] = context.get("reaction_role")
+            if context.get("deeper_reaction_poi_id"):
+                poi["deeper_reaction_poi_id"] = context.get("deeper_reaction_poi_id")
+            if context.get("front_inducement_poi_ids"):
+                poi["front_inducement_poi_ids"] = context.get("front_inducement_poi_ids")
         ranked.append(poi)
     ranked.sort(key=lambda poi: poi.get("selection_score", 0.0), reverse=True)
     for index, poi in enumerate(ranked, start=1):
@@ -465,7 +478,13 @@ def _rank_candidates(candidates: list[dict[str, Any]], *, direction: str) -> lis
     return ranked
 
 
-def _poi_rank_score(poi: Mapping[str, Any], *, timeframe: str, direction: str) -> tuple[float, list[str], dict[str, float]]:
+def _poi_rank_score(
+    poi: Mapping[str, Any],
+    *,
+    timeframe: str,
+    direction: str,
+    reaction_context: Mapping[str, Any] | None = None,
+) -> tuple[float, list[str], dict[str, float]]:
     reasons: list[str] = []
     score = 0.0
     breakdown: dict[str, float] = {}
@@ -536,11 +555,216 @@ def _poi_rank_score(poi: Mapping[str, Any], *, timeframe: str, direction: str) -
     else:
         breakdown["distance"] = 0.0
 
+    context = reaction_context or {}
+    reaction_score = float(context.get("reaction_context_score", 0.0) or 0.0)
+    score += reaction_score
+    breakdown["inducement_liquidity_context"] = reaction_score
+    role = str(context.get("reaction_role") or "")
+    if role:
+        reasons.append(f"reaction_role:{role}")
+    if context.get("deeper_reaction_poi_id"):
+        reasons.append(f"deeper_reaction_poi:{context['deeper_reaction_poi_id']}")
+    if context.get("front_inducement_poi_ids"):
+        reasons.append("front_inducement_pois:" + ",".join(context["front_inducement_poi_ids"]))
+    breakdown["fvg_order_block_overlap"] = float(context.get("fvg_order_block_overlap", 0.0) or 0.0)
+
     breakdown.setdefault("premium_discount", 0.0)
     breakdown.setdefault("mitigation_status", 0.0)
-    breakdown.setdefault("fvg_order_block_overlap", 0.0)
-    breakdown.setdefault("inducement_liquidity_context", 0.0)
     return score, reasons, breakdown
+
+
+def _reaction_context_by_candidate(candidates: list[dict[str, Any]], *, direction: str) -> dict[str, dict[str, Any]]:
+    """Classify shallow inducement-risk POIs versus deeper reaction POIs.
+
+    SMC doctrine distinction:
+    - FVGs are imbalances. They may react, but they are secondary unless paired
+      with an order block or fresh rejection.
+    - A shallow POI sitting in front of a valid deeper same-leg OB is often the
+      inducement/liquidity that pulls price into the true reaction area.
+    - The deeper OB is not automatically executable; it only earns selection
+      priority as the watch/reaction POI.
+    """
+    active = [poi for poi in candidates if _active_setup_candidate(poi)]
+    order_blocks = [poi for poi in active if _is_order_block_poi(poi)]
+    contexts: dict[str, dict[str, Any]] = {}
+    for poi in candidates:
+        key = _candidate_key(poi)
+        context: dict[str, Any] = {
+            "reaction_role": "non_active_context",
+            "reaction_context_score": 0.0,
+            "fvg_order_block_overlap": 0.0,
+        }
+        if not _active_setup_candidate(poi):
+            contexts[key] = context
+            continue
+
+        if _is_order_block_poi(poi):
+            deeper = _same_tf_deeper_order_blocks(poi, order_blocks, direction=direction)
+            front = _front_same_tf_pois(poi, active, direction=direction)
+            if deeper:
+                paired = _nearest_deeper_order_block(poi, deeper, direction=direction)
+                context.update({
+                    "reaction_role": "front_inducement_risk",
+                    "reaction_context_score": -0.14,
+                    "deeper_reaction_poi_id": paired.get("poi_id"),
+                })
+            elif front:
+                context.update({
+                    "reaction_role": "deeper_order_block_reaction_candidate",
+                    "reaction_context_score": 0.20,
+                    "front_inducement_poi_ids": [
+                        str(item.get("poi_id"))
+                        for item in front[:3]
+                        if item.get("poi_id")
+                    ],
+                })
+            else:
+                context.update({
+                    "reaction_role": "standalone_order_block_reaction_candidate",
+                    "reaction_context_score": 0.06,
+                })
+        elif _is_fvg_poi(poi):
+            overlapping_obs = [ob for ob in order_blocks if _zones_overlap(poi, ob)]
+            deeper = _same_tf_deeper_order_blocks(poi, order_blocks, direction=direction)
+            if overlapping_obs:
+                context.update({
+                    "reaction_role": "fvg_order_block_overlap_confluence",
+                    "reaction_context_score": 0.04,
+                    "fvg_order_block_overlap": 0.04,
+                })
+            elif deeper:
+                paired = _nearest_deeper_order_block(poi, deeper, direction=direction)
+                context.update({
+                    "reaction_role": "fvg_path_to_deeper_order_block",
+                    "reaction_context_score": -0.16,
+                    "deeper_reaction_poi_id": paired.get("poi_id"),
+                })
+            else:
+                context.update({
+                    "reaction_role": "fvg_secondary_reaction_candidate",
+                    "reaction_context_score": -0.06,
+                })
+        else:
+            context.update({
+                "reaction_role": "non_ob_poi_context",
+                "reaction_context_score": -0.02,
+            })
+        contexts[key] = context
+    return contexts
+
+
+def _candidate_key(poi: Mapping[str, Any]) -> str:
+    return str(
+        poi.get("poi_id")
+        or "|".join(
+            [
+                str(poi.get("timeframe")),
+                str(poi.get("kind")),
+                str(poi.get("direction")),
+                str(poi.get("price_low")),
+                str(poi.get("price_high")),
+            ]
+        )
+    )
+
+
+def _active_setup_candidate(poi: Mapping[str, Any]) -> bool:
+    return poi.get("scope") == "active_setup" and poi.get("validity_status") == "VALID_ACTIVE_SETUP_POI"
+
+
+def _is_order_block_poi(poi: Mapping[str, Any]) -> bool:
+    return str(poi.get("created_by") or "").lower() == "order_block" or str(poi.get("kind") or "").lower() in {
+        "supply",
+        "demand",
+        "order_block",
+    }
+
+
+def _is_fvg_poi(poi: Mapping[str, Any]) -> bool:
+    return str(poi.get("created_by") or "").lower() == "fvg" or str(poi.get("kind") or "").lower() == "fvg"
+
+
+def _same_tf_deeper_order_blocks(
+    poi: Mapping[str, Any],
+    order_blocks: list[Mapping[str, Any]],
+    *,
+    direction: str,
+) -> list[Mapping[str, Any]]:
+    return [
+        ob
+        for ob in order_blocks
+        if _candidate_key(ob) != _candidate_key(poi)
+        and str(ob.get("timeframe")) == str(poi.get("timeframe"))
+        and _is_deeper_than(ob, poi, direction=direction)
+    ]
+
+
+def _front_same_tf_pois(
+    poi: Mapping[str, Any],
+    active: list[Mapping[str, Any]],
+    *,
+    direction: str,
+) -> list[Mapping[str, Any]]:
+    front = [
+        item
+        for item in active
+        if _candidate_key(item) != _candidate_key(poi)
+        and str(item.get("timeframe")) == str(poi.get("timeframe"))
+        and _is_deeper_than(poi, item, direction=direction)
+    ]
+    front.sort(key=lambda item: abs(_center(item) - _center(poi)) if _center(item) is not None and _center(poi) is not None else Decimal("999999"))
+    return front
+
+
+def _nearest_deeper_order_block(
+    poi: Mapping[str, Any],
+    deeper: list[Mapping[str, Any]],
+    *,
+    direction: str,
+) -> Mapping[str, Any]:
+    center = _center(poi)
+    if center is None:
+        return deeper[0]
+    return sorted(
+        deeper,
+        key=lambda item: abs((_center(item) or center) - center),
+    )[0]
+
+
+def _is_deeper_than(candidate: Mapping[str, Any], reference: Mapping[str, Any], *, direction: str) -> bool:
+    candidate_center = _center(candidate)
+    reference_center = _center(reference)
+    if candidate_center is None or reference_center is None:
+        return False
+    if direction == "bullish":
+        return candidate_center < reference_center
+    if direction == "bearish":
+        return candidate_center > reference_center
+    return False
+
+
+def _zones_overlap(left: Mapping[str, Any], right: Mapping[str, Any]) -> bool:
+    left_low, left_high = _bounds(left)
+    right_low, right_high = _bounds(right)
+    if None in {left_low, left_high, right_low, right_high}:
+        return False
+    assert left_low is not None and left_high is not None and right_low is not None and right_high is not None
+    return max(left_low, right_low) <= min(left_high, right_high)
+
+
+def _center(poi: Mapping[str, Any]) -> Decimal | None:
+    low, high = _bounds(poi)
+    if low is None or high is None:
+        return None
+    return (low + high) / Decimal("2")
+
+
+def _bounds(poi: Mapping[str, Any]) -> tuple[Decimal | None, Decimal | None]:
+    low = _to_decimal(poi.get("price_low"))
+    high = _to_decimal(poi.get("price_high"))
+    if low is None or high is None:
+        return None, None
+    return (min(low, high), max(low, high))
 
 
 def _scope_context(hierarchy: Mapping[str, Any]) -> dict[str, Decimal | None]:

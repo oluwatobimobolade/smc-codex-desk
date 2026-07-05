@@ -24,6 +24,7 @@ from smc_desk.brain.ai_smc_trader_brain import REASONING_ORDER
 from smc_desk.brain.llm_provider import CallableAISMCProvider, LLMCompletionRequest
 from smc_desk.colleague.orchestrator_v3 import run_ai_smc_orchestrator_v3
 from smc_desk.data.historical_backfill import fetch_historical_closed_ohlcv
+from smc_desk.perception.structure_narrative import build_structure_narrative, derive_strict_htf_bias
 
 
 BINANCE_BASE = "https://fapi.binance.com"
@@ -304,15 +305,22 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
     summaries = pack["ohlcv_summaries"]
     range_authority = pack.get("active_range_authority") or {}
     selected_range = range_authority.get("selected_range") if isinstance(range_authority, dict) else None
-    tf_bias = {tf: timeframe_bias(summary) for tf, summary in summaries.items()}
-    directional_votes = [bias for tf, bias in tf_bias.items() if tf in {"1d", "4h", "1h"} and bias in {"bullish", "bearish"}]
-    bullish = directional_votes.count("bullish")
-    bearish = directional_votes.count("bearish")
-    if bullish > bearish:
-        direction = "bullish"
-    elif bearish > bullish:
-        direction = "bearish"
-    else:
+    raw_tf_bias = {tf: timeframe_bias(summary) for tf, summary in summaries.items()}
+    structure_narrative = pack.get("structure_narrative")
+    if not isinstance(structure_narrative, dict):
+        structure_narrative = build_structure_narrative(
+            pack.get("detector_candidates", {}) or {},
+            raw_bias=raw_tf_bias,
+        )
+    tf_bias = _display_bias_labels(raw_tf_bias, structure_narrative)
+    vote_bias = _vote_bias_labels(raw_tf_bias, structure_narrative)
+    direction = derive_strict_htf_bias(vote_bias, fallback_bias=raw_tf_bias)
+    parent_child_context = structure_narrative.get("parent_child_context") if isinstance(structure_narrative, dict) else {}
+    if not isinstance(parent_child_context, dict):
+        parent_child_context = {}
+    parent_child_conflict = bool(parent_child_context.get("has_parent_child_conflict"))
+    parent_child_sentence = str(parent_child_context.get("thesis_sentence") or "").strip()
+    if parent_child_conflict:
         direction = "mixed"
     htf_direction = direction
 
@@ -323,8 +331,6 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
         mid = float(selected_range["equilibrium"])
         price_location = str(selected_range["price_location"])
         range_direction = str(selected_range.get("direction", ""))
-        if htf_direction == "mixed" and range_direction in {"bullish", "bearish"}:
-            direction = range_direction
         official_state = "WATCH_ONLY" if direction in {"bullish", "bearish"} else "THESIS_ONLY"
         active_range_payload = {
             "timeframe": active_tf,
@@ -369,7 +375,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
     target_price = low if direction == "bearish" and low is not None else high if direction == "bullish" and high is not None else None
     invalidation_price = high if direction == "bearish" and high is not None else low if direction == "bullish" and low is not None else None
     labels = [
-        {"text": f"HTF bias {direction}", "kind": "context", "timeframe": "1h"},
+        {
+            "text": _short_parent_child_label(parent_child_context) if parent_child_conflict else f"HTF bias {direction}",
+            "kind": "context",
+            "timeframe": str(parent_child_context.get("parent_timeframe") or "1h") if parent_child_conflict else "1h",
+        },
         {
             "text": f"{active_tf} structural range {format_price(low)}-{format_price(high)}"
             if low is not None and high is not None
@@ -399,6 +409,8 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             "final_bias": direction if direction in {"bullish", "bearish"} else "mixed",
             "evidence": [
                 *[f"{tf}: {bias}" for tf, bias in sorted(tf_bias.items())],
+                *list(structure_narrative.get("evidence", []) or []),
+                *list(parent_child_context.get("evidence", []) or []),
                 (
                     f"active_range_direction: {range_direction} (map only; HTF consensus {htf_direction})"
                     if isinstance(selected_range, dict) and selected_range.get("status") == "RESOLVED_ACTIVE_RANGE"
@@ -418,7 +430,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             ]
             if target_price is not None
             else [],
-            "narrative": "This live system test sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan.",
+            "narrative": (
+                f"{parent_child_sentence} This is a context conflict, so no clean direction is promoted into a trade plan."
+                if parent_child_conflict and parent_child_sentence
+                else "This live system test sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
+            ),
         },
         "displacement_assessment": {
             "direction": "none",
@@ -485,6 +501,12 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             "corrections_made": [
                 "Refused executable trade because sweep/displacement/active POI were not validated.",
                 "Used structural active range authority instead of OHLCV summary extremes.",
+                "Reconciled raw OHLC summary bias with confirmed structure narrative.",
+                *(
+                    ["Downgraded to mixed/THESIS_ONLY because parent and child context timeframes conflict."]
+                    if parent_child_conflict
+                    else []
+                ),
             ]
             if selected_range
             else ["Downgraded to review because active range authority was unresolved."],
@@ -494,8 +516,15 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             ],
         },
         "final_thesis": (
-            f"{symbol}: {official_state}. Directional context is {direction}, but the system does not have validated "
-            "sweep/displacement/active POI/entry evidence, so it refuses a trade plan."
+            (
+                f"{symbol}: {official_state}. {parent_child_sentence} "
+                "This is not clean bullish or clean bearish; the system refuses a trade plan until one side confirms."
+            )
+            if parent_child_conflict and parent_child_sentence
+            else (
+                f"{symbol}: {official_state}. Directional context is {direction}, but the system does not have validated "
+                "sweep/displacement/active POI/entry evidence, so it refuses a trade plan."
+            )
         ),
     }
 
@@ -514,6 +543,22 @@ def timeframe_bias(summary: dict[str, Any]) -> str:
     return "mixed"
 
 
+def _display_bias_labels(raw_tf_bias: dict[str, str], structure_narrative: dict[str, Any]) -> dict[str, str]:
+    labels = dict(raw_tf_bias)
+    for timeframe, item in (structure_narrative.get("timeframes") or {}).items():
+        if isinstance(item, dict) and item.get("label") not in {None, "unknown"}:
+            labels[str(timeframe)] = str(item["label"])
+    return labels
+
+
+def _vote_bias_labels(raw_tf_bias: dict[str, str], structure_narrative: dict[str, Any]) -> dict[str, str]:
+    labels = dict(raw_tf_bias)
+    for timeframe, item in (structure_narrative.get("timeframes") or {}).items():
+        if isinstance(item, dict) and item.get("vote_bias") in {"bullish", "bearish"}:
+            labels[str(timeframe)] = str(item["vote_bias"])
+    return labels
+
+
 def format_price(value: float | None) -> str:
     if value is None:
         return "n/a"
@@ -525,6 +570,14 @@ def format_price(value: float | None) -> str:
     if abs_value >= 1:
         return f"{float(value):.4g}"
     return f"{float(value):.6g}"
+
+
+def _short_parent_child_label(parent_child_context: dict[str, Any]) -> str:
+    parent_tf = str(parent_child_context.get("parent_timeframe") or "HTF")
+    parent_bias = str(parent_child_context.get("parent_bias") or "parent")
+    child_tf = str(parent_child_context.get("child_timeframe") or "LTF")
+    child_bias = str(parent_child_context.get("child_bias") or "child")
+    return f"{parent_tf} {parent_bias} parent / {child_tf} {child_bias} child"
 
 
 def render_summary_markdown(summary: dict[str, Any]) -> str:

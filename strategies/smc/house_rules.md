@@ -41,6 +41,7 @@ This is the exact playbook the engine should follow. The deeper structure doctri
 - Fresh is better than partial; fully mitigated is invalid by default.
 - Swing order blocks drive POI selection; internal order blocks can help refine entries.
 - Rank by freshness, confluence, displacement strength, and premium/discount location.
+- Do not blindly prefer the nearest OB. A shallow OB/FVG sitting in front of a deeper same-leg OB can be inducement/liquidity. The deeper origin OB gets reaction priority when it is still protected-range-valid.
 
 ## Fair Value Gaps
 
@@ -48,6 +49,7 @@ This is the exact playbook the engine should follow. The deeper structure doctri
 - Ignore tiny gaps inside consolidation unless they overlap a stronger POI.
 - Fresh FVGs are preferred. Partially mitigated FVGs are research-only unless explicitly allowed.
 - FVG alignment matters: bearish FVGs in premium for sells, bullish FVGs in discount for buys.
+- FVGs are secondary POIs by default. They may react, but an FVG-only pocket must not outrank a valid deeper OB unless there is no better OB or fresh confirmation makes the FVG the active reaction zone.
 
 ## Liquidity
 
@@ -55,6 +57,7 @@ This is the exact playbook the engine should follow. The deeper structure doctri
 - A wick through liquidity is a sweep/grab, not a structure break by itself.
 - A useful sweep must be followed by displacement and internal or swing structure confirmation.
 - External liquidity is used for main targets. Internal liquidity can be used for TP1 or entry inducement.
+- Inducement often sits just before the true POI. The engine should mark shallow/front POIs as inducement risk when a deeper protected-range-valid OB sits behind them.
 
 ## Dealing Range
 
