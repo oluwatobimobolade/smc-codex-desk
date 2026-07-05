@@ -140,7 +140,7 @@ def test_watch_state_is_bearish_retrace_and_observe_only():
     assert decision.active_poi is not None
     assert decision.active_poi["selection_score"] > 0
     assert decision.active_poi["selection_reasons"]
-    assert decision.poi_selection["method"] == "ranked_active_poi_v2_protected_range_first"
+    assert decision.poi_selection["method"] == "ranked_active_poi_v3_protected_range_first_deeper_ob_reaction_priority"
     # observe-only invariant — the whole point of the repair
     assert decision.signal_allowed is False
     assert decision.final_action != "EXECUTE"

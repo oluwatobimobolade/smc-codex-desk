@@ -379,6 +379,116 @@ def test_live_conservative_provider_does_not_let_active_range_override_htf_bias(
     assert any(issue.code == "direction_conflicts_with_active_range" and issue.severity == "warning" for issue in result.issues)
 
 
+def test_live_provider_preserves_bullish_external_structure_with_internal_pullback():
+    module = _tool_module("run_live_ai_smc_full_system")
+
+    class Request:
+        evidence_pack = {
+            "symbol": "SUIUSDT",
+            "ohlcv_summaries": {
+                "15m": {"first_open": 0.80, "last_close": 0.7309, "high": 0.8109, "low": 0.6503},
+                "1h": {"first_open": 1.10, "last_close": 0.7323, "high": 1.1324, "low": 0.6503},
+                "4h": {"first_open": 0.93, "last_close": 0.7364, "high": 1.4140, "low": 0.6503},
+                "1d": {"first_open": 2.67, "last_close": 0.7152, "high": 4.4478, "low": 0.5669},
+            },
+            "detector_candidates": {
+                "15m": {
+                    "structure_breaks": [
+                        {
+                            "object_id": "sui:15m:external_bos_up",
+                            "direction": "bullish",
+                            "confirmed_at": "2026-07-02T13:45:00+00:00",
+                            "price": 0.7474,
+                            "structure_scope": "external",
+                            "evidence": {"structure_scope": "external"},
+                        },
+                        {
+                            "object_id": "sui:15m:internal_choch_down",
+                            "direction": "bearish",
+                            "confirmed_at": "2026-07-02T22:45:00+00:00",
+                            "price": 0.7334,
+                            "structure_scope": "internal",
+                            "evidence": {"structure_scope": "internal"},
+                        },
+                    ]
+                },
+                "1h": {
+                    "structure_breaks": [
+                        {
+                            "object_id": "sui:1h:external_bos_up",
+                            "direction": "bullish",
+                            "confirmed_at": "2026-07-02T14:00:00+00:00",
+                            "price": 0.7401,
+                            "structure_scope": "external",
+                            "evidence": {"structure_scope": "external"},
+                        },
+                        {
+                            "object_id": "sui:1h:internal_choch_down",
+                            "direction": "bearish",
+                            "confirmed_at": "2026-07-02T23:00:00+00:00",
+                            "price": 0.7334,
+                            "structure_scope": "internal",
+                            "evidence": {"structure_scope": "internal"},
+                        },
+                    ]
+                },
+                "4h": {
+                    "structure_breaks": [
+                        {
+                            "object_id": "sui:4h:external_bos_up",
+                            "direction": "bullish",
+                            "confirmed_at": "2026-07-02T12:00:00+00:00",
+                            "price": 0.7401,
+                            "structure_scope": "external",
+                            "evidence": {"structure_scope": "external"},
+                        }
+                    ]
+                },
+                "1d": {"structure_breaks": []},
+            },
+            "active_range_authority": {
+                "selected_range": {
+                    "status": "RESOLVED_ACTIVE_RANGE",
+                    "timeframe": "1h",
+                    "direction": "bearish",
+                    "range_high": 0.7532,
+                    "range_low": 0.6503,
+                    "equilibrium": 0.70175,
+                    "price_location": "premium",
+                    "range_id": "sui:1h:test_range",
+                    "protected_high": 0.7532,
+                    "protected_low": 0.6503,
+                    "width_atr": 8.0,
+                    "max_width_atr": 22.0,
+                    "protected_high_pivot_id": "sui:h",
+                    "protected_low_pivot_id": "sui:l",
+                    "authority_notes": ["Range map is bearish but must not override HTF structure consensus."],
+                }
+            },
+        }
+
+    payload = module.build_conservative_ai_payload(Request(), {"source": "test"})
+
+    assert payload["bias_summary"]["1h"] == "bullish_external_bearish_internal_pullback"
+    assert payload["bias_summary"]["final_bias"] == "mixed"
+    assert payload["direction"] == "mixed"
+    assert payload["official_state"] == "THESIS_ONLY"
+    assert any(
+        "1h: raw summary bias bearish conflicts with confirmed structure vote bullish" in line
+        for line in payload["bias_summary"]["evidence"]
+    )
+    assert any(
+        "treat as pullback, not full bias flip" in line
+        for line in payload["bias_summary"]["evidence"]
+    )
+    decision = parse_ai_smc_decision(payload)
+    result = validate_ai_smc_decision(
+        decision,
+        {"detector_candidates": Request.evidence_pack["detector_candidates"], "active_range_authority": Request.evidence_pack["active_range_authority"]},
+    )
+    assert result.status == "VALIDATED"
+
+
 def test_forex_perception_trims_known_session_gaps_without_disabling_crypto_gap_guard():
     before_gap = pd.DataFrame(
         {

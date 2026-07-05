@@ -72,6 +72,13 @@ def _pack(tmp_path=None):
             "max_width_atr": 24.0,
         },
     }
+    from smc_desk.perception.formal_structure_graph import build_mtf_structure_graph
+    pack["formal_structure_graph"] = build_mtf_structure_graph(
+        symbol="BTCUSDT",
+        detector_candidates=pack.get("detector_candidates", pack.get("detector_candidates", {})),
+        active_range_authority=pack["active_range_authority"],
+        timeframe_dfs={"15m": _df(), "1h": _df(), "4h": _df(), "1d": _df()},
+    )
     return pack
 
 

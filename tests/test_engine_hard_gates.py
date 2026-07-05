@@ -66,6 +66,20 @@ class HardGateVetoTests(unittest.TestCase):
             reason="synthetic perfect POI",
         )
 
+    def _make_bullish_ob(self, low: float, high: float, score: float = 0.8) -> Zone:
+        return Zone(
+            label="Bullish Order Block",
+            kind="order_block",
+            direction="bullish",
+            low=low,
+            high=high,
+            start_index=40,
+            end_index=42,
+            status="fresh",
+            score=score,
+            reason="synthetic bullish order block",
+        )
+
     def _make_perfect_sweep(self, index: int, price: float) -> StructureEvent:
         return StructureEvent(
             label="Liquidity Sweep",
@@ -174,6 +188,49 @@ class HardGateVetoTests(unittest.TestCase):
         self.assertIsNotNone(plan.risk_reward)
         if plan.risk_reward is not None:
             self.assertGreaterEqual(plan.risk_reward, config.risk_reward_floor)
+
+    def test_engine_prefers_deeper_order_block_over_nearest_inducement_zone(self) -> None:
+        config = RuleConfig()
+        df = self._make_ranging_df(close=110.0)
+        shallow_ob = self._make_bullish_ob(low=100.0, high=102.0, score=0.82)
+        deeper_ob = self._make_bullish_ob(low=96.0, high=98.0, score=0.80)
+        fvg_between = Zone(
+            label="Bullish FVG",
+            kind="fvg",
+            direction="bullish",
+            low=98.5,
+            high=99.5,
+            start_index=41,
+            end_index=43,
+            status="fresh",
+            score=0.88,
+            reason="synthetic FVG between shallow and deeper OB",
+        )
+        liquidity = Zone(
+            label="Equal Highs",
+            kind="liquidity",
+            direction="bearish",
+            low=118.0,
+            high=118.0,
+            status="fresh",
+            score=0.8,
+            reason="target liquidity",
+        )
+
+        plan = _build_trade_plan_for_direction(
+            df=df,
+            swings=[],
+            zones=[shallow_ob, fvg_between, deeper_ob, liquidity],
+            events=[],
+            config=config,
+            direction="bullish",
+        )
+
+        self.assertIsNotNone(plan.selected_poi)
+        assert plan.selected_poi is not None
+        self.assertEqual(plan.selected_poi.low, deeper_ob.low)
+        self.assertEqual(plan.selected_poi.high, deeper_ob.high)
+        self.assertTrue(any("deeper_origin_ob_preferred" in warning for warning in plan.warnings))
 
 
 if __name__ == "__main__":
