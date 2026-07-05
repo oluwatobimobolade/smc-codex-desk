@@ -811,6 +811,10 @@ def _resolve_anchor_price(anchor: str, evidence_ids: list[str], evidence_pack: M
                 return (float(first["price_low"]) + float(first["price_high"])) / 2.0
             return float(first.get("price") or first.get("price_low") or first.get("price_high") or 0.0)
         elif kind == "stop":
+            if "high" in anchor and "price_high" in first:
+                return float(first["price_high"])
+            if "low" in anchor and "price_low" in first:
+                return float(first["price_low"])
             if "price_high" in first and "above" in anchor:
                 return float(first["price_high"])
             if "price_low" in first and "below" in anchor:
@@ -819,6 +823,10 @@ def _resolve_anchor_price(anchor: str, evidence_ids: list[str], evidence_pack: M
         elif kind == "target":
             return float(first.get("price") or first.get("price_low") or first.get("price_high") or 0.0)
         elif kind == "invalidation":
+            if "high" in anchor and "price_high" in first:
+                return float(first["price_high"])
+            if "low" in anchor and "price_low" in first:
+                return float(first["price_low"])
             if "price_high" in first and "above" in anchor:
                 return float(first["price_high"])
             if "price_low" in first and "below" in anchor:

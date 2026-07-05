@@ -1,0 +1,57 @@
+{
+  "case_id": "gauntlet_04_trade_ready_bullish_continuation",
+  "description": "TRADE_PLAN_READY: Valid bullish continuation. 1d/4h/1h all bullish, 4h CHoCH with SSL sweep, 1h displacement, entry at 1h demand origin, stop at 1h demand low, target at 4h BSL. RR=4.2.",
+  "expected_workflow_status": "AGENT_REVIEW_WORKFLOW",
+  "expected_analysis_status": "VALIDATED",
+  "expected_official_state": "TRADE_PLAN_READY",
+  "expected_chart_template": "trade_plan_chart",
+  "expected_direction": "bullish",
+  "evidence_pack": {
+    "active_range_authority": {
+      "selected_range": {
+        "status": "RESOLVED_ACTIVE_RANGE",
+        "timeframe": "4h",
+        "direction": "bullish",
+        "range_high": 3500.0,
+        "range_low": 3200.0,
+        "equilibrium": 3350.0,
+        "price_location": "discount",
+        "range_id": "ETHUSDT:4h:active_range:gauntlet04",
+        "width_atr": 5.0,
+        "max_width_atr": 22.0,
+        "protected_high_pivot_id": "ETHUSDT:4h:swing_high:gauntlet04",
+        "protected_low_pivot_id": "ETHUSDT:4h:swing_low:gauntlet04",
+        "protected_high": 3500.0,
+        "protected_low": 3200.0,
+        "authority_notes": ["Active range from protected swing pair."]
+      }
+    },
+    "detector_candidates": {
+      "1d": {"structure_breaks": [{"object_id": "1d_bull_choch", "break_type": "CHoCH", "direction": "bullish", "confirmed_at": "2026-06-10T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "3100.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}, "is_choch": true}], "sweeps": [{"object_id": "1d_sweep_low", "price": 3100.0, "side": "sell_side"}], "order_blocks": [{"object_id": "1d_demand_origin", "direction": "bullish", "timeframe": "1d", "price_low": 3080.0, "price_high": 3120.0}], "fvgs": [], "liquidity_levels": [{"object_id": "1d_ssl_3100", "side": "sell_side", "price": 3100.0}]},
+      "4h": {"structure_breaks": [{"object_id": "4h_bull_bos", "break_type": "BOS", "direction": "bullish", "confirmed_at": "2026-07-01T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "3200.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}}], "sweeps": [{"object_id": "4h_sweep_low", "price": 3200.0, "side": "sell_side"}], "order_blocks": [{"object_id": "4h_demand_origin", "direction": "bullish", "timeframe": "4h", "price_low": 3180.0, "price_high": 3220.0}], "fvgs": [], "liquidity_levels": [{"object_id": "4h_ssl_3200", "side": "sell_side", "price": 3200.0}, {"object_id": "4h_bsl_3500", "side": "buy_side", "price": 3500.0}]},
+      "1h": {"structure_breaks": [{"object_id": "1h_bull_bos", "break_type": "BOS", "direction": "bullish", "confirmed_at": "2026-07-02T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "3250.0", "is_unconfirmed_probe": false, "broke_protected_swing": false, "structure_scope": "external"}}, {"object_id": "1h_bull_disp", "break_type": "BOS", "direction": "bullish", "confirmed_at": "2026-07-02T04:00:00Z", "structure_scope": "internal", "evidence": {"broken_price": "3270.0", "is_unconfirmed_probe": false, "broke_protected_swing": false, "structure_scope": "internal"}}], "sweeps": [], "order_blocks": [{"object_id": "1h_demand_origin", "direction": "bullish", "timeframe": "1h", "price_low": 3230.0, "price_high": 3250.0}], "fvgs": [], "liquidity_levels": []},
+      "15m": {"structure_breaks": [{"object_id": "15m_bull_bos", "break_type": "BOS", "direction": "bullish", "confirmed_at": "2026-07-02T10:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "3260.0", "is_unconfirmed_probe": false, "broke_protected_swing": false, "structure_scope": "external"}}], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": []}
+    }
+  },
+  "ai_decision": {
+    "schema": "ai_smc_trader_decision_v1",
+    "symbol": "ETHUSDT",
+    "official_state": "TRADE_PLAN_READY",
+    "setup_grade": "A",
+    "direction": "bullish",
+    "setup_model": "bullish_continuation_after_ssl_sweep",
+    "bias_summary": {"daily": "bullish", "4h": "bullish", "1h": "bullish", "final_bias": "bullish", "evidence": ["1d CHoCH confirmed bullish", "4h BOS with SSL sweep", "1h displacement clean"]},
+    "active_range": {"timeframe": "4h", "high": 3500.0, "low": 3200.0, "equilibrium": 3350.0, "price_location": "discount", "source": "protected_swing_pair", "evidence_object_ids": ["ETHUSDT:4h:swing_high:gauntlet04", "ETHUSDT:4h:swing_low:gauntlet04"], "evidence": ["Active range from protected swing pair."]},
+    "liquidity_story": {"obvious_liquidity": [{"liquidity_id": "4h_ssl_3200", "timeframe": "4h", "side": "sell_side", "price": 3200.0, "label": "SSL below 4h low", "status": "prior_swept_liquidity"}], "swept_liquidity": [{"liquidity_id": "4h_ssl_3200", "timeframe": "4h", "side": "sell_side", "price": 3200.0, "status": "prior_swept_liquidity"}], "unswept_liquidity": [{"liquidity_id": "4h_bsl_3500", "timeframe": "4h", "side": "buy_side", "price": 3500.0, "status": "model_completion_reference"}], "narrative": "SSL below 3200 was swept on 4h BOS. Price is now retracing into 1h demand origin. Target is the unswept BSL at 3500."},
+    "displacement_assessment": {"direction": "bullish", "quality": "clean", "structure_broken": true, "evidence_object_ids": ["4h_bull_bos", "1h_bull_disp"], "summary": "Clean bullish displacement on 1h internal BOS after 4h external BOS."},
+    "active_poi": {"poi_id": "1h_demand_origin", "timeframe": "1h", "kind": "order_block", "direction": "bullish", "price_low": 3230.0, "price_high": 3250.0, "freshness": "fresh", "evidence_object_ids": ["1h_demand_origin"], "summary": "1h demand origin after 4h SSL sweep and BOS."},
+    "entry_plan": {"entry_ready": true, "entry_timeframe": "15m", "refinement_timeframe": "5m", "entry_price": 3240.0, "entry_zone_low": 3230.0, "entry_zone_high": 3250.0, "signal_type": "rejection_from_demand", "required_confirmation": ["15m bullish rejection candle", "15m BOS confirming entry"], "evidence_object_ids": ["1h_demand_origin"], "entry_anchor": "1h_demand_origin", "mapped_entry_price": 3240.0, "summary": "Entry at 1h demand origin (3230-3250 midpoint 3240), awaiting 15m rejection confirmation."},
+    "stop_loss_plan": {"stop_price": 3230.0, "structural_invalidation_price": 3230.0, "source": "1h_demand_origin_low", "buffer_notes": "Stop at 1h demand origin low (3230). Body close below invalidates the setup.", "evidence_object_ids": ["1h_demand_origin"], "stop_anchor": "1h_demand_origin_low", "mapped_stop_price": 3230.0, "summary": "Structural invalidation: 1h demand origin low 3230. Body close below 3230 invalidates the bullish setup."},
+    "target_plan": {"targets": [{"price": 3500.0, "label": "4h BSL — model completion", "timeframe": "4h", "reason": "Model completion: bullish move target is the unswept buy-side liquidity at 4h range high.", "evidence_object_ids": ["4h_bsl_3500"], "target_anchor": "4h_bsl", "mapped_target_price": 3500.0}], "model_completion_liquidity_id": "4h_bsl_3500", "summary": "Target: 4h BSL at 3500.0 — model completion liquidity."},
+    "rr_status": {"rr": 21.0, "minimum_rr": 3.0, "pass_rr": true, "notes": "RR = (target 3500 - entry 3240) / (entry 3240 - stop 3230) = 260/10 = 26.0. Wait: 3500-3240=260, 3240-3230=10, RR=26.0. Passes 3.0."},
+    "invalidation": {"invalidation_price": 3230.0, "condition": "1h candle body close below 1h demand origin low (3230) invalidates the bullish setup.", "source": "1h_demand_origin_low", "evidence_object_ids": ["1h_demand_origin"], "invalidation_anchor": "1h_demand_origin_low", "mapped_invalidation_price": 3230.0},
+    "annotation_plan": {"chart_template": "trade_plan_chart", "show_trade_box": true, "labels": [], "levels": [], "reasoning_order": ["daily_context", "4h_context", "1h_context", "active_range", "premium_discount", "obvious_liquidity", "swept_liquidity", "displacement_quality", "active_poi", "entry_model", "entry_readiness", "structural_invalidation", "model_completion_liquidity_target", "rr_minimum_three", "final_state"]},
+    "self_review": {"active_range_check": "passed", "poi_check": "passed", "annotation_check": "passed", "refusal_check": "passed", "corrections_made": [], "remaining_uncertainties": []},
+    "final_thesis": "ETHUSDT: TRADE_PLAN_READY. Bullish continuation: 1d CHoCH, 4h BOS with SSL sweep at 3200, 1h clean displacement. Entry at 1h demand origin (3230-3250 midpoint 3240) with stop at 3230 (1h demand low). Target: 4h BSL at 3500 (model completion). RR = 260/10 = 26.0, well above 3.0 minimum."
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "case_id": "gauntlet_07_target_conflict_rejected",
+  "description": "TARGET_CONFLICT: Target is already swept liquidity, not fresh. Validator must reject this because target must be model-completion liquidity, not swept.",
+  "expected_workflow_status": "AGENT_REVIEW_WORKFLOW",
+  "expected_analysis_status": "REVIEW_REQUIRED",
+  "expected_official_state": "REVIEW_REQUIRED",
+  "expected_chart_template": "review_chart",
+  "expected_direction": "bearish",
+  "evidence_pack": {
+    "active_range_authority": {
+      "selected_range": {
+        "status": "RESOLVED_ACTIVE_RANGE",
+        "timeframe": "4h",
+        "direction": "bearish",
+        "range_high": 63500.0,
+        "range_low": 57800.0,
+        "equilibrium": 60650.0,
+        "price_location": "premium",
+        "range_id": "BTCUSDT:4h:active_range:gauntlet07",
+        "width_atr": 4.5,
+        "max_width_atr": 22.0,
+        "protected_high_pivot_id": "BTCUSDT:4h:swing_high:gauntlet07",
+        "protected_low_pivot_id": "BTCUSDT:4h:swing_low:gauntlet07",
+        "protected_high": 63500.0,
+        "protected_low": 57800.0,
+        "authority_notes": ["Active range from protected swing pair."]
+      }
+    },
+    "detector_candidates": {
+      "1d": {"structure_breaks": [{"object_id": "1d_bear_choch", "break_type": "CHoCH", "direction": "bearish", "confirmed_at": "2026-06-15T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "64000.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}, "is_choch": true}], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": []},
+      "4h": {"structure_breaks": [{"object_id": "4h_bear_bos", "break_type": "BOS", "direction": "bearish", "confirmed_at": "2026-07-01T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "63500.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}}], "sweeps": [], "order_blocks": [{"object_id": "4h_supply_origin", "direction": "bearish", "timeframe": "4h", "price_low": 63300.0, "price_high": 63500.0}], "fvgs": [], "liquidity_levels": [{"object_id": "4h_bsl_63500", "side": "buy_side", "price": 63500.0}, {"object_id": "4h_ssl_57800_SWEPT", "side": "sell_side", "price": 57800.0}]},
+      "1h": {"structure_breaks": [{"object_id": "1h_bear_bos", "break_type": "BOS", "direction": "bearish", "confirmed_at": "2026-07-02T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "63000.0", "is_unconfirmed_probe": false, "broke_protected_swing": false, "structure_scope": "external"}}, {"object_id": "1h_bear_disp", "break_type": "BOS", "direction": "bearish", "confirmed_at": "2026-07-02T04:00:00Z", "structure_scope": "internal", "evidence": {"broken_price": "62800.0", "is_unconfirmed_probe": false, "broke_protected_swing": false, "structure_scope": "internal"}}], "sweeps": [], "order_blocks": [{"object_id": "1h_supply_origin", "direction": "bearish", "timeframe": "1h", "price_low": 62800.0, "price_high": 63000.0}], "fvgs": [], "liquidity_levels": []},
+      "15m": {"structure_breaks": [], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": []}
+    }
+  },
+  "ai_decision_intentionally_bad": "This decision claims target is 57800 (already swept), violating the target_not_model_completion_liquidity rule. The validator MUST reject this.",
+  "ai_decision": {
+    "schema": "ai_smc_trader_decision_v1",
+    "symbol": "BTCUSDT",
+    "official_state": "TRADE_PLAN_READY",
+    "setup_grade": "A",
+    "direction": "bearish",
+    "setup_model": "bearish_continuation_target_conflict",
+    "bias_summary": {"daily": "bearish", "4h": "bearish", "1h": "bearish", "final_bias": "bearish", "evidence": ["1d CHoCH confirmed", "4h BOS confirmed"]},
+    "active_range": {"timeframe": "4h", "high": 63500.0, "low": 57800.0, "equilibrium": 60650.0, "price_location": "premium", "source": "protected_swing_pair", "evidence_object_ids": [], "evidence": ["Active range from protected swing pair."]},
+    "liquidity_story": {"obvious_liquidity": [{"liquidity_id": "4h_ssl_57800_SWEPT", "timeframe": "4h", "side": "sell_side", "price": 57800.0, "label": "SSL at 4h low", "status": "prior_swept_liquidity"}], "swept_liquidity": [{"liquidity_id": "4h_ssl_57800_SWEPT", "timeframe": "4h", "side": "sell_side", "price": 57800.0, "status": "prior_swept_liquidity"}], "unswept_liquidity": [], "narrative": "SSL at 57800 was already swept. Cannot use as target."},
+    "displacement_assessment": {"direction": "bearish", "quality": "clean", "structure_broken": true, "evidence_object_ids": ["4h_bear_bos", "1h_bear_disp"], "summary": "Clean bearish displacement."},
+    "active_poi": {"poi_id": "1h_supply_origin", "timeframe": "1h", "kind": "order_block", "direction": "bearish", "price_low": 62800.0, "price_high": 63000.0, "freshness": "fresh", "evidence_object_ids": ["1h_supply_origin"], "summary": "1h supply origin."},
+    "entry_plan": {"entry_ready": true, "entry_timeframe": "15m", "refinement_timeframe": "5m", "entry_price": 62900.0, "entry_zone_low": 62850.0, "entry_zone_high": 62900.0, "signal_type": "rejection_from_supply", "required_confirmation": ["15m rejection"], "evidence_object_ids": ["1h_supply_origin"], "entry_anchor": "1h_supply_origin", "mapped_entry_price": 62900.0, "summary": "Entry at 1h supply."},
+    "stop_loss_plan": {"stop_price": 63000.0, "structural_invalidation_price": 63000.0, "source": "1h_supply_origin_high", "evidence_object_ids": ["1h_supply_origin"], "stop_anchor": "1h_supply_origin_high", "mapped_stop_price": 63000.0, "summary": "Stop at 1h supply high."},
+    "target_plan": {"targets": [{"price": 57800.0, "label": "4h SSL", "timeframe": "4h", "reason": "Target at swept SSL — this is WRONG and must be rejected by validator.", "evidence_object_ids": ["4h_ssl_57800_SWEPT"], "target_anchor": "4h_ssl_57800_SWEPT", "mapped_target_price": 57800.0}], "model_completion_liquidity_id": "4h_ssl_57800_SWEPT", "summary": "Target at swept SSL — INVALID."},
+    "rr_status": {"rr": 51.0, "pass_rr": true, "notes": "RR=51.0 but target is swept."},
+    "invalidation": {"invalidation_price": 63000.0, "condition": "Body close above 1h supply high.", "source": "1h_supply_origin_high", "evidence_object_ids": ["1h_supply_origin"]},
+    "annotation_plan": {"chart_template": "trade_plan_chart", "show_trade_box": true, "labels": [], "levels": [], "reasoning_order": ["daily_context", "4h_context", "1h_context", "active_range", "premium_discount", "obvious_liquidity", "swept_liquidity", "displacement_quality", "active_poi", "entry_model", "entry_readiness", "structural_invalidation", "model_completion_liquidity_target", "rr_minimum_three", "final_state"]},
+    "self_review": {"active_range_check": "passed", "poi_check": "passed", "annotation_check": "passed", "refusal_check": "passed", "corrections_made": [], "remaining_uncertainties": []},
+    "final_thesis": "BTCUSDT: TRADE_PLAN_READY. Bearish continuation targeting swept SSL at 57800. This decision is INTENTIONALLY BAD — the validator must catch that the target is swept liquidity, not fresh model-completion liquidity."
+  }
+}

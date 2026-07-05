@@ -320,12 +320,12 @@ def test_manual_json_still_cannot_full_pass() -> None:
         official_decision: dict = None
         def __post_init__(self):
             self.official_decision = {"official_state": "WATCH_ONLY"}
-    assert _status(provider_result=FakeVR(), validation_result=FakeVal()) == "PARTIAL_PASS"
+    assert _status(provider_result=FakeVR(), validation_result=FakeVal()) == "MANUAL_ASSISTED_WORKFLOW:VALIDATED"
 
 
 def test_local_deterministic_provider_cannot_claim_real_ai() -> None:
-    """LOCAL_DETERMINISTIC_PROVIDER returns SAFE_SIMULATION_PASS, not real AI reasoning."""
-    from smc_desk.colleague.orchestrator_v3 import _status
+    """LOCAL_DETERMINISTIC_PROVIDER returns LOCAL_DETERMINISTIC_WORKFLOW, not real AI workflow."""
+    from smc_desk.colleague.orchestrator_v3 import _status, _workflow_status
     from dataclasses import dataclass
     @dataclass
     class FakeVR:
@@ -338,7 +338,7 @@ def test_local_deterministic_provider_cannot_claim_real_ai() -> None:
         official_decision: dict = None
         def __post_init__(self):
             self.official_decision = {"official_state": "WATCH_ONLY"}
-    assert _status(provider_result=FakeVR(), validation_result=FakeVal()) == "SAFE_SIMULATION_PASS"
+    assert _workflow_status(FakeVR()) == "LOCAL_DETERMINISTIC_WORKFLOW"
 
 
 def test_watch_state_from_external_agent_has_no_trade_box() -> None:

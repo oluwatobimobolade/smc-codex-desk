@@ -168,7 +168,7 @@ def test_stub_provider_marks_run_as_not_real_reasoning(tmp_path):
         detector_candidates=_candidates(),
         enforce_minimum_depth=False,
     )
-    assert result.status == "NOT_REAL_AI_REASONING"
+    assert result.status.startswith("STUB_WORKFLOW")
     assert result.report["provider"]["metadata"]["warning"] == "NOT_REAL_AI_REASONING - STUB_PROVIDER"
 
 

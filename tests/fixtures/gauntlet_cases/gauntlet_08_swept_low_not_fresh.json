@@ -1,0 +1,58 @@
+{
+  "case_id": "gauntlet_08_swept_low_not_fresh",
+  "description": "SWEPT_LOW_NOT_FRESH: AI claims swept low is fresh liquidity. Validator must reject because swept lows are NOT fresh.",
+  "expected_workflow_status": "AGENT_REVIEW_WORKFLOW",
+  "expected_analysis_status": "REVIEW_REQUIRED",
+  "expected_official_state": "REVIEW_REQUIRED",
+  "expected_chart_template": "review_chart",
+  "expected_direction": "bearish",
+  "evidence_pack": {
+    "active_range_authority": {
+      "selected_range": {
+        "status": "RESOLVED_ACTIVE_RANGE",
+        "timeframe": "4h",
+        "direction": "bearish",
+        "range_high": 63500.0,
+        "range_low": 57800.0,
+        "equilibrium": 60650.0,
+        "price_location": "premium",
+        "range_id": "BTCUSDT:4h:active_range:gauntlet08",
+        "width_atr": 4.5,
+        "max_width_atr": 22.0,
+        "protected_high_pivot_id": "BTCUSDT:4h:swing_high:gauntlet08",
+        "protected_low_pivot_id": "BTCUSDT:4h:swing_low:gauntlet08",
+        "protected_high": 63500.0,
+        "protected_low": 57800.0,
+        "authority_notes": ["Active range from protected swing pair."]
+      }
+    },
+    "detector_candidates": {
+      "1d": {"structure_breaks": [{"object_id": "1d_bear_choch", "break_type": "CHoCH", "direction": "bearish", "confirmed_at": "2026-06-15T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "64000.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}, "is_choch": true}], "sweeps": [{"object_id": "1d_sweep_low", "price": 57800.0, "side": "sell_side", "swept_liquidity_id": "4h_ssl_57800"}], "order_blocks": [], "fvgs": [], "liquidity_levels": [{"object_id": "1d_ssl_57800", "side": "sell_side", "price": 57800.0}]},
+      "4h": {"structure_breaks": [{"object_id": "4h_bear_bos", "break_type": "BOS", "direction": "bearish", "confirmed_at": "2026-07-01T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "63500.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}}], "sweeps": [{"object_id": "4h_sweep_low", "price": 57800.0, "side": "sell_side", "swept_liquidity_id": "4h_ssl_57800"}], "order_blocks": [{"object_id": "4h_supply_origin", "direction": "bearish", "timeframe": "4h", "price_low": 63300.0, "price_high": 63500.0}], "fvgs": [], "liquidity_levels": [{"object_id": "4h_bsl_63500", "side": "buy_side", "price": 63500.0}, {"object_id": "4h_ssl_57800", "side": "sell_side", "price": 57800.0}]},
+      "1h": {"structure_breaks": [], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": []},
+      "15m": {"structure_breaks": [], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": []}
+    }
+  },
+  "ai_decision_intentionally_bad": "This decision claims the swept low at 57800 is FRESH liquidity. The validator MUST reject this because swept lows are not fresh.",
+  "ai_decision": {
+    "schema": "ai_smc_trader_decision_v1",
+    "symbol": "BTCUSDT",
+    "official_state": "WATCH_ONLY",
+    "setup_grade": "C",
+    "direction": "bearish",
+    "setup_model": "swept_low_mislabeled_fresh",
+    "bias_summary": {"daily": "bearish", "4h": "bearish", "1h": "bearish", "final_bias": "bearish", "evidence": ["1d CHoCH confirmed"]},
+    "active_range": {"timeframe": "4h", "high": 63500.0, "low": 57800.0, "equilibrium": 60650.0, "price_location": "premium", "source": "protected_swing_pair", "evidence_object_ids": [], "evidence": ["Active range from protected swing pair."]},
+    "liquidity_story": {"obvious_liquidity": [{"liquidity_id": "4h_ssl_57800", "timeframe": "4h", "side": "sell_side", "price": 57800.0, "label": "SSL at 4h low", "status": "fresh_untaken_liquidity"}], "swept_liquidity": [], "unswept_liquidity": [], "narrative": "WRONG: Claims swept low is fresh. It was already swept on 4h BOS."},
+    "displacement_assessment": {"direction": "none", "quality": "none", "structure_broken": false, "evidence_object_ids": [], "summary": "No displacement."},
+    "active_poi": {"direction": "unknown", "evidence_object_ids": [], "summary": "No POI."},
+    "entry_plan": {"entry_ready": false, "entry_timeframe": "15m", "refinement_timeframe": "5m", "entry_price": null, "entry_zone_low": null, "entry_zone_high": null, "signal_type": null, "required_confirmation": [], "evidence_object_ids": [], "entry_anchor": null, "mapped_entry_price": null, "summary": "No entry."},
+    "stop_loss_plan": {"evidence_object_ids": [], "summary": "No stop."},
+    "target_plan": {"targets": [], "summary": "No target."},
+    "rr_status": {"rr": null, "pass_rr": false, "notes": "No RR."},
+    "invalidation": {"condition": "Watch.", "source": "none", "evidence_object_ids": []},
+    "annotation_plan": {"chart_template": "watch_chart", "show_trade_box": false, "labels": [], "levels": [], "reasoning_order": ["daily_context", "4h_context", "1h_context", "active_range", "premium_discount", "obvious_liquidity", "swept_liquidity", "displacement_quality", "active_poi", "entry_model", "entry_readiness", "structural_invalidation", "model_completion_liquidity_target", "rr_minimum_three", "final_state"]},
+    "self_review": {"active_range_check": "passed", "poi_check": "not_applicable", "annotation_check": "passed", "refusal_check": "passed", "corrections_made": [], "remaining_uncertainties": []},
+    "final_thesis": "BTCUSDT: WATCH_ONLY. INTENTIONALLY BAD: Claims swept low is fresh liquidity. Validator must catch this."
+  }
+}

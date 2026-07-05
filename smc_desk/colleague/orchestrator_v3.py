@@ -230,12 +230,16 @@ def run_ai_smc_orchestrator_v3(
     _render_structure_map(timeframe_dfs, formal_graph, root / "16_formal_structure_graph" / "structure_map.png", symbol=symbol)
 
     status = _status(provider_result=provider_result, validation_result=validation_result)
+    workflow_status = _workflow_status(provider_result)
+    analysis_status = _analysis_status(validation_result)
     prompt_manifest = build_prompt_registry_manifest(include_text=False)
     report = {
         "schema": "ai_smc_orchestrator_v3_report",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "symbol": symbol,
         "status": status,
+        "workflow_status": workflow_status,
+        "analysis_status": analysis_status,
         "ai_brain_used": True,
         "provider": provider_result.audit_record(),
         "prompt_version": "ai_smc_trader_prompt_v1",
@@ -398,23 +402,55 @@ def _downgrade_for_depth(result: ValidationResult, depth_report: Mapping[str, An
     return ValidationResult(status="REVIEW_REQUIRED", decision=result.decision, official_decision=official, issues=issues)
 
 
-def _status(*, provider_result: LLMCompletionResult, validation_result: ValidationResult) -> str:
+def _workflow_status(provider_result: LLMCompletionResult) -> str:
+    """How the AI reasoning was produced (workflow status).
+
+    This is about the HANDSHAKE, not the market analysis. A successful
+    workflow can still produce WATCH_ONLY, THESIS_ONLY, or REVIEW_REQUIRED
+    as the correct analysis result.
+
+    Provider mode is checked FIRST so that the mode-specific workflow names
+    are always returned, regardless of is_real_reasoning settings.
+    """
     mode = getattr(provider_result, "provider_mode", "")
-    if mode == "LOCAL_DETERMINISTIC_PROVIDER":
-        return "SAFE_SIMULATION_PASS" if validation_result.status == "VALIDATED" else "REVIEW_REQUIRED"
     if mode == "STUB_PROVIDER" or provider_result.is_stub:
-        return "NOT_REAL_AI_REASONING"
-    if not provider_result.is_real_reasoning:
-        return "NOT_REAL_AI_REASONING"
-    if validation_result.status != "VALIDATED":
-        return "REVIEW_REQUIRED"
+        return "STUB_WORKFLOW"
+    if mode == "LOCAL_DETERMINISTIC_PROVIDER":
+        return "LOCAL_DETERMINISTIC_WORKFLOW"
     if mode == "MANUAL_AI_ASSISTED_JSON":
-        return "PARTIAL_PASS"
-    if mode == "HUMAN_OVERRIDE":
-        return "HUMAN_OVERRIDE_APPLIED"
+        return "MANUAL_ASSISTED_WORKFLOW"
     if mode == "EXTERNAL_AI_AGENT":
-        return "AGENT_REVIEW_PASS"
-    return "PASS"
+        return "AGENT_REVIEW_WORKFLOW"
+    if mode == "HUMAN_OVERRIDE":
+        return "HUMAN_OVERRIDE_WORKFLOW"
+    if mode == "REAL_VISION_LLM_PROVIDER":
+        return "REAL_LLM_WORKFLOW"
+    if not provider_result.is_real_reasoning:
+        return "NOT_REAL_AI_WORKFLOW"
+    return "UNKNOWN_WORKFLOW"
+
+
+def _analysis_status(validation_result: ValidationResult) -> str:
+    """The market analysis result from the validator.
+
+    This is about the MARKET, not the AI workflow. A VALIDATED analysis
+    means the decision passed all hard checks. REVIEW_REQUIRED means the
+    validator caught issues.
+    """
+    return validation_result.status
+
+
+def _status(*, provider_result: LLMCompletionResult, validation_result: ValidationResult) -> str:
+    """Combined status. Workflow success + analysis result.
+
+    Returns a composite string like "AGENT_REVIEW_PASS:VALIDATED" or
+    "AGENT_REVIEW_PASS:REVIEW_REQUIRED". The first part is the workflow
+    status, the second is the analysis status. A successful workflow can
+    still produce REVIEW_REQUIRED as the correct market analysis.
+    """
+    workflow = _workflow_status(provider_result)
+    analysis = _analysis_status(validation_result)
+    return f"{workflow}:{analysis}"
 
 
 def _chart_df(timeframe_dfs: Mapping[str, pd.DataFrame]) -> pd.DataFrame:
@@ -453,6 +489,8 @@ def _render_structure_map(
 def _report_markdown(report: Mapping[str, Any]) -> str:
     lines = [f"# {report.get('symbol')} AI SMC Orchestrator V3", ""]
     lines.append(f"Status: `{report.get('status')}`")
+    lines.append(f"Workflow status: `{report.get('workflow_status')}` (how the AI reasoned)")
+    lines.append(f"Analysis status: `{report.get('analysis_status')}` (what the market says)")
     lines.append(f"AI brain used: `{report.get('ai_brain_used')}`")
     provider = report.get("provider") or {}
     lines.append(f"Provider: `{provider.get('provider_name')}` / `{provider.get('model_name')}`")

@@ -107,7 +107,7 @@ def test_bearish_trade_ready_runs_through_orchestrator(tmp_path) -> None:
         enforce_minimum_depth=False,
     )
 
-    assert result.status in ("PARTIAL_PASS", "REVIEW_REQUIRED"), f"Unexpected status: {result.status}"
+    assert result.report["workflow_status"] == "MANUAL_ASSISTED_WORKFLOW", f"Unexpected workflow status: {result.report.get('workflow_status')}"
     assert (tmp_path / "11_ai_smc_trader_brain" / "raw_decision.json").exists()
     assert (tmp_path / "12_ai_consistency_validation" / "validation_result.json").exists()
     assert (tmp_path / "13_official_ai_decision" / "official_decision.json").exists()

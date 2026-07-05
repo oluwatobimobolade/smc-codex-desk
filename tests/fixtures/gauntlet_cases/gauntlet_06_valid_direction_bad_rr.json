@@ -1,0 +1,57 @@
+{
+  "case_id": "gauntlet_06_valid_direction_bad_rr",
+  "description": "VALID_DIRECTION_BAD_RR_WAIT_FOR_BETTER_ENTRY: Direction is valid (bearish) but RR is too low (1.8 < 3.0). Wait for better entry.",
+  "expected_workflow_status": "AGENT_REVIEW_WORKFLOW",
+  "expected_analysis_status": "VALIDATED",
+  "expected_official_state": "VALID_DIRECTION_BAD_RR_WAIT_FOR_BETTER_ENTRY",
+  "expected_chart_template": "watch_chart",
+  "expected_direction": "bearish",
+  "evidence_pack": {
+    "active_range_authority": {
+      "selected_range": {
+        "status": "RESOLVED_ACTIVE_RANGE",
+        "timeframe": "4h",
+        "direction": "bearish",
+        "range_high": 63500.0,
+        "range_low": 57800.0,
+        "equilibrium": 60650.0,
+        "price_location": "discount",
+        "range_id": "BTCUSDT:4h:active_range:gauntlet06",
+        "width_atr": 4.5,
+        "max_width_atr": 22.0,
+        "protected_high_pivot_id": "BTCUSDT:4h:swing_high:gauntlet06",
+        "protected_low_pivot_id": "BTCUSDT:4h:swing_low:gauntlet06",
+        "protected_high": 63500.0,
+        "protected_low": 57800.0,
+        "authority_notes": ["Active range from protected swing pair."]
+      }
+    },
+    "detector_candidates": {
+      "1d": {"structure_breaks": [{"object_id": "1d_bear_choch", "break_type": "CHoCH", "direction": "bearish", "confirmed_at": "2026-06-15T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "64000.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}, "is_choch": true}], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": [{"object_id": "1d_bsl_64000", "side": "buy_side", "price": 64000.0}]},
+      "4h": {"structure_breaks": [{"object_id": "4h_bear_bos", "break_type": "BOS", "direction": "bearish", "confirmed_at": "2026-07-01T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "63500.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}}], "sweeps": [], "order_blocks": [{"object_id": "4h_supply_origin", "direction": "bearish", "timeframe": "4h", "price_low": 63300.0, "price_high": 63500.0}], "fvgs": [], "liquidity_levels": [{"object_id": "4h_bsl_63500", "side": "buy_side", "price": 63500.0}, {"object_id": "4h_ssl_57800", "side": "sell_side", "price": 57800.0}]},
+      "1h": {"structure_breaks": [], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": []},
+      "15m": {"structure_breaks": [], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": []}
+    }
+  },
+  "ai_decision": {
+    "schema": "ai_smc_trader_decision_v1",
+    "symbol": "BTCUSDT",
+    "official_state": "VALID_DIRECTION_BAD_RR_WAIT_FOR_BETTER_ENTRY",
+    "setup_grade": "THESIS_ONLY",
+    "direction": "bearish",
+    "setup_model": "bearish_valid_bad_rr",
+    "bias_summary": {"daily": "bearish", "4h": "bearish", "1h": "bearish", "final_bias": "bearish", "evidence": ["1d CHoCH confirmed bearish", "4h BOS confirmed bearish", "Direction is valid"]},
+    "active_range": {"timeframe": "4h", "high": 63500.0, "low": 57800.0, "equilibrium": 60650.0, "price_location": "discount", "source": "protected_swing_pair", "evidence_object_ids": ["BTCUSDT:4h:swing_high:gauntlet06", "BTCUSDT:4h:swing_low:gauntlet06"], "evidence": ["Active range from protected swing pair."]},
+    "liquidity_story": {"obvious_liquidity": [{"liquidity_id": "4h_bsl_63500", "timeframe": "4h", "side": "buy_side", "price": 63500.0, "label": "BSL above 4h high", "status": "fresh_untaken_liquidity"}], "swept_liquidity": [], "unswept_liquidity": [{"liquidity_id": "4h_ssl_57800", "timeframe": "4h", "side": "sell_side", "price": 57800.0, "status": "model_completion_reference"}], "narrative": "Direction is valid bearish but current price location gives bad RR. Wait for better entry."},
+    "displacement_assessment": {"direction": "none", "quality": "none", "structure_broken": false, "evidence_object_ids": [], "summary": "No fresh displacement. Waiting for 1h/15m displacement."},
+    "active_poi": {"direction": "unknown", "evidence_object_ids": [], "summary": "No active POI with good RR."},
+    "entry_plan": {"entry_ready": false, "entry_timeframe": "15m", "refinement_timeframe": "5m", "entry_price": null, "entry_zone_low": null, "entry_zone_high": null, "signal_type": null, "required_confirmation": ["BSL sweep above 63500", "15m rejection from supply", "Better RR (>= 3.0)"], "evidence_object_ids": [], "entry_anchor": null, "mapped_entry_price": null, "summary": "No entry. Direction valid but RR too low. Wait for better entry."},
+    "stop_loss_plan": {"evidence_object_ids": [], "summary": "No stop loss because there is no trade plan."},
+    "target_plan": {"targets": [], "summary": "No executable target."},
+    "rr_status": {"rr": 1.8, "minimum_rr": 3.0, "pass_rr": false, "notes": "RR=1.8 is below 3.0 minimum. Wait for better entry."},
+    "invalidation": {"condition": "Watch invalidation only.", "source": "none", "evidence_object_ids": []},
+    "annotation_plan": {"chart_template": "watch_chart", "show_trade_box": false, "labels": [], "levels": [], "reasoning_order": ["daily_context", "4h_context", "1h_context", "active_range", "premium_discount", "obvious_liquidity", "swept_liquidity", "displacement_quality", "active_poi", "entry_model", "entry_readiness", "structural_invalidation", "model_completion_liquidity_target", "rr_minimum_three", "final_state"]},
+    "self_review": {"active_range_check": "passed", "poi_check": "not_applicable", "annotation_check": "passed", "refusal_check": "passed", "corrections_made": ["Recognized direction is valid but RR is too low", "Did not force a trade with bad RR"], "remaining_uncertainties": ["Waiting for better entry"]},
+    "final_thesis": "BTCUSDT: VALID_DIRECTION_BAD_RR_WAIT_FOR_BETTER_ENTRY. Direction is valid bearish but current entry would give RR=1.8, below 3.0 minimum. Wait for BSL sweep above 63500 and better RR."
+  }
+}
