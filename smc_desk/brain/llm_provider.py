@@ -146,9 +146,11 @@ class CallableAISMCProvider:
 
     VALID_PROVIDER_MODES = {
         "REAL_VISION_LLM_PROVIDER",
+        "EXTERNAL_AI_AGENT",
         "MANUAL_AI_ASSISTED_JSON",
         "LOCAL_DETERMINISTIC_PROVIDER",
         "STUB_PROVIDER",
+        "HUMAN_OVERRIDE",
     }
 
     def __init__(
@@ -174,7 +176,7 @@ class CallableAISMCProvider:
     def complete(self, request: LLMCompletionRequest) -> LLMCompletionResult:
         self.last_request = request
         raw = self.completion_fn(request)
-        is_real = self.provider_mode in ("REAL_VISION_LLM_PROVIDER", "MANUAL_AI_ASSISTED_JSON")
+        is_real = self.provider_mode in ("REAL_VISION_LLM_PROVIDER", "MANUAL_AI_ASSISTED_JSON", "EXTERNAL_AI_AGENT")
         is_real_call = self.provider_mode == "REAL_VISION_LLM_PROVIDER"
         return LLMCompletionResult(
             raw_json=raw,

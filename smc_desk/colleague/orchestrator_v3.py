@@ -410,6 +410,10 @@ def _status(*, provider_result: LLMCompletionResult, validation_result: Validati
         return "REVIEW_REQUIRED"
     if mode == "MANUAL_AI_ASSISTED_JSON":
         return "PARTIAL_PASS"
+    if mode == "HUMAN_OVERRIDE":
+        return "HUMAN_OVERRIDE_APPLIED"
+    if mode == "EXTERNAL_AI_AGENT":
+        return "AGENT_REVIEW_PASS"
     return "PASS"
 
 

@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from smc_desk import analyze_ohlcv, build_trade_plan_markdown, load_rule_config
+from smc_desk.engine import analyze_ohlcv, build_trade_plan_markdown
+from smc_desk.rules import load_rule_config
 from smc_desk.dual_lens import reconcile, render_markdown
 from smc_desk.episode_narrative import EpisodeNarrativeBuilder
 from smc_desk.features import detect_failed_breakout, detect_vertical_spike_trap, regime_features

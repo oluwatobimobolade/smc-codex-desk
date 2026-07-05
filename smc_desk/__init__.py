@@ -1,6 +1,8 @@
-"""Core package for the smc-codex-desk workstation."""
+"""Core package for the smc-codex-desk workstation.
 
-from .engine import analyze_dataframe, analyze_ohlcv, build_trade_plan_markdown
-from .rules import RuleConfig, load_rule_config
+Import functions directly from their submodules to avoid eagerly loading
+optional dependencies (e.g. yaml) at import time:
 
-__all__ = ["RuleConfig", "analyze_dataframe", "analyze_ohlcv", "build_trade_plan_markdown", "load_rule_config"]
+    from smc_desk.engine import analyze_dataframe, analyze_ohlcv
+    from smc_desk.rules import RuleConfig, load_rule_config
+"""

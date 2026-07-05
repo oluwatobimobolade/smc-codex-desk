@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from smc_desk import analyze_ohlcv, load_rule_config
+from smc_desk.engine import analyze_ohlcv
+from smc_desk.rules import load_rule_config
 
 
 def parse_args() -> argparse.Namespace:
