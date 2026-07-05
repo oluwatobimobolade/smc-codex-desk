@@ -64,7 +64,7 @@ class LLMCompletionResult:
     model_name: str
     is_stub: bool = False
     is_real_reasoning: bool = True
-    provider_mode: str = "REAL_LLM_PROVIDER"
+    provider_mode: str = "REAL_VISION_LLM_PROVIDER"
     api_usage: dict[str, int] = field(default_factory=lambda: {"prompt_tokens": 0, "completion_tokens": 0, "image_count": 0})
     is_manual: bool = False
     is_real_llm_call: bool = True
@@ -130,11 +130,26 @@ class StubAISMCProvider:
 class CallableAISMCProvider:
     """Provider adapter around an injected callable.
 
-    This is the preferred no-API test/local bridge: the caller supplies a real
-    function that can be backed by this chat, a local model, Claude Desktop, or
-    another manually operated workspace. Mark it as stub only when the payload is
-    fixed and not produced by chart reasoning.
+    Provider mode is ALWAYS explicit. The caller must declare what kind of
+    provider this is — never auto-label as real LLM.
+
+    Valid provider_mode values:
+      - REAL_VISION_LLM_PROVIDER: an actual vision LLM (OpenAI, Claude, Kimi, etc.)
+        is receiving the prompt + chart images and returning the decision JSON.
+      - MANUAL_AI_ASSISTED_JSON: a human or AI assistant (like this chat) has
+        inspected the charts and written the JSON. The reasoning is real but
+        not from an automated API call.
+      - LOCAL_DETERMINISTIC_PROVIDER: a local function is producing a
+        conservative/structured payload. This is NOT real AI reasoning.
+      - STUB_PROVIDER: a fixed payload. Definitely not real AI reasoning.
     """
+
+    VALID_PROVIDER_MODES = {
+        "REAL_VISION_LLM_PROVIDER",
+        "MANUAL_AI_ASSISTED_JSON",
+        "LOCAL_DETERMINISTIC_PROVIDER",
+        "STUB_PROVIDER",
+    }
 
     def __init__(
         self,
@@ -142,29 +157,37 @@ class CallableAISMCProvider:
         *,
         provider_name: str,
         model_name: str,
-        is_stub: bool = False,
+        provider_mode: str,
     ):
+        if provider_mode not in self.VALID_PROVIDER_MODES:
+            raise ValueError(
+                f"provider_mode must be one of {sorted(self.VALID_PROVIDER_MODES)}, got {provider_mode!r}. "
+                "Never auto-label a local callable as REAL_VISION_LLM_PROVIDER."
+            )
         self.completion_fn = completion_fn
         self.provider_name = provider_name
         self.model_name = model_name
-        self.is_stub = is_stub
+        self.provider_mode = provider_mode
+        self.is_stub = provider_mode in ("STUB_PROVIDER",)
         self.last_request: LLMCompletionRequest | None = None
 
     def complete(self, request: LLMCompletionRequest) -> LLMCompletionResult:
         self.last_request = request
         raw = self.completion_fn(request)
+        is_real = self.provider_mode in ("REAL_VISION_LLM_PROVIDER", "MANUAL_AI_ASSISTED_JSON")
+        is_real_call = self.provider_mode == "REAL_VISION_LLM_PROVIDER"
         return LLMCompletionResult(
             raw_json=raw,
             provider_name=self.provider_name,
             model_name=self.model_name,
             is_stub=self.is_stub,
-            is_real_reasoning=not self.is_stub,
-            provider_mode="STUB_PROVIDER" if self.is_stub else "REAL_LLM_PROVIDER",
-            is_manual=False,
-            is_real_llm_call=not self.is_stub,
+            is_real_reasoning=is_real,
+            provider_mode=self.provider_mode,
+            is_manual=self.provider_mode == "MANUAL_AI_ASSISTED_JSON",
+            is_real_llm_call=is_real_call,
             api_usage={"prompt_tokens": 0, "completion_tokens": 0, "image_count": len(request.chart_images)},
             prompt_hash=request.prompt_hash,
             evidence_hash=request.evidence_hash,
             chart_image_count=len(request.chart_images),
-            metadata={"adapter": "callable"},
+            metadata={"adapter": "callable", "provider_mode_explicit": True},
         )

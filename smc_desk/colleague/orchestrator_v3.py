@@ -399,11 +399,16 @@ def _downgrade_for_depth(result: ValidationResult, depth_report: Mapping[str, An
 
 
 def _status(*, provider_result: LLMCompletionResult, validation_result: ValidationResult) -> str:
-    if provider_result.is_stub or not provider_result.is_real_reasoning:
+    mode = getattr(provider_result, "provider_mode", "")
+    if mode == "LOCAL_DETERMINISTIC_PROVIDER":
+        return "SAFE_SIMULATION_PASS" if validation_result.status == "VALIDATED" else "REVIEW_REQUIRED"
+    if mode == "STUB_PROVIDER" or provider_result.is_stub:
+        return "NOT_REAL_AI_REASONING"
+    if not provider_result.is_real_reasoning:
         return "NOT_REAL_AI_REASONING"
     if validation_result.status != "VALIDATED":
         return "REVIEW_REQUIRED"
-    if getattr(provider_result, "provider_mode", "") == "MANUAL_AI_ASSISTED_JSON":
+    if mode == "MANUAL_AI_ASSISTED_JSON":
         return "PARTIAL_PASS"
     return "PASS"
 

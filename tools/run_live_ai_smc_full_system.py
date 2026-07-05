@@ -53,7 +53,7 @@ def main() -> None:
                 lambda request, manifest=source_manifest: build_conservative_ai_payload(request, manifest),
                 provider_name="local_codex_thread_brain",
                 model_name="prompt_os_v1_conservative_observe_only",
-                is_stub=False,
+                provider_mode="LOCAL_DETERMINISTIC_PROVIDER",
             )
             result = run_ai_smc_orchestrator_v3(
                 symbol=normalize_symbol(symbol),

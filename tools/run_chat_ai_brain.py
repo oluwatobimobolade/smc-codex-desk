@@ -80,7 +80,7 @@ def main() -> None:
         completion_fn=lambda request, payload=brain_payload: payload,
         provider_name="chat_assistant_ai_brain",
         model_name="this_chat_with_vision",
-        is_stub=False,
+        provider_mode="MANUAL_AI_ASSISTED_JSON",
     )
 
     # 3. Run the full WP-0035 pipeline with the chat-AI decision injected.

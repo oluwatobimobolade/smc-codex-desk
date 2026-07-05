@@ -92,7 +92,7 @@ def main() -> None:
             lambda request, manifest=source_manifest: build_gauntlet_ai_payload(request, symbol_norm, manifest),
             provider_name="local_codex_thread_brain",
             model_name="prompt_os_v1_conservative_observe_only",
-            is_stub=False,
+            provider_mode="LOCAL_DETERMINISTIC_PROVIDER",
         )
 
         symbol_run_dir = root / symbol_norm
