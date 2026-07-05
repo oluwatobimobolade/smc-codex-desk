@@ -29,6 +29,13 @@ from smc_desk.data.historical_backfill import DEFAULT_MINIMUM_DEPTH, FOREX_MINIM
 from smc_desk.perception.engine_v2 import PerceptionEngineV2
 from smc_desk.rendering.clean_mtf_chart_pack import render_clean_mtf_chart_pack
 from smc_desk.rendering.smc_trader_annotation_renderer import render_smc_trader_annotation_chart
+from smc_desk.perception.formal_structure_graph import (
+    graph_invariant_violation_codes,
+    graph_requires_thesis_only,
+    graph_requires_mixed_bias,
+    graph_thesis_sentence,
+    graph_to_dict_string,
+)
 
 
 OFFICIAL_AI_SOURCE = "AISMCTraderBrainValidated"
@@ -185,6 +192,7 @@ def run_ai_smc_orchestrator_v3(
             break
 
     official_decision = validation_result.official_decision
+    formal_graph = evidence_pack.get("formal_structure_graph") or {}
     _write_json(root / "11_ai_smc_trader_brain" / "provider_audit.json", provider_result.audit_record())
     _write_json(root / "11_ai_smc_trader_brain" / "raw_decision.json", decision.model_dump(mode="json", by_alias=True))
     _write_json(root / "12_ai_consistency_validation" / "validation_result.json", validation_result.model_dump(mode="json", by_alias=True))
@@ -218,6 +226,9 @@ def run_ai_smc_orchestrator_v3(
     _write_json(root / "15_ai_thesis" / "thesis.json", thesis)
     _write_text(root / "15_ai_thesis" / "thesis.md", render_smc_thesis_ai_v1_markdown(thesis))
 
+    _write_json(root / "16_formal_structure_graph" / "structure_graph.json", formal_graph)
+    _render_structure_map(timeframe_dfs, formal_graph, root / "16_formal_structure_graph" / "structure_map.png", symbol=symbol)
+
     status = _status(provider_result=provider_result, validation_result=validation_result)
     prompt_manifest = build_prompt_registry_manifest(include_text=False)
     report = {
@@ -245,6 +256,14 @@ def run_ai_smc_orchestrator_v3(
         "paper_execution": "disabled",
         "live_execution": "disabled",
         "capital_risk": 0,
+        "formal_structure_graph_path": str(root / "16_formal_structure_graph" / "structure_graph.json"),
+        "structure_map_chart": str(root / "16_formal_structure_graph" / "structure_map.png"),
+        "graph_invariant_status": formal_graph.get("invariants", {}).get("status", "NOT_COMPUTED"),
+        "graph_invariant_failures": graph_invariant_violation_codes(formal_graph),
+        "graph_parent_child_status": formal_graph.get("parent_child_context", {}).get("status", "NOT_COMPUTED"),
+        "graph_thesis_sentence": graph_thesis_sentence(formal_graph),
+        "graph_requires_mixed_bias": graph_requires_mixed_bias(formal_graph),
+        "graph_requires_thesis_only": graph_requires_thesis_only(formal_graph),
     }
     assert_official_report_uses_ai_brain(report)
     _write_json(root / "final_report.json", report)
@@ -407,6 +426,21 @@ def _write_text(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def _render_structure_map(
+    timeframe_dfs: Mapping[str, pd.DataFrame],
+    graph: Mapping[str, Any],
+    output_path: Path,
+    *,
+    symbol: str,
+) -> None:
+    """Render a sparse structure map: gray parent range, thick external BOS, dashed internal, no trade box."""
+    if not graph or not graph.get("timeframes"):
+        return
+    from smc_desk.rendering.structure_map_renderer import render_structure_map
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    render_structure_map(timeframe_dfs, graph, output_path, symbol=symbol)
+
+
 def _report_markdown(report: Mapping[str, Any]) -> str:
     lines = [f"# {report.get('symbol')} AI SMC Orchestrator V3", ""]
     lines.append(f"Status: `{report.get('status')}`")
@@ -416,7 +450,14 @@ def _report_markdown(report: Mapping[str, Any]) -> str:
     lines.append(f"Validation: `{report.get('validation_result')}`")
     lines.append(f"Official state: `{report.get('official_state')}`")
     lines.append(f"Chart template: `{report.get('final_chart_template')}`")
+    lines.append(f"Graph invariants: `{report.get('graph_invariant_status')}`")
+    lines.append(f"Parent-child context: `{report.get('graph_parent_child_status')}`")
     lines.append("")
+    if report.get("graph_invariant_failures"):
+        lines.append("## Graph Invariant Failures")
+        for code in report.get("graph_invariant_failures") or []:
+            lines.append(f"- `{code}`")
+        lines.append("")
     if report.get("hard_issues"):
         lines.append("## Hard Issues")
         for issue in report.get("hard_issues") or []:

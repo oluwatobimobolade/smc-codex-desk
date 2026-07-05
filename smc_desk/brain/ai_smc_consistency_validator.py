@@ -44,6 +44,8 @@ def validate_ai_smc_decision(
     issues: list[ValidationIssue] = []
     _check_reasoning_order(decision, issues)
     _check_bias_alignment(decision, issues)
+    _check_formal_structure_graph(decision, evidence_pack, issues)
+    _check_parent_child_structure(decision, evidence_pack, issues)
     _check_no_1m_entry(decision, issues)
     _check_chart_eligibility(decision, issues)
     _check_trade_ready_preconditions(decision, issues)
@@ -64,6 +66,9 @@ def validate_ai_smc_decision(
     # SMC Doctrine vs Trade Plan categorisation
     smc_doctrine_issue_codes = {
         "direction_bias_mismatch",
+        "parent_child_conflict_direction_not_mixed",
+        "parent_child_conflict_trade_ready",
+        "parent_child_conflict_not_acknowledged",
         "displacement_direction_mismatch",
         "forbidden_1m_entry",
         "active_range_invalid_bounds",
@@ -92,6 +97,10 @@ def validate_ai_smc_decision(
         "bullish_target_below_entry",
         "target_not_model_completion_liquidity",
         "swept_low_classified_as_fresh_ssl",
+        "formal_graph_invariant_violation",
+        "formal_graph_trade_promotion_blocked",
+        "formal_graph_requires_mixed_bias",
+        "formal_graph_requires_thesis_only",
     }
 
     # Calculate statuses
@@ -214,6 +223,105 @@ def _check_bias_alignment(decision: AISMCDecision, issues: list[ValidationIssue]
             _issue(issues, "displacement_direction_mismatch", "Displacement direction conflicts with final direction.")
 
 
+def _check_formal_structure_graph(
+    decision: AISMCDecision,
+    evidence_pack: Mapping[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    graph = evidence_pack.get("formal_structure_graph")
+    if not isinstance(graph, Mapping):
+        return
+
+    invariants = graph.get("invariants") or {}
+    status = str(invariants.get("status", "PASS"))
+
+    if status == "FATAL_STRUCTURE_VIOLATION":
+        _issue(issues, "formal_graph_invariant_violation",
+               f"Formal structure graph has FATAL invariant violations: {invariants.get('violations', [])}. "
+               "The decision must be downgraded to REVIEW_REQUIRED.")
+        return
+
+    if status == "REVIEW_REQUIRED":
+        _issue(issues, "formal_graph_invariant_violation",
+               f"Formal structure graph has invariant violations requiring review: {invariants.get('violations', [])}.")
+
+    contract = graph.get("authority_contract") or {}
+    if contract.get("trade_promotion_blocked"):
+        if decision.official_state == "TRADE_PLAN_READY":
+            _issue(issues, "formal_graph_trade_promotion_blocked",
+                   "Formal structure graph blocks trade promotion. TRADE_PLAN_READY cannot be issued "
+                   "when graph invariants are not PASS.")
+
+    pc = graph.get("parent_child_context") or {}
+    if pc.get("has_conflict"):
+        if decision.direction not in ("mixed",) or decision.bias_summary.final_bias not in ("mixed",):
+            _issue(issues, "formal_graph_requires_mixed_bias",
+                   "Formal structure graph has parent-child conflict. Direction and final_bias must be 'mixed'.")
+        if decision.official_state not in ("THESIS_ONLY", "REVIEW_REQUIRED", "WATCH_ONLY"):
+            _issue(issues, "formal_graph_requires_thesis_only",
+                   "Formal structure graph has parent-child conflict. Official state must be THESIS_ONLY or REVIEW_REQUIRED, "
+                   "not WATCH_ONLY or TRADE_PLAN_READY.")
+
+
+def _check_parent_child_structure(
+    decision: AISMCDecision,
+    evidence_pack: Mapping[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    structure_narrative = evidence_pack.get("structure_narrative")
+    if not isinstance(structure_narrative, Mapping):
+        return
+    parent_child = structure_narrative.get("parent_child_context")
+    if not isinstance(parent_child, Mapping) or not parent_child.get("has_parent_child_conflict"):
+        return
+
+    if decision.direction != "mixed" or decision.bias_summary.final_bias != "mixed":
+        _issue(
+            issues,
+            "parent_child_conflict_direction_not_mixed",
+            (
+                "Parent/child context timeframes conflict. The decision must remain mixed rather than "
+                "flattening the chart into clean bullish or clean bearish structure."
+            ),
+        )
+
+    if decision.official_state == "TRADE_PLAN_READY":
+        _issue(
+            issues,
+            "parent_child_conflict_trade_ready",
+            "Parent/child structure conflict cannot be promoted directly to TRADE_PLAN_READY.",
+        )
+
+    text = _decision_text(decision)
+    parent_tf = str(parent_child.get("parent_timeframe") or "").lower()
+    parent_bias = str(parent_child.get("parent_bias") or "").lower()
+    child_tf = str(parent_child.get("child_timeframe") or "").lower()
+    child_bias = str(parent_child.get("child_bias") or "").lower()
+    has_timeframes = all(token and token in text for token in (parent_tf, child_tf))
+    has_biases = all(token and token in text for token in (parent_bias, child_bias))
+    has_relationship = any(
+        token in text
+        for token in (
+            "parent",
+            "child",
+            "pullback",
+            "recovery",
+            "retracement",
+            "inside parent",
+            "context conflict",
+        )
+    )
+    if not (has_timeframes and has_biases and has_relationship):
+        _issue(
+            issues,
+            "parent_child_conflict_not_acknowledged",
+            (
+                "Parent/child structure conflict must be explicitly named in the thesis/evidence "
+                "with parent timeframe, child timeframe, both biases, and pullback/recovery context."
+            ),
+        )
+
+
 def _check_no_1m_entry(decision: AISMCDecision, issues: list[ValidationIssue]) -> None:
     for field_name, value in {
         "entry_timeframe": decision.entry_plan.entry_timeframe,
@@ -221,6 +329,21 @@ def _check_no_1m_entry(decision: AISMCDecision, issues: list[ValidationIssue]) -
     }.items():
         if str(value or "").lower() == "1m":
             _issue(issues, "forbidden_1m_entry", f"{field_name} cannot be 1m for an official entry plan.")
+
+
+def _decision_text(decision: AISMCDecision) -> str:
+    parts: list[str] = [
+        str(decision.final_thesis or ""),
+        str(decision.liquidity_story.narrative or ""),
+        str(decision.displacement_assessment.summary or ""),
+        str(decision.active_poi.summary or ""),
+        str(decision.entry_plan.summary or ""),
+    ]
+    parts.extend(str(item) for item in decision.bias_summary.evidence)
+    parts.extend(str(label.text) for label in decision.annotation_plan.labels)
+    parts.extend(str(item) for item in decision.self_review.corrections_made)
+    parts.extend(str(item) for item in decision.self_review.remaining_uncertainties)
+    return " ".join(parts).lower()
 
 
 def _check_chart_eligibility(decision: AISMCDecision, issues: list[ValidationIssue]) -> None:

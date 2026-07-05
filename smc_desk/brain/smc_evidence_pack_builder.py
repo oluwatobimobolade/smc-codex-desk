@@ -15,6 +15,8 @@ from typing import Any
 import pandas as pd
 
 from smc_desk.decision.active_range_resolver import resolve_active_range_authority
+from smc_desk.perception.formal_structure_graph import build_mtf_structure_graph
+from smc_desk.perception.structure_narrative import build_structure_narrative, prefer_formal_graph_override
 from smc_desk.profile.smc_intraday_profile import get_intraday_profile
 
 
@@ -63,6 +65,20 @@ def build_smc_evidence_pack(
         symbol=symbol,
         timeframe_dfs=timeframe_dfs,
     )
+    candidate_manifest = _candidate_manifest(detector_candidates or {})
+    formal_structure_graph = build_mtf_structure_graph(
+        symbol=symbol,
+        detector_candidates=candidate_manifest,
+        active_range_authority=active_range_authority,
+        timeframe_dfs=timeframe_dfs,
+    )
+    structure_narrative = prefer_formal_graph_override(
+        build_structure_narrative(
+            candidate_manifest,
+            raw_bias={timeframe: _summary_bias(summary) for timeframe, summary in ohlcv_summaries.items()},
+        ),
+        formal_structure_graph,
+    )
     pack = {
         "schema": "smc_evidence_pack_v1",
         "symbol": symbol,
@@ -82,7 +98,9 @@ def build_smc_evidence_pack(
         "ohlcv_summaries": ohlcv_summaries,
         "ohlcv_windows": ohlcv_windows,
         "active_range_authority": active_range_authority,
-        "detector_candidates": _candidate_manifest(detector_candidates or {}),
+        "detector_candidates": candidate_manifest,
+        "structure_narrative": structure_narrative,
+        "formal_structure_graph": formal_structure_graph,
         "provenance": {
             "dataframe_hashes": dataframe_hashes,
             "pack_hash": None,
@@ -143,6 +161,20 @@ def _summarize_df(df: pd.DataFrame) -> dict[str, Any]:
         "range_mid": (high + low) / 2.0,
         "volume_sum": float(df["volume"].sum()),
     }
+
+
+def _summary_bias(summary: Mapping[str, Any]) -> str:
+    close = float(summary["last_close"])
+    first = float(summary["first_open"])
+    high = float(summary["high"])
+    low = float(summary["low"])
+    span = max(high - low, 1e-9)
+    move = (close - first) / span
+    if move > 0.18:
+        return "bullish"
+    if move < -0.18:
+        return "bearish"
+    return "mixed"
 
 
 def _tail_records(df: pd.DataFrame, max_rows: int) -> list[dict[str, Any]]:

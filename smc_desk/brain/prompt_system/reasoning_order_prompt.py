@@ -12,6 +12,7 @@ PROMPT = PromptModule(
 1. Daily context: bias, active Daily range, and price location.
 2. 4H context: alignment/conflict, active 4H dealing range, premium/discount/equilibrium.
 3. 1H context: external structure, internal retracement, protected high/low, meaningful POI.
+3A. Parent-child structure check: if Daily/12H/4H parent context conflicts with 1H/15M child structure, say both sides explicitly. Never flatten this into clean bullish or clean bearish.
 4. Active range: define the dealing range that controls the current idea.
 5. Premium/discount: state where price is in the active range.
 6. Obvious liquidity: buy-side and sell-side pools visible before the decision.

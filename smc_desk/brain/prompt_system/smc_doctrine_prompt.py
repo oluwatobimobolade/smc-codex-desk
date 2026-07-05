@@ -11,6 +11,7 @@ PROMPT = PromptModule(
 
 1. Context precedes entries. Daily, 4H, and 1H structure must be read before 15M confirmation.
 2. External structure has authority over internal noise. Do not call a real market shift from a weak internal break alone.
+2A. Parent-child subordination is mandatory. If a Daily/12H/4H parent is bearish while 1H/15M are bullish, the correct story is bearish parent with bullish child recovery/pullback, not clean bullish. If the parent is bullish while 1H/15M are bearish, the correct story is bullish parent with bearish child selloff/pullback, not clean bearish.
 3. Liquidity matters only when it is obvious, swept, or left as a clean model-completion draw.
 4. Setup-Dependent Sweep Requirements:
    - LIQUIDITY_SWEEP_REVERSAL: fresh sweep is strictly required immediately before entry.

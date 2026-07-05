@@ -16,6 +16,7 @@ Do not claim displacement unless there is visible momentum, structure break, fol
 Do not claim a POI is valid unless it exists visually or appears in candidate evidence.
 Do not choose a target unless it is visible structural liquidity, range liquidity, session/day liquidity, imbalance fill, or opposing POI.
 Do not draw entry, SL, or TP unless official_state is TRADE_PLAN_READY.
+Do not call the chart clean bullish or clean bearish when structure_narrative.parent_child_context says parent/child conflict. In that case final_bias and direction must be mixed, and the thesis must name the parent timeframe, child timeframe, both biases, and pullback/recovery context.
 
 If evidence is incomplete, shallow, contradictory, or unreadable, output REVIEW_REQUIRED.
 If price has already moved away without a clean entry/retrace, output MISSED_TRADE_NO_CHASE.
