@@ -1,0 +1,164 @@
+{
+  "schema": "ai_smc_trader_decision_v1",
+  "symbol": "BTCUSDT",
+  "official_state": "THESIS_ONLY",
+  "setup_grade": "THESIS_ONLY",
+  "direction": "mixed",
+  "setup_model": "observe_only_parent_child_conflict_thesis",
+  "bias_summary": {
+    "daily": "bearish",
+    "4h": "bullish",
+    "1h": "bullish",
+    "final_bias": "mixed",
+    "evidence": [
+      "formal_structure_graph parent_child_context: PARENT_CHILD_CONFLICT - 1d remains bearish parent structure while 4h is bullish child recovery.",
+      "Graph thesis: treat the child move as pullback/recovery inside parent context until the parent protected structure breaks.",
+      "Graph invariants: REVIEW_REQUIRED with wick_probes_are_not_breaks violations across 1d (10 wick probes), 4h (15), 1h (35), 15m (38).",
+      "Authority contract: signal_allowed=false, trade_promotion_blocked=true, execution=disabled.",
+      "is_child_body_closed_beyond_parent_protected: false - the child 4h has NOT body-closed beyond the 1d parent protected high (74868.0).",
+      "Active range: 4h bullish 57758.6-63450.0, price in premium (equilibrium 60604.3)."
+    ]
+  },
+  "active_range": {
+    "timeframe": "4h",
+    "high": 63450.0,
+    "low": 57758.6,
+    "equilibrium": 60604.3,
+    "price_location": "premium",
+    "source": "protected_swing_pair",
+    "range_id": "BTCUSDT:4h:active_range:test",
+    "protected_high": 63450.0,
+    "protected_low": 57758.6,
+    "width_atr": null,
+    "max_allowed_width_atr": null,
+    "evidence_object_ids": [],
+    "evidence": [
+      "Active range selected from recent alternating swing structure.",
+      "Broad candle extremes were excluded from range selection."
+    ]
+  },
+  "liquidity_story": {
+    "obvious_liquidity": [
+      {"timeframe": "4h", "side": "buy_side", "price": 63450.0, "label": "active range high", "status": "range_high_reference"},
+      {"timeframe": "4h", "side": "sell_side", "price": 57758.6, "label": "active range low", "status": "range_low_reference"}
+    ],
+    "swept_liquidity": [],
+    "unswept_liquidity": [
+      {"timeframe": "1d", "side": "sell_side", "price": 74868.0, "label": "1d parent protected high - the level the 4h child would need to body-close beyond to flip the parent", "status": "above_high_external_liquidity"}
+    ],
+    "narrative": "Parent-child conflict: 1d bearish parent (last CHoCH at 74868.0 on 2026-05-28) vs 4h bullish child recovery (last BOS at 62180.0 on 2026-07-04). The child has not body-closed beyond the parent protected high, so the parent structure governs. The 4h active range is bullish (57758.6-63450.0) but this is internal structure within the parent bearish context. No validated sweep or displacement promoted into a trade plan."
+  },
+  "displacement_assessment": {
+    "direction": "none",
+    "quality": "none",
+    "structure_broken": false,
+    "evidence_object_ids": [],
+    "summary": "No validated displacement candidate promoted. The formal structure graph shows wick probes across all timeframes - these are probes/sweeps, not confirmed BOS/CHoCH. The 4h bullish BOS exists but is internal pullback, not a parent-flipping break."
+  },
+  "active_poi": {
+    "poi_id": null,
+    "timeframe": null,
+    "kind": null,
+    "direction": "unknown",
+    "price_low": null,
+    "price_high": null,
+    "freshness": null,
+    "evidence_object_ids": [],
+    "summary": "No validated active POI. The graph blocks promotion because parent-child conflict exists and wick probes are present. Wait for parent protected structure to break or for child to body-close beyond parent."
+  },
+  "entry_plan": {
+    "entry_ready": false,
+    "entry_timeframe": "15m",
+    "refinement_timeframe": "5m",
+    "entry_price": null,
+    "entry_zone_low": null,
+    "entry_zone_high": null,
+    "signal_type": null,
+    "required_confirmation": [
+      "Parent protected structure break with body close (1d CHoCH beyond 74868.0 or below 1d protected low)",
+      "Validated sweep/displacement/POI sequence",
+      "15m rejection or continuation confirmation"
+    ],
+    "evidence_object_ids": [],
+    "entry_anchor": null,
+    "mapped_entry_price": null,
+    "summary": "No entry. The formal structure graph blocks TRADE_PLAN_READY because parent-child conflict exists and invariants are REVIEW_REQUIRED."
+  },
+  "stop_loss_plan": {
+    "stop_price": null,
+    "structural_invalidation_price": null,
+    "source": null,
+    "buffer_notes": null,
+    "evidence_object_ids": [],
+    "stop_anchor": null,
+    "mapped_stop_price": null,
+    "summary": "No stop loss because there is no trade plan. The graph blocks trade promotion."
+  },
+  "target_plan": {
+    "targets": [],
+    "model_completion_liquidity_id": null,
+    "summary": "No executable target because there is no trade-ready entry. The graph's authority contract has trade_promotion_blocked=true."
+  },
+  "rr_status": {"rr": null, "minimum_rr": 3.0, "pass_rr": false, "notes": "RR not evaluated because this is not TRADE_PLAN_READY. Graph blocks promotion."},
+  "invalidation": {
+    "invalidation_price": null,
+    "condition": "Watch invalidation only. Parent structure break would change the context.",
+    "source": "1d_parent_protected_high",
+    "evidence_object_ids": [],
+    "invalidation_anchor": null,
+    "mapped_invalidation_price": null
+  },
+  "annotation_plan": {
+    "chart_template": "context_chart",
+    "show_trade_box": false,
+    "labels": [
+      {"text": "PARENT_CHILD_CONFLICT: 1d bearish parent / 4h bullish child recovery", "kind": "context", "timeframe": "1d"},
+      {"text": "1d remains bearish parent while 4h is bullish child recovery; treat as pullback/recovery inside parent context", "kind": "context", "timeframe": "1d"},
+      {"text": "Graph invariants: REVIEW_REQUIRED (wick_probes_are_not_breaks)", "kind": "state", "timeframe": "1h"},
+      {"text": "No validated sweep/displacement/POI promoted", "kind": "state"},
+      {"text": "THESIS_ONLY - graph blocks TRADE_PLAN_READY", "kind": "state"}
+    ],
+    "levels": [
+      {"label": "1d parent protected high (74868.0)", "kind": "invalidation", "price": 74868.0, "timeframe": "1d"},
+      {"label": "4h range high (63450.0)", "kind": "liquidity", "price": 63450.0, "timeframe": "4h"},
+      {"label": "4h range low (57758.6)", "kind": "liquidity", "price": 57758.6, "timeframe": "4h"},
+      {"label": "4h equilibrium (60604.3)", "kind": "structure", "price": 60604.3, "timeframe": "4h"}
+    ],
+    "reasoning_order": [
+      "daily_context",
+      "4h_context",
+      "1h_context",
+      "active_range",
+      "premium_discount",
+      "obvious_liquidity",
+      "swept_liquidity",
+      "displacement_quality",
+      "active_poi",
+      "entry_model",
+      "entry_readiness",
+      "structural_invalidation",
+      "model_completion_liquidity_target",
+      "rr_minimum_three",
+      "final_state"
+    ]
+  },
+  "self_review": {
+    "active_range_check": "passed",
+    "poi_check": "not_applicable",
+    "annotation_check": "passed",
+    "refusal_check": "passed",
+    "corrections_made": [
+      "Downgraded to mixed/THESIS_ONLY because parent and child context timeframes conflict per the formal structure graph.",
+      "The formal_structure_graph is the single authoritative source. It says PARENT_CHILD_CONFLICT and REVIEW_REQUIRED invariants. I obey.",
+      "Did not promote to TRADE_PLAN_READY because the graph's authority contract has trade_promotion_blocked=true.",
+      "Direction set to mixed because the graph requires mixed when parent-child conflict exists.",
+      "Official state set to THESIS_ONLY because the graph requires THESIS_ONLY when parent-child conflict exists."
+    ],
+    "remaining_uncertainties": [
+      "Parent protected structure has not been broken by the child.",
+      "Wick probes across all timeframes mean no confirmed external break can be trusted yet.",
+      "The 4h bullish move is internal pullback/recovery inside the 1d bearish parent context until proven otherwise."
+    ]
+  },
+  "final_thesis": "BTCUSDT: THESIS_ONLY. 1d remains bearish parent structure while 4h is bullish child recovery; treat the child move as a pullback/recovery inside parent context until the parent protected structure breaks. The formal structure graph confirms PARENT_CHILD_CONFLICT with invariants REVIEW_REQUIRED (wick probes across all timeframes). The child has NOT body-closed beyond the parent protected high (74868.0), so the parent structure governs. The graph's authority contract blocks trade promotion. The system refuses a trade plan and stays in THESIS_ONLY."
+}

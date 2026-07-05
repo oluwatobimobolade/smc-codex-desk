@@ -1,0 +1,157 @@
+{
+  "schema": "ai_smc_trader_decision_v1",
+  "symbol": "GBPUSD",
+  "official_state": "WATCH_ONLY",
+  "setup_grade": "C",
+  "direction": "bullish",
+  "setup_model": "observe_only_context_watch_with_graph_authoritative",
+  "bias_summary": {
+    "daily": "bullish",
+    "4h": "bullish",
+    "1h": "bullish",
+    "final_bias": "bullish",
+    "evidence": [
+      "formal_structure_graph parent_child_context: INCOMPLETE_ALIGNMENT (no confirmed structure breaks in graph nodes; all timeframes report external_bias=unknown).",
+      "structure_narrative: 1d bullish, 4h bullish, 1h bullish, 15m bearish — short-term pullback inside broader bullish context.",
+      "active_range_authority: 4h bullish range 1.3214-1.3385, price in premium (equilibrium 1.3300, location=premium).",
+      "Graph invariants: PASS — no wick probes, no summary-sourced range, no unconfirmed breaks.",
+      "Authority contract: signal_allowed=true, trade_promotion_blocked=false, execution=disabled.",
+      "Graph does not block WATCH_ONLY because no parent-child conflict exists at the graph level; the 15m bearish move is internal structure, not a confirmed external break."
+    ]
+  },
+  "active_range": {
+    "timeframe": "4h",
+    "high": 1.3385447263717651,
+    "low": 1.3214054107666016,
+    "equilibrium": 1.3299750685691833,
+    "price_location": "premium",
+    "source": "protected_swing_pair",
+    "range_id": "GBPUSD:4h:active_range:test",
+    "protected_high": 1.3385447263717651,
+    "protected_low": 1.3214054107666016,
+    "width_atr": null,
+    "max_allowed_width_atr": null,
+    "evidence_object_ids": [],
+    "evidence": [
+      "Active range selected from recent alternating swing structure.",
+      "Broad candle extremes were excluded from range selection."
+    ]
+  },
+  "liquidity_story": {
+    "obvious_liquidity": [
+      {"timeframe": "4h", "side": "buy_side", "price": 1.3385447263717651, "label": "active range high", "status": "range_high_reference"},
+      {"timeframe": "4h", "side": "sell_side", "price": 1.3214054107666016, "label": "active range low", "status": "range_low_reference"}
+    ],
+    "swept_liquidity": [],
+    "unswept_liquidity": [
+      {"timeframe": "4h", "side": "buy_side", "price": 1.3385447263717651, "label": "buy-side liquidity above range high", "status": "fresh_untaken_liquidity"}
+    ],
+    "narrative": "Price is in premium at 1.3300. The 4h active range is bullish but price is at the upper half. No validated sweep or displacement has been promoted. We watch for a clean retrace toward the range low or equilibrium before considering any directional bias."
+  },
+  "displacement_assessment": {
+    "direction": "none",
+    "quality": "none",
+    "structure_broken": false,
+    "evidence_object_ids": [],
+    "summary": "No validated displacement candidate promoted. The formal structure graph shows all timeframes as external_bias=unknown, meaning no confirmed external breaks exist in the detector output."
+  },
+  "active_poi": {
+    "poi_id": null,
+    "timeframe": null,
+    "kind": null,
+    "direction": "unknown",
+    "price_low": null,
+    "price_high": null,
+    "freshness": null,
+    "evidence_object_ids": [],
+    "summary": "No validated active POI. Wait for clean retrace/rejection before trade readiness."
+  },
+  "entry_plan": {
+    "entry_ready": false,
+    "entry_timeframe": "15m",
+    "refinement_timeframe": "5m",
+    "entry_price": null,
+    "entry_zone_low": null,
+    "entry_zone_high": null,
+    "signal_type": null,
+    "required_confirmation": ["validated sweep/displacement/POI", "15m rejection or continuation confirmation"],
+    "evidence_object_ids": [],
+    "entry_anchor": null,
+    "mapped_entry_price": null,
+    "summary": "No entry: the run is watch only. The graph does not certify any active POI."
+  },
+  "stop_loss_plan": {
+    "stop_price": null,
+    "structural_invalidation_price": null,
+    "source": null,
+    "buffer_notes": null,
+    "evidence_object_ids": [],
+    "stop_anchor": null,
+    "mapped_stop_price": null,
+    "summary": "No stop loss because there is no trade plan."
+  },
+  "target_plan": {
+    "targets": [],
+    "model_completion_liquidity_id": null,
+    "summary": "No executable target because there is no trade-ready entry."
+  },
+  "rr_status": {"rr": null, "minimum_rr": 3.0, "pass_rr": false, "notes": "RR not evaluated because this is not TRADE_PLAN_READY."},
+  "invalidation": {
+    "invalidation_price": 1.3214054107666016,
+    "condition": "Watch invalidation only; not an executable stop loss.",
+    "source": "4h_range_extreme",
+    "evidence_object_ids": [],
+    "invalidation_anchor": null,
+    "mapped_invalidation_price": null
+  },
+  "annotation_plan": {
+    "chart_template": "watch_chart",
+    "show_trade_box": false,
+    "labels": [
+      {"text": "4h bullish active range, price in premium", "kind": "context", "timeframe": "4h"},
+      {"text": "1d/4h/1h bullish, 15m bearish internal pullback", "kind": "context", "timeframe": "1d"},
+      {"text": "Graph: INCOMPLETE_ALIGNMENT, invariants PASS", "kind": "state", "timeframe": "1h"},
+      {"text": "No validated sweep/displacement/POI promoted", "kind": "state"},
+      {"text": "Watch only - wait for real POI confirmation", "kind": "state"}
+    ],
+    "levels": [
+      {"label": "4h range high (buy-side liquidity)", "kind": "liquidity", "price": 1.3385447263717651, "timeframe": "4h"},
+      {"label": "4h range low (sell-side liquidity)", "kind": "liquidity", "price": 1.3214054107666016, "timeframe": "4h"},
+      {"label": "4h equilibrium", "kind": "structure", "price": 1.3299750685691833, "timeframe": "4h"}
+    ],
+    "reasoning_order": [
+      "daily_context",
+      "4h_context",
+      "1h_context",
+      "active_range",
+      "premium_discount",
+      "obvious_liquidity",
+      "swept_liquidity",
+      "displacement_quality",
+      "active_poi",
+      "entry_model",
+      "entry_readiness",
+      "structural_invalidation",
+      "model_completion_liquidity_target",
+      "rr_minimum_three",
+      "final_state"
+    ]
+  },
+  "self_review": {
+    "active_range_check": "passed",
+    "poi_check": "not_applicable",
+    "annotation_check": "passed",
+    "refusal_check": "passed",
+    "corrections_made": [
+      "Refused executable trade because sweep/displacement/active POI were not validated.",
+      "Used structural active range authority instead of OHLCV summary extremes.",
+      "Read the formal_structure_graph first - it reports INCOMPLETE_ALIGNMENT with invariants PASS, so no downgrade is needed but no promotion is either."
+    ],
+    "remaining_uncertainties": [
+      "No validated active POI promoted into trade readiness.",
+      "No confirmed sweep/displacement sequence promoted into execution.",
+      "Graph shows all timeframes as external_bias=unknown - the detector pipeline in this test run did not produce confirmed structure breaks."
+    ]
+  },
+  "final_thesis": "GBPUSD: WATCH_ONLY. Directional context is bullish (1d/4h/1h bullish, 15m bearish internal pullback), active range is 4h bullish 1.3214-1.3385 with price in premium. The formal structure graph reports INCOMPLETE_ALIGNMENT with invariants PASS - no parent-child conflict, no wick probes, no summary-sourced range. The system refuses a trade plan because no validated sweep/displacement/active POI has been promoted, and the graph does not certify any confirmed external break to anchor a directional entry."
+}
