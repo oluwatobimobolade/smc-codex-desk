@@ -240,7 +240,7 @@ def test_orchestrator_auto_runs_perception_when_candidates_are_missing(tmp_path)
     result = run_ai_smc_orchestrator_v3(
         symbol="BTCUSDT",
         timeframe_dfs=_timeframe_dfs(90),
-        provider=CallableAISMCProvider(complete, provider_name="local", model_name="manual", is_stub=False),
+        provider=CallableAISMCProvider(complete, provider_name="local", model_name="manual", provider_mode="MANUAL_AI_ASSISTED_JSON"),
         output_dir=tmp_path,
         detector_candidates=None,
         enforce_minimum_depth=False,

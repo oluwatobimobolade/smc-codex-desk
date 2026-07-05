@@ -103,7 +103,7 @@ def test_wp0036_acceptance_summary_fails_state_trade_box_mismatch():
             "annotation_plan": {"chart_template": "trade_plan_chart", "show_trade_box": True, "labels": []},
         },
         validation_result_data={},
-        provider_manifest={"provider_mode": "REAL_LLM_PROVIDER", "is_real_llm_call": True, "is_manual": False, "is_stub": False},
+        provider_manifest={"provider_mode": "REAL_VISION_LLM_PROVIDER", "is_real_llm_call": True, "is_manual": False, "is_stub": False},
         critic_data={"veto": False, "critique": "", "suggested_downgrade_state": "KEEP_CURRENT"},
         anchor_grounding={"anchors": []},
         liq_status={"swept_liquidity_checks": []},

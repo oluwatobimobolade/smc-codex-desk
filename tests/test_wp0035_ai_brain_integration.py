@@ -119,7 +119,7 @@ def _real_provider(payload=None, calls=None):
             calls.append(request)
         return payload or _payload()
 
-    return CallableAISMCProvider(complete, provider_name="local_real_reasoning", model_name="manual-ai-json", is_stub=False)
+    return CallableAISMCProvider(complete, provider_name="local_real_reasoning", model_name="manual-ai-json", provider_mode="MANUAL_AI_ASSISTED_JSON")
 
 
 def test_orchestrator_calls_ai_smc_brain(tmp_path):
