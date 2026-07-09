@@ -19,6 +19,10 @@ from smc_desk.brain.ai_smc_consistency_validator import (
     strip_trade_plan_for_review,
     validate_ai_smc_decision,
 )
+from smc_desk.brain.annotation_plan_validator import (
+    annotation_validation_to_dict,
+    validate_annotation_plan_v2,
+)
 from smc_desk.brain.ai_smc_trader_brain import AISMCTraderBrain
 from smc_desk.brain.llm_provider import AISMCProvider, LLMCompletionRequest, LLMCompletionResult
 from smc_desk.brain.prompt_system import build_prompt_registry_manifest
@@ -221,6 +225,34 @@ def run_ai_smc_orchestrator_v3(
             "source": "validated_ai_annotation_plan",
         }
         _write_json(root / "14_clean_annotation_render" / "annotation_manifest.json", chart_manifest)
+        visual_review = scene.get("visual_critic") or {
+            "schema": "professional_smc_annotation_visual_review_v1",
+            "status": "NOT_AVAILABLE",
+            "critic_authority": "downgrade_or_cleanup_only",
+            "issues": [],
+        }
+        _write_json(root / "14_clean_annotation_render" / "annotation_visual_review.json", visual_review)
+        annotation_validation = validate_annotation_plan_v2(validation_result.decision, evidence_pack)
+        annotation_validation_payload = annotation_validation_to_dict(annotation_validation)
+        _write_json(root / "14_clean_annotation_render" / "annotation_validation.json", annotation_validation_payload)
+        _write_json(
+            root / "14_clean_annotation_render" / "annotation_plan_v2.json",
+            official_decision.get("annotation_plan_v2") or {
+                "schema": "professional_smc_annotation_plan_v2",
+                "style": "professional_smc_sparse",
+                "objects": [],
+                "notes": ["No annotation_plan_v2 was supplied; renderer used legacy annotation_plan."],
+            },
+        )
+        _write_text(
+            root / "14_clean_annotation_render" / "annotation_self_review.md",
+            _annotation_self_review_markdown(
+                scene=scene,
+                validation=annotation_validation_payload,
+                visual_review=visual_review,
+                official_state=str(official_decision.get("official_state")),
+            ),
+        )
 
     thesis = build_smc_thesis_ai_v1(validation_result=validation_result, evidence_pack=evidence_pack)
     _write_json(root / "15_ai_thesis" / "thesis.json", thesis)
@@ -305,7 +337,7 @@ def _run_perception_candidates(
         try:
             normalized = _normalize_timeframe_df(df)
             gap_trim_report: dict[str, Any] = {"session_gap_trimmed": False}
-            if _is_forex_pair(symbol.upper().replace("/", "").replace("-", "")):
+            if _uses_sessioned_chart_proxy(symbol.upper().replace("/", "").replace("-", "")):
                 normalized, gap_trim_report = _trim_to_latest_contiguous_segment(normalized, timeframe=timeframe)
             candles = dataframe_to_candles(
                 normalized,
@@ -353,6 +385,10 @@ def _select_depth_profile(symbol: str) -> Mapping[str, int]:
 def _is_forex_pair(symbol: str) -> bool:
     currencies = {"AUD", "CAD", "CHF", "EUR", "GBP", "JPY", "NOK", "NZD", "SEK", "USD"}
     return len(symbol) == 6 and symbol[:3] in currencies and symbol[3:] in currencies
+
+
+def _uses_sessioned_chart_proxy(symbol: str) -> bool:
+    return _is_forex_pair(symbol) or symbol in {"XAU", "XAUUSD", "GCF", "GC=F", "GC"}
 
 
 def _normalize_timeframe_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -484,6 +520,46 @@ def _render_structure_map(
     from smc_desk.rendering.structure_map_renderer import render_structure_map
     output_path.parent.mkdir(parents=True, exist_ok=True)
     render_structure_map(timeframe_dfs, graph, output_path, symbol=symbol)
+
+
+def _annotation_self_review_markdown(
+    *,
+    scene: Mapping[str, Any],
+    validation: Mapping[str, Any],
+    visual_review: Mapping[str, Any],
+    official_state: str,
+) -> str:
+    issues = validation.get("issues") or []
+    source = scene.get("level_source") or "annotation_plan"
+    lines = [
+        "# Annotation Self-Review",
+        "",
+        f"- Official state: `{official_state}`",
+        f"- Render source: `{source}`",
+        f"- Validation: `{validation.get('status')}`",
+        f"- Local visual critic: `{visual_review.get('status')}` ({visual_review.get('critic_authority')})",
+        f"- Drawing objects: `{scene.get('drawing_object_count', 0)}` total / `{scene.get('visible_drawing_object_count', 0)}` visible",
+        f"- Visible levels: `{scene.get('visible_level_count', 0)}`",
+        f"- Trade box: `{scene.get('show_trade_box')}`",
+        "",
+    ]
+    if issues:
+        lines.append("## Issues")
+        for issue in issues:
+            lines.append(f"- `{issue.get('code')}`: {issue.get('message')}")
+    else:
+        lines.extend(
+            [
+                "## Result",
+                "The official annotation plan passed the professional sparse-markup checks. It remains subordinate to the formal graph and does not create execution authority.",
+            ]
+        )
+    critic_issues = visual_review.get("issues") or []
+    if critic_issues:
+        lines.extend(["", "## Visual Critic"])
+        for issue in critic_issues:
+            lines.append(f"- `{issue.get('code')}`: {issue.get('message')}")
+    return "\n".join(lines) + "\n"
 
 
 def _report_markdown(report: Mapping[str, Any]) -> str:

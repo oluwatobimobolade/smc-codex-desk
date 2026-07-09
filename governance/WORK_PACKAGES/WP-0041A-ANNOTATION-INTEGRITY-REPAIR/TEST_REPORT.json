@@ -1,0 +1,50 @@
+{
+  "schema": "wp_test_report_v1",
+  "work_package": "WP-0041A-ANNOTATION-INTEGRITY-REPAIR",
+  "status": "PASS",
+  "created_at": "2026-07-09T21:50:00Z",
+  "supersedes_partial_work_acknowledged_in": "governance/WORK_PACKAGES/WP-0041-PROFESSIONAL-AI-SMC-ANNOTATION-PLANNER/final_report.md",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0041a_annotation_integrity_repair.py tests/test_wp0041_professional_annotation_planner.py -q",
+      "result": "10 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0034_ai_smc_trader_brain.py tests/test_wp0040_formal_structure_graph.py tests/test_smc_annotation_correctness.py tests/test_wp0037_external_agent_handoff.py tests/test_wp0038_avax_eurnzd_repairs.py tests/test_wp0041_professional_annotation_planner.py tests/test_wp0041a_annotation_integrity_repair.py -q",
+      "result": "85 passed"
+    },
+    {
+      "command": ".venv/bin/python -m compileall smc_desk tools tests -q",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "745 passed, 1 skipped (baseline 740 + 5 WP-0041A tests; full suite green from project root)"
+    }
+  ],
+  "adversarial_cases_covered": [
+    "test_wp0041a_rejects_real_evidence_id_with_invented_bos_geometry: validator detects moved BOS evidence (price 999999 at unrelated span) as annotation_v2_structure_price_mismatch and annotation_v2_structure_span_mismatch",
+    "test_wp0041a_rejects_internal_break_disguised_as_external_structure: detects scope/label mismatch (internal evidence relabeled as external BOS) as annotation_v2_structure_scope_mismatch and annotation_v2_internal_structure_not_labeled",
+    "test_wp0041a_path_requires_a_certified_active_poi: path projection without active POI evidence rejected as annotation_v2_path_without_active_poi",
+    "test_wp0041a_trade_box_is_v2_native_and_suppresses_legacy_text: scene level_source=annotation_plan_v2, legacy labels suppressed, V2 trade box renders and visual critic PASSES",
+    "test_wp0041a_visual_critic_requests_cleanup_for_overlapping_marks: local visual critic returns CLEANUP_REQUIRED with cleanup_object_ids for overlapping local labels (density cleanup, not promotion)"
+  ],
+  "evidence_artifacts_written_per_run": [
+    "14_clean_annotation_render/annotation_plan_v2.json",
+    "14_clean_annotation_render/annotation_validation.json",
+    "14_clean_annotation_render/annotation_visual_review.json",
+    "14_clean_annotation_render/annotation_self_review.md",
+    "14_clean_annotation_render/annotation_manifest.json"
+  ],
+  "guards_repaired": [
+    "P1: evidence grounding now mechanically verifies drawn price/span/scope match source object geometry (annotation_evidence + validator geometry checks)",
+    "P1: visual self-review replaced with real downgrade-only critic whose result is saved as annotation_visual_review.json",
+    "P2: renderer suppresses generic banners/footer/explanatory text when level_source=annotation_plan_v2",
+    "P2: live planner wired to evidence-grounded composer that selects only recent, graph-compatible SMC objects",
+    "P2: V2 trade-box ownership repaired end-to-end with native geometry plus legacy gate",
+    "P2: test coverage extended from 5 to 10 focused tests covering moved BOS, internal-as-external, missing POI path, native trade box, and visual-critic cleanup"
+  ],
+  "execution_authority": "disabled",
+  "paper_execution": "disabled",
+  "live_execution": "disabled"
+}

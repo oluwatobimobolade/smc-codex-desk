@@ -16,6 +16,7 @@ import pandas as pd
 from matplotlib.patches import FancyArrowPatch
 from matplotlib.patches import Rectangle
 
+from smc_desk.brain.annotation_visual_critic import apply_visual_cleanup
 from smc_desk.brain.ai_smc_consistency_validator import ValidationResult
 
 
@@ -47,7 +48,8 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
     if result.status != "VALIDATED":
         if chart_template != "review_chart" or annotation.get("show_trade_box"):
             raise ValueError("Review-required decisions may only render review_chart without a trade box.")
-    labels = list(annotation.get("labels") or [])
+    legacy_labels = list(annotation.get("labels") or [])
+    labels = list(legacy_labels)
     label_limit = LABEL_LIMITS.get(chart_template, 7)
     if len(labels) > label_limit:
         labels = labels[:label_limit]
@@ -55,7 +57,13 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
         raise ValueError("Only trade_plan_chart may show trade boxes.")
     if chart_template == "trade_plan_chart" and decision.get("official_state") != "TRADE_PLAN_READY":
         raise ValueError("trade_plan_chart requires TRADE_PLAN_READY.")
-    levels = list(annotation.get("levels") or [])
+    legacy_levels = list(annotation.get("levels") or [])
+    annotation_plan_v2 = decision.get("annotation_plan_v2") or {}
+    drawing_objects = list(annotation_plan_v2.get("objects") or []) if isinstance(annotation_plan_v2, Mapping) else []
+    if drawing_objects:
+        labels = []
+    visible_drawing_objects = _select_visible_drawing_objects(drawing_objects, chart_template)
+    levels = _drawing_objects_to_levels(visible_drawing_objects) if drawing_objects else legacy_levels
     visible_labels = _select_visible_labels(labels, chart_template)
     visible_levels = _select_visible_levels(levels, chart_template)
     return {
@@ -67,13 +75,22 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
         "chart_template": chart_template,
         "show_trade_box": bool(annotation.get("show_trade_box")),
         "labels": labels,
+        "legacy_labels": legacy_labels,
         "levels": levels,
+        "legacy_levels": legacy_levels,
+        "annotation_plan_v2": annotation_plan_v2 if drawing_objects else None,
+        "drawing_objects": drawing_objects,
+        "visible_drawing_objects": visible_drawing_objects,
+        "drawing_object_count": len(drawing_objects),
+        "visible_drawing_object_count": len(visible_drawing_objects),
+        "level_source": "annotation_plan_v2" if drawing_objects else "annotation_plan",
         "visible_labels": visible_labels,
         "visible_levels": visible_levels,
         "label_count": len(labels),
         "label_limit": label_limit,
         "visible_label_count": len(visible_labels),
         "hidden_label_count": max(0, len(labels) - len(visible_labels)),
+        "legacy_labels_suppressed": bool(drawing_objects and legacy_labels),
         "visible_level_count": len(visible_levels),
         "hidden_level_count": max(0, len(levels) - len(visible_levels)),
         "display_contract": "trader_markup_sparse",
@@ -100,11 +117,12 @@ def render_smc_trader_annotation_chart(
 ) -> dict[str, Any]:
     if df.empty:
         raise ValueError("Cannot render SMC trader annotation chart from an empty dataframe.")
-    scene = build_smc_trader_annotation_scene(result)
     decision = result.official_decision
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df = _normalize_df(df)
+    scene = _resolve_scene_time_geometry(build_smc_trader_annotation_scene(result), df)
+    scene = apply_visual_cleanup(scene, df)
     o = df["open"].to_numpy(float)
     h = df["high"].to_numpy(float)
     l = df["low"].to_numpy(float)
@@ -112,8 +130,11 @@ def render_smc_trader_annotation_chart(
     n = len(df)
 
     levels = _scene_levels({**scene, "levels": scene["visible_levels"]})
-    low = min([float(l.min()), *[item["low"] for item in levels], *[item["high"] for item in levels]]) if levels else float(l.min())
-    high = max([float(h.max()), *[item["low"] for item in levels], *[item["high"] for item in levels]]) if levels else float(h.max())
+    path_prices = _v2_path_prices(scene.get("visible_drawing_objects") or [])
+    low_inputs = [float(l.min()), *[item["low"] for item in levels], *[item["high"] for item in levels], *path_prices]
+    high_inputs = [float(h.max()), *[item["low"] for item in levels], *[item["high"] for item in levels], *path_prices]
+    low = min(low_inputs)
+    high = max(high_inputs)
     span = max(high - low, abs(high) * 0.01, 1e-9)
 
     fig, ax = plt.subplots(figsize=(18, 9))
@@ -147,8 +168,14 @@ def render_smc_trader_annotation_chart(
         ax.plot([x1, x2], [level["low"], level["low"]], color=level["edge_color"], linestyle=level["linestyle"], linewidth=level["linewidth"], alpha=0.92, zorder=4)
         _inline_label(ax, (x1 + x2) / 2, level.get("label_y", level["low"]), level["label"], level["edge_color"])
 
+    v2_trade_box = _first_v2_trade_box(scene.get("visible_drawing_objects") or [])
     if scene["chart_template"] == "trade_plan_chart":
-        _draw_trade_projection(ax, scene, levels, n)
+        if v2_trade_box is not None:
+            _draw_v2_trade_box(ax, v2_trade_box, n)
+        else:
+            _draw_trade_projection(ax, scene, levels, n)
+    if scene.get("visible_drawing_objects"):
+        _draw_v2_path_objects(ax, scene["visible_drawing_objects"], n)
     elif scene["chart_template"] == "watch_chart":
         # Draw path arrows for watch thesis
         direction = decision.get("direction")
@@ -237,10 +264,7 @@ def render_smc_trader_annotation_chart(
                 )
 
     title = f"{decision.get('symbol')} {timeframe}"
-    subtitle = (
-        f"{scene['chart_template']} | {decision.get('official_state')} | "
-        f"trade box {str(scene['show_trade_box']).lower()}"
-    )
+    subtitle = str(decision.get("official_state") or "").replace("_", " ")
     ax.set_title(title, color="#111111", fontsize=12, fontweight="bold", loc="left", pad=12)
     ax.text(
         0.008,
@@ -255,7 +279,7 @@ def render_smc_trader_annotation_chart(
     )
     labels = scene["visible_labels"]
     label_text = "\n".join(f"{idx}. {label['text']}" for idx, label in enumerate(labels, start=1))
-    if label_text and scene["chart_template"] != "watch_chart":
+    if label_text and scene["level_source"] != "annotation_plan_v2" and scene["chart_template"] != "watch_chart":
         ax.text(
             0.008,
             0.92,
@@ -268,7 +292,7 @@ def render_smc_trader_annotation_chart(
             linespacing=1.35,
             bbox={"facecolor": "#ffffff", "edgecolor": "#dddddd", "alpha": 0.92, "boxstyle": "round,pad=0.4"},
         )
-    elif scene["chart_template"] == "watch_chart":
+    elif scene["level_source"] != "annotation_plan_v2" and scene["chart_template"] == "watch_chart":
         ax.text(
             0.008,
             0.92,
@@ -282,14 +306,10 @@ def render_smc_trader_annotation_chart(
             bbox={"facecolor": "#ffffff", "edgecolor": "#ef5350", "alpha": 0.95, "boxstyle": "round,pad=0.3"},
         )
 
-    if scene["chart_template"] == "trade_plan_chart":
-        footer = "TRADE PLAN READY - ENTRY / SL / TP / RR VALIDATED"
-        footer_color = "#81c784"
-    else:
-        footer = "WATCH / REVIEW ONLY - NO ENTRY - NO STOP LOSS - NO TAKE PROFIT TRADE BOX"
-        footer_color = "#ef5350"
-    ax.text(0.008, 0.015, footer, transform=ax.transAxes, ha="left", va="bottom", color=footer_color, fontsize=7.5, fontweight="normal")
-    ax.text(0.5, -0.085, "Official chart uses validated AI annotation plan only", transform=ax.transAxes, ha="center", va="top", color="#777777", fontsize=8)
+    if scene["level_source"] != "annotation_plan_v2":
+        footer = "TRADE PLAN READY - ENTRY / SL / TP / RR VALIDATED" if scene["chart_template"] == "trade_plan_chart" else "WATCH / REVIEW ONLY"
+        footer_color = "#81c784" if scene["chart_template"] == "trade_plan_chart" else "#ef5350"
+        ax.text(0.008, 0.015, footer, transform=ax.transAxes, ha="left", va="bottom", color=footer_color, fontsize=7.5)
 
     step = max(1, n // 8)
     ticks = list(range(0, n, step))
@@ -310,12 +330,49 @@ def render_smc_trader_annotation_chart(
     return scene
 
 
+def _resolve_scene_time_geometry(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[str, Any]:
+    """Map V2 timestamp geometry into the rendered 15m chart index space."""
+    out = dict(scene)
+    stamps = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")
+    for key in ("drawing_objects", "visible_drawing_objects", "levels", "visible_levels"):
+        raw_items = out.get(key) or []
+        resolved: list[dict[str, Any]] = []
+        for raw in raw_items:
+            if not isinstance(raw, Mapping):
+                continue
+            item = dict(raw)
+            if item.get("start_index") is None and item.get("start_time"):
+                item["start_index"] = _timestamp_index(stamps, item.get("start_time"))
+            if item.get("end_index") is None and item.get("end_time"):
+                item["end_index"] = _timestamp_index(stamps, item.get("end_time"))
+            resolved.append(item)
+        out[key] = resolved
+    return out
+
+
+def _timestamp_index(stamps: pd.Series, value: Any) -> int | None:
+    try:
+        target = pd.Timestamp(value)
+        if target.tzinfo is None:
+            target = target.tz_localize("UTC")
+        else:
+            target = target.tz_convert("UTC")
+    except (TypeError, ValueError):
+        return None
+    valid = stamps.notna()
+    if not valid.any():
+        return None
+    deltas = (stamps[valid] - target).abs()
+    return int(deltas.idxmin())
+
+
 def _scene_levels(scene: Mapping[str, Any]) -> list[dict[str, Any]]:
     colors = {
         "liquidity": "#81c784",
         "poi": "#9467bd",
         "order_block": "#8fbaf5",
         "fvg": "#98c9ff",
+        "path": "#777777",
         "bos": "#111111",
         "choch": "#ef5350",
         "idm": "#111111",
@@ -330,6 +387,7 @@ def _scene_levels(scene: Mapping[str, Any]) -> list[dict[str, Any]]:
         "poi": "solid",
         "order_block": "solid",
         "fvg": (0, (4, 4)),
+        "path": (0, (5, 4)),
         "bos": "solid",
         "choch": "solid",
         "idm": (0, (1, 2)),
@@ -368,6 +426,8 @@ def _scene_levels(scene: Mapping[str, Any]) -> list[dict[str, Any]]:
             "linestyle": _line_style(raw.get("line_style"), styles.get(kind, "solid")),
             "start_index": start_index,
             "end_index": end_index,
+            "source_object_type": raw.get("source_object_type"),
+            "semantic_object_id": raw.get("semantic_object_id"),
         })
     return levels
 
@@ -423,6 +483,54 @@ def _select_visible_levels(levels: list[Mapping[str, Any]], chart_template: str)
     indexed.sort(key=lambda item: (priority.get(str(item[1].get("kind") or ""), 20), item[0]))
     selected_indexes = sorted(index for index, _level in indexed[:limit])
     return [levels[index] for index in selected_indexes]
+
+
+def _select_visible_drawing_objects(objects: list[Mapping[str, Any]], chart_template: str) -> list[Mapping[str, Any]]:
+    limit = VISIBLE_LEVEL_LIMITS.get(chart_template, 3)
+    if len(objects) <= limit:
+        return objects
+    priority = {
+        "poi_zone": 0,
+        "structure_segment": 1,
+        "liquidity_line": 2,
+        "trade_box": 3,
+        "path_projection": 4,
+    }
+    indexed = list(enumerate(objects))
+    indexed.sort(
+        key=lambda item: (
+            int(item[1].get("importance") or 2),
+            priority.get(str(item[1].get("object_type") or ""), 20),
+            item[0],
+        )
+    )
+    selected_indexes = sorted(index for index, _obj in indexed[:limit])
+    return [objects[index] for index in selected_indexes]
+
+
+def _drawing_objects_to_levels(objects: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    levels: list[dict[str, Any]] = []
+    for obj in objects:
+        if obj.get("object_type") in {"path_projection", "trade_box"}:
+            continue
+        levels.append(
+            {
+                "label": obj.get("label"),
+                "kind": obj.get("kind"),
+                "price": obj.get("price"),
+                "price_low": obj.get("price_low"),
+                "price_high": obj.get("price_high"),
+                "timeframe": obj.get("timeframe"),
+                "start_index": obj.get("start_index"),
+                "end_index": obj.get("end_index"),
+                "start_time": obj.get("start_time"),
+                "end_time": obj.get("end_time"),
+                "line_style": obj.get("line_style"),
+                "semantic_object_id": obj.get("semantic_object_id"),
+                "source_object_type": obj.get("object_type"),
+            }
+        )
+    return levels
 
 
 def _assign_level_label_positions(levels: list[dict[str, Any]], *, low: float, high: float) -> list[dict[str, Any]]:
@@ -514,6 +622,77 @@ def _draw_trade_projection(ax: Any, scene: Mapping[str, Any], levels: list[Mappi
             zorder=6,
         )
     )
+
+
+def _first_v2_trade_box(objects: list[Mapping[str, Any]]) -> Mapping[str, Any] | None:
+    return next((obj for obj in objects if obj.get("object_type") == "trade_box"), None)
+
+
+def _draw_v2_trade_box(ax: Any, obj: Mapping[str, Any], n: int) -> None:
+    entry = _float(obj.get("entry_price"))
+    stop = _float(obj.get("stop_price"))
+    targets = [_float(value) for value in (obj.get("target_prices") or [])]
+    targets = [value for value in targets if value is not None]
+    if entry is None or stop is None or not targets:
+        return
+    start = _int(obj.get("start_index"))
+    end = _int(obj.get("end_index"))
+    x1 = max(0.0, float(start if start is not None else int(n * 0.72)))
+    x2 = max(x1 + 6.0, float(end if end is not None else n + 5))
+    x2 = min(x2, n + 6.0)
+    primary_target = targets[0]
+    ax.add_patch(Rectangle((x1, min(entry, stop)), x2 - x1, abs(entry - stop), color="#ef5350", alpha=0.16, zorder=0, linewidth=0))
+    ax.add_patch(Rectangle((x1, min(entry, primary_target)), x2 - x1, abs(entry - primary_target), color="#26a69a", alpha=0.16, zorder=0, linewidth=0))
+    for price, label, color, style in (
+        (entry, "ENTRY", "#d6a700", "solid"),
+        (stop, "SL", "#ef5350", "solid"),
+    ):
+        ax.plot([x1, x2], [price, price], color=color, linestyle=style, linewidth=1.0, zorder=6)
+        _inline_label(ax, x2, price, label, color)
+    for idx, target in enumerate(targets, start=1):
+        ax.plot([x1, x2], [target, target], color="#26a69a", linestyle=(0, (2, 3)), linewidth=1.0, zorder=6)
+        _inline_label(ax, x2, target, f"TP{idx}", "#26a69a")
+
+
+def _draw_v2_path_objects(ax: Any, objects: list[Mapping[str, Any]], n: int) -> None:
+    for obj in objects:
+        if obj.get("object_type") != "path_projection":
+            continue
+        start = _int(obj.get("start_index"))
+        end = _int(obj.get("end_index"))
+        price_low = _float(obj.get("price_low"))
+        price_high = _float(obj.get("price_high"))
+        if start is None or end is None or price_low is None or price_high is None:
+            continue
+        left = max(-0.5, min(float(start), n + 6.0))
+        right = max(left + 1.0, min(float(end), n + 6.0))
+        ax.add_patch(
+            FancyArrowPatch(
+                (left, price_low),
+                (right, price_high),
+                connectionstyle="arc3,rad=0.15",
+                arrowstyle="->",
+                color="#777777",
+                linewidth=1.05,
+                linestyle=(0, (5, 4)),
+                alpha=0.5,
+                mutation_scale=9,
+                zorder=5,
+            )
+        )
+        _inline_label(ax, right, price_high, str(obj.get("label") or "PATH"), "#777777")
+
+
+def _v2_path_prices(objects: list[Mapping[str, Any]]) -> list[float]:
+    prices: list[float] = []
+    for obj in objects:
+        if obj.get("object_type") != "path_projection":
+            continue
+        for key in ("price", "price_low", "price_high"):
+            value = _float(obj.get(key))
+            if value is not None:
+                prices.append(value)
+    return prices
 
 
 def _first_level(levels: list[Mapping[str, Any]], kinds: set[str]) -> Mapping[str, Any] | None:

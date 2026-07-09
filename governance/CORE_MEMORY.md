@@ -62,6 +62,18 @@ calibration.
 - Local deterministic provider now emits conservative v2 watch markup from certified active-range evidence.
 - Validation: 5 WP-0041 tests passed, affected suite 59 passed, full suite 740 passed / 1 skipped. BTCUSDT/SUIUSDT and GBPUSD smoke runs validated observe-only.
 
+**WP-0041A Annotation Integrity Repair (2026-07-09):** The hard repair that makes WP-0041 mechanically honest.
+- New `annotation_evidence.py` builds canonical `AnnotationEvidenceAnchor` index from detector candidates and graph active range (exact price, price band, start/end timestamps, timeframe, direction, structure scope, kind, source).
+- Validator now mechanically verifies drawn price/span/scope/kind/type against source anchors (8 bps tolerance, 2-candle span tolerance). Mismatches emit specific issues (`*_price_mismatch`, `*_span_mismatch`, `*_scope_mismatch`, `*_kind_mismatch`).
+- New `annotation_visual_critic.py` is a downgrade-only critic that audits the actual built scene for visible labels, drawing object density per chart template, and overlap risk. Its result is saved as `annotation_visual_review.json`, and `annotation_self_review.md` is rebuilt from the real critic result.
+- New `annotation_candidate_composer.py` is a deliberate selector that picks at most four evidence-grounded marks (active POI, latest visible external 15m structure, active-range liquidity, conditional path). The conditional path is only emitted when a certified active POI exists in a path-allowed state.
+- Renderer suppresses generic banners, footer, and explanatory text when `level_source=annotation_plan_v2`. Scene reports `legacy_labels_suppressed` and embeds the visual critic payload.
+- Orchestrator writes `annotation_visual_review.json`, `annotation_validation.json`, `annotation_plan_v2.json`, and a critic-driven `annotation_self_review.md` in each run.
+- Live runner wired to `compose_local_annotation_plan_v2` so live path produces evidence-grounded V2 markup instead of generic range decoration.
+- V2 `trade_box` geometry verified against validated entry/stop/target plans within tolerance; legacy text is suppressed.
+- Adversarial tests cover: moved-BOS price/span mismatch, internal-as-external relabel, path-without-active-POI, native V2 trade box, and visual-critic overlap cleanup.
+- Validation: 6 WP-0041A focused tests passed, WP-0041+WP-0041A combined 10 passed, affected suite 85 passed, full suite 745 passed / 1 skipped (baseline 740 + 5 new adversarial tests).
+
 **Pipeline:** Live/Historical OHLCV → PEV2 (15m/1H/4H/1D) → Event Ledger → MTF Graph & Parent-Child Guard → Formal Structure Graph (AUTHORITATIVE) → Strategy-State Engine & POI Refinement → Evidence Graph → Decision.
 
 ## Architectural History
@@ -119,7 +131,7 @@ orchestrator.
 - Stricter AI trader brain prompt operating system with modular versioned files, schema constraints, and watch/refusal states.
 - Decoupled consistency validator separates doctrine correctness from execution parameters.
 - Orchestrator v3 flow runs MTF candle resamples, evidence packaging, provider interfaces, AI critic reviews, and visual annotations.
-- Visual annotation renderer draws expected paths for watch layouts and gates entry-SL-TP boxes strictly to ready trades.
+- Visual annotation renderer prefers `annotation_plan_v2` professional SMC markup, draws sparse validated objects, and gates entry-SL-TP boxes strictly to ready trades.
 - Forex session gap trimming handles exchange closures without breaking consensus.
 - Formal MTF structure graph is the single authoritative source for all AI theses, chart annotations, POI claims, and trade/watch states.
 

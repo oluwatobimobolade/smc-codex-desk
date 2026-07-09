@@ -1,0 +1,39 @@
+{
+  "schema": "wp_test_report_v1",
+  "work_package": "WP-0041-PROFESSIONAL-AI-SMC-ANNOTATION-PLANNER",
+  "status": "PASS",
+  "created_at": "2026-07-09T19:10:00Z",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0041_professional_annotation_planner.py -q",
+      "result": "5 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_wp0034_ai_smc_trader_brain.py tests/test_wp0040_formal_structure_graph.py tests/test_smc_annotation_correctness.py tests/test_wp0037_external_agent_handoff.py -q",
+      "result": "59 passed"
+    },
+    {
+      "command": ".venv/bin/python -m compileall smc_desk tools tests -q",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols BTCUSDT SUIUSDT --output-root analysis_runs/WP0041_PROFESSIONAL_ANNOTATION_SMOKE",
+      "result": "BTCUSDT and SUIUSDT validated observe-only; no hard issues"
+    },
+    {
+      "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols GBPUSD --output-root analysis_runs/WP0041_PROFESSIONAL_ANNOTATION_SMOKE",
+      "result": "GBPUSD validated observe-only; annotation_plan_v2 produced 3 professional objects"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "740 passed, 1 skipped"
+    }
+  ],
+  "smoke_runs": [
+    "analysis_runs/WP0041_PROFESSIONAL_ANNOTATION_SMOKE/LIVE_FULL_SYSTEM_AI_SMC_V3_20260709_190455",
+    "analysis_runs/WP0041_PROFESSIONAL_ANNOTATION_SMOKE/LIVE_FULL_SYSTEM_AI_SMC_V3_20260709_190544"
+  ],
+  "execution_authority": "disabled",
+  "paper_execution": "disabled",
+  "live_execution": "disabled"
+}

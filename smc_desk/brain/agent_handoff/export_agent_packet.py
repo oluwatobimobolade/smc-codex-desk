@@ -98,7 +98,8 @@ Think top-down like a disciplined intraday SMC trader:
 1. `official_decision_candidate.json` — strict JSON matching `09_expected_output_schema.json`.
 2. `agent_reasoning_summary.md` — short markdown summary of your reasoning.
 3. `annotation_plan.json` — chart labels and levels for rendering.
-4. `requested_more_context.json` (optional) — if you need more data.
+4. `annotation_plan_v2` inside the decision — professional sparse SMC drawing objects: local BOS/CHoCH/IDM segments, bounded POI zones, short liquidity lines, optional dashed path, and trade box only when trade-ready.
+5. `requested_more_context.json` (optional) — if you need more data.
 
 The system will then validate your response, ground your levels in OHLCV, render the chart, and produce the final thesis.
 """
@@ -130,6 +131,7 @@ This packet is for an **EXTERNAL_AI_AGENT**. The system does not call an LLM API
 
 - WATCH_ONLY, THESIS_ONLY, WAIT_FOR_*, POI_TOUCHED_*, MISSED_TRADE_NO_CHASE, VALID_DIRECTION_BAD_RR_WAIT_FOR_BETTER_ENTRY, INDUCEMENT_RISK, INVALIDATED_REMAP, MOVE_STARTED_NOT_CHASEABLE, NO_TRADE must NOT have entry/SL/TP/RR or trade box.
 - Use chart_template: context_chart, watch_chart, or review_chart.
+- Prefer annotation_plan_v2 for professional markup. Every V2 object must be sparse, local, readable, and grounded with evidence_object_ids and exact source geometry. For structure, declare the matching external/internal scope. A path requires a certified active POI; a trade_box requires kind=trade plus validated entry_price, stop_price, and target_prices.
 
 ## Parent-child conflict
 

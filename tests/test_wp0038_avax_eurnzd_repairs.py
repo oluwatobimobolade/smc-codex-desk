@@ -509,5 +509,10 @@ def test_forex_perception_trims_known_session_gaps_without_disabling_crypto_gap_
     assert forex_report["timeframes"]["15m"]["session_gap_trimmed"] is True
     assert forex_report["timeframes"]["15m"]["rows_after_trim"] == 60
 
+    _, gold_report = _run_perception_candidates(symbol="XAUUSD", timeframe_dfs={"15m": gapped})
+    assert gold_report["timeframes"]["15m"]["status"] == "PASS"
+    assert gold_report["timeframes"]["15m"]["session_gap_trimmed"] is True
+    assert gold_report["timeframes"]["15m"]["rows_after_trim"] == 60
+
     _, crypto_report = _run_perception_candidates(symbol="AVAXUSDT", timeframe_dfs={"15m": gapped})
     assert crypto_report["timeframes"]["15m"]["status"] == "FAILED"

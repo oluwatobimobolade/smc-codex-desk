@@ -395,6 +395,15 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
         levels.append({"label": f"{target_side} liquidity watch", "kind": "liquidity", "price": target_price, "timeframe": active_tf})
     if invalidation_price is not None:
         levels.append({"label": "watch invalidation, not SL", "kind": "invalidation", "price": invalidation_price, "timeframe": active_tf})
+    from smc_desk.brain.annotation_candidate_composer import compose_local_annotation_plan_v2
+
+    annotation_plan_v2 = compose_local_annotation_plan_v2(
+        evidence_pack=pack,
+        official_state=official_state,
+        direction=direction,
+        active_range=active_range_payload,
+        active_poi=None,
+    )
     return {
         "schema": "ai_smc_trader_decision_v1",
         "symbol": symbol,
@@ -493,6 +502,7 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             "levels": levels,
             "reasoning_order": REASONING_ORDER,
         },
+        "annotation_plan_v2": annotation_plan_v2,
         "self_review": {
             "active_range_check": "passed" if selected_range else "failed",
             "poi_check": "not_applicable",
@@ -526,6 +536,94 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
                 "sweep/displacement/active POI/entry evidence, so it refuses a trade plan."
             )
         ),
+    }
+
+
+def _build_conservative_annotation_plan_v2(
+    *,
+    pack: dict[str, Any],
+    active_tf: str,
+    direction: str,
+    high: float | None,
+    low: float | None,
+    mid: float | None,
+    target_price: float | None,
+    target_side: str,
+    invalidation_price: float | None,
+    range_id: str | None,
+    official_state: str,
+) -> dict[str, Any]:
+    window = (pack.get("ohlcv_windows") or {}).get("15m") or []
+    n = len(window) if isinstance(window, list) else 120
+    left = max(0, n - 26)
+    right = max(left + 4, n - 2)
+    path_left = max(0, n - 2)
+    path_right = n + 6
+    evidence_ids = [range_id] if range_id else []
+    objects: list[dict[str, Any]] = []
+    if target_price is not None and evidence_ids:
+        objects.append(
+            {
+                "object_type": "liquidity_line",
+                "semantic_object_id": f"{range_id}:target_liquidity",
+                "timeframe": "15m",
+                "label": f"{target_side.upper()} WATCH",
+                "reason": f"Model-completion liquidity from certified {active_tf} active range.",
+                "kind": "liquidity",
+                "direction": direction if direction in {"bullish", "bearish"} else "mixed",
+                "price": target_price,
+                "start_index": left,
+                "end_index": right,
+                "line_style": "dotted",
+                "evidence_object_ids": evidence_ids,
+                "importance": 2,
+            }
+        )
+    if invalidation_price is not None and evidence_ids:
+        objects.append(
+            {
+                "object_type": "structure_segment",
+                "semantic_object_id": f"{range_id}:watch_invalidation",
+                "timeframe": "15m",
+                "label": "WATCH INVALIDATION",
+                "reason": "Watch invalidation from the opposite side of the certified active range; not an executable SL.",
+                "kind": "structure",
+                "direction": direction if direction in {"bullish", "bearish"} else "mixed",
+                "price": invalidation_price,
+                "start_index": left,
+                "end_index": right,
+                "line_style": "dashed",
+                "evidence_object_ids": evidence_ids,
+                "importance": 3,
+            }
+        )
+    if official_state == "WATCH_ONLY" and mid is not None and target_price is not None:
+        objects.append(
+            {
+                "object_type": "path_projection",
+                "semantic_object_id": f"{range_id or 'active_range'}:conditional_path",
+                "timeframe": "15m",
+                "label": "POSSIBLE PATH",
+                "reason": "Conditional watch path only; it is not a prediction guarantee or trade signal.",
+                "kind": "path",
+                "direction": direction if direction in {"bullish", "bearish"} else "mixed",
+                "price_low": mid,
+                "price_high": target_price,
+                "start_index": path_left,
+                "end_index": path_right,
+                "line_style": "dashed",
+                "evidence_object_ids": [],
+                "importance": 3,
+            }
+        )
+    return {
+        "schema": "professional_smc_annotation_plan_v2",
+        "style": "professional_smc_sparse",
+        "objects": objects,
+        "notes": [
+            "Local deterministic provider emitted conservative v2 markup only from certified active range evidence.",
+            "No POI, BOS, CHoCH, entry, SL, TP, or trade box is drawn unless separately validated.",
+        ],
     }
 
 

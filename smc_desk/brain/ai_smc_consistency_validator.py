@@ -10,6 +10,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from smc_desk.brain.annotation_plan_validator import validate_annotation_plan_v2
 from smc_desk.brain.ai_smc_trader_brain import AISMCDecision, MINIMUM_RR, REASONING_ORDER
 
 
@@ -59,6 +60,7 @@ def validate_ai_smc_decision(
     _check_rr(decision, issues)
     _check_label_budget(decision, issues)
     _check_self_review(decision, issues)
+    _check_annotation_plan_v2(decision, evidence_pack, issues)
 
     mapped_prices = _check_anchors_and_grounding(decision, evidence_pack, issues)
     _check_liquidity_status(decision, evidence_pack, issues)
@@ -101,6 +103,41 @@ def validate_ai_smc_decision(
         "formal_graph_trade_promotion_blocked",
         "formal_graph_requires_mixed_bias",
         "formal_graph_requires_thesis_only",
+        "annotation_v2_missing_evidence",
+        "annotation_v2_unresolved_evidence",
+        "annotation_v2_structure_segment_too_wide",
+        "annotation_v2_poi_zone_too_wide",
+        "annotation_v2_trade_box_without_trade_ready",
+        "annotation_v2_fvg_mislabeled_as_ob",
+        "annotation_v2_bad_structure_kind",
+        "annotation_v2_bad_poi_kind",
+        "annotation_v2_bad_liquidity_kind",
+        "annotation_v2_watch_contains_trade_object",
+        "annotation_v2_trade_box_without_legacy_gate",
+        "annotation_v2_internal_structure_drawn_as_parent_bias",
+        "annotation_v2_object_budget_exceeded",
+        "annotation_v2_path_not_allowed_for_state",
+        "annotation_v2_path_without_active_poi",
+        "annotation_v2_bad_trade_box_kind",
+        "annotation_v2_structure_requires_structure_evidence",
+        "annotation_v2_structure_kind_mismatch",
+        "annotation_v2_structure_scope_mismatch",
+        "annotation_v2_internal_structure_not_labeled",
+        "annotation_v2_poi_requires_poi_evidence",
+        "annotation_v2_generic_poi_not_active",
+        "annotation_v2_poi_kind_mismatch",
+        "annotation_v2_structure_price_mismatch",
+        "annotation_v2_structure_span_mismatch",
+        "annotation_v2_poi_price_mismatch",
+        "annotation_v2_poi_span_mismatch",
+        "annotation_v2_liquidity_requires_liquidity_evidence",
+        "annotation_v2_liquidity_price_mismatch",
+        "annotation_v2_liquidity_span_mismatch",
+        "annotation_v2_trade_entry_mismatch",
+        "annotation_v2_trade_stop_mismatch",
+        "annotation_v2_trade_target_mismatch",
+        "annotation_v2_trade_price_mismatch",
+        "annotation_v2_split_trade_box_forbidden",
     }
 
     # Calculate statuses
@@ -199,6 +236,18 @@ def strip_trade_plan_for_review(official: Mapping[str, Any], issues: Sequence[Va
         if isinstance(level, Mapping) and level.get("kind") not in {"entry", "stop", "target"}
     ]
     stripped["annotation_plan"] = annotation_plan
+
+    annotation_plan_v2 = stripped.get("annotation_plan_v2")
+    if isinstance(annotation_plan_v2, Mapping):
+        annotation_plan_v2 = dict(annotation_plan_v2)
+        annotation_plan_v2["objects"] = [
+            obj
+            for obj in annotation_plan_v2.get("objects", []) or []
+            if isinstance(obj, Mapping)
+            and obj.get("kind") not in {"entry", "stop", "target"}
+            and obj.get("object_type") != "trade_box"
+        ]
+        stripped["annotation_plan_v2"] = annotation_plan_v2
 
     stripped["validation_status"] = "REVIEW_REQUIRED"
     stripped["validation_issues"] = [issue.model_dump(mode="json") for issue in issues]
@@ -680,6 +729,16 @@ def _check_self_review(decision: AISMCDecision, issues: list[ValidationIssue]) -
                 "trade_ready_requires_completed_self_review",
                 f"TRADE_PLAN_READY requires completed self-review checks: {', '.join(not_passed)}.",
             )
+
+
+def _check_annotation_plan_v2(
+    decision: AISMCDecision,
+    evidence_pack: Mapping[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    validation = validate_annotation_plan_v2(decision, evidence_pack)
+    for issue in validation.issues:
+        _issue(issues, issue.code, issue.message, issue.severity)
 
 
 def _all_candidates(evidence_pack: Mapping[str, Any], groups: Sequence[str]) -> list[dict[str, Any]]:

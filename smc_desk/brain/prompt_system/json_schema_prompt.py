@@ -5,7 +5,7 @@ from smc_desk.brain.prompt_system.prompt_contract import PromptModule
 
 PROMPT = PromptModule(
     name="json_schema_prompt",
-    version="1.0.0",
+    version="1.1.0",
     purpose="Force strict JSON output matching AISMCDecision.",
     text="""Return strict JSON only. No markdown. No prose outside JSON.
 
@@ -13,8 +13,12 @@ The JSON schema is ai_smc_trader_decision_v1 and must include:
 official_state, setup_grade, direction, setup_model, bias_summary, active_range,
 liquidity_story, displacement_assessment, active_poi, entry_plan, stop_loss_plan,
 target_plan, rr_status, invalidation, annotation_plan, final_thesis.
+annotation_plan_v2 is optional for backward compatibility but preferred for professional chart rendering.
 
 annotation_plan.reasoning_order must exactly equal required_reasoning_order.
+annotation_plan_v2, when present, must use schema professional_smc_annotation_plan_v2 and objects with:
+object_type, semantic_object_id, timeframe, label, reason, kind, price or price_low/price_high, start/end index or time, and evidence_object_ids.
+structure_segment also requires structure_scope matching its source break. trade_box requires kind=trade plus entry_price, stop_price, and target_prices.
 
 Semantic Grounding Requirement:
 You must output semantic anchors before proposing any exact prices:

@@ -24,6 +24,7 @@ SCHEMA_FIELDS = [
     "rr_status",
     "invalidation",
     "annotation_plan",
+    "annotation_plan_v2",
     "self_review",
     "final_thesis",
 ]
@@ -45,6 +46,8 @@ def build_layered_ai_smc_prompt(evidence_pack: Mapping[str, Any]) -> str:
             "Use evidence_pack.active_range_authority.selected_range for active_range; if it is unresolved or visibly wrong, return REVIEW_REQUIRED.",
             "If evidence_pack.structure_narrative.parent_child_context.has_parent_child_conflict is true, direction and final_bias must be mixed; the final_thesis must name the parent timeframe, child timeframe, both biases, and say pullback/recovery inside parent context.",
             "Every official annotation must be checked against the selected active range and active POI before output.",
+            "annotation_plan_v2 is the professional chart markup plan. The AI chooses the sparse drawing objects, but every object must be grounded in detector evidence, the active POI, liquidity, or the formal_structure_graph.",
+            "Professional SMC annotation means local BOS/CHoCH/IDM segments, bounded POI rectangles, short liquidity lines, and optional dashed thesis path; never detector firehose clutter.",
             "TRADE_PLAN_READY requires validated entry, structural invalidation, model-completion liquidity target, and RR >= 3.",
             "TRADE_PLAN_READY requires clean/strong displacement, structure_broken=true, and displacement evidence_object_ids.",
             "If final_thesis says watch, wait, no trade, or refuses a trade plan, official_state must not be TRADE_PLAN_READY.",
@@ -56,6 +59,7 @@ def build_layered_ai_smc_prompt(evidence_pack: Mapping[str, Any]) -> str:
             "Second pass: challenge the first pass. Ask whether the active range is too broad, summary-sourced, stale, or outside protected structure.",
             "Parent-child pass: challenge any clean bullish/bearish label against Daily/12H/4H parent context and 1H/15M child structure. If they conflict, downgrade to mixed and write the relationship explicitly.",
             "Annotation pass: remove any label, level, entry, SL, or TP not supported by selected evidence.",
+            "Professional annotation pass: build annotation_plan_v2 with only the few objects a disciplined SMC trader would mark. If you cannot ground an object, omit it.",
             "Refusal pass: if the setup needs invented levels, broad OHLCV ranges, or missing POI evidence, output REVIEW_REQUIRED or WATCH_ONLY.",
             "Populate self_review with the pass/fail result and corrections made.",
         ],
@@ -64,6 +68,8 @@ def build_layered_ai_smc_prompt(evidence_pack: Mapping[str, Any]) -> str:
             "schema": "ai_smc_trader_decision_v1",
             "fields": SCHEMA_FIELDS,
             "annotation_plan_must_include_reasoning_order": True,
+            "annotation_plan_v2_optional_but_preferred": True,
+            "annotation_plan_v2_object_types": ["structure_segment", "poi_zone", "liquidity_line", "path_projection", "trade_box"],
             "strict_json_only": True,
         },
         "official_state_options": [

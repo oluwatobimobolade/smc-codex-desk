@@ -261,6 +261,96 @@ class AnnotationLevel(StrictModel):
     line_style: Literal["solid", "dashed", "dotted"] | None = None
 
 
+class AnnotationDrawingObject(StrictModel):
+    object_type: Literal[
+        "structure_segment",
+        "poi_zone",
+        "liquidity_line",
+        "path_projection",
+        "trade_box",
+    ]
+    semantic_object_id: str
+    timeframe: str
+    label: str
+    reason: str
+    kind: Literal[
+        "bos",
+        "choch",
+        "idm",
+        "structure",
+        "order_block",
+        "fvg",
+        "poi",
+        "liquidity",
+        "entry",
+        "stop",
+        "target",
+        "invalidation",
+        "path",
+        "trade",
+    ]
+    direction: Literal["bullish", "bearish", "neutral", "mixed", "unknown"] = "unknown"
+    price: float | None = None
+    price_low: float | None = None
+    price_high: float | None = None
+    start_index: int | None = None
+    end_index: int | None = None
+    start_time: str | None = None
+    end_time: str | None = None
+    line_style: Literal["solid", "dashed", "dotted"] | None = None
+    structure_scope: Literal["external", "internal"] | None = None
+    entry_price: float | None = None
+    stop_price: float | None = None
+    target_prices: list[float] = Field(default_factory=list)
+    allow_htf_full_width: bool = False
+    evidence_object_ids: list[str] = Field(default_factory=list)
+    importance: int = Field(default=2, ge=1, le=3)
+
+    @model_validator(mode="after")
+    def _object_has_geometry(self) -> "AnnotationDrawingObject":
+        has_x_span = (
+            self.start_index is not None
+            and self.end_index is not None
+        ) or (
+            self.start_time is not None
+            and self.end_time is not None
+        )
+        if not has_x_span:
+            raise ValueError("annotation_plan_v2 objects require start/end index or start/end time")
+        has_price = self.price is not None or (self.price_low is not None and self.price_high is not None)
+        if not has_price:
+            raise ValueError("annotation_plan_v2 objects require price or price_low/price_high")
+        if (
+            self.object_type != "path_projection"
+            and self.price_low is not None
+            and self.price_high is not None
+            and self.price_low > self.price_high
+        ):
+            raise ValueError("annotation_plan_v2 price_low cannot be above price_high")
+        if not self.semantic_object_id.strip():
+            raise ValueError("annotation_plan_v2 semantic_object_id cannot be blank")
+        if not self.reason.strip():
+            raise ValueError("annotation_plan_v2 reason cannot be blank")
+        if self.object_type == "trade_box":
+            if self.kind != "trade":
+                raise ValueError("annotation_plan_v2 trade_box must use kind=trade")
+            if self.entry_price is None or self.stop_price is None or not self.target_prices:
+                raise ValueError("annotation_plan_v2 trade_box requires entry_price, stop_price, and target_prices")
+        elif self.kind == "trade":
+            raise ValueError("annotation_plan_v2 kind=trade is reserved for trade_box")
+        return self
+
+
+class AnnotationPlanV2(StrictModel):
+    schema_: Literal["professional_smc_annotation_plan_v2"] = Field(
+        default="professional_smc_annotation_plan_v2",
+        alias="schema",
+    )
+    style: Literal["professional_smc_sparse"] = "professional_smc_sparse"
+    objects: list[AnnotationDrawingObject] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class AnnotationPlan(StrictModel):
     chart_template: Literal["context_chart", "watch_chart", "trade_plan_chart", "review_chart", "debug_chart"]
     show_trade_box: bool = False
@@ -296,6 +386,7 @@ class AISMCDecision(StrictModel):
     rr_status: RRStatus
     invalidation: InvalidationPlan
     annotation_plan: AnnotationPlan
+    annotation_plan_v2: AnnotationPlanV2 | None = None
     self_review: SelfReview = Field(default_factory=SelfReview)
     final_thesis: str
 

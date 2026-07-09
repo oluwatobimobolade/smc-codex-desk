@@ -87,6 +87,15 @@ def make_agent_response_template() -> dict[str, Any]:
                 "entry_model", "entry_readiness", "structural_invalidation",
                 "model_completion_liquidity_target", "rr_minimum_three", "final_state"
             ]},
+            "annotation_plan_v2": {
+                "schema": "professional_smc_annotation_plan_v2",
+                "style": "professional_smc_sparse",
+                "objects": [],
+                "notes": [
+                    "Use professional sparse SMC drawing objects when evidence supports them.",
+                    "Omit objects that cannot be grounded in the formal graph or detector evidence.",
+                ],
+            },
             "self_review": {"active_range_check": "not_applicable", "poi_check": "not_applicable", "annotation_check": "not_applicable", "refusal_check": "not_applicable", "corrections_made": [], "remaining_uncertainties": []},
             "final_thesis": "",
         },

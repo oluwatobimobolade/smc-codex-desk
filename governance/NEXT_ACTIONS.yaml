@@ -293,3 +293,39 @@ next_actions:
       - analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_20260705_090254/
       - analysis_runs/CHAT_AI_BRAIN_GBPUSD_20260705_090637/
       - analysis_runs/CHAT_AI_BRAIN_BTCUSDT_20260705_090709/
+  - id: WP-0041
+    priority: 41
+    title: Professional AI SMC Annotation Planner
+    owner: Market Colleague Architect
+    status: COMPLETE_ACCEPTED_FULL_SYSTEM_VALIDATED
+    gate: 740_tests_passing_annotation_v2_professional_markup_validated
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0041-PROFESSIONAL-AI-SMC-ANNOTATION-PLANNER/final_report.md
+      - governance/WORK_PACKAGES/WP-0041-PROFESSIONAL-AI-SMC-ANNOTATION-PLANNER/TEST_REPORT.json
+      - smc_desk/brain/annotation_plan_validator.py
+      - smc_desk/rendering/smc_trader_annotation_renderer.py prefers annotation_plan_v2 when present
+      - tests/test_wp0041_professional_annotation_planner.py
+      - analysis_runs/WP0041_PROFESSIONAL_ANNOTATION_SMOKE/LIVE_FULL_SYSTEM_AI_SMC_V3_20260709_190544/
+  - id: WP-0041A
+    priority: 41
+    title: Annotation integrity repair — evidence anchoring, real visual critic, sparse renderer, V2 trade-box ownership
+    owner: Market Colleague Architect
+    status: COMPLETE_ACCEPTED_FULL_SYSTEM_VALIDATED
+    gate: 745_tests_passing_adversarial_evidence_anchor_visual_critic_validated
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/final_report.md
+      - governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json
+      - smc_desk/brain/annotation_evidence.py (canonical price/time/scope anchors)
+      - smc_desk/brain/annotation_plan_validator.py (geometry/price/span/scope/kind checks)
+      - smc_desk/brain/annotation_candidate_composer.py (evidence-grounded selector)
+      - smc_desk/brain/annotation_visual_critic.py (downgrade-only critic)
+      - tests/test_wp0041a_annotation_integrity_repair.py (adversarial cases)
+    completed_scope:
+      - drawn price/span/scope/kind/type mechanically verified against detector + graph anchors
+      - static self-review replaced with downgrade-only visual critic saved as annotation_visual_review.json
+      - renderer suppresses generic banners/footer/explanatory text when level_source=annotation_plan_v2
+      - live planner wired to evidence-grounded candidate composer
+      - V2 trade_box geometry verified against validated entry/stop/target plans
+    prohibited_claims:
+      - WP-0041A creates no trading edge, execution authority, or live readiness
+      - passing tests means code behaved as specified; it does not prove market correctness
