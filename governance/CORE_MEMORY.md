@@ -50,8 +50,17 @@ calibration.
 - Built `smc_desk/rendering/structure_map_renderer.py` — sparse visual proof: gray parent range, thick external BOS, dashed internal CHoCH, no trade box.
 - Wired graph into evidence pack builder, consistency validator (hard-downgrade on invariant failures), orchestrator V3 (writes structure_graph.json + structure_map.png), and prompt system (non-negotiable: graph is authoritative).
 - Upgraded critic to graph challenger: reads graph first, can ONLY downgrade, NEVER promote.
-- 20 WP-0040 tests, all green. Full system tests on GBPUSD + BTCUSDT passed (conservative provider and chat-AI brain).
-- Test suite: 700 passed, 1 skipped.
+- 2026-07-07 audit repair: graph `signal_allowed` is always false; `invariant_passed` carries graph health without implying execution permission. Child parent-break logic now requires body close beyond parent protected level, stale child breaks are ignored, wick probes remain informational unless promoted, and structure-map headers no longer overlap.
+- 20 WP-0040 tests, all green. Fresh observe-only smoke on BTCUSDT + SUIUSDT passed (THESIS_ONLY, graph conflict, invariants PASS, trade promotion blocked).
+- Test suite: 735 passed, 1 skipped.
+
+**WP-0041 Professional AI SMC Annotation Planner (2026-07-09):** AI-directed professional markup under graph authority.
+- Added `annotation_plan_v2` as the professional SMC drawing instruction layer beside legacy labels/levels.
+- Added v2 drawing objects: local structure segments, bounded POI zones, liquidity lines, conditional path projections, and trade boxes gated to `TRADE_PLAN_READY`.
+- Added `annotation_plan_validator.py` and wired it into the main consistency validator so unsupported drawings downgrade to `REVIEW_REQUIRED`.
+- Upgraded official renderer to prefer v2 and write annotation plan, validation, and self-review artifacts in each run.
+- Local deterministic provider now emits conservative v2 watch markup from certified active-range evidence.
+- Validation: 5 WP-0041 tests passed, affected suite 59 passed, full suite 740 passed / 1 skipped. BTCUSDT/SUIUSDT and GBPUSD smoke runs validated observe-only.
 
 **Pipeline:** Live/Historical OHLCV → PEV2 (15m/1H/4H/1D) → Event Ledger → MTF Graph & Parent-Child Guard → Formal Structure Graph (AUTHORITATIVE) → Strategy-State Engine & POI Refinement → Evidence Graph → Decision.
 

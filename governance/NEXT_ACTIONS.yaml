@@ -279,15 +279,17 @@ next_actions:
     title: Formal MTF Structure Graph — single authoritative source
     owner: Colleague Authority Engineer
     status: COMPLETE_ACCEPTED_FULL_SYSTEM_VALIDATED
-    gate: 700_tests_passing_formal_graph_authoritative_gbpusd_btcusdt_validated
+    gate: 735_tests_passing_formal_graph_observe_only_btcusdt_suiusdt_validated
     evidence_required:
       - governance/WORK_PACKAGES/WP-0040-FORMAL-STRUCTURE-GRAPH/final_report.md
-      - smc_desk/perception/formal_structure_graph.py (deterministic, 6 invariants, authority contract)
-      - smc_desk/rendering/structure_map_renderer.py (sparse visual proof, no trade box)
+      - smc_desk/perception/formal_structure_graph.py (deterministic, 6 invariants, observe-only authority contract)
+      - smc_desk/rendering/structure_map_renderer.py (sparse visual proof, clean header, no trade box)
       - tests/test_wp0040_formal_structure_graph.py (20 tests, all green)
       - critic upgraded to graph challenger (reads graph first, can only downgrade, never promote)
       - full system test: GBPUSD PASS/WATCH_ONLY, BTCUSDT REVIEW_REQUIRED/PARENT_CHILD_CONFLICT
       - chat-AI brain test: same results — graph is authoritative regardless of AI provider
+      - 2026-07-07 audit: signal_allowed always false; invariant_passed added; stale child breaks ignored; body-close parent break required
+      - analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_20260707_094402/
       - analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_20260705_090254/
       - analysis_runs/CHAT_AI_BRAIN_GBPUSD_20260705_090637/
       - analysis_runs/CHAT_AI_BRAIN_BTCUSDT_20260705_090709/

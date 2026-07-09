@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
+from textwrap import wrap
+from typing import Any
 
 import matplotlib
 matplotlib.use("Agg")
@@ -45,6 +47,7 @@ def render_structure_map(
     fig.patch.set_facecolor("#0e1117")
     ax.set_facecolor("#0e1117")
     ax.grid(color="#2a2e39", linewidth=0.5, alpha=0.4)
+    fig.subplots_adjust(left=0.06, right=0.96, bottom=0.10, top=0.84)
 
     # Candles
     body_floor = span * 1e-3
@@ -72,24 +75,22 @@ def render_structure_map(
             continue
         _render_structure_breaks(ax, df, node, tf, n)
 
-    # Parent-child context status
+    # Header: keep graph status and thesis outside the plot so they cannot
+    # collide with chart labels or each other.
     pc = graph.get("parent_child_context") or {}
-    pc_text = pc.get("thesis_sentence", "")
-    if pc.get("has_conflict"):
-        ax.text(0.5, 1.014, f"MIXED: {pc_text[:120]}",
-                transform=ax.transAxes, color="#f0b062", fontsize=8, fontweight="bold",
-                ha="center", va="bottom", zorder=10)
-
-    # Invariant status
     inv = graph.get("invariants") or {}
     inv_status = inv.get("status", "NOT_COMPUTED")
     inv_color = "#26a69a" if inv_status == "PASS" else "#f0b062" if inv_status == "REVIEW_REQUIRED" else "#ef5350"
-    ax.text(0.99, 1.014, f"GRAPH INVARIANTS: {inv_status}",
-            transform=ax.transAxes, color=inv_color, fontsize=8, fontweight="bold",
-            ha="right", va="bottom", zorder=10)
 
-    ax.set_title(f"{symbol} {entry_tf} Formal Structure Map ({n} candles)",
-                 color="#e0e0e0", fontsize=11, fontweight="bold", loc="left")
+    fig.text(0.06, 0.965, f"{symbol} {entry_tf} Formal Structure Map ({n} candles)",
+             color="#e0e0e0", fontsize=11, fontweight="bold", ha="left", va="top")
+    fig.text(0.96, 0.965, f"GRAPH INVARIANTS: {inv_status}",
+             color=inv_color, fontsize=8, fontweight="bold", ha="right", va="top")
+    header_text = _header_thesis(pc)
+    if header_text:
+        fig.text(0.06, 0.928, header_text, color="#f0b062", fontsize=8,
+                 fontweight="bold", ha="left", va="top", linespacing=1.25)
+
     ax.text(0.01, 0.015, "FORMAL STRUCTURE MAP — NO AI INTERPRETATION — NO TRADE BOX",
             transform=ax.transAxes, color="#9598a1", fontsize=7, ha="left", va="bottom")
 
@@ -103,7 +104,6 @@ def render_structure_map(
         spine.set_color("#2a2e39")
     ax.set_xlim(-1, n)
     ax.set_ylim(low - span * 0.10, high + span * 0.14)
-    fig.tight_layout()
     fig.savefig(output_path, dpi=150, facecolor=fig.get_facecolor())
     plt.close(fig)
 
@@ -136,3 +136,16 @@ def _normalize(df: pd.DataFrame) -> pd.DataFrame:
         out = out.reset_index().rename(columns={"index": "timestamp"})
     out["timestamp"] = pd.to_datetime(out["timestamp"], utc=True)
     return out.sort_values("timestamp").reset_index(drop=True)
+
+
+def _header_thesis(parent_child: Mapping[str, Any]) -> str:
+    if not parent_child.get("has_conflict"):
+        return ""
+    raw = str(parent_child.get("thesis_sentence") or "")
+    if not raw:
+        return "MIXED: Parent-child conflict; trade promotion blocked."
+    text = f"MIXED: {raw}"
+    lines = wrap(text, width=150)
+    if len(lines) <= 2:
+        return "\n".join(lines)
+    return "\n".join([lines[0], f"{lines[1][:145].rstrip()}..."])

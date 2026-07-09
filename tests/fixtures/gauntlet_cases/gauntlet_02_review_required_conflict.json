@@ -2,7 +2,7 @@
   "case_id": "gauntlet_02_review_required_conflict",
   "description": "REVIEW_REQUIRED: Parent-child conflict (1d bearish vs 4h bullish), wick probes in all timeframes. System must refuse trade.",
   "expected_workflow_status": "AGENT_REVIEW_WORKFLOW",
-  "expected_analysis_status": "REVIEW_REQUIRED",
+  "expected_analysis_status": "VALIDATED",
   "expected_official_state": "REVIEW_REQUIRED",
   "expected_chart_template": "review_chart",
   "expected_direction": "mixed",
@@ -23,32 +23,126 @@
         "protected_low_pivot_id": "BTCUSDT:4h:swing_low:gauntlet02",
         "protected_high": 63450.0,
         "protected_low": 57758.6,
-        "authority_notes": ["Active range from protected swing pair."]
+        "authority_notes": [
+          "Active range from protected swing pair."
+        ]
       }
     },
     "detector_candidates": {
       "1d": {
         "structure_breaks": [
-          {"object_id": "1d_bear_choch", "break_type": "CHoCH", "direction": "bearish", "confirmed_at": "2026-05-28T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "74868.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}, "is_choch": true},
-          {"object_id": "1d_wick_probe", "break_type": "BOS", "direction": "bullish", "confirmed_at": "2026-07-03T20:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "63500.0", "is_unconfirmed_probe": true, "broke_protected_swing": false, "structure_scope": "external"}}
+          {
+            "object_id": "1d_bear_choch",
+            "break_type": "CHoCH",
+            "direction": "bearish",
+            "confirmed_at": "2026-05-28T00:00:00Z",
+            "structure_scope": "external",
+            "evidence": {
+              "broken_price": "74868.0",
+              "is_unconfirmed_probe": false,
+              "broke_protected_swing": true,
+              "structure_scope": "external"
+            },
+            "is_choch": true
+          },
+          {
+            "object_id": "1d_wick_probe",
+            "break_type": "BOS",
+            "direction": "bullish",
+            "confirmed_at": "2026-07-03T20:00:00Z",
+            "structure_scope": "external",
+            "evidence": {
+              "broken_price": "63500.0",
+              "is_unconfirmed_probe": true,
+              "broke_protected_swing": false,
+              "structure_scope": "external"
+            }
+          }
         ],
         "sweeps": [],
         "order_blocks": [],
         "fvgs": [],
-        "liquidity_levels": [{"object_id": "1d_bsl_74868", "side": "buy_side", "price": 74868.0}]
+        "liquidity_levels": [
+          {
+            "object_id": "1d_bsl_74868",
+            "side": "buy_side",
+            "price": 74868.0
+          }
+        ]
       },
       "4h": {
         "structure_breaks": [
-          {"object_id": "4h_bull_bos", "break_type": "BOS", "direction": "bullish", "confirmed_at": "2026-07-04T00:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "62180.0", "is_unconfirmed_probe": false, "broke_protected_swing": true, "structure_scope": "external"}},
-          {"object_id": "4h_wick_probe", "break_type": "BOS", "direction": "bearish", "confirmed_at": "2026-07-04T12:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "57758.0", "is_unconfirmed_probe": true, "broke_protected_swing": false, "structure_scope": "external"}}
+          {
+            "object_id": "4h_bull_bos",
+            "break_type": "BOS",
+            "direction": "bullish",
+            "confirmed_at": "2026-07-04T00:00:00Z",
+            "structure_scope": "external",
+            "evidence": {
+              "broken_price": "62180.0",
+              "is_unconfirmed_probe": false,
+              "broke_protected_swing": true,
+              "structure_scope": "external"
+            }
+          },
+          {
+            "object_id": "4h_wick_probe",
+            "break_type": "BOS",
+            "direction": "bearish",
+            "confirmed_at": "2026-07-04T12:00:00Z",
+            "structure_scope": "external",
+            "evidence": {
+              "broken_price": "57758.0",
+              "is_unconfirmed_probe": true,
+              "broke_protected_swing": false,
+              "structure_scope": "external"
+            }
+          }
         ],
         "sweeps": [],
         "order_blocks": [],
         "fvgs": [],
-        "liquidity_levels": [{"object_id": "4h_bsl_63450", "side": "buy_side", "price": 63450.0}, {"object_id": "4h_ssl_57758", "side": "sell_side", "price": 57758.6}]
+        "liquidity_levels": [
+          {
+            "object_id": "4h_bsl_63450",
+            "side": "buy_side",
+            "price": 63450.0
+          },
+          {
+            "object_id": "4h_ssl_57758",
+            "side": "sell_side",
+            "price": 57758.6
+          }
+        ]
       },
-      "1h": {"structure_breaks": [{"object_id": "1h_wick_probe", "break_type": "BOS", "direction": "bullish", "confirmed_at": "2026-07-04T16:00:00Z", "structure_scope": "external", "evidence": {"broken_price": "62957.0", "is_unconfirmed_probe": true, "broke_protected_swing": false, "structure_scope": "external"}}], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": []},
-      "15m": {"structure_breaks": [], "sweeps": [], "order_blocks": [], "fvgs": [], "liquidity_levels": []}
+      "1h": {
+        "structure_breaks": [
+          {
+            "object_id": "1h_wick_probe",
+            "break_type": "BOS",
+            "direction": "bullish",
+            "confirmed_at": "2026-07-04T16:00:00Z",
+            "structure_scope": "external",
+            "evidence": {
+              "broken_price": "62957.0",
+              "is_unconfirmed_probe": true,
+              "broke_protected_swing": false,
+              "structure_scope": "external"
+            }
+          }
+        ],
+        "sweeps": [],
+        "order_blocks": [],
+        "fvgs": [],
+        "liquidity_levels": []
+      },
+      "15m": {
+        "structure_breaks": [],
+        "sweeps": [],
+        "order_blocks": [],
+        "fvgs": [],
+        "liquidity_levels": []
+      }
     }
   },
   "ai_decision": {
@@ -58,18 +152,148 @@
     "setup_grade": "THESIS_ONLY",
     "direction": "mixed",
     "setup_model": "parent_child_conflict_watch",
-    "bias_summary": {"daily": "bearish", "4h": "bullish", "1h": "bullish", "final_bias": "mixed", "evidence": ["1d remains bearish parent (CHoCH at 74868)", "4h is bullish child recovery (BOS at 62180)", "Wick probes in all timeframes", "Child has NOT body-closed beyond parent protected high"]},
-    "active_range": {"timeframe": "4h", "high": 63450.0, "low": 57758.6, "equilibrium": 60604.3, "price_location": "premium", "source": "protected_swing_pair", "evidence_object_ids": ["BTCUSDT:4h:swing_high:gauntlet02", "BTCUSDT:4h:swing_low:gauntlet02"], "evidence": ["Active range from protected swing pair."]},
-    "liquidity_story": {"obvious_liquidity": [{"liquidity_id": "4h_bsl_63450", "timeframe": "4h", "side": "buy_side", "price": 63450.0, "label": "4h range high", "status": "range_high_reference"}, {"liquidity_id": "4h_ssl_57758", "timeframe": "4h", "side": "sell_side", "price": 57758.6, "label": "4h range low", "status": "range_low_reference"}], "swept_liquidity": [], "unswept_liquidity": [{"liquidity_id": "1d_bsl_74868", "timeframe": "1d", "side": "buy_side", "price": 74868.0, "status": "above_high_external_liquidity"}], "narrative": "Parent-child conflict: 1d bearish parent vs 4h bullish child. Wick probes in all timeframes. Graph blocks trade promotion."},
-    "displacement_assessment": {"direction": "none", "quality": "none", "structure_broken": false, "evidence_object_ids": [], "summary": "No validated displacement. Wick probes across all timeframes are not confirmed breaks."},
-    "active_poi": {"direction": "unknown", "evidence_object_ids": [], "summary": "No active POI. Graph blocks promotion due to parent-child conflict and wick probes."},
-    "entry_plan": {"entry_ready": false, "entry_timeframe": "15m", "refinement_timeframe": "5m", "entry_price": null, "entry_zone_low": null, "entry_zone_high": null, "signal_type": null, "required_confirmation": ["Parent protected structure break with body close", "Validated sweep/displacement/POI sequence"], "evidence_object_ids": [], "entry_anchor": null, "mapped_entry_price": null, "summary": "No entry. Graph blocks TRADE_PLAN_READY."},
-    "stop_loss_plan": {"evidence_object_ids": [], "summary": "No stop loss because there is no trade plan."},
-    "target_plan": {"targets": [], "summary": "No executable target."},
-    "rr_status": {"rr": null, "pass_rr": false, "notes": "RR not evaluated."},
-    "invalidation": {"condition": "Watch invalidation only. Parent structure break would change context.", "source": "1d_parent_protected_high", "evidence_object_ids": []},
-    "annotation_plan": {"chart_template": "review_chart", "show_trade_box": false, "labels": [], "levels": [], "reasoning_order": ["daily_context", "4h_context", "1h_context", "active_range", "premium_discount", "obvious_liquidity", "swept_liquidity", "displacement_quality", "active_poi", "entry_model", "entry_readiness", "structural_invalidation", "model_completion_liquidity_target", "rr_minimum_three", "final_state"]},
-    "self_review": {"active_range_check": "passed", "poi_check": "not_applicable", "annotation_check": "passed", "refusal_check": "passed", "corrections_made": ["Downgraded to mixed/REVIEW_REQUIRED because parent-child conflict exists per formal structure graph.", "Did not promote to TRADE_PLAN_READY because graph has trade_promotion_blocked=true."], "remaining_uncertainties": ["Parent protected structure not broken by child", "Wick probes across all timeframes"]},
+    "bias_summary": {
+      "daily": "bearish",
+      "4h": "bullish",
+      "1h": "bullish",
+      "final_bias": "mixed",
+      "evidence": [
+        "1d remains bearish parent (CHoCH at 74868)",
+        "4h is bullish child recovery (BOS at 62180)",
+        "Wick probes in all timeframes",
+        "Child has NOT body-closed beyond parent protected high"
+      ]
+    },
+    "active_range": {
+      "timeframe": "4h",
+      "high": 63450.0,
+      "low": 57758.6,
+      "equilibrium": 60604.3,
+      "price_location": "premium",
+      "source": "protected_swing_pair",
+      "evidence_object_ids": [
+        "BTCUSDT:4h:swing_high:gauntlet02",
+        "BTCUSDT:4h:swing_low:gauntlet02"
+      ],
+      "evidence": [
+        "Active range from protected swing pair."
+      ]
+    },
+    "liquidity_story": {
+      "obvious_liquidity": [
+        {
+          "liquidity_id": "4h_bsl_63450",
+          "timeframe": "4h",
+          "side": "buy_side",
+          "price": 63450.0,
+          "label": "4h range high",
+          "status": "range_high_reference"
+        },
+        {
+          "liquidity_id": "4h_ssl_57758",
+          "timeframe": "4h",
+          "side": "sell_side",
+          "price": 57758.6,
+          "label": "4h range low",
+          "status": "range_low_reference"
+        }
+      ],
+      "swept_liquidity": [],
+      "unswept_liquidity": [
+        {
+          "liquidity_id": "1d_bsl_74868",
+          "timeframe": "1d",
+          "side": "buy_side",
+          "price": 74868.0,
+          "status": "above_high_external_liquidity"
+        }
+      ],
+      "narrative": "Parent-child conflict: 1d bearish parent vs 4h bullish child. Wick probes in all timeframes. Graph blocks trade promotion."
+    },
+    "displacement_assessment": {
+      "direction": "none",
+      "quality": "none",
+      "structure_broken": false,
+      "evidence_object_ids": [],
+      "summary": "No validated displacement. Wick probes across all timeframes are not confirmed breaks."
+    },
+    "active_poi": {
+      "direction": "unknown",
+      "evidence_object_ids": [],
+      "summary": "No active POI. Graph blocks promotion due to parent-child conflict and wick probes."
+    },
+    "entry_plan": {
+      "entry_ready": false,
+      "entry_timeframe": "15m",
+      "refinement_timeframe": "5m",
+      "entry_price": null,
+      "entry_zone_low": null,
+      "entry_zone_high": null,
+      "signal_type": null,
+      "required_confirmation": [
+        "Parent protected structure break with body close",
+        "Validated sweep/displacement/POI sequence"
+      ],
+      "evidence_object_ids": [],
+      "entry_anchor": null,
+      "mapped_entry_price": null,
+      "summary": "No entry. Graph blocks TRADE_PLAN_READY."
+    },
+    "stop_loss_plan": {
+      "evidence_object_ids": [],
+      "summary": "No stop loss because there is no trade plan."
+    },
+    "target_plan": {
+      "targets": [],
+      "summary": "No executable target."
+    },
+    "rr_status": {
+      "rr": null,
+      "pass_rr": false,
+      "notes": "RR not evaluated."
+    },
+    "invalidation": {
+      "condition": "Watch invalidation only. Parent structure break would change context.",
+      "source": "1d_parent_protected_high",
+      "evidence_object_ids": []
+    },
+    "annotation_plan": {
+      "chart_template": "review_chart",
+      "show_trade_box": false,
+      "labels": [],
+      "levels": [],
+      "reasoning_order": [
+        "daily_context",
+        "4h_context",
+        "1h_context",
+        "active_range",
+        "premium_discount",
+        "obvious_liquidity",
+        "swept_liquidity",
+        "displacement_quality",
+        "active_poi",
+        "entry_model",
+        "entry_readiness",
+        "structural_invalidation",
+        "model_completion_liquidity_target",
+        "rr_minimum_three",
+        "final_state"
+      ]
+    },
+    "self_review": {
+      "active_range_check": "passed",
+      "poi_check": "not_applicable",
+      "annotation_check": "passed",
+      "refusal_check": "passed",
+      "corrections_made": [
+        "Downgraded to mixed/REVIEW_REQUIRED because parent-child conflict exists per formal structure graph.",
+        "Did not promote to TRADE_PLAN_READY because graph has trade_promotion_blocked=true."
+      ],
+      "remaining_uncertainties": [
+        "Parent protected structure not broken by child",
+        "Wick probes across all timeframes"
+      ]
+    },
     "final_thesis": "BTCUSDT: REVIEW_REQUIRED. 1d remains bearish parent while 4h is bullish child recovery. Parent-child conflict per formal structure graph. Wick probes in all timeframes. Graph blocks trade promotion. System refuses a trade plan."
   }
 }

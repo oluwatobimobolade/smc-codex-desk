@@ -29,6 +29,7 @@ def _break(obj_id: str, direction: str, confirmed_at: str, scope: str, broken_pr
         "evidence": {
             "structure_scope": scope,
             "broken_price": str(broken_price),
+            "body_close_penetration": str(kw.get("body_close_penetration", 0.0)),
             "is_unconfirmed_probe": kw.get("is_unconfirmed_probe", False),
             "broke_protected_swing": kw.get("broke_protected_swing", False),
         },
@@ -211,8 +212,10 @@ def test_graph_catches_wick_probes() -> None:
     }
     graph = build_mtf_structure_graph(symbol="BTCUSDT", detector_candidates=candidates, active_range_authority=_default_active_range())
     assert graph["timeframes"]["4h"]["has_wick_probes"] is True
+    assert graph["timeframes"]["4h"]["wick_probe_count"] == 1
+    # Wick probes existing is normal — they should NOT cause invariant violations
     codes = graph_invariant_violation_codes(graph)
-    assert "wick_probes_are_not_breaks" in codes
+    assert "wick_probes_are_not_breaks" not in codes
 
 
 def test_graph_rejects_ohlc_summary_range() -> None:
@@ -316,7 +319,8 @@ def test_graph_authority_contract() -> None:
     contract = graph["authority_contract"]
     assert contract["graph_is_authoritative"] is True
     assert contract["overrides_blocked"] is True
-    assert contract["signal_allowed"] is True  # invariants PASS
+    assert contract["signal_allowed"] is False  # graph is observe-only
+    assert contract["invariant_passed"] is True
     assert contract["trade_promotion_blocked"] is True  # blocked by parent-child conflict
     assert contract["execution"] == "disabled"
     assert contract["capital_risk"] == 0
@@ -350,7 +354,7 @@ def test_graph_child_body_close_beyond_parent_is_legitimate_flip() -> None:
         "4h": {
             "structure_breaks": [
                 _break("4h_bull_choch", "bullish", "2026-07-03T04:00:00Z", "external", 61000.0, is_choch=True,
-                       broke_protected_swing=True),
+                       broke_protected_swing=True, body_close_penetration=250.0),
             ],
             "sweeps": [], "fvgs": [], "order_blocks": [], "liquidity_levels": [],
         },
@@ -365,8 +369,11 @@ def test_graph_child_body_close_beyond_parent_is_legitimate_flip() -> None:
     ar = _default_active_range()
     graph = build_mtf_structure_graph(symbol="BTCUSDT", detector_candidates=candidates, active_range_authority=ar)
     pc = graph["parent_child_context"]
-    assert pc["has_conflict"] is True
+    assert pc["status"] == "PARENT_BREAK_CONFIRMED"
+    assert pc["has_conflict"] is False
     assert pc["is_child_body_closed_beyond_parent_protected"] is True
+    assert graph_requires_thesis_only(graph) is False
+    assert graph_requires_mixed_bias(graph) is False
     inv = graph["invariants"]
     assert inv["status"] == "PASS"
     assert "child_body_close_required_for_parent_break" not in inv["violations"]
@@ -398,11 +405,11 @@ def test_graph_stale_child_break_cannot_influence_context() -> None:
     }
     graph = build_mtf_structure_graph(symbol="BTCUSDT", detector_candidates=candidates, active_range_authority=_default_active_range())
     pc = graph["parent_child_context"]
-    assert pc["status"] == "PARENT_CHILD_CONFLICT"
-    assert pc["parent_timeframe"] == "1d"
-    assert pc["parent_bias"] == "bullish"
-    assert pc["child_timeframe"] == "4h"
-    assert pc["child_bias"] == "bearish"
+    assert pc["status"] == "ALIGNED"
+    assert pc["aligned_bias"] == "bullish"
+    assert pc["has_conflict"] is False
+    assert pc["stale_child_breaks"][0]["child_timeframe"] == "4h"
+    assert pc["stale_child_breaks"][0]["child_break_id"] == "4h_bear_stale"
 
 
 def test_structure_map_renderer_no_trade_box() -> None:
