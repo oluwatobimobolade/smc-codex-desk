@@ -1,0 +1,58 @@
+{
+  "schema": "wp_test_report_v1",
+  "work_package": "WP-0043-CANONICAL-RUNTIME-AND-AUTHORITY-CONSOLIDATION",
+  "gate": "GATE-CANONICAL-RUNTIME-001",
+  "status": "PASS",
+  "date": "2026-07-10",
+  "baseline_commit": "554e4997e520615735aa6f6daa136746f3bc252c",
+  "commands": [
+    {
+      "command": ".venv/bin/python tools/check_authority_boundaries.py",
+      "result": "AUTHORITY BOUNDARY CHECK: PASS — scanned 91 files across 4 active packages + 2 canonical tools"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python -m pytest tests/test_canonical_runtime_authority.py -v",
+      "result": "9 passed in 2.51s"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python -m pytest tests/ -q",
+      "result": "754 passed, 1 skipped in 103.57s"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python -m smc_desk.colleague --smoke --output-root /tmp/_wp0043_smoke",
+      "result": "Authority trace written: /tmp/_wp0043_smoke/_authority_smoke/authority_trace.json — schema=smc_codex_desk_authority_trace_v1, sha256 captured"
+    },
+    {
+      "command": "PYTHONPATH=. .venv/bin/python -m py_compile smc_desk/colleague/__main__.py smc_desk/colleague/orchestrator_v3.py smc_desk/colleague/run_context.py tools/check_authority_boundaries.py tools/analyze_live_dual_lens.py",
+      "result": "compile ok"
+    }
+  ],
+  "tests_added": [
+    "test_authority_boundary_checker_passes",
+    "test_orchestrator_v1_is_tagged_comparison_only",
+    "test_orchestrator_v2_is_tagged_comparison_only",
+    "test_orchestrator_v3_documents_canonical_authority",
+    "test_run_context_does_not_import_legacy_engine",
+    "test_dual_lens_tool_is_tagged_comparison_only",
+    "test_run_context_inline_loader_preserves_semantics",
+    "test_canonical_main_smoke_emits_authority_trace",
+    "test_boundary_checker_rejects_new_forbidden_import"
+  ],
+  "test_suite_change": {
+    "before_wp0043": "740 passed, 1 skipped",
+    "after_wp0043": "754 passed, 1 skipped",
+    "delta": "+14 tests, 0 regressions"
+  },
+  "headline_fixes": [
+    "Removed R1 leak: smc_desk/colleague/run_context.py imported load_ohlcv_csv from smc_desk.engine. Replaced with an inlined local loader that preserves the exact contract.",
+    "Extended authority-boundary checker to cover smc_desk/brain, smc_desk/perception, and the canonical tool surface.",
+    "Removed the blanket 'mtf.py' allow from the boundary checker — each importer must be individually justified."
+  ],
+  "headline_additions": [
+    "Added smc_desk/colleague/__main__.py with --smoke subcommand and pre-flight boundary check.",
+    "Added build_authority_trace and write_authority_trace helpers (smc_desk.colleague.__main__).",
+    "Wired authority_trace.json emission into the v3 run path (orchestrator_v3.py).",
+    "Tagged orchestrator v1, orchestrator v2, and tools/analyze_live_dual_lens.py as COMPARISON_ONLY."
+  ],
+  "acceptance": "GATE-CANONICAL-RUNTIME-001 PASS"
+}

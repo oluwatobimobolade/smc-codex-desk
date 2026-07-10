@@ -1,0 +1,22 @@
+ foundation_programme/WP-0042/dirty_tree_status.txt |   19 +
+ .../WP-0042/dirty_tree_uncommitted.patch           | 1073 ++++++++++++++++++++
+ foundation_programme/WP-0042/stash_output.txt      |    0
+ governance/CORE_MEMORY.md                          |    7 +-
+ governance/CURRENT_STATE.yaml                      |    9 +-
+ governance/NEXT_ACTIONS.yaml                       |   17 +-
+ .../TEST_REPORT.json                               |   30 +-
+ .../final_report.md                                |   34 +-
+ smc_desk/brain/ai_smc_consistency_validator.py     |    6 +
+ smc_desk/brain/annotation_candidate_composer.py    |  106 +-
+ smc_desk/brain/annotation_evidence.py              |   63 +-
+ smc_desk/brain/annotation_plan_validator.py        |   19 +-
+ smc_desk/brain/annotation_visual_critic.py         |   10 +-
+ smc_desk/colleague/orchestrator_v3.py              |   64 +-
+ .../rendering/smc_trader_annotation_renderer.py    |   29 +-
+ tests/test_offline_full_system_xauusd.py           |   56 +
+ tests/test_wp0024_partial_htf_rejection.py         |  118 +++
+ .../test_wp0041_professional_annotation_planner.py |    9 +-
+ tests/test_wp0041a_annotation_integrity_repair.py  |  136 ++-
+ tools/run_live_ai_smc_full_system.py               |   58 +-
+ tools/run_offline_full_system_xauusd.py            |  191 ++++
+ 21 files changed, 1995 insertions(+), 59 deletions(-)

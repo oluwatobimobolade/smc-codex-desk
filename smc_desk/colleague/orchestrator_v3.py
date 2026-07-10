@@ -1,7 +1,19 @@
 """Official AI SMC brain orchestrator.
 
-V3 is the migration point where the AI SMC trader brain becomes the official
-analysis path. Legacy rule authority is allowed only as debug comparison.
+V3 is the canonical authority for SMC Codex Desk as of WP-0043
+(GATE-CANONICAL-RUNTIME-001). Every authoritative run must go through this
+orchestrator (entry point: ``python -m smc_desk.colleague``). Legacy rule
+authority is allowed only as debug comparison via
+``smc_desk/colleague/legacy_comparison.py``.
+
+The orchestrator is responsible for:
+
+* building a completed-candle-only context;
+* invoking PerceptionEngineV2 and the formal structure graph (WP-0040);
+* constructing the AI SMC trader brain evidence pack;
+* running the consistency validator and annotation validator;
+* writing the ``authority_trace.json`` alongside other run artefacts;
+* refusing any decision that violates authority boundaries.
 """
 from __future__ import annotations
 
@@ -27,6 +39,7 @@ from smc_desk.brain.ai_smc_trader_brain import AISMCTraderBrain
 from smc_desk.brain.llm_provider import AISMCProvider, LLMCompletionRequest, LLMCompletionResult
 from smc_desk.brain.prompt_system import build_prompt_registry_manifest
 from smc_desk.brain.smc_evidence_pack_builder import build_smc_evidence_pack
+from smc_desk.colleague.__main__ import build_authority_trace, write_authority_trace
 from smc_desk.colleague.run_context import TIMEFRAME_DURATIONS, dataframe_to_candles
 from smc_desk.colleague.smc_thesis_ai_v1 import build_smc_thesis_ai_v1, render_smc_thesis_ai_v1_markdown
 from smc_desk.data.historical_backfill import DEFAULT_MINIMUM_DEPTH, FOREX_MINIMUM_DEPTH, build_context_depth_report
@@ -302,6 +315,35 @@ def run_ai_smc_orchestrator_v3(
         "graph_requires_thesis_only": graph_requires_thesis_only(formal_graph),
     }
     assert_official_report_uses_ai_brain(report)
+
+    # WP-0043: emit authority_trace.json (mandated by GATE-CANONICAL-RUNTIME-001).
+    authority_trace = build_authority_trace(
+        command_line=[
+            "run_ai_smc_orchestrator_v3",
+            f"--symbol={symbol}",
+            f"--output-root={root}",
+        ],
+        output_root=root,
+        extra={
+            "symbol": symbol,
+            "evidence_pack_hash": (evidence_pack.get("provenance") or {}).get("pack_hash"),
+            "official_state": official_decision.get("official_state"),
+            "validation_status": validation_result.status,
+            "graph_invariant_status": formal_graph.get("invariants", {}).get("status", "NOT_COMPUTED"),
+            "graph_parent_child_status": formal_graph.get("parent_child_context", {}).get("status", "NOT_COMPUTED"),
+            "provider_model": provider_result.audit_record().get("model"),
+            "render_charts": render_charts,
+            "loop_count": loop_count,
+        },
+    )
+    authority_trace_info = write_authority_trace(
+        root / "authority_trace.json", authority_trace
+    )
+    report["authority_trace"] = {
+        "path": str(root / "authority_trace.json"),
+        **authority_trace_info,
+    }
+
     _write_json(root / "final_report.json", report)
     _write_text(root / "final_report.md", _report_markdown(report))
     return AISMCOrchestratorV3Result(

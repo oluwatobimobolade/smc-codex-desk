@@ -1,7 +1,12 @@
 """Colleague brain v2: cognitive correctness pipeline.
 
-This is an observe-only orchestration layer. Its job is to decide whether the
-system is allowed to reason, not to generate trades.
+STATUS: COMPARISON_ONLY (WP-0043, GATE-CANONICAL-RUNTIME-001).
+
+This is an observe-only orchestration layer; its job is to decide whether the
+system is allowed to reason, not to generate trades. It is retained for
+historical evidence and comparison runs only. The canonical authority is
+``smc_desk.colleague.orchestrator_v3``. Do not import this module from
+canonical-runtime code.
 """
 from __future__ import annotations
 

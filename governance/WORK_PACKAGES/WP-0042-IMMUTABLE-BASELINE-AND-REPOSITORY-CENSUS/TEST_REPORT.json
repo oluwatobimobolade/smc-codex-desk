@@ -1,0 +1,55 @@
+{
+  "schema": "wp_test_report_v1",
+  "work_package": "WP-0042-IMMUTABLE-BASELINE-AND-REPOSITORY-CENSUS",
+  "gate": "GATE-BASELINE-CENSUS-001",
+  "status": "PASS",
+  "date": "2026-07-10",
+  "baseline": {
+    "commit": "554e4997e520615735aa6f6daa136746f3bc252c",
+    "branch": "wp-0012a-remove-legacy-authority",
+    "tracked_file_count": 706,
+    "stash_preservation": "stash@{0} (22 files, 1073 lines)"
+  },
+  "pre_outputs": {
+    "1_census": "foundation_programme/WP-0042/README.md",
+    "2_classification": "foundation_programme/WP-0042/file_manifest.tsv",
+    "3_call_graph": "foundation_programme/pre_outputs/03_import_call_graph.md",
+    "4_conflicts": "foundation_programme/pre_outputs/04_conflicting_authority_claims.md",
+    "5_repro_gap": "foundation_programme/pre_outputs/05_reproducibility_gap.md",
+    "6_canonical_runtime": "foundation_programme/pre_outputs/06_canonical_runtime.md",
+    "7_risk_ranked_plan": "foundation_programme/pre_outputs/07_risk_ranked_plan.md"
+  },
+  "commands_run": [
+    {
+      "command": "git rev-parse HEAD",
+      "result": "554e4997e520615735aa6f6daa136746f3bc252c"
+    },
+    {
+      "command": "git stash -u",
+      "result": "stash@{0} created (22 files preserved)"
+    },
+    {
+      "command": "git status --short (post-stash)",
+      "result": "clean"
+    },
+    {
+      "command": "git ls-files | wc -l",
+      "result": "706"
+    },
+    {
+      "command": "manifest generation: shasum -a 256 per file",
+      "result": "706 hashes, classification column populated"
+    }
+  ],
+  "headline_findings": [
+    "R1: orchestrator.py v1 still imports smc_desk.rules.RuleConfig",
+    "R1: tools/analyze_live_dual_lens.py imports legacy smc_desk.engine",
+    "R3: VALIDATION_REGISTRY.json latest_validation.id stuck at WP-0022",
+    "R3: README_FIRST.md next-work pointer stale (WP-0001)",
+    "R6: no dependency lockfile, no CI workflow, no entry_points",
+    "R2: data-quality status taxonomy designed but not enforced at loader",
+    "R4: holdout isolation is documentary only, no technical separation",
+    "Master Strategy Truth Audit.pdf referenced as controlling but not verified on disk"
+  ],
+  "acceptance": "GATE-BASELINE-CENSUS-001 PASS"
+}

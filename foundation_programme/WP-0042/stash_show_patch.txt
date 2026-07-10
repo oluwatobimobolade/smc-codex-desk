@@ -1,0 +1,1073 @@
+diff --git a/governance/CORE_MEMORY.md b/governance/CORE_MEMORY.md
+index f20e188..88b36f3 100644
+--- a/governance/CORE_MEMORY.md
++++ b/governance/CORE_MEMORY.md
+@@ -52,7 +52,7 @@ calibration.
+ - Upgraded critic to graph challenger: reads graph first, can ONLY downgrade, NEVER promote.
+ - 2026-07-07 audit repair: graph `signal_allowed` is always false; `invariant_passed` carries graph health without implying execution permission. Child parent-break logic now requires body close beyond parent protected level, stale child breaks are ignored, wick probes remain informational unless promoted, and structure-map headers no longer overlap.
+ - 20 WP-0040 tests, all green. Fresh observe-only smoke on BTCUSDT + SUIUSDT passed (THESIS_ONLY, graph conflict, invariants PASS, trade promotion blocked).
+-- Test suite: 735 passed, 1 skipped.
++- Historical WP-0040 completion validation: 735 passed, 1 skipped. The current repository count is recorded under WP-0041A below.
+ 
+ **WP-0041 Professional AI SMC Annotation Planner (2026-07-09):** AI-directed professional markup under graph authority.
+ - Added `annotation_plan_v2` as the professional SMC drawing instruction layer beside legacy labels/levels.
+@@ -72,7 +72,10 @@ calibration.
+ - Live runner wired to `compose_local_annotation_plan_v2` so live path produces evidence-grounded V2 markup instead of generic range decoration.
+ - V2 `trade_box` geometry verified against validated entry/stop/target plans within tolerance; legacy text is suppressed.
+ - Adversarial tests cover: moved-BOS price/span mismatch, internal-as-external relabel, path-without-active-POI, native V2 trade box, and visual-critic overlap cleanup.
+-- Validation: 6 WP-0041A focused tests passed, WP-0041+WP-0041A combined 10 passed, affected suite 85 passed, full suite 745 passed / 1 skipped (baseline 740 + 5 new adversarial tests).
++- 2026-07-10 re-audit added confirmation/lifecycle anchors, wick-probe rejection, evidence-grounded active-POI selection, critic-enforced official downgrade, empty-V2 legacy suppression, bounded one-candle POI display, and decision-time-correct offline XAU replay.
++- A final coordinate audit found that evidence indices used 120 candles while the official chart used 240. Official rendering now uses the evidence-window length, timestamp geometry overrides raw indices, and out-of-window evidence cannot snap to an edge. POI lifecycle is independently replayed from subsequent candles because order-block detector lifecycle is incomplete.
++- The final live deterministic GBPUSD smoke mapped a fresh watch-only 15m OB at its true July 10 origin, explicitly recorded the bullish-HTF/bearish-active-range conflict, rendered only a bounded OB plus local BOS/BSL, and kept entry/SL/TP/trade box absent. The visual critic passed.
++- Validation after re-audit: 12 WP-0041A tests passed, WP-0041+WP-0041A combined 17 passed, affected integrity suite 126 passed, and the full repository suite passed 760 / skipped 1.
+ 
+ **Pipeline:** Live/Historical OHLCV → PEV2 (15m/1H/4H/1D) → Event Ledger → MTF Graph & Parent-Child Guard → Formal Structure Graph (AUTHORITATIVE) → Strategy-State Engine & POI Refinement → Evidence Graph → Decision.
+ 
+diff --git a/governance/CURRENT_STATE.yaml b/governance/CURRENT_STATE.yaml
+index 54beb3b..4c5458c 100644
+--- a/governance/CURRENT_STATE.yaml
++++ b/governance/CURRENT_STATE.yaml
+@@ -3,8 +3,8 @@ project:
+   product: Dual-Lens Market Colleague
+   release: colleague-core-rc0
+   status: research_foundation
+-  current_date: "2026-07-05"
+-  last_updated: "2026-07-05"
++  current_date: "2026-07-10"
++  last_updated: "2026-07-10"
+ 
+ scope:
+   certified_initial_scope:
+@@ -57,6 +57,11 @@ authority:
+   smc_detector_rebuild: implemented_wp0022_stage_ab_internal_external_liquidity_sweep_ob_inducement
+   decision_quality_diagram_repair: passed_wp0027_protected_poi_inducement_story_chart_repair
+   smc_narrative_authority: passed_wp0029_single_official_model_watch_chart_trade_box_gating
++  formal_mtf_structure_graph: implemented_wp0040_deterministic_graph_authority_observe_only
++  professional_ai_smc_annotation: reaudited_wp0041a_evidence_anchored_sparse_and_critic_guarded
++  annotation_visual_critic: downgrade_or_cleanup_only_hard_veto_wired
++  closed_candle_partial_htf_guard: verified_wp0024_exact_decision_time_boundary
++  offline_xau_replay: verified_stale_demo_canonical_15m_completed_htf_only_not_live
+   prediction: research_only
+   paper_execution: disabled
+   live_execution: disabled
+diff --git a/governance/NEXT_ACTIONS.yaml b/governance/NEXT_ACTIONS.yaml
+index 95c2705..b4852b9 100644
+--- a/governance/NEXT_ACTIONS.yaml
++++ b/governance/NEXT_ACTIONS.yaml
+@@ -310,8 +310,8 @@ next_actions:
+     priority: 41
+     title: Annotation integrity repair — evidence anchoring, real visual critic, sparse renderer, V2 trade-box ownership
+     owner: Market Colleague Architect
+-    status: COMPLETE_ACCEPTED_FULL_SYSTEM_VALIDATED
+-    gate: 745_tests_passing_adversarial_evidence_anchor_visual_critic_validated
++    status: COMPLETE_ACCEPTED_REAUDITED_20260710
++    gate: 760_tests_passing_annotation_integrity_coordinate_and_decision_time_truth_validated
+     evidence_required:
+       - governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/final_report.md
+       - governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json
+@@ -320,12 +320,25 @@ next_actions:
+       - smc_desk/brain/annotation_candidate_composer.py (evidence-grounded selector)
+       - smc_desk/brain/annotation_visual_critic.py (downgrade-only critic)
+       - tests/test_wp0041a_annotation_integrity_repair.py (adversarial cases)
++      - tests/test_wp0024_partial_htf_rejection.py (forming HTF candle exclusion)
++      - tests/test_offline_full_system_xauusd.py (offline cutoff and OHLC truth contract)
++      - analysis_runs/WP0041A_REAUDIT_20260710/LIVE_FINAL_VERIFIED/LIVE_FULL_SYSTEM_AI_SMC_V3_20260710_082247/GBPUSD/
++      - analysis_runs/WP0041A_REAUDIT_20260710/OFFLINE_FULL_SYSTEM_XAUUSD_STALE_20260710_082328/
+     completed_scope:
+       - drawn price/span/scope/kind/type mechanically verified against detector + graph anchors
+       - static self-review replaced with downgrade-only visual critic saved as annotation_visual_review.json
+       - renderer suppresses generic banners/footer/explanatory text when level_source=annotation_plan_v2
+       - live planner wired to evidence-grounded candidate composer
+       - V2 trade_box geometry verified against validated entry/stop/target plans
++      - wick-only and unconfirmed structure cannot be drawn as BOS or CHoCH
++      - unconfirmed, terminal, invalidated, or fully mitigated POIs cannot be rendered as active zones
++      - visual critic REVIEW_REQUIRED is an official hard downgrade that strips trade levels
++      - active watch POI selection is evidence-grounded and cannot create entry, stop, target, or execution authority
++      - empty V2 plans suppress legacy labels, levels, banners, and generic path clutter
++      - stale offline XAU replay trims canonical 15m at decision time and derives completed HTFs only
++      - official chart length equals the evidence window and timestamp geometry overrides raw indices
++      - out-of-window evidence cannot snap to a chart edge or pass validation
++      - subsequent candles independently reconstruct POI freshness, partial mitigation, consumption, and invalidation
+     prohibited_claims:
+       - WP-0041A creates no trading edge, execution authority, or live readiness
+       - passing tests means code behaved as specified; it does not prove market correctness
+diff --git a/governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json b/governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json
+index 71bdea8..c6794b9 100644
+--- a/governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json
++++ b/governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json
+@@ -1,17 +1,17 @@
+ {
+   "schema": "wp_test_report_v1",
+   "work_package": "WP-0041A-ANNOTATION-INTEGRITY-REPAIR",
+-  "status": "PASS",
+-  "created_at": "2026-07-09T21:50:00Z",
++  "status": "PASS_REAUDITED",
++  "created_at": "2026-07-10T08:10:30Z",
+   "supersedes_partial_work_acknowledged_in": "governance/WORK_PACKAGES/WP-0041-PROFESSIONAL-AI-SMC-ANNOTATION-PLANNER/final_report.md",
+   "commands": [
+     {
+       "command": ".venv/bin/python -m pytest tests/test_wp0041a_annotation_integrity_repair.py tests/test_wp0041_professional_annotation_planner.py -q",
+-      "result": "10 passed"
++      "result": "17 passed"
+     },
+     {
+-      "command": ".venv/bin/python -m pytest tests/test_wp0034_ai_smc_trader_brain.py tests/test_wp0040_formal_structure_graph.py tests/test_smc_annotation_correctness.py tests/test_wp0037_external_agent_handoff.py tests/test_wp0038_avax_eurnzd_repairs.py tests/test_wp0041_professional_annotation_planner.py tests/test_wp0041a_annotation_integrity_repair.py -q",
+-      "result": "85 passed"
++      "command": ".venv/bin/python -m pytest -q tests/test_wp0037_acceptance_gauntlet.py tests/test_wp0037_active_range_authority.py tests/test_wp0037_external_agent_handoff.py tests/test_wp0038_avax_eurnzd_repairs.py tests/test_wp0039_parent_child_structure_guard.py tests/test_wp0040_formal_structure_graph.py tests/test_wp0041_professional_annotation_planner.py tests/test_wp0041a_annotation_integrity_repair.py tests/test_15m_choch_not_enough_without_poi_context.py tests/test_active_poi_must_be_inside_protected_range.py tests/test_trade_box_only_when_trade_plan_ready.py tests/test_watch_state_blocks_trade_box.py tests/test_mtf.py tests/test_mtf_current.py tests/test_wp0024_partial_htf_rejection.py tests/test_offline_full_system_xauusd.py",
++      "result": "126 passed"
+     },
+     {
+       "command": ".venv/bin/python -m compileall smc_desk tools tests -q",
+@@ -19,7 +19,7 @@
+     },
+     {
+       "command": ".venv/bin/python -m pytest -q",
+-      "result": "745 passed, 1 skipped (baseline 740 + 5 WP-0041A tests; full suite green from project root)"
++      "result": "760 passed, 1 skipped in 132.44s (full suite green from project root)"
+     }
+   ],
+   "adversarial_cases_covered": [
+@@ -27,7 +27,14 @@
+     "test_wp0041a_rejects_internal_break_disguised_as_external_structure: detects scope/label mismatch (internal evidence relabeled as external BOS) as annotation_v2_structure_scope_mismatch and annotation_v2_internal_structure_not_labeled",
+     "test_wp0041a_path_requires_a_certified_active_poi: path projection without active POI evidence rejected as annotation_v2_path_without_active_poi",
+     "test_wp0041a_trade_box_is_v2_native_and_suppresses_legacy_text: scene level_source=annotation_plan_v2, legacy labels suppressed, V2 trade box renders and visual critic PASSES",
+-    "test_wp0041a_visual_critic_requests_cleanup_for_overlapping_marks: local visual critic returns CLEANUP_REQUIRED with cleanup_object_ids for overlapping local labels (density cleanup, not promotion)"
++    "test_wp0041a_visual_critic_requests_cleanup_for_overlapping_marks: cleanup is applied and the final scene is reviewed again to PASSED",
++    "test_wp0041a_wick_probe_cannot_be_drawn_as_confirmed_bos: candidate or wick-only structure cannot become confirmed BOS",
++    "test_wp0041a_local_composer_selects_confirmed_watch_poi_without_trade_levels: active POI selection remains observe-only",
++    "test_wp0041a_visual_critic_hard_failure_downgrades_official_decision: visual veto strips trade authority",
++    "test_wp0041a_empty_v2_plan_suppresses_legacy_clutter: V2 remains authoritative even with zero selected objects",
++    "test_wp0041a_one_candle_poi_is_locally_visible_but_not_full_width: exact POI remains legible and bounded",
++    "test_wp0041a_out_of_window_evidence_is_not_snapped_to_chart_edge: stale geometry is absent and validator refuses it",
++    "test_wp0041a_consumed_order_block_cannot_be_selected_as_active_poi: subsequent candles veto a detector POI with stale lifecycle"
+   ],
+   "evidence_artifacts_written_per_run": [
+     "14_clean_annotation_render/annotation_plan_v2.json",
+@@ -42,7 +49,14 @@
+     "P2: renderer suppresses generic banners/footer/explanatory text when level_source=annotation_plan_v2",
+     "P2: live planner wired to evidence-grounded composer that selects only recent, graph-compatible SMC objects",
+     "P2: V2 trade-box ownership repaired end-to-end with native geometry plus legacy gate",
+-    "P2: test coverage extended from 5 to 10 focused tests covering moved BOS, internal-as-external, missing POI path, native trade box, and visual-critic cleanup"
++    "P2: test coverage extended to 10 focused WP-0041A tests and 15 combined WP-0041/WP-0041A tests",
++    "Re-audit: confirmation/lifecycle/wick-probe state is enforced by canonical evidence anchors",
++    "Re-audit: visual critic REVIEW_REQUIRED now hard-downgrades the official decision and removes trade levels",
++    "Re-audit: local runner selects real watch-only POIs and keeps thesis wording synchronized",
++    "Re-audit: empty V2 plans suppress all legacy chart clutter",
++    "Re-audit: offline XAU replay is decision-time-correct and cannot claim live data"
++    ,"Re-audit: official chart and evidence pack share one candle window and timestamps override raw indices"
++    ,"Re-audit: off-window or candle-consumed POIs are rejected before official annotation"
+   ],
+   "execution_authority": "disabled",
+   "paper_execution": "disabled",
+diff --git a/governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/final_report.md b/governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/final_report.md
+index 1f5820a..ba68b0d 100644
+--- a/governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/final_report.md
++++ b/governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/final_report.md
+@@ -1,6 +1,6 @@
+ # WP-0041A Annotation Integrity Repair - Final Report
+ 
+-## Status: COMPLETE / PASS
++## Status: COMPLETE / PASS / RE-AUDITED 2026-07-10
+ 
+ WP-0041A is the integrity repair for the WP-0041 professional AI SMC annotation planner. Where WP-0041 delivered the V2 schema, validator, renderer preference, and artifacts, WP-0041A enforces that every drawn mark is mechanically true, the chart stops narrating at the viewer, and a real downgrade-only critic audits the actual rendered scene before it is accepted.
+ 
+@@ -48,7 +48,23 @@ It was gated correctly but did not yet model and render a coherent V2 entry/SL/T
+ 
+ ### P2: Test coverage was narrower than the written plan
+ 
+-**Repair.** Five new focused WP-0041A tests extend coverage to coordinate-to-evidence matching, scope/label mismatch, path-without-POI, native V2 trade box, and visual-critic cleanup.
++**Repair.** Twelve focused WP-0041A tests now cover coordinate-to-evidence matching, scope/label mismatch, path-without-POI, native V2 trade box, visual-critic cleanup, wick-probe rejection, active watch-POI selection, critic-enforced hard downgrade, empty-V2 legacy suppression, bounded one-candle POI display, off-window evidence rejection, and candle-replayed POI consumption.
++
++## 2026-07-10 Re-Audit Repairs
++
++The first WP-0041A report correctly described the architecture but overstated several guarantees. A fresh live smoke and source audit found the following remaining defects and repaired them.
++
++- Evidence anchors did not carry confirmation, activity, mitigation, or wick-probe state. These fields are now indexed and enforced. Candidate or wick-only structure cannot become BOS/CHoCH; unconfirmed or terminal POIs cannot become active zones.
++- The local runner passed `active_poi=None`, so the composer could not emit a real OB/FVG even when one existed. It now selects a confirmed, visible, non-terminal 15m watch POI inside the certified active range. The selection creates no execution authority.
++- A visual-critic `REVIEW_REQUIRED` result was written but did not change the official decision. It now hard-downgrades the official state and strips entry, stop, targets, and trade-box authority.
++- Cleanup retained the pre-cleanup verdict. The critic now reruns after cleanup and records both the initial and final verdict.
++- An empty V2 plan fell back to legacy clutter. Presence of the V2 schema now suppresses legacy labels, levels, banners, and generic paths even when no V2 objects are selected.
++- One-candle POIs at the left chart edge rendered as unreadable slivers. The renderer preserves exact evidence geometry but gives the displayed zone a capped 6-12 candle local width. It never becomes a full-width ray.
++- The offline XAU helper accepted future candles relative to its stale cutoff and could combine inconsistent native HTFs. It now treats 15m as canonical, trims by closed-candle decision time, derives completed HTFs only, validates OHLC geometry, and labels the run `OFFLINE_STALE_DEMO`, never live.
++- Thesis wording previously said no POI was available after the selector found one. The live provider now distinguishes a mapped watch POI from absent entry confirmation and explicitly explains active-range direction conflicts.
++- Evidence indices were calculated on a 120-candle pack while the official chart rendered 240 candles, shifting valid marks left. Official chart rendering now uses the exact evidence-window length, and timestamp geometry always overrides raw indices.
++- `index_for_time` previously snapped timestamps outside the evidence window to index 0 or the last candle. Out-of-window evidence now has no chart index and is rejected by both the selector and validator.
++- Order-block lifecycle fields remain incomplete in the detector. The annotation authority now independently replays all subsequent visible candles and rejects POIs that were consumed or invalidated; partial touches are labeled honestly.
+ 
+ ## Pipeline Wiring
+ 
+@@ -60,11 +76,15 @@ The repair is fully wired end-to-end.
+ 
+ ## Validation
+ 
+-- Focused WP-0041A tests: `6 passed` (5 in `test_wp0041a_annotation_integrity_repair.py` plus the 1 trade-box scene assertion).
+-- WP-0041 + WP-0041A combined: `10 passed`.
+-- Affected AI/renderer/formal-graph/agent tests: `85 passed`.
++- Focused WP-0041A tests: `12 passed`.
++- WP-0041 + WP-0041A combined: `17 passed`.
++- Extended annotation, graph, POI, MTF, decision-time, and offline-replay suite: `126 passed`.
++- Focused integrity plus decision-time tests: `25 passed`.
+ - Compileall: `passed`.
+-- Full pytest: `745 passed, 1 skipped` (baseline 740 plus 5 new WP-0041A tests).
++- `git diff --check`: `passed`.
++- Full pytest: `760 passed, 1 skipped` in `132.44s`.
++- Offline XAU smoke: validated `OFFLINE_STALE_DEMO`; canonical 15m was trimmed at the decision cutoff and only completed HTFs were derived.
++- Fresh GBPUSD smoke: `VALIDATED / WATCH_ONLY`; fresh 15m OB mapped at its true July 10 origin without entry/SL/TP, range-direction conflict disclosed, sparse chart passed visual critic.
+ 
+ ## Evidence
+ 
+@@ -77,6 +97,8 @@ The repair is fully wired end-to-end.
+ - Renderer cleanup integration: `smc_desk/rendering/smc_trader_annotation_renderer.py` (`apply_visual_cleanup`, `legacy_labels_suppressed`)
+ - Orchestrator wiring: `smc_desk/colleague/orchestrator_v3.py` (`annotation_visual_review.json`, `annotation_self_review.md`)
+ - Live runner wiring: `tools/run_live_ai_smc_full_system.py` (`compose_local_annotation_plan_v2`)
++- Re-audit report: `reports/current/WP0041A_ANNOTATION_INTEGRITY_REAUDIT_20260710.md`
++- Fresh GBPUSD chart: `analysis_runs/WP0041A_REAUDIT_20260710/LIVE_FINAL_VERIFIED/LIVE_FULL_SYSTEM_AI_SMC_V3_20260710_082247/GBPUSD/14_clean_annotation_render/GBPUSD_official_ai_annotation.png`
+ 
+ ## Final Truth
+ 
+diff --git a/smc_desk/brain/ai_smc_consistency_validator.py b/smc_desk/brain/ai_smc_consistency_validator.py
+index 7f7f510..731a220 100644
+--- a/smc_desk/brain/ai_smc_consistency_validator.py
++++ b/smc_desk/brain/ai_smc_consistency_validator.py
+@@ -138,6 +138,12 @@ def validate_ai_smc_decision(
+         "annotation_v2_trade_target_mismatch",
+         "annotation_v2_trade_price_mismatch",
+         "annotation_v2_split_trade_box_forbidden",
++        "annotation_v2_structure_not_confirmed",
++        "annotation_v2_poi_not_confirmed",
++        "annotation_v2_poi_not_active",
++        "annotation_v2_evidence_outside_visible_window",
++        "annotation_v2_poi_observed_consumed",
++        "annotation_v2_poi_lifecycle_unverifiable",
+     }
+ 
+     # Calculate statuses
+diff --git a/smc_desk/brain/annotation_candidate_composer.py b/smc_desk/brain/annotation_candidate_composer.py
+index b86e04b..ef1734a 100644
+--- a/smc_desk/brain/annotation_candidate_composer.py
++++ b/smc_desk/brain/annotation_candidate_composer.py
+@@ -8,7 +8,69 @@ from __future__ import annotations
+ 
+ from typing import Any, Mapping
+ 
+-from smc_desk.brain.annotation_evidence import AnnotationEvidenceAnchor, build_annotation_evidence_index
++from smc_desk.brain.annotation_evidence import AnnotationEvidenceAnchor, build_annotation_evidence_index, observed_poi_state
++
++
++def select_local_active_poi(
++    *,
++    evidence_pack: Mapping[str, Any],
++    direction: str,
++    active_range: Mapping[str, Any],
++) -> dict[str, Any] | None:
++    """Choose a confirmed untouched watch POI without creating trade readiness."""
++    if direction not in {"bullish", "bearish"}:
++        return None
++    index = build_annotation_evidence_index(evidence_pack)
++    windows = evidence_pack.get("ohlcv_windows") or {}
++    candles = windows.get("15m") if isinstance(windows, Mapping) else None
++    if not isinstance(candles, list) or not candles:
++        return None
++    current_price = _float((candles[-1] or {}).get("close")) if isinstance(candles[-1], Mapping) else None
++    if current_price is None:
++        return None
++    row_count = len(candles)
++    range_low = _float(active_range.get("low"))
++    range_high = _float(active_range.get("high"))
++    candidates: list[tuple[AnnotationEvidenceAnchor, str]] = []
++    for anchor in index.values():
++        if not (
++            anchor.evidence_type in {"order_block", "fvg"}
++            and anchor.timeframe == "15m"
++            and anchor.direction == direction
++            and anchor.confirmation_status == "confirmed"
++            and not anchor.is_wick_only_probe
++            and anchor.activity_status != "terminal"
++            and anchor.mitigation_status not in {"full", "invalidated"}
++            and _visible(anchor, row_count)
++            and _on_retrace_side(anchor, current_price, direction)
++            and _inside_range(anchor, range_low, range_high)
++        ):
++            continue
++        observed_state = observed_poi_state(anchor, evidence_pack)
++        if observed_state in {"consumed", "invalidated", "unverifiable"}:
++            continue
++        candidates.append((anchor, observed_state))
++    if not candidates:
++        return None
++    selected, observed_state = min(candidates, key=lambda item: _poi_rank(item[0], current_price, direction))
++    label = "demand order block" if direction == "bullish" else "supply order block"
++    if selected.evidence_type == "fvg":
++        label = f"{direction} FVG"
++    freshness = "partially_mitigated" if observed_state == "partial" or selected.mitigation_status == "partial" else "fresh"
++    return {
++        "poi_id": selected.object_id,
++        "timeframe": selected.timeframe,
++        "kind": label.replace(" ", "_"),
++        "direction": direction,
++        "price_low": selected.price_low,
++        "price_high": selected.price_high,
++        "freshness": freshness,
++        "evidence_object_ids": [selected.object_id],
++        "summary": (
++            f"Observe-only {selected.timeframe} {label} selected from confirmed, non-terminal evidence; observed lifecycle={freshness}. "
++            "It is a watch POI only; no entry, stop, target, or execution authority is created."
++        ),
++    }
+ 
+ 
+ def compose_local_annotation_plan_v2(
+@@ -24,7 +86,7 @@ def compose_local_annotation_plan_v2(
+     windows = evidence_pack.get("ohlcv_windows") or {}
+     candles = windows.get("15m") if isinstance(windows, Mapping) else None
+     row_count = len(candles) if isinstance(candles, list) else 0
+-    recent_start = max(0, row_count - 56)
++    recent_start = max(0, row_count - 28)
+     recent_end = max(recent_start + 4, row_count - 2)
+     objects: list[dict[str, Any]] = []
+ 
+@@ -112,6 +174,8 @@ def _latest_visible_external_structure(
+         if anchor.evidence_type == "structure"
+         and anchor.timeframe == "15m"
+         and anchor.structure_scope == "external"
++        and anchor.confirmation_status == "confirmed"
++        and not anchor.is_wick_only_probe
+         and _visible(anchor, row_count)
+     ]
+     return max(candidates, key=lambda anchor: anchor.end_index or -1, default=None)
+@@ -126,6 +190,10 @@ def _active_poi_anchor(
+     anchor = index.get(str(poi_id)) if poi_id else None
+     if anchor is None or anchor.evidence_type not in {"order_block", "fvg"}:
+         return None
++    if anchor.confirmation_status != "confirmed" or anchor.activity_status == "terminal":
++        return None
++    if anchor.mitigation_status in {"full", "invalidated"}:
++        return None
+     return anchor
+ 
+ 
+@@ -190,3 +258,37 @@ def _midpoint(low: float | None, high: float | None) -> float | None:
+     if low is None or high is None:
+         return None
+     return (float(low) + float(high)) / 2.0
++
++
++def _on_retrace_side(anchor: AnnotationEvidenceAnchor, current_price: float, direction: str) -> bool:
++    if anchor.price_low is None or anchor.price_high is None:
++        return False
++    tolerance = abs(current_price) * 0.001
++    if direction == "bullish":
++        return anchor.price_low <= current_price + tolerance
++    return anchor.price_high >= current_price - tolerance
++
++
++def _inside_range(anchor: AnnotationEvidenceAnchor, range_low: float | None, range_high: float | None) -> bool:
++    if range_low is None or range_high is None or anchor.price_low is None or anchor.price_high is None:
++        return True
++    return anchor.price_low >= range_low and anchor.price_high <= range_high
++
++
++def _poi_rank(anchor: AnnotationEvidenceAnchor, current_price: float, direction: str) -> tuple[float, ...]:
++    midpoint = _midpoint(anchor.price_low, anchor.price_high) or current_price
++    kind_rank = 0.0 if anchor.evidence_type == "order_block" else 1.0
++    freshness_rank = 0.0 if anchor.mitigation_status in {None, "untouched"} else 1.0
++    confidence_rank = -float(anchor.confidence or 0.0)
++    # Within the same quality tier, preserve deeper-OB priority before distance.
++    depth_rank = midpoint if direction == "bullish" else -midpoint
++    distance_rank = abs(current_price - midpoint)
++    recency_rank = -float(anchor.end_index or 0)
++    return kind_rank, freshness_rank, confidence_rank, depth_rank, distance_rank, recency_rank
++
++
++def _float(value: Any) -> float | None:
++    try:
++        return float(value)
++    except (TypeError, ValueError):
++        return None
+diff --git a/smc_desk/brain/annotation_evidence.py b/smc_desk/brain/annotation_evidence.py
+index abfed83..4665332 100644
+--- a/smc_desk/brain/annotation_evidence.py
++++ b/smc_desk/brain/annotation_evidence.py
+@@ -26,6 +26,11 @@ class AnnotationEvidenceAnchor:
+     end_time: str | None
+     start_index: int | None
+     end_index: int | None
++    confirmation_status: str | None
++    activity_status: str | None
++    mitigation_status: str | None
++    is_wick_only_probe: bool
++    confidence: float | None
+     source: str
+ 
+ 
+@@ -67,6 +72,11 @@ def build_annotation_evidence_index(evidence_pack: Mapping[str, Any]) -> dict[st
+             end_time=None,
+             start_index=None,
+             end_index=None,
++            confirmation_status="confirmed",
++            activity_status="active",
++            mitigation_status="untouched",
++            is_wick_only_probe=False,
++            confidence=1.0,
+             source="formal_structure_graph.active_range",
+         )
+     return index
+@@ -107,19 +117,65 @@ def index_for_time(evidence_pack: Mapping[str, Any], timeframe: str, value: str
+     target = _parse_time(value)
+     if target is None:
+         return None
+-    best: tuple[float, int] | None = None
++    parsed_stamps: list[tuple[int, datetime]] = []
+     for idx, candle in enumerate(candles):
+         if not isinstance(candle, Mapping):
+             continue
+         stamp = _parse_time(str(candle.get("timestamp") or candle.get("open_time") or ""))
+         if stamp is None:
+             continue
++        parsed_stamps.append((idx, stamp))
++    if not parsed_stamps:
++        return None
++    first_stamp = min(stamp for _idx, stamp in parsed_stamps)
++    last_stamp = max(stamp for _idx, stamp in parsed_stamps)
++    if target < first_stamp or target > last_stamp:
++        return None
++    best: tuple[float, int] | None = None
++    for idx, stamp in parsed_stamps:
+         delta = abs((stamp - target).total_seconds())
+         if best is None or delta < best[0]:
+             best = (delta, idx)
+     return None if best is None else best[1]
+ 
+ 
++def observed_poi_state(anchor: AnnotationEvidenceAnchor, evidence_pack: Mapping[str, Any]) -> str:
++    """Return fresh/partial/consumed/invalidated from candles after confirmation."""
++    windows = evidence_pack.get("ohlcv_windows") or {}
++    candles = windows.get(anchor.timeframe) if isinstance(windows, Mapping) else None
++    if (
++        not isinstance(candles, list)
++        or anchor.end_index is None
++        or anchor.price_low is None
++        or anchor.price_high is None
++    ):
++        return "unverifiable"
++    touched = False
++    for raw in candles[anchor.end_index + 1 :]:
++        if not isinstance(raw, Mapping):
++            continue
++        low = _float(raw.get("low"))
++        high = _float(raw.get("high"))
++        close = _float(raw.get("close"))
++        if low is None or high is None or close is None:
++            return "unverifiable"
++        if anchor.direction == "bullish":
++            if close < anchor.price_low:
++                return "invalidated"
++            if low <= anchor.price_low:
++                return "consumed"
++            touched = touched or low <= anchor.price_high
++        elif anchor.direction == "bearish":
++            if close > anchor.price_high:
++                return "invalidated"
++            if high >= anchor.price_high:
++                return "consumed"
++            touched = touched or high >= anchor.price_low
++        else:
++            return "unverifiable"
++    return "partial" if touched else "fresh"
++
++
+ def _candidate_anchor(
+     timeframe: str,
+     bucket: str,
+@@ -161,6 +217,11 @@ def _candidate_anchor(
+         end_time=end_time,
+         start_index=index_for_time(evidence_pack, str(item.get("timeframe") or timeframe), start_time),
+         end_index=index_for_time(evidence_pack, str(item.get("timeframe") or timeframe), end_time),
++        confirmation_status=_enum_value(item.get("confirmation_status")),
++        activity_status=_enum_value(item.get("activity_status")),
++        mitigation_status=_enum_value(item.get("mitigation_status")),
++        is_wick_only_probe=bool(evidence.get("is_unconfirmed_probe") or item.get("is_wick_only_probe")),
++        confidence=_float(item.get("confidence")),
+         source=f"detector_candidates.{timeframe}.{bucket}",
+     )
+ 
+diff --git a/smc_desk/brain/annotation_plan_validator.py b/smc_desk/brain/annotation_plan_validator.py
+index e0264ce..ac134d8 100644
+--- a/smc_desk/brain/annotation_plan_validator.py
++++ b/smc_desk/brain/annotation_plan_validator.py
+@@ -12,6 +12,7 @@ from smc_desk.brain.ai_smc_trader_brain import AISMCDecision, AnnotationDrawingO
+ from smc_desk.brain.annotation_evidence import (
+     AnnotationEvidenceAnchor,
+     build_annotation_evidence_index,
++    observed_poi_state,
+     prices_match,
+     zones_match,
+ )
+@@ -160,7 +161,7 @@ def _check_geometry(
+     if obj.object_type == "structure_segment":
+         _check_structure_geometry(obj, anchors, issues)
+     elif obj.object_type == "poi_zone":
+-        _check_poi_geometry(obj, anchors, issues)
++        _check_poi_geometry(obj, anchors, evidence_pack, issues)
+     elif obj.object_type == "liquidity_line":
+         _check_liquidity_geometry(obj, anchors, issues)
+     elif obj.object_type == "trade_box":
+@@ -267,6 +268,10 @@ def _check_structure_geometry(
+     anchor = _first_anchor(anchors, "structure")
+     if anchor is None:
+         return
++    if anchor.start_index is None or anchor.end_index is None:
++        _issue(issues, "annotation_v2_evidence_outside_visible_window", f"{obj.label} structure evidence is outside the chart evidence window.")
++    if anchor.confirmation_status != "confirmed" or anchor.is_wick_only_probe:
++        _issue(issues, "annotation_v2_structure_not_confirmed", f"{obj.label} references a wick probe or unconfirmed structure candidate.")
+     expected = anchor.exact_price
+     if not prices_match(obj.price, expected):
+         _issue(issues, "annotation_v2_structure_price_mismatch", f"{obj.label} price does not match the broken swing level.")
+@@ -276,11 +281,23 @@ def _check_structure_geometry(
+ def _check_poi_geometry(
+     obj: AnnotationDrawingObject,
+     anchors: list[AnnotationEvidenceAnchor],
++    evidence_pack: Mapping[str, Any],
+     issues: list[AnnotationPlanIssue],
+ ) -> None:
+     anchor = _first_anchor(anchors, "order_block", "fvg")
+     if anchor is None:
+         return
++    if anchor.start_index is None or anchor.end_index is None:
++        _issue(issues, "annotation_v2_evidence_outside_visible_window", f"{obj.label} POI evidence is outside the chart evidence window.")
++    if anchor.confirmation_status != "confirmed":
++        _issue(issues, "annotation_v2_poi_not_confirmed", f"{obj.label} references an unconfirmed POI candidate.")
++    if anchor.activity_status == "terminal" or anchor.mitigation_status in {"full", "invalidated"}:
++        _issue(issues, "annotation_v2_poi_not_active", f"{obj.label} references a consumed or invalidated POI.")
++    observed_state = observed_poi_state(anchor, evidence_pack)
++    if observed_state in {"consumed", "invalidated"}:
++        _issue(issues, "annotation_v2_poi_observed_consumed", f"{obj.label} was {observed_state} by subsequent visible candles.")
++    elif observed_state == "unverifiable":
++        _issue(issues, "annotation_v2_poi_lifecycle_unverifiable", f"{obj.label} lifecycle cannot be reconstructed inside the visible evidence window.")
+     if not zones_match(obj.price_low, obj.price_high, anchor.price_low, anchor.price_high):
+         _issue(issues, "annotation_v2_poi_price_mismatch", f"{obj.label} zone does not match the certified POI bounds.")
+     _check_anchor_span(obj, anchor, "annotation_v2_poi_span_mismatch", issues)
+diff --git a/smc_desk/brain/annotation_visual_critic.py b/smc_desk/brain/annotation_visual_critic.py
+index 69674a6..130d8cd 100644
+--- a/smc_desk/brain/annotation_visual_critic.py
++++ b/smc_desk/brain/annotation_visual_critic.py
+@@ -62,8 +62,8 @@ def review_annotation_scene(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[
+ def apply_visual_cleanup(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[str, Any]:
+     """Return a render scene with only the critic-approved objects visible."""
+     out = dict(scene)
+-    review = review_annotation_scene(out, df)
+-    cleanup = set(review["cleanup_object_ids"])
++    initial_review = review_annotation_scene(out, df)
++    cleanup = set(initial_review["cleanup_object_ids"])
+     if cleanup:
+         out["visible_drawing_objects"] = [
+             item for item in out.get("visible_drawing_objects", [])
+@@ -75,7 +75,11 @@ def apply_visual_cleanup(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[str
+             if str(item.get("semantic_object_id") or "") not in cleanup
+         ]
+         out["visible_level_count"] = len(out["visible_levels"])
+-    out["visual_critic"] = review
++    final_review = review_annotation_scene(out, df)
++    final_review["pre_cleanup_status"] = initial_review["status"]
++    final_review["cleanup_applied"] = sorted(cleanup)
++    final_review["pre_cleanup_issues"] = initial_review["issues"]
++    out["visual_critic"] = final_review
+     return out
+ 
+ 
+diff --git a/smc_desk/colleague/orchestrator_v3.py b/smc_desk/colleague/orchestrator_v3.py
+index ed3576d..21ba4d7 100644
+--- a/smc_desk/colleague/orchestrator_v3.py
++++ b/smc_desk/colleague/orchestrator_v3.py
+@@ -212,25 +212,40 @@ def run_ai_smc_orchestrator_v3(
+     chart_manifest: dict[str, Any] = {"status": "disabled"}
+     if render_charts:
+         official_chart_path = root / "14_clean_annotation_render" / f"{symbol}_official_ai_annotation.png"
++        evidence_rows = len((evidence_pack.get("ohlcv_windows") or {}).get("15m") or []) or None
++        official_chart_df = _chart_df(timeframe_dfs, tail_rows=evidence_rows)
+         scene = render_smc_trader_annotation_chart(
+-            _chart_df(timeframe_dfs),
++            official_chart_df,
+             validation_result,
+             official_chart_path,
+             timeframe="15m",
+         )
+-        chart_manifest = {
+-            "status": "PASS",
+-            "chart_path": str(official_chart_path),
+-            "scene": scene,
+-            "source": "validated_ai_annotation_plan",
+-        }
+-        _write_json(root / "14_clean_annotation_render" / "annotation_manifest.json", chart_manifest)
+         visual_review = scene.get("visual_critic") or {
+             "schema": "professional_smc_annotation_visual_review_v1",
+             "status": "NOT_AVAILABLE",
+             "critic_authority": "downgrade_or_cleanup_only",
+             "issues": [],
+         }
++        reviewed_result = apply_visual_critic_authority(validation_result, visual_review)
++        if reviewed_result.status != validation_result.status:
++            validation_result = reviewed_result
++            official_decision = validation_result.official_decision
++            _write_json(root / "12_ai_consistency_validation" / "validation_result.json", validation_result.model_dump(mode="json", by_alias=True))
++            _write_json(root / "13_official_ai_decision" / "official_decision.json", official_decision)
++            scene = render_smc_trader_annotation_chart(
++                official_chart_df,
++                validation_result,
++                official_chart_path,
++                timeframe="15m",
++            )
++            visual_review = scene.get("visual_critic") or visual_review
++        chart_manifest = {
++            "status": "PASS" if visual_review.get("status") != "REVIEW_REQUIRED" else "REVIEW_REQUIRED",
++            "chart_path": str(official_chart_path),
++            "scene": scene,
++            "source": "validated_ai_annotation_plan",
++        }
++        _write_json(root / "14_clean_annotation_render" / "annotation_manifest.json", chart_manifest)
+         _write_json(root / "14_clean_annotation_render" / "annotation_visual_review.json", visual_review)
+         annotation_validation = validate_annotation_plan_v2(validation_result.decision, evidence_pack)
+         annotation_validation_payload = annotation_validation_to_dict(annotation_validation)
+@@ -489,11 +504,11 @@ def _status(*, provider_result: LLMCompletionResult, validation_result: Validati
+     return f"{workflow}:{analysis}"
+ 
+ 
+-def _chart_df(timeframe_dfs: Mapping[str, pd.DataFrame]) -> pd.DataFrame:
++def _chart_df(timeframe_dfs: Mapping[str, pd.DataFrame], *, tail_rows: int | None = None) -> pd.DataFrame:
+     for tf in ("15m", "5m", "1h", "4h", "1d"):
+         df = timeframe_dfs.get(tf)
+         if df is not None:
+-            return df.tail(240).copy()
++            return df.tail(tail_rows or 240).copy()
+     raise ValueError("No dataframe available for official chart rendering.")
+ 
+ 
+@@ -562,6 +577,35 @@ def _annotation_self_review_markdown(
+     return "\n".join(lines) + "\n"
+ 
+ 
++def apply_visual_critic_authority(
++    validation_result: ValidationResult,
++    visual_review: Mapping[str, Any],
++) -> ValidationResult:
++    """Enforce the critic's one-way authority: keep state or downgrade only."""
++    if visual_review.get("status") != "REVIEW_REQUIRED" or validation_result.status == "REVIEW_REQUIRED":
++        return validation_result
++    messages = [
++        str(issue.get("message"))
++        for issue in visual_review.get("issues", []) or []
++        if isinstance(issue, Mapping) and issue.get("message")
++    ]
++    issue = ValidationIssue(
++        code="annotation_visual_critic_veto",
++        severity="hard",
++        message="; ".join(messages) or "The downgrade-only annotation visual critic rejected the official scene.",
++    )
++    issues = [*validation_result.issues, issue]
++    official = strip_trade_plan_for_review(validation_result.official_decision, issues)
++    return ValidationResult(
++        status="REVIEW_REQUIRED",
++        decision=validation_result.decision,
++        official_decision=official,
++        issues=issues,
++        smc_model_validity=validation_result.smc_model_validity,
++        trade_plan_validity="failed",
++    )
++
++
+ def _report_markdown(report: Mapping[str, Any]) -> str:
+     lines = [f"# {report.get('symbol')} AI SMC Orchestrator V3", ""]
+     lines.append(f"Status: `{report.get('status')}`")
+diff --git a/smc_desk/rendering/smc_trader_annotation_renderer.py b/smc_desk/rendering/smc_trader_annotation_renderer.py
+index d2abb76..c65a7e1 100644
+--- a/smc_desk/rendering/smc_trader_annotation_renderer.py
++++ b/smc_desk/rendering/smc_trader_annotation_renderer.py
+@@ -59,11 +59,12 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
+         raise ValueError("trade_plan_chart requires TRADE_PLAN_READY.")
+     legacy_levels = list(annotation.get("levels") or [])
+     annotation_plan_v2 = decision.get("annotation_plan_v2") or {}
+-    drawing_objects = list(annotation_plan_v2.get("objects") or []) if isinstance(annotation_plan_v2, Mapping) else []
+-    if drawing_objects:
++    v2_present = isinstance(annotation_plan_v2, Mapping) and annotation_plan_v2.get("schema") == "professional_smc_annotation_plan_v2"
++    drawing_objects = list(annotation_plan_v2.get("objects") or []) if v2_present else []
++    if v2_present:
+         labels = []
+     visible_drawing_objects = _select_visible_drawing_objects(drawing_objects, chart_template)
+-    levels = _drawing_objects_to_levels(visible_drawing_objects) if drawing_objects else legacy_levels
++    levels = _drawing_objects_to_levels(visible_drawing_objects) if v2_present else legacy_levels
+     visible_labels = _select_visible_labels(labels, chart_template)
+     visible_levels = _select_visible_levels(levels, chart_template)
+     return {
+@@ -78,19 +79,19 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
+         "legacy_labels": legacy_labels,
+         "levels": levels,
+         "legacy_levels": legacy_levels,
+-        "annotation_plan_v2": annotation_plan_v2 if drawing_objects else None,
++        "annotation_plan_v2": annotation_plan_v2 if v2_present else None,
+         "drawing_objects": drawing_objects,
+         "visible_drawing_objects": visible_drawing_objects,
+         "drawing_object_count": len(drawing_objects),
+         "visible_drawing_object_count": len(visible_drawing_objects),
+-        "level_source": "annotation_plan_v2" if drawing_objects else "annotation_plan",
++        "level_source": "annotation_plan_v2" if v2_present else "annotation_plan",
+         "visible_labels": visible_labels,
+         "visible_levels": visible_levels,
+         "label_count": len(labels),
+         "label_limit": label_limit,
+         "visible_label_count": len(visible_labels),
+         "hidden_label_count": max(0, len(labels) - len(visible_labels)),
+-        "legacy_labels_suppressed": bool(drawing_objects and legacy_labels),
++        "legacy_labels_suppressed": bool(v2_present and legacy_labels),
+         "visible_level_count": len(visible_levels),
+         "hidden_level_count": max(0, len(levels) - len(visible_levels)),
+         "display_contract": "trader_markup_sparse",
+@@ -176,7 +177,7 @@ def render_smc_trader_annotation_chart(
+             _draw_trade_projection(ax, scene, levels, n)
+     if scene.get("visible_drawing_objects"):
+         _draw_v2_path_objects(ax, scene["visible_drawing_objects"], n)
+-    elif scene["chart_template"] == "watch_chart":
++    elif scene["level_source"] != "annotation_plan_v2" and scene["chart_template"] == "watch_chart":
+         # Draw path arrows for watch thesis
+         direction = decision.get("direction")
+         active_range = decision.get("active_range") or {}
+@@ -341,9 +342,9 @@ def _resolve_scene_time_geometry(scene: Mapping[str, Any], df: pd.DataFrame) ->
+             if not isinstance(raw, Mapping):
+                 continue
+             item = dict(raw)
+-            if item.get("start_index") is None and item.get("start_time"):
++            if item.get("start_time"):
+                 item["start_index"] = _timestamp_index(stamps, item.get("start_time"))
+-            if item.get("end_index") is None and item.get("end_time"):
++            if item.get("end_time"):
+                 item["end_index"] = _timestamp_index(stamps, item.get("end_time"))
+             resolved.append(item)
+         out[key] = resolved
+@@ -362,7 +363,10 @@ def _timestamp_index(stamps: pd.Series, value: Any) -> int | None:
+     valid = stamps.notna()
+     if not valid.any():
+         return None
+-    deltas = (stamps[valid] - target).abs()
++    visible = stamps[valid]
++    if target < visible.min() or target > visible.max():
++        return None
++    deltas = (visible - target).abs()
+     return int(deltas.idxmin())
+ 
+ 
+@@ -563,6 +567,11 @@ def _level_x_span(level: Mapping[str, Any], n: int, chart_template: str) -> tupl
+     if start is not None and end is not None:
+         left = max(-0.5, min(float(start), n + 6.0))
+         right = max(left + 1.0, min(float(end), n + 6.0))
++        if _is_zone_kind(str(level.get("kind") or "")) and right - left < 4.0:
++            # Preserve the certified origin while giving a one-candle POI enough
++            # local width to be legible. The cap keeps it far from a full-width ray.
++            local_width = max(6.0, min(12.0, n * 0.10))
++            right = min(n - 0.5, left + local_width)
+         return left, right
+     if _is_zone_kind(str(level.get("kind") or "")):
+         width = max(6.0, min(24.0, n * 0.18))
+diff --git a/tests/test_wp0041_professional_annotation_planner.py b/tests/test_wp0041_professional_annotation_planner.py
+index b2dd6d5..1453dbe 100644
+--- a/tests/test_wp0041_professional_annotation_planner.py
++++ b/tests/test_wp0041_professional_annotation_planner.py
+@@ -99,6 +99,8 @@ def _watch_payload_with_v2() -> dict:
+ def _pack_with_v2_geometry() -> dict:
+     pack = deepcopy(_pack())
+     window = pack["ohlcv_windows"]["15m"]
++    # Keep the fixture POI partially touched but not fully consumed after confirmation.
++    window[19]["high"] = 100.5
+     stamps = [str(candle["timestamp"]) for candle in window]
+     breaks = pack["detector_candidates"]["15m"]["structure_breaks"]
+     breaks[0].update(
+@@ -109,12 +111,15 @@ def _pack_with_v2_geometry() -> dict:
+             "candidate_at": stamps[11],
+             "confirmed_at": stamps[11],
+             "evidence": {"broken_price": 98.0, "structure_scope": "external"},
++            "confirmation_status": "confirmed",
++            "activity_status": "inactive",
++            "mitigation_status": "untouched",
+         }
+     )
+     poi = pack["detector_candidates"]["15m"]["order_blocks"][0]
+-    poi.update({"pivot_time": stamps[12], "candidate_at": stamps[18], "confirmed_at": stamps[18]})
++    poi.update({"pivot_time": stamps[12], "candidate_at": stamps[18], "confirmed_at": stamps[18], "confirmation_status": "confirmed", "activity_status": "inactive", "mitigation_status": "untouched"})
+     liquidity = pack["detector_candidates"]["15m"]["liquidity_levels"][0]
+-    liquidity.update({"pivot_time": stamps[10], "candidate_at": stamps[19], "confirmed_at": stamps[19]})
++    liquidity.update({"pivot_time": stamps[10], "candidate_at": stamps[19], "confirmed_at": stamps[19], "confirmation_status": "confirmed", "activity_status": "inactive", "mitigation_status": "untouched"})
+     return pack
+ 
+ 
+diff --git a/tests/test_wp0041a_annotation_integrity_repair.py b/tests/test_wp0041a_annotation_integrity_repair.py
+index d9fc01a..ec278ab 100644
+--- a/tests/test_wp0041a_annotation_integrity_repair.py
++++ b/tests/test_wp0041a_annotation_integrity_repair.py
+@@ -6,8 +6,12 @@ from pathlib import Path
+ import pandas as pd
+ 
+ from smc_desk.brain.ai_smc_consistency_validator import validate_ai_smc_decision
+-from smc_desk.brain.annotation_visual_critic import review_annotation_scene
++from smc_desk.brain.annotation_visual_critic import apply_visual_cleanup, review_annotation_scene
++from smc_desk.brain.annotation_candidate_composer import compose_local_annotation_plan_v2, select_local_active_poi
++from smc_desk.brain.annotation_evidence import build_annotation_evidence_index
++from smc_desk.colleague.orchestrator_v3 import apply_visual_critic_authority
+ from smc_desk.rendering.smc_trader_annotation_renderer import (
++    _level_x_span,
+     build_smc_trader_annotation_scene,
+     render_smc_trader_annotation_chart,
+ )
+@@ -60,6 +64,41 @@ def test_wp0041a_path_requires_a_certified_active_poi() -> None:
+     assert "annotation_v2_path_without_active_poi" in _issue_codes(result)
+ 
+ 
++def test_wp0041a_wick_probe_cannot_be_drawn_as_confirmed_bos() -> None:
++    pack = _pack_with_v2_geometry()
++    probe = pack["detector_candidates"]["15m"]["structure_breaks"][0]
++    probe["confirmation_status"] = "candidate"
++    probe["evidence"]["is_unconfirmed_probe"] = True
++    payload = _watch_payload_with_v2()
++
++    result = validate_ai_smc_decision(_decision(payload), pack)
++
++    assert result.status == "REVIEW_REQUIRED"
++    assert "annotation_v2_structure_not_confirmed" in _issue_codes(result)
++
++
++def test_wp0041a_local_composer_selects_confirmed_watch_poi_without_trade_levels() -> None:
++    pack = _pack_with_v2_geometry()
++    pack["ohlcv_windows"]["15m"][19]["high"] = 100.5
++    active_range = {"low": 95.0, "high": 103.0, "range_id": "test:range1"}
++
++    active_poi = select_local_active_poi(evidence_pack=pack, direction="bearish", active_range=active_range)
++    plan = compose_local_annotation_plan_v2(
++        evidence_pack=pack,
++        official_state="WATCH_ONLY",
++        direction="bearish",
++        active_range=active_range,
++        active_poi=active_poi,
++    )
++
++    assert active_poi is not None
++    assert active_poi["poi_id"] == "poi1"
++    assert active_poi["freshness"] == "partially_mitigated"
++    assert any(obj["object_type"] == "poi_zone" for obj in plan["objects"])
++    assert any(obj["object_type"] == "path_projection" for obj in plan["objects"])
++    assert all(obj["object_type"] != "trade_box" for obj in plan["objects"])
++
++
+ def test_wp0041a_trade_box_is_v2_native_and_suppresses_legacy_text(tmp_path: Path) -> None:
+     payload = _valid_payload()
+     payload["annotation_plan_v2"] = {
+@@ -118,3 +157,98 @@ def test_wp0041a_visual_critic_requests_cleanup_for_overlapping_marks() -> None:
+ 
+     assert review["status"] == "CLEANUP_REQUIRED"
+     assert review["cleanup_object_ids"] == ["b"]
++
++    cleaned = apply_visual_cleanup(scene, df)
++    assert cleaned["visual_critic"]["pre_cleanup_status"] == "CLEANUP_REQUIRED"
++    assert cleaned["visual_critic"]["status"] == "PASSED"
++    assert cleaned["visual_critic"]["cleanup_applied"] == ["b"]
++
++
++def test_wp0041a_visual_critic_hard_failure_downgrades_official_decision() -> None:
++    result = validate_ai_smc_decision(_decision(_valid_payload()), _pack_with_v2_geometry())
++    review = {
++        "status": "REVIEW_REQUIRED",
++        "issues": [{"code": "forced_visual_failure", "message": "Official annotation scene failed layout integrity."}],
++    }
++
++    downgraded = apply_visual_critic_authority(result, review)
++
++    assert result.status == "VALIDATED"
++    assert downgraded.status == "REVIEW_REQUIRED"
++    assert downgraded.official_decision["official_state"] == "REVIEW_REQUIRED"
++    assert downgraded.official_decision["annotation_plan"]["show_trade_box"] is False
++    assert downgraded.official_decision["entry_plan"]["entry_price"] is None
++    assert downgraded.official_decision["stop_loss_plan"]["stop_price"] is None
++    assert downgraded.official_decision["target_plan"]["targets"] == []
++
++
++def test_wp0041a_empty_v2_plan_suppresses_legacy_clutter() -> None:
++    payload = _watch_payload_with_v2()
++    payload["annotation_plan_v2"]["objects"] = []
++    result = validate_ai_smc_decision(_decision(payload), _pack_with_v2_geometry())
++
++    scene = build_smc_trader_annotation_scene(result)
++
++    assert result.status == "VALIDATED"
++    assert scene["level_source"] == "annotation_plan_v2"
++    assert scene["visible_labels"] == []
++    assert scene["visible_levels"] == []
++    assert scene["legacy_labels_suppressed"] is True
++
++
++def test_wp0041a_one_candle_poi_is_locally_visible_but_not_full_width() -> None:
++    left, right = _level_x_span(
++        {"kind": "order_block", "start_index": 0, "end_index": 0},
++        n=120,
++        chart_template="watch_chart",
++    )
++
++    assert left == 0.0
++    assert right == 12.0
++    assert right < 120 * 0.15
++
++
++def test_wp0041a_out_of_window_evidence_is_not_snapped_to_chart_edge() -> None:
++    pack = _pack_with_v2_geometry()
++    poi = pack["detector_candidates"]["15m"]["order_blocks"][0]
++    poi.update(
++        {
++            "pivot_time": "2026-06-01T00:00:00Z",
++            "candidate_at": "2026-06-01T00:15:00Z",
++            "confirmed_at": "2026-06-01T00:15:00Z",
++        }
++    )
++
++    anchor = build_annotation_evidence_index(pack)["poi1"]
++    active_poi = select_local_active_poi(
++        evidence_pack=pack,
++        direction="bearish",
++        active_range={"low": 95.0, "high": 103.0, "range_id": "test:range1"},
++    )
++
++    assert anchor.start_index is None
++    assert anchor.end_index is None
++    assert active_poi is None
++
++    payload = _watch_payload_with_v2()
++    result = validate_ai_smc_decision(_decision(payload), pack)
++    assert result.status == "REVIEW_REQUIRED"
++    assert "annotation_v2_evidence_outside_visible_window" in _issue_codes(result)
++    assert "annotation_v2_poi_lifecycle_unverifiable" in _issue_codes(result)
++
++
++def test_wp0041a_consumed_order_block_cannot_be_selected_as_active_poi() -> None:
++    pack = _pack_with_v2_geometry()
++    pack["ohlcv_windows"]["15m"][19].update({"high": 101.5, "close": 100.5})
++
++    active_poi = select_local_active_poi(
++        evidence_pack=pack,
++        direction="bearish",
++        active_range={"low": 95.0, "high": 103.0, "range_id": "test:range1"},
++    )
++
++    assert active_poi is None
++
++    result = validate_ai_smc_decision(_decision(_watch_payload_with_v2()), pack)
++    assert result.status == "REVIEW_REQUIRED"
++    assert "annotation_v2_poi_observed_consumed" in _issue_codes(result)
+diff --git a/tools/run_live_ai_smc_full_system.py b/tools/run_live_ai_smc_full_system.py
+index dea00cf..9694e32 100644
+--- a/tools/run_live_ai_smc_full_system.py
++++ b/tools/run_live_ai_smc_full_system.py
+@@ -395,14 +395,28 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
+         levels.append({"label": f"{target_side} liquidity watch", "kind": "liquidity", "price": target_price, "timeframe": active_tf})
+     if invalidation_price is not None:
+         levels.append({"label": "watch invalidation, not SL", "kind": "invalidation", "price": invalidation_price, "timeframe": active_tf})
+-    from smc_desk.brain.annotation_candidate_composer import compose_local_annotation_plan_v2
++    from smc_desk.brain.annotation_candidate_composer import compose_local_annotation_plan_v2, select_local_active_poi
++
++    active_poi_payload = select_local_active_poi(
++        evidence_pack=pack,
++        direction=direction,
++        active_range=active_range_payload,
++    )
++    has_active_poi = active_poi_payload is not None
++    range_conflict = bool(
++        isinstance(selected_range, dict)
++        and selected_range.get("status") == "RESOLVED_ACTIVE_RANGE"
++        and range_direction in {"bullish", "bearish"}
++        and direction in {"bullish", "bearish"}
++        and range_direction != direction
++    )
+ 
+     annotation_plan_v2 = compose_local_annotation_plan_v2(
+         evidence_pack=pack,
+         official_state=official_state,
+         direction=direction,
+         active_range=active_range_payload,
+-        active_poi=None,
++        active_poi=active_poi_payload,
+     )
+     return {
+         "schema": "ai_smc_trader_decision_v1",
+@@ -442,7 +456,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
+             "narrative": (
+                 f"{parent_child_sentence} This is a context conflict, so no clean direction is promoted into a trade plan."
+                 if parent_child_conflict and parent_child_sentence
+-                else "This live system test sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
++                else (
++                    "A confirmed active POI is mapped for observation, but no validated sweep/displacement/entry confirmation is promoted into a trade plan."
++                    if has_active_poi
++                    else "This live system test sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
++                )
+             ),
+         },
+         "displacement_assessment": {
+@@ -452,7 +470,7 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
+             "evidence_object_ids": [],
+             "summary": "No validated displacement candidate was promoted for this observe-only test run.",
+         },
+-        "active_poi": {
++        "active_poi": active_poi_payload or {
+             "poi_id": None,
+             "timeframe": None,
+             "kind": None,
+@@ -505,13 +523,22 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
+         "annotation_plan_v2": annotation_plan_v2,
+         "self_review": {
+             "active_range_check": "passed" if selected_range else "failed",
+-            "poi_check": "not_applicable",
++            "poi_check": "passed" if has_active_poi else "not_applicable",
+             "annotation_check": "passed",
+             "refusal_check": "passed",
+             "corrections_made": [
+-                "Refused executable trade because sweep/displacement/active POI were not validated.",
++                (
++                    "Kept the confirmed active POI as watch evidence only because sweep/displacement/entry confirmation were not validated."
++                    if has_active_poi
++                    else "Refused executable trade because sweep/displacement/active POI were not validated."
++                ),
+                 "Used structural active range authority instead of OHLCV summary extremes.",
+                 "Reconciled raw OHLC summary bias with confirmed structure narrative.",
++                *(
++                    ["Kept the directional thesis conditional because the active-range direction opposes HTF consensus."]
++                    if range_conflict
++                    else []
++                ),
+                 *(
+                     ["Downgraded to mixed/THESIS_ONLY because parent and child context timeframes conflict."]
+                     if parent_child_conflict
+@@ -521,7 +548,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
+             if selected_range
+             else ["Downgraded to review because active range authority was unresolved."],
+             "remaining_uncertainties": [
+-                "No validated active POI promoted into trade readiness.",
++                (
++                    "The mapped active POI has not produced validated entry confirmation."
++                    if has_active_poi
++                    else "No validated active POI promoted into trade readiness."
++                ),
+                 "No confirmed sweep/displacement sequence promoted into execution.",
+             ],
+         },
+@@ -532,8 +563,17 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
+             )
+             if parent_child_conflict and parent_child_sentence
+             else (
+-                f"{symbol}: {official_state}. Directional context is {direction}, but the system does not have validated "
+-                "sweep/displacement/active POI/entry evidence, so it refuses a trade plan."
++                f"{symbol}: {official_state}. Directional context is {direction}"
++                + (
++                    f", while the certified active-range map remains {range_direction}"
++                    if range_conflict
++                    else ""
++                )
++                + (
++                    ". A confirmed active POI is mapped, but sweep/displacement/entry confirmation is absent, so it remains watch evidence and no trade plan is allowed."
++                    if has_active_poi
++                    else ". The system does not have validated sweep/displacement/active POI/entry evidence, so it refuses a trade plan."
++                )
+             )
+         ),
+     }

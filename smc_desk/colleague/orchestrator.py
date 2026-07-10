@@ -1,3 +1,14 @@
+"""Colleague orchestrator v1.
+
+STATUS: COMPARISON_ONLY (WP-0043, GATE-CANONICAL-RUNTIME-001).
+
+This orchestrator is retained for historical evidence and reference comparison
+runs only. The canonical authority is ``smc_desk.colleague.orchestrator_v3``
+(see ``smc_desk/colleague/__main__.py``). Do not import this module from
+canonical-runtime code. This module still imports ``smc_desk.rules.RuleConfig``
+and the legacy render modules; those imports must NOT be carried into any
+canonical-runtime module — see ``tools/check_authority_boundaries.py``.
+"""
 from __future__ import annotations
 
 import json

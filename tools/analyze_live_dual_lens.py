@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """Live dual-lens analysis: fresh data -> engine -> (vision) -> reconcile -> case.
 
+STATUS: COMPARISON_ONLY (WP-0043, GATE-CANONICAL-RUNTIME-001).
+
+This tool is retained for historical evidence and side-by-side comparison
+with the canonical AI SMC V3 path (``python -m smc_desk.colleague`` /
+``tools/run_live_ai_smc_full_system.py``). It imports the legacy
+``smc_desk.engine`` and ``smc_desk.rules`` modules and therefore must NOT be
+treated as canonical authority.
+
 One command runs the whole loop for a single live decision:
 
 1. Pull fresh OHLCV from the venue (seconds).
