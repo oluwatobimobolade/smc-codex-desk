@@ -1,9 +1,11 @@
-"""SMC structure state machines (programme §5, §7).
+"""SMC structure state machines (programme §5, §6, §7).
 
 Public surface:
 - doctrine           -- constitution loader + integrity check
 - protected_point    -- causal protected-point state machine (§5)
 - active_range       -- active dealing-range state machine (§7)
+- level_interactions -- sweep/breakout/probe/reclaim multi-horizon state
+                        machine (§6)
 """
 from smc_desk.structure.active_range import (
     RangeDirection,
@@ -27,6 +29,16 @@ from smc_desk.structure.doctrine import (
     missing_structural_fields,
     unresolved_contested_decisions,
 )
+from smc_desk.structure.level_interactions import (
+    Horizon,
+    InteractionType,
+    LevelInteraction,
+    LevelInteractionReport,
+    build_report,
+    classify_at_event,
+    is_wick_only,
+    refine_at_horizon,
+)
 from smc_desk.structure.protected_point import (
     ProtectedPointCandidate,
     ProtectedPointSelection,
@@ -39,6 +51,10 @@ __all__ = [
     "DEFAULT_DOCTRINE_PATH",
     "DEFAULT_HASH_PATH",
     "DoctrineLoad",
+    "Horizon",
+    "InteractionType",
+    "LevelInteraction",
+    "LevelInteractionReport",
     "ProtectedPointCandidate",
     "ProtectedPointSelection",
     "RangeDirection",
@@ -46,15 +62,19 @@ __all__ = [
     "RangeObject",
     "ReplacementTrigger",
     "activate",
+    "build_report",
     "can_replace",
+    "classify_at_event",
     "concept",
     "doctrine",
     "generate_candidates",
     "is_authoritative",
+    "is_wick_only",
     "load_doctrine",
     "location_in_range",
     "missing_structural_fields",
     "propose_range",
+    "refine_at_horizon",
     "replace",
     "score_candidates",
     "select",
