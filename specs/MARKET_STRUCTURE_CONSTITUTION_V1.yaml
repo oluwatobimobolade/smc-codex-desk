@@ -1,0 +1,1204 @@
+---
+# ============================================================================
+# SMC Codex Desk — Market Structure Constitution V1
+# ----------------------------------------------------------------------------
+# Source: Downloads/SMC_Codex_Expert_AI_Perception_Validation_Annotation_Programme.md
+#         section 10 ("Market Structure Constitution draft")
+# Status: PROPOSED_DOCTRINE_DRAFT_PENDING_HUMAN_APPROVAL
+# Authority: NONE until the human trader adjudicates every contested_decision.
+# Machine-readable companion: docs/MARKET_STRUCTURE_CONSTITUTION_V1.md
+# Doctrine hash: see specs/MARKET_STRUCTURE_CONSTITUTION_V1.sha256
+# ----------------------------------------------------------------------------
+# DOCTRINE_HASH_PLACEHOLDER
+# (the real hash is the SHA-256 of this file's canonical content with the
+# DOCTRINE_HASH_PLACEHOLDER line preserved; see companion .sha256 file)
+# ============================================================================
+
+schema: smc_codex_market_structure_constitution_v1
+version: 1.0.0
+prepared_date: "2026-07-11"
+source_programme: SMC_Codex_Expert_AI_Perception_Validation_Annotation_Programme.md
+programme_section: "10. Market Structure Constitution draft"
+
+design_principles:
+  - id: ai_for_semantics_not_arithmetic
+    statement: >-
+      AI decides which candidate matters, which causal narrative is strongest,
+      which interpretation is alternative, why one POI outranks another, and
+      when ambiguity remains. Deterministic code owns OHLC, timestamps,
+      completed-candle status, candidate coordinates, event order, body/wick
+      facts, future-data cutoff, and geometry.
+  - id: no_single_model_authority
+    statement: >-
+      Six separated AI roles (blind visual reader, candidate reconciler,
+      causal episode constructor, adversarial critic, annotation planner,
+      visual critic). Each role has its own prompt, schema, and repair budget.
+  - id: five_kinds_of_correctness
+    statement: >-
+      Measure separately: (1) data correctness, (2) object detection
+      correctness, (3) causal structure correctness, (4) chart communication
+      correctness, (5) predictive/economic value. A system may pass one and
+      fail another.
+  - id: events_not_just_bars
+    statement: >-
+      Structure is event-based and multi-scale. Equal calendar intervals can
+      hide differences in market activity; candidate generation must combine
+      fractals, volatility-adaptive directional changes, prominence,
+      statistical change points, and displacement-linked origins.
+  - id: levels_are_dynamic_evidence
+    statement: >-
+      Every level carries: birth, salience, touch history, age, decay,
+      active/consumed state, owning timeframe. Levels are not permanent facts.
+  - id: anchor_preservation
+    statement: >-
+      No flat recency compactor may drop active external swings, the
+      current protected point, range endpoints, BOS origins, unswept external
+      liquidity, active higher-timeframe POIs, blind-reader references, or
+      critic challenges. Retrieval tools exist for the rest.
+  - id: explicit_lifecycles
+    statement: >-
+      Every interpretation has a lifecycle state. Sweep/breakout is a state
+      machine, not a binary rule. Inducement is a hypothesis with explicit
+      states, never a post-hoc unfalsifiable explanation.
+  - id: abstain_when_uncertain
+    statement: >-
+      Confidence is decomposed (data / geometry / doctrine / ai_agreement /
+      critic / human_agreement_estimate). Categories: confirmed, probable,
+      ambiguous, contradicted, insufficient context. The system abstains
+      rather than averaging arbitrary scores into false precision.
+  - id: descriptive_before_predictive
+    statement: >-
+      First certify that the system sees the same structure as experts.
+      Then test whether that structure improves predictions. Never use
+      profitable outcomes to redefine past structure labels.
+
+contested_decisions:
+  - id: wick_vs_body_close
+    question: >-
+      What closes count as confirmation of a structural break — body close
+      only, wick penetration, or both?
+    proposed_default: BODY_CLOSE_REQUIRED_FOR_EXTERNAL_BREAK
+    alternatives:
+      - WICK_PENETRATION_ALONE_SUFFICIENT
+      - BODY_REQUIRED_FOR_BREAK_AND_RECLAIM_WICK_ALLOWED_FOR_SWEEP
+    rationale: >-
+      Programme section 4.6 demands exact broken-price coordinates and
+      confirming body-close candle. A wick is treated as a probe candidate,
+      not a confirmed break.
+    status: PROPOSED
+
+  - id: minimum_penetration
+    question: >-
+      How much must price traverse beyond the broken level before the
+      structure qualifies as broken (tick count, ATR-normalised, or
+      percentage)?
+    proposed_default: ATR_NORMALISED_MINIMUM_PENETRATION_0_25_ATR
+    alternatives:
+      - FIXED_TICK_MINIMUM (exchange-specific)
+      - 1_BAR_BODY_CLOSE_BEYOND_LEVEL
+      - NO_FIXED_MINIMUM_RELY_ON_DISPLACEMENT
+    rationale: >-
+      Fixed tick minimums ignore regime. ATR-normalised thresholds adapt to
+      current volatility while remaining deterministic. The exact 0.25 ATR
+      figure is illustrative; the human trader selects the family and value.
+    status: PROPOSED
+
+  - id: displacement_role
+    question: >-
+      Is displacement required for a structural break, or is body-close
+      penetration alone sufficient?
+    proposed_default: DISPLACEMENT_REQUIRED_FOR_EXTERNAL_BREAK
+    alternatives:
+      - DISPLACEMENT_GRADES_BREAK_BUT_NOT_REQUIRED
+      - DISPLACEMENT_REQUIRED_ONLY_FOR_RANGE_BREAK
+      - DISPLACEMENT_NOT_USED_RELY_ON_BODY_AND_PENETRATION
+    rationale: >-
+      The programme treats displacement as a separate evidence stream
+      (section 2.1, "Displacement-linked candidates"). It also requires
+      "originated displacement" as a causal-feature in POI ranking
+      (section 8.2). The doctrine proposal keeps displacement as a
+      gate for external breaks and grades internal breaks by it.
+    status: PROPOSED
+
+  - id: first_break_behaviour
+    question: >-
+      How is the first break of a level treated — as an immediate external
+      break, a probe awaiting confirmation, or state machine pending
+      evidence?
+    proposed_default: FIRST_BREAK_REQUIRES_CONFIRMATION_WINDOW
+    alternatives:
+      - FIRST_BREAK_IS_INSTANT_EXTERNAL_BREAK
+      - FIRST_BREAK_IS_PROBE_THEN_BREAK
+    rationale: >-
+      Programme section 6 ("Sweep versus breakout judgment") treats every
+      interaction as a lifecycle state machine, never a one-bar binary rule.
+      The default enforces the multi-horizon pattern (at_event /
+      after_2_bars / after_6_bars).
+    status: PROPOSED
+
+  - id: external_swing_ownership
+    question: >-
+      What makes a swing "external" — fixed timeframe, structural role,
+      or both?
+    proposed_default: EXTERNAL_BY_STRUCTURAL_ROLE_AND_TIMEFRAME
+    alternatives:
+      - EXTERNAL_BY_TIMEFRAME_ONLY (e.g., always 4H and above)
+      - EXTERNAL_BY_CAUSAL_ROLE_ONLY (no timeframe precondition)
+      - EXTERNAL_BY_MAJORITY_VOTE_OF_GENERATORS
+    rationale: >-
+      Programme section 4.1: "An expert swing is a pivot that performs a
+      structural role." A swing owned by an external timeframe that did
+      NOT cause displacement or protect a break is not external in the
+      causal sense. The default combines both ownership and causal role.
+    status: PROPOSED
+
+  - id: protected_point_selection
+    question: >-
+      Which point is protected — the latest confirmed opposing pivot, the
+      causal origin of the impulse, or a candidate set?
+    proposed_default: CAUSAL_ORIGIN_OF_IMPULSE_OR_ORIGIN_CLUSTER
+    alternatives:
+      - LATEST_CONFIRMED_OPPOSING_PIVOT (current implementation;
+        explicitly rejected by programme section 5)
+      - LATEST_VS_CAUSAL_RUNNER_UP (highest-confidence of both)
+      - MULTIPLE_PROTECTED_POINTS_PER_TIMEFRAME
+    rationale: >-
+      Programme section 5.1: "The protected point is not automatically
+      the latest opposing pivot. It is the structurally eligible opposing
+      point whose violation would invalidate the active causal continuation
+      narrative." The current implementation (`track.protected_low =
+      track.last_confirmed_low`) is the mistake the programme names.
+    status: PROPOSED
+
+  - id: choch_vs_mss
+    question: >-
+      Are CHoCH and MSS the same event, sequential events, or
+      timeframe-dependent?
+    proposed_default: MSS_EQUALS_CHOCH_AT_INTERNAL_SCOPE
+    alternatives:
+      - MSS_AND_CHOCH_ARE_DISTINCT_EVENTS
+      - MSS_REQUIRED_AT_EXTERNAL_CHOCH_AT_INTERNAL
+      - MSS_PRIMARY_CHOCH_SECONDARY
+    rationale: >-
+      The programme includes both CHoCH and MSS in the annotation
+      vocabulary (section 19) without mandating their distinction. The
+      proposed default treats MSS as the internal-scope name and CHoCH
+      as the external-scope name for the same causal event.
+    status: PROPOSED
+
+  - id: sweep_confirmation_horizon
+    question: >-
+      How many bars must price reclaim after the wick before a sweep is
+      confirmed?
+    proposed_default: MULTI_HORIZON_STATE_MACHINE
+    alternatives:
+      - FIXED_N_BAR_RECLAIM (N to be set by human)
+      - IMMEDIATE_NEXT_BAR_RECLAIM
+      - RECLAIM_BY_NEXT_HTF_CLOSE
+    rationale: >-
+      Programme section 6.4 explicitly requires multi-horizon
+      classification: at_event / after_2_bars / after_6_bars. A fixed
+      single horizon would re-introduce the hindsight bias the lifecycle
+      machine exists to avoid.
+    status: PROPOSED
+
+  - id: range_replacement
+    question: >-
+      When is an active range replaced — terminal extension, protected
+      point invalidation, parent supersession, or explicit stale?
+    proposed_default: REPLACE_ON_ANY_OF_FOUR_TRIGGERS
+    alternatives:
+      - REPLACE_ONLY_ON_PROTECTED_INVALIDATION
+      - REPLACE_ONLY_ON_TERMINAL_EXTENSION
+      - NEVER_REPLACE_ONLY_ADD_CHILD_RANGES
+    rationale: >-
+      Programme section 7.5 names four trigger types. The proposed default
+      accepts all four because each represents a distinct causal event.
+      The detection logic must check all four in order.
+    status: PROPOSED
+
+  - id: order_block_candle_vs_cluster
+    question: >-
+      Is an order block a single opposing candle or a cluster?
+    proposed_default: CLUSTER_WITH_ORIGIN_AND_INTERNAL_PIVOT
+    alternatives:
+      - SINGLE_OPPOSING_CANDLE (current implementation default;
+        explicitly rejected by programme section 5.3)
+      - CLUSTER_WITHOUT_SINGLE_PIVOT
+      - BOTH_SINGLE_AND_CLUSTER_EMITTED_SEPARATELY
+    rationale: >-
+      Programme section 5.3 mandates cluster origins where an impulse
+      begins from several candles. The current implementation searches
+      backward for the nearest opposing candle within a fixed lookback
+      (`ob_lookback`). The default keeps cluster as primary and emits
+      a single candle only when the cluster reduces to one candle.
+    status: PROPOSED
+
+  - id: poi_ranking
+    question: >-
+      Are POI candidates ranked by deterministic evidence, AI semantic
+      judgment, or a combined score?
+    proposed_default: THREE_SEPARATE_SCORES_PLUS_COMBINED_RANK
+    alternatives:
+      - DETERMINISTIC_SCORE_ONLY
+      - AI_SEMANTIC_RANK_ONLY
+      - COMBINED_VIA_LEARNED_WEIGHTING
+    rationale: >-
+      Programme section 8.3 explicitly demands three scores
+      (deterministic, AI semantic, empirical) plus combined_rank and
+      uncertainty. Empirical score is null until outcomes exist.
+      Collapsing them prematurely would violate the doctrine.
+    status: PROPOSED
+
+  - id: inducement_criteria
+    question: >-
+      What is the necessary-condition set for labelling something as
+      inducement?
+    proposed_default: FIVE_NECESSARY_CONDITIONS_ALL_REQUIRED
+    alternatives:
+      - VISIBLE_INTERMEDIATE_LIQUIDITY_ALONE
+      - SHALLOW_POI_ALONE
+      - NO_FORMAL_CRITERIA_RELY_ON_AI_NARRATIVE
+    rationale: >-
+      Programme section 9.2 lists five conditions: deeper POI/objective,
+      intermediate visible liquidity, plausible causal path, structural
+      reason the shallow object is weaker, unconsumed liquidity around the
+      intermediate object. The default enforces all five so inducement
+      cannot become a post-hoc unfalsifiable explanation.
+    status: PROPOSED
+
+  - id: abstention_threshold
+    question: >-
+      When does the system abstain rather than emit a best-guess
+      interpretation?
+    proposed_default: ABSTAIN_WHEN_AMBIGUOUS_OR_CONTRADICTED
+    alternatives:
+      - NEVER_ABSTAIN_EMIT_BEST_GUESS
+      - ABSTAIN_ONLY_ON_INSUFFICIENT_CONTEXT
+      - ABSTAIN_AT_DEFINED_CONFIDENCE_FLOOR
+    rationale: >-
+      Programme section 17 defines five calibrated categories
+      (confirmed / probable / ambiguous / contradicted / insufficient
+      context). The default abstains on ambiguous and contradicted and
+      emits a labelled interpretation on probable / confirmed. The
+      exact confidence-floor value is set by the human trader.
+    status: PROPOSED
+
+  - id: evidence_id_required_for_every_claim
+    question: >-
+      Must every accepted interpretation cite at least one certified
+      evidence ID?
+    proposed_default: YES_ALL_CLAIMS_REQUIRE_EVIDENCE_ID
+    alternatives:
+      - EVIDENCE_ID_REQUIRED_ONLY_FOR_TRADE_OBJECTS
+      - NARRATIVE_CLAIMS_MAY_BE_EVIDENCE_FREE
+    rationale: >-
+      Programme section 28 demands every interpretation pass deterministic
+      evidence-id grounding. The default enforces this for all six AI
+      roles, not only trade geometry.
+    status: PROPOSED
+
+concepts:
+
+  swing:
+    formal_definition: >-
+      A swing is a pivot that performs a structural role in the current
+      market episode — caused displacement, caused or terminated an
+      accepted break, defines the active dealing range, remains protected,
+      holds visible liquidity, or explains the current market narrative.
+    plain_definition: >-
+      Not "highest of five candles." A swing is a pivot that matters
+      causally — without it the story would change.
+    candidate_generation_rules:
+      - >-
+        A swing candidate must be emitted by at least one of these
+        generators -- fixed-scale fractal (micro, local, internal, external
+        candidate), volatility-adaptive directional change (0.5, 0.75,
+        1.0, 1.5, 2.0 ATR), prominence and persistence analysis,
+        statistical change point, or displacement-linked origin trace.
+      - Each candidate records all generator sources that produced it.
+      - The reconciler assigns classification (internal, external,
+        structural, unresolved) and causal role, not the detector.
+    semantic_selection_rules:
+      - The reconciler rejects any candidate whose evidence IDs cannot be
+        grounded in the certified candidate atlas.
+      - Rejected candidates are recorded with reasons.
+      - Ambiguous classifications (e.g., internal-vs-external) are
+        recorded as "unresolved" rather than guessed.
+    confirmation:
+      - Direction confirmed by subsequent displacement or accepted break
+        in the candidate's owning timeframe.
+    invalidation:
+      - The candidate is invalidated when its price level is decisively
+        closed through on its owning timeframe without reclaim.
+    lifecycle:
+      - CANDIDATE -> STRUCTURAL -> PROTECTED -> BROKEN
+      - CANDIDATE -> REJECTED (no structural role found)
+      - CANDIDATE -> STALE (older than the active external swing,
+        no current causal relationship)
+    timeframe_ownership:
+      - Each candidate carries its owning timeframe. A 15m candidate
+        cannot serve as an external protected point; a Daily candidate
+        cannot serve as a 15m entry trigger.
+    positive_example: >-
+      A 4H candle that is the highest high before a 4H accepted BOS
+      continuation. It is protected (low invalidates the thesis) and
+      owns its 4H leg.
+    negative_example: >-
+      A 15m candle that happens to be the high of the last five bars but
+      causes no displacement, holds no liquidity, and disappears within
+      ten bars.
+    ambiguous_example: >-
+      A 1H swing that could be either internal (1H CHoCH within Daily
+      trend) or external (1H Daily-equivalent). Resolved by parent
+      alignment and displacement magnitude, not by fixed rules.
+    forbidden_shortcuts:
+      - "latest confirmed opposing pivot"
+      - "highest of last N bars"
+      - "AI picks the swing without candidate-generator evidence"
+    required_evidence:
+      - owning timeframe
+      - generator sources (>=1)
+      - pivot_time, pivot_price
+      - bars_left, bars_right (for fractal candidates)
+      - prominence / volatility_normalized_move
+      - displacement_after
+      - lifecycle state
+    optional_evidence:
+      - subordinate_pivot_count
+      - survival_bars
+      - cross_scale_presence
+      - touch_count
+      - causal_origin_hypotheses
+    unresolved_alternatives:
+      - role-first vs timeframe-first external classification
+      - cluster origin vs single candle at impulse start
+      - cross-scale voting vs causal-scoring for classification
+
+  protected_point:
+    formal_definition: >-
+      The structurally eligible opposing point whose violation would
+      invalidate the active causal continuation narrative on its owning
+      timeframe.
+    plain_definition: >-
+      The point whose loss would prove the trade thesis wrong. Not the
+      last opposing pivot by default.
+    candidate_generation_rules:
+      - Start from an accepted structural break (BOS or CHoCH).
+      - Trace the impulse backward through contiguous displacement candles
+        and FVG-forming sequences.
+      - Stop at opposing structural pivot, consolidation origin, range
+        boundary, displacement initiation, or last opposing candle cluster.
+      - >-
+        Generate at least four candidates -- latest opposing internal
+        pivot, extreme of the origin cluster, higher-timeframe origin,
+        nested lower-timeframe pivot.
+    semantic_selection_rules:
+      - >-
+        The AI compares candidates pairwise and answers:
+        (a) which caused the impulse,
+        (b) which must remain intact for the BOS narrative,
+        (c) which candidate is already violated,
+        (d) which violation changes only the lower timeframe versus the
+            whole external structure.
+      - The selection is a labelled graph relationship, not a single number.
+    confirmation:
+      - Parent break accepted, causal impulse identified, candidate predates
+        break, candidate remains unviolated at decision time, no stronger
+        unresolved alternative.
+    invalidation:
+      - Decisive close beyond the candidate's price level on its owning
+        timeframe, OR a stronger opposing candidate is confirmed later.
+    lifecycle:
+      - CANDIDATES -> SELECTED -> PROTECTED -> VIOLATED / SUPERSEDED
+      - CLUSTER_ORIGIN (selected_protected_price + cluster_start + cluster_end)
+      - SINGLE_CANDLE (when the cluster reduces to one candle)
+    timeframe_ownership:
+      - The protected point is owned by the same timeframe as the BOS it
+        protects. A Daily protected point cannot be invalidated by a 15m
+        breach without Daily confirmation.
+    positive_example: >-
+      After an accepted bullish 4H BOS, the lowest low of the 4H impulse
+      origin cluster is selected as the protected low. A 15m wick below
+      this low that does not close on 4H does NOT invalidate it.
+    negative_example: >-
+      The most recent 1H swing low is treated as protected regardless of
+      whether it caused the 4H impulse. (This is the current
+      implementation's mistake.)
+    ambiguous_example: >-
+      Two opposing pivots both predate the impulse. Resolution requires
+      causal-necessity scoring, not distance from break.
+    forbidden_shortcuts:
+      - "track.protected_low = track.last_confirmed_low"
+      - "use the most recent confirmed opposing pivot"
+      - "ignore the origin cluster"
+      - "15m breach invalidates 4H protected point"
+    required_evidence:
+      - parent_break_evidence_id
+      - impulse_candle_ids (the contiguous sequence)
+      - origin_cluster_start, origin_cluster_end
+      - selected_protected_price, selection_reason
+      - owning_timeframe
+    optional_evidence:
+      - internal_pivot
+      - higher_timeframe_origin_evidence_id
+      - violation_attempt_history
+    unresolved_alternatives:
+      - single candle vs cluster as primary representation
+      - causal-necessity scoring formula
+      - distance vs causality as primary selection criterion
+
+  bos:
+    formal_definition: >-
+      Break Of Structure. A decisive close beyond a previously protected
+      swing in the direction of the prevailing trend, on the owning
+      timeframe.
+    plain_definition: >-
+      Trend continuation signal: the structure that protected the previous
+      leg is broken.
+    candidate_generation_rules:
+      - A BOS candidate is generated when price closes beyond a
+        protected level on the owning timeframe with penetration
+        >= minimum_penetration threshold.
+    semantic_selection_rules:
+      - >-
+        The candidate must satisfy: parent swing is protected, penetration
+        exceeds minimum_penetration, confirming body close is present,
+        displacement is present for external BOS.
+    confirmation:
+      - >-
+        Two of: confirming body close, displacement magnitude, ATR-normalised
+        penetration, subsequent structural construction beyond the level.
+    invalidation:
+      - Immediate reclaim within the confirmation horizon without subsequent
+        structural construction. May downgrade to sweep candidate.
+    lifecycle:
+      - LEVEL_ACTIVE -> BREAKOUT_CANDIDATE -> ACCEPTED_BREAKOUT
+      - LEVEL_ACTIVE -> BREAKOUT_CANDIDATE -> FAILED_BREAKOUT
+    timeframe_ownership:
+      - External BOS owns the external timeframe; internal BOS owns the
+        internal timeframe. A 15m BOS cannot upgrade to a 4H BOS without
+        4H confirmation.
+    positive_example: >-
+      A 4H body close decisively beyond the prior protected 4H swing high,
+      followed by 4H displacement and new 4H structural construction
+      above the broken level.
+    negative_example: >-
+      A 15m wick above a 4H protected high with 15m displacement. Even
+      if true, this is a 15m internal break, not a 4H BOS.
+    ambiguous_example: >-
+      A close beyond the level on 4H but no clear 4H displacement. Treated
+      as UNRESOLVED until the confirmation horizon expires.
+    forbidden_shortcuts:
+      - "wick counts as break"
+      - "BOS at any timeframe where price touched beyond"
+      - "AI labels BOS without evidence IDs"
+    required_evidence:
+      - broken_level_evidence_id
+      - confirming_candle_id
+      - owning_timeframe
+      - penetration_atr
+    optional_evidence:
+      - displacement_magnitude
+      - subsequent_construction_ids
+    unresolved_alternatives:
+      - displacement requirement strict vs grading
+      - confirmation horizon length
+      - interaction with first-break policy
+
+  choch:
+    formal_definition: >-
+      Change Of Character. A break of the most recent internal structure
+      in the opposite direction of the prior leg, signalling a possible
+      external reversal pending confirmation.
+    plain_definition: >-
+      The current internal trend has broken; the larger external narrative
+      may be turning.
+    candidate_generation_rules:
+      - A CHoCH candidate is generated when an internal-structure break
+        occurs opposite to the most recent internal-track direction.
+    semantic_selection_rules:
+      - Internal break must be confirmed on its owning timeframe. The
+        external reversal is not confirmed until a higher-timeframe BOS
+        or accepted sweep+reclaim occurs.
+    confirmation:
+      - Higher-timeframe BOS, accepted sweep + reclaim, or explicit
+        rejection of the prior external structure.
+    invalidation:
+      - Internal break loses structural weight (failed_breakout) OR
+        higher timeframe does not confirm within the doctrine horizon.
+    lifecycle:
+      - INTERNAL_TRACK -> CHoCH_CANDIDATE -> EXTERNAL_REVERSAL_CONFIRMED
+      - INTERNAL_TRACK -> CHoCH_CANDIDATE -> INTERNAL_CONTINUATION_RESUMED
+    timeframe_ownership:
+      - Owned by the timeframe on which the internal break occurred.
+        External reversal status belongs to the parent timeframe.
+    positive_example: >-
+      In a Daily bullish context, a 4H bearish internal break followed by
+      a 4H sweep+reclaim and a Daily accepted BOS to the downside.
+    negative_example: >-
+      A 15m internal break with no 4H alignment. Treated as a 15m event,
+      not as a CHoCH candidate at higher scope.
+    ambiguous_example: >-
+      An internal break that could be either CHoCH (external reversal
+      candidate) or failed_breakout. Resolved by higher-timeframe evidence.
+    forbidden_shortcuts:
+      - "CHoCH at any timeframe implies external reversal"
+      - "single internal break upgrades external bias"
+      - "AI narrative drives CHoCH assignment"
+    required_evidence:
+      - broken_internal_swing_id
+      - direction
+      - confirming_candle_id
+      - owning_timeframe
+    optional_evidence:
+      - higher_timeframe_confirmation_id
+      - external_reversal_candidate_status
+    unresolved_alternatives:
+      - CHoCH equals MSS at internal scope (proposed default) vs distinct
+      - first break of internal structure classification
+      - external confirmation horizon length
+
+  mss:
+    formal_definition: >-
+      Market Structure Shift. A higher-timeframe structural break that
+      reverses the prior external trend context.
+    plain_definition: >-
+      The larger narrative just turned; the chart is no longer in the
+      trend it appeared to be in.
+    candidate_generation_rules:
+      - An MSS candidate is generated when the external-scope structure
+        breaks against the prior external bias on the owning timeframe.
+    semantic_selection_rules:
+      - The break must satisfy the BOS confirmation requirements at the
+        external timeframe.
+    confirmation:
+      - Body close beyond external protected level, displacement, new
+        external structure beyond the break, lower-timeframe CHoCH
+        alignment.
+    invalidation:
+      - Failed breakout at the external timeframe, OR higher-parent
+        timeframe does not confirm.
+    lifecycle:
+      - EXTERNAL_TRACK -> MSS_CANDIDATE -> EXTERNAL_REVERSAL_CONFIRMED
+    timeframe_ownership:
+      - Owned by the external timeframe (typically Daily or 4H depending
+        on the asset's structural horizon).
+    positive_example: >-
+      After weeks of Daily bullish structure, a Daily body close beyond
+      the protected Daily low with Daily displacement and 4H alignment.
+    negative_example: >-
+      A 4H break without Daily confirmation. Treated as a 4H event, not
+      as a Daily MSS.
+    ambiguous_example: >-
+      A Daily close beyond the level without displacement. Unresolved
+      until the confirmation horizon expires.
+    forbidden_shortcuts:
+      - "any timeframe break counts as MSS"
+      - "narrative alone determines MSS"
+    required_evidence:
+      - broken_external_level_id
+      - confirming_candle_id
+      - displacement evidence
+      - lower_timeframe_alignment_ids
+    optional_evidence:
+      - parent_timeframe_status
+    unresolved_alternatives:
+      - same event as CHoCH (proposed default) vs distinct
+      - whether MSS implies HTF_BOS automatically
+
+  sweep:
+    formal_definition: >-
+      A lifecycle event where price exceeds an active level briefly and
+      reclaims before acceptance.
+    plain_definition: >-
+      A liquidity raid: price poked beyond the level, traders were
+      triggered, price came back.
+    candidate_generation_rules:
+      - Generated when price exceeds an ACTIVE level by wick or body
+        without sustained closes beyond.
+    semantic_selection_rules:
+      - Promoted to CONFIRMED_SWEEP only after reclaim + opposite
+        displacement + internal structural confirmation.
+    confirmation:
+      - Salient pre-existing level, brief excursion, weak acceptance
+        beyond, reclaim, opposite displacement, internal structure break.
+    invalidation:
+      - Sustained closes beyond the level beyond the confirmation horizon
+        → BREAKOUT_CANDIDATE; immediate reclaim failure → FAILED_RECLAIM.
+    lifecycle:
+      - LEVEL_ACTIVE -> PROBE -> SWEEP_CANDIDATE -> CONFIRMED_SWEEP
+      - LEVEL_ACTIVE -> PROBE -> SWEEP_CANDIDATE -> UNRESOLVED
+    timeframe_ownership:
+      - Owned by the timeframe on which the level was originally created.
+    positive_example: >-
+      A 4H wick above a 4H protected high that reclaims within the
+      confirmation horizon with 4H displacement back below and 1H
+      internal structure break.
+    negative_example: >-
+      A 15m wick that does not reclaim on 4H. Not a 4H sweep.
+    ambiguous_example: >-
+      Reclaim occurs at after_2_bars but after_6_bars price accepts
+      beyond. Treated as SWEEP at after_2_bars, upgraded to BREAKOUT at
+      after_6_bars. State machine must record both.
+    forbidden_shortcuts:
+      - "wick beyond level = sweep"
+      - "single-bar reclaim counts as confirmation"
+      - "ignore the confirmation horizon"
+    required_evidence:
+      - level_evidence_id
+      - excursion_measurements (wick/body/atr-normalised/duration/closes)
+      - reclaim_measurements
+      - internal_structure_confirmation_id
+    optional_evidence:
+      - microstructure_evidence (where available)
+      - aggressive_volume_on_reclaim
+    unresolved_alternatives:
+      - exact confirmation horizon values
+      - weighting of internal-structure break vs displacement
+
+  breakout:
+    formal_definition: >-
+      A lifecycle event where price closes beyond an active level and
+      builds new structure on the other side.
+    plain_definition: >-
+      The level was real, and price has decisively left it.
+    candidate_generation_rules:
+      - Generated when price closes beyond an ACTIVE level with sustained
+        closes on the owning timeframe.
+    semantic_selection_rules:
+      - Promoted to ACCEPTED_BREAKOUT only after body close, meaningful
+        penetration, persistence, retest hold or continued displacement,
+        new structure beyond the level.
+    confirmation:
+      - Body close beyond, meaningful normalised penetration, persistence,
+        retest hold or continued displacement, structural construction
+        beyond, no immediate reclaim.
+    invalidation:
+      - Decisive reclaim within the confirmation horizon without new
+        structure beyond → FAILED_BREAKOUT.
+    lifecycle:
+      - LEVEL_ACTIVE -> BREAKOUT_CANDIDATE -> ACCEPTED_BREAKOUT
+      - LEVEL_ACTIVE -> BREAKOUT_CANDIDATE -> FAILED_BREAKOUT
+      - LEVEL_ACTIVE -> BREAKOUT_CANDIDATE -> UNRESOLVED
+    timeframe_ownership:
+      - Owned by the timeframe on which the level was created.
+    positive_example: >-
+      A 4H body close beyond a 4H protected high with 4H displacement,
+      4H retest from above that holds, and 4H structure built above.
+    negative_example: >-
+      A single 4H body close that immediately reclaims with no new
+      structure. Treated as FAILED_BREAKOUT or unresolved.
+    ambiguous_example: >-
+      Close beyond level but no retest within horizon. Recorded as
+      BREAKOUT_CANDIDATE at after_2_bars; may upgrade to ACCEPTED on
+      retest or be downgraded to FAILED on reclaim.
+    forbidden_shortcuts:
+      - "one close beyond = accepted breakout"
+      - "breakout without displacement confirmation"
+    required_evidence:
+      - level_evidence_id
+      - body_close_evidence_ids
+      - displacement_evidence_ids
+      - new_structure_ids
+    optional_evidence:
+      - retest_evidence
+      - microstructure
+    unresolved_alternatives:
+      - minimum persistence requirement
+      - exact retest horizon
+
+  probe:
+    formal_definition: >-
+      A wick interaction with a level that does not close beyond it.
+    plain_definition: >-
+      Price tested the level; the level held; the body stayed put.
+    candidate_generation_rules:
+      - Generated when a wick exceeds a level by less than the minimum
+        penetration threshold and reclaims within the same bar.
+    semantic_selection_rules:
+      - Probe records the level's salience update. It is not a sweep
+        candidate unless subsequent bars confirm displacement beyond.
+    confirmation:
+      - Same-bar reclaim; level not closed beyond.
+    invalidation:
+      - Subsequent sustained closes beyond → upgrade to BREAKOUT_CANDIDATE.
+    lifecycle:
+      - ACTIVE -> PROBE -> CONCLUDED_PROBE
+      - ACTIVE -> PROBE -> UPGRADED_TO_SWEEP_CANDIDATE
+      - ACTIVE -> PROBE -> UPGRADED_TO_BREAKOUT_CANDIDATE
+    timeframe_ownership:
+      - Owned by the timeframe of the probing candle.
+    positive_example: >-
+      A 4H candle whose wick pokes above the 4H protected high but whose
+      body closes back below. Counts as probe, not sweep, not BOS.
+    negative_example: >-
+      A 4H body close beyond the level. Not a probe; that is a
+      breakout candidate.
+    ambiguous_example: >-
+      A wick beyond with the close just above the level. Records the
+      ambiguity; treated as probe only if subsequent closes reclaim.
+    forbidden_shortcuts:
+      - "any wick beyond = sweep or probe prematurely"
+    required_evidence:
+      - level_evidence_id
+      - probing_candle_id
+      - wick_penetration_atr
+      - close_inside_level boolean
+    optional_evidence: []
+    unresolved_alternatives:
+      - what counts as "same bar" for reclaim across timeframes
+
+  reclaim:
+    formal_definition: >-
+      The closing of price back inside a previously exceeded level.
+    plain_definition: >-
+      The level held (or, equivalently, the sweep failed). Price came
+      back.
+    candidate_generation_rules:
+      - Generated when price closes inside the level after an excursion.
+    semantic_selection_rules:
+      - The reclaim must occur within the doctrine-defined confirmation
+        horizon to count as part of a sweep confirmation.
+    confirmation:
+      - Closing inside the level + subsequent opposite displacement.
+    invalidation:
+      - Multiple closes beyond after reclaim → counted as failed reclaim;
+        the lifecycle state reverts to BREAKOUT_CANDIDATE.
+    lifecycle:
+      - EXCURSION -> RECLAIM_ATTEMPTED -> RECLAIM_CONFIRMED
+      - EXCURSION -> RECLAIM_ATTEMPTED -> RECLAIM_FAILED
+    timeframe_ownership:
+      - Owned by the timeframe of the reclaiming candle.
+    positive_example: >-
+      A 4H candle that closes back below a 4H protected high after a
+      wick above it, followed by 4H displacement lower.
+    negative_example: >-
+      A 4H candle that closes just inside the level on a wick, with the
+      next 4H candle closing well beyond. Treated as failed reclaim.
+    ambiguous_example: >-
+      A close inside the level on 4H but on 15m price is still beyond.
+      The 4H reclaim is recorded; the 15m state machine records its own.
+    forbidden_shortcuts:
+      - "wick inside = reclaim"
+      - "single close inside = confirmed"
+    required_evidence:
+      - reclaiming_candle_id
+      - close_price
+      - level_evidence_id
+      - subsequent_displacement_id
+    optional_evidence: []
+    unresolved_alternatives:
+      - exact confirmation horizon values
+      - how to handle HTF-vs-LTF reclaim disagreement
+
+  active_range:
+    formal_definition: >-
+      The causal structural leg currently controlling location and
+      invalidation on a stated timeframe.
+    plain_definition: >-
+      The "where am I, what would break my story" box. Not just the
+      latest high and low.
+    candidate_generation_rules:
+      - Created when an accepted external BOS establishes a leg, OR an
+        accepted reversal creates a new external leg, AND the causal
+        origin and terminal structural point are known.
+    semantic_selection_rules:
+      - The range object stores origin, terminal, creating_event,
+        protected_point, parent_range, child_ranges, equilibrium,
+        premium_zone, discount_zone, state, replacement_conditions,
+        invalidation.
+    confirmation:
+      - Origin and terminal are grounded by evidence IDs; parent_range
+        and child_ranges are recorded; lifecycle state is ACTIVE.
+    invalidation:
+      - >-
+        One of: terminal extension by accepted external break, protected
+        point violation, parent_range supersession, explicit STALE.
+    lifecycle:
+      - PROPOSED -> ACTIVE -> EXTENDED -> SUPERSEDED
+      - PROPOSED -> ACTIVE -> STALE
+    timeframe_ownership:
+      - Each range owns its timeframe. A Daily parent range supersedes a
+        4H child; a 4H child refines a Daily parent.
+    positive_example: >-
+      After a 4H accepted bullish BOS, the 4H range is created with
+      origin = 4H protected low, terminal = 4H BOS level, parent_range
+      = the current Daily range.
+    negative_example: >-
+      A "range" defined only as the latest 50-candle high-low with no
+      causal origin or terminal.
+    ambiguous_example: >-
+      A 4H leg whose origin is unclear because the impulse begins from
+      a cluster. Treated as PROPOSED until the AI adjudicator resolves.
+    forbidden_shortcuts:
+      - "active range = latest high and low"
+      - "range fixed at session open"
+      - "child range can overwrite parent"
+    required_evidence:
+      - origin_evidence_id
+      - terminal_evidence_id
+      - creating_event_id
+      - protected_point_evidence_id
+      - owner_timeframe
+    optional_evidence:
+      - parent_range_id
+      - child_range_ids
+      - equilibrium, premium_zone, discount_zone
+    unresolved_alternatives:
+      - daily/4H/1H/15m hierarchy exact ownership rules
+      - replacement priority among the four triggers
+
+  liquidity:
+    formal_definition: >-
+      Visible pools of orders or stops whose interaction may produce
+      measurable price behaviour: BSL, SSL, equal highs/lows, session
+      and prior-day/week levels.
+    plain_definition: >-
+      "Where the stops are." Recognised by prior touches, reactions, age.
+    candidate_generation_rules:
+      - Generated when multiple candles' highs/lows cluster within a
+        tolerance (equal highs/lows), OR a session boundary produces a
+        recurring level, OR a historical level (prior day/week) is
+        identified.
+    semantic_selection_rules:
+      - >-
+        Each liquidity object carries: birth_time, salience_score,
+        touch_count, reaction_history, age, decay, owning timeframe,
+        active/consumed state.
+    confirmation:
+      - Subsequent reaction at the level. Lifetime state is ACTIVE until
+        consumption.
+    invalidation:
+      - Consumed by decisive close beyond the level that does not
+        reclaim; lifecycle becomes CONSUMED.
+    lifecycle:
+      - POTENTIAL -> ACTIVE -> TESTED -> CONSUMED
+      - POTENTIAL -> ACTIVE -> STALE
+    timeframe_ownership:
+      - Owned by the timeframe on which the level is significant.
+    positive_example: >-
+      Three consecutive 4H candle highs within 0.1% form an equal-highs
+      BSL level. Touch_count=3, salience increases, ACTIVE.
+    negative_example: >-
+      A single 15m wick at a price level that no other candle in the
+      last 50 bars approached.
+    ambiguous_example: >-
+      Two highs within tolerance but on different sessions. Lifetime
+      salience is lower than three within session.
+    forbidden_shortcuts:
+      - "any obvious level is liquidity"
+      - "stops are clustered everywhere"
+      - "liquidity exists before price created it"
+    required_evidence:
+      - level_price
+      - level_birth_time
+      - owning_timeframe
+      - touch_count
+      - reaction_history
+    optional_evidence:
+      - salience_score
+      - microstructure (where available)
+    unresolved_alternatives:
+      - equal-highs tolerance formula
+      - session and prior-day/week specific rules per venue
+
+  poi:
+    formal_definition: >-
+      Price of Interest: a price zone where reaction is expected because
+      of prior causal significance. Includes order blocks, clusters,
+      FVGs, supply/demand zones, breakers (where doctrine permits), and
+      nested HTF/LTF zones.
+    plain_definition: >-
+      "Where price might react." Multiple kinds, multiple timeframes,
+      ranked.
+    candidate_generation_rules:
+      - >-
+        Generated broadly: order blocks, order-block clusters, FVGs,
+        supply/demand zones, breakers (doctrine-conditional), nested
+        HTF/LTF zones, prior reaction zones.
+    semantic_selection_rules:
+      - Three separate scores (deterministic, AI semantic, empirical-null)
+        plus combined_rank and uncertainty. Empirical is null until
+        outcomes exist.
+      - Pairwise AI comparisons preferred over 30-at-once ranking.
+    confirmation:
+      - >-
+        At least one of: originated displacement, caused accepted BOS,
+        linked to protected point, created FVG, belongs to active range.
+    invalidation:
+      - Mitigated (price trades through), fully invalidated (closes
+        through with displacement), or aged beyond the active range.
+    lifecycle:
+      - PROPOSED -> FRESH -> PARTIALLY_MITIGATED -> FULLY_MITIGATED -> INVALIDATED
+    timeframe_ownership:
+      - Owned by the timeframe where the displacement originated.
+        Nested zones record both their origin timeframe and their
+        execution timeframe.
+    positive_example: >-
+      The 4H bullish order-block cluster at the origin of the impulse
+      that caused the 4H accepted BOS. Untouched on 15m, partial
+        mitigation on 1H, fresh on 4H.
+    negative_example: >-
+      A 15m order block inside an active 4H bearish leg with no causal
+        connection to the 4H BOS. Score should be low.
+    ambiguous_example: >-
+      Two POIs both plausible; neither fully resolved by deterministic
+      evidence. AI pairwise comparison requested.
+    forbidden_shortcuts:
+      - "nearest opposing candle wins"
+      - "lookback search without causal evaluation"
+      - "single score ranks POIs"
+    required_evidence:
+      - origin_candle_ids
+      - origin_timeframe
+      - causal_features (originated_displacement, caused_bos,
+        linked_protected_point, created_fvg, in_active_range)
+      - location_features (premium/discount, parent_range_position,
+        proximity_to_liquidity, depth_relative_to_shallow)
+      - lifecycle_features (fresh/partial/full/invalid, age, reactions)
+      - quality_features (departure_speed, imbalance_size, clean_origin)
+      - narrative_features (liquidity_before/after, parent_alignment)
+    optional_evidence:
+      - microstructure
+      - prior_reaction_history
+    unresolved_alternatives:
+      - whether OBs can be single candles (programme says clusters default)
+      - explicit scoring weights per feature
+      - calibration between scores
+
+  inducement:
+    formal_definition: >-
+      A falsifiable hypothesis: a visible intermediate liquidity or
+      lower-quality POI whose interaction plausibly facilitates access
+      to a stronger causal POI or structural objective.
+    plain_definition: >-
+      "Did price take that shallow level to clear positioning before
+      reaching the deeper one?" Treat the hypothesis as testable, not
+      as a story.
+    candidate_generation_rules:
+      - >-
+        Generated when at least one of five necessary conditions holds:
+        (1) a higher-ranked deeper POI or objective, (2) intermediate
+        visible liquidity or POI, (3) plausible causal path,
+        (4) structural reason the shallow object is weaker,
+        (5) unconsumed liquidity around the intermediate.
+    semantic_selection_rules:
+      - >-
+        The AI must explain: what is being induced, whose positioning is
+        inferred, which liquidity is expected to be taken, which deeper
+        POI is the destination, what event rejects the hypothesis.
+    confirmation:
+      - Intermediate interaction observed AND deeper POI subsequently
+        reached AND no contradicting event in between.
+    invalidation:
+      - A contradicting event (e.g., the deeper POI is reached without
+        the intermediate interaction, or price rejects at the intermediate).
+    lifecycle:
+      - NO_INDUCEMENT_HYPOTHESIS -> INDUCEMENT_CANDIDATE -> INDUCEMENT_PATH_ACTIVE
+      - INDUCEMENT_PATH_ACTIVE -> INDUCEMENT_CONSUMED
+      - INDUCEMENT_CANDIDATE -> HYPOTHESIS_REJECTED
+    timeframe_ownership:
+      - Owned by the timeframe at which the inducement hypothesis is
+        evaluated.
+    positive_example: >-
+      A shallow 1H FVG inside an active 4H bearish leg, with a deeper
+      4H order-block demand zone below. Price pierces the shallow FVG,
+      triggers stops above, then reverses to the deeper 4H demand.
+    negative_example: >-
+      Every failed POI labelled as inducement after the fact, with no
+      deeper POI candidate or rejection event specified.
+    ambiguous_example: >-
+      Two shallow objects in front of a deeper one; unclear which is
+      the inducement. Pairwise AI comparison; default to
+      HYPOTHESIS_REJECTED if not resolved.
+    forbidden_shortcuts:
+      - "every failed POI is inducement"
+      - "inducement is invisible institutional intention"
+      - "AI narrative without rejection event"
+    required_evidence:
+      - shallow_object_evidence_id
+      - deeper_object_evidence_id
+      - rejection_event_definition
+      - lifecycle state
+    optional_evidence:
+      - microstructure evidence
+    unresolved_alternatives:
+      - exact five-condition enforcement (strict vs majority)
+      - scope of "deeper" (HTF vs same-TF cluster)
+
+  displacement:
+    formal_definition: >-
+      A sequence of candles with large normalised bodies, consecutive
+      directional closes, range expansion, and possible FVG creation,
+      indicating the market is leaving a previous state with momentum.
+    plain_definition: >-
+      "Price is moving with intent." The mechanism by which structure
+      breaks are realised.
+    candidate_generation_rules:
+      - Generated when N consecutive candles close directionally with
+        body > normalised threshold AND total range expansion exceeds
+        threshold AND optional FVG creation observed.
+    semantic_selection_rules:
+      - Required evidence for an external BOS. Grades internal breaks.
+    confirmation:
+      - Consecutive directional closes, range expansion, FVG creation,
+      - departure speed above median for the timeframe.
+    invalidation:
+      - Loss of consecutive directional closes before the BOS confirms,
+      - or displacement magnitude below the threshold.
+    lifecycle:
+      - PROPOSED -> ACTIVE -> CONSUMED
+    timeframe_ownership:
+      - Owned by the timeframe of the displacement candles.
+    positive_example: >-
+      Three 4H candles with consecutive bullish bodies, total range
+      expansion > 2 ATR, FVG created. Causes the 4H BOS.
+    negative_example: >-
+      Three 4H candles with bodies but mixed direction; not displacement.
+    ambiguous_example: >-
+      Two 4H candles with large bodies but no FVG; possible displacement
+      pending third candle confirmation.
+    forbidden_shortcuts:
+      - "any big candle is displacement"
+      - "displacement without FVG is invalid"
+    required_evidence:
+      - candle_ids in the displacement sequence
+      - body_to_atr ratios
+      - range_expansion_atr
+      - fvg_evidence_ids
+    optional_evidence:
+      - departure_speed_atr_per_bar
+    unresolved_alternatives:
+      - exact consecutive count threshold
+      - exact body-ratio threshold
+
+  confidence_and_abstention:
+    formal_definition: >-
+      The decomposition of system confidence into orthogonal components,
+      each with a calibrated category.
+    plain_definition: >-
+      "How sure are we, and what kind of sure?" Six axes. Five categories.
+    confidence_axes:
+      - data_confidence: market-truth certificate cleanliness
+      - geometry_confidence: candidate and break coordinate exactness
+      - doctrine_confidence: contested decisions resolved (vs proposed)
+      - ai_agreement: inter-role convergence
+      - critic_confidence: adversarial critic verdict
+      - human_agreement_estimate: expected agreement with an expert label
+    categories:
+      - confirmed: all axes confirmed, evidence grounded
+      - probable: most axes confirmed, no contradictions
+      - ambiguous: at least one axis contested, no contradictions
+      - contradicted: at least one axis actively contradicted
+      - insufficient_context: left or higher-timeframe context absent
+    abstention_rule: >-
+      Abstain on ambiguous and contradicted; emit a labelled interpretation
+      on probable and confirmed; refuse to emit on insufficient context.
+    lifecycle: >-
+      Categories are evaluated at decision time and recorded in the
+      validated structure graph. They are not updated post-hoc.
+    timeframe_ownership: >-
+      Confidence is per-interpretation, not per-system.
+    positive_example: >-
+      data_confidence: confirmed, geometry_confidence: confirmed,
+      doctrine_confidence: confirmed (all contested decisions resolved
+      by human), ai_agreement: confirmed (all six roles agree), critic:
+      PASS. overall: confirmed.
+    negative_example: >-
+      doctrine_confidence: probable (one contested decision still
+      PROPOSED), critic: REVISE. overall: ambiguous.
+    ambiguous_example: >-
+      ai_agreement: ambiguous (reconciler and episode constructor
+      disagree on protected point), critic: PASS. Recorded as ambiguous.
+    forbidden_shortcuts:
+      - "average scores into a single percentage"
+      - "ignore one axis because others are confirmed"
+      - "emit confident when contradicted"
+    required_evidence:
+      - per-axis values
+      - abstention_decision
+      - reasoning summary
+    optional_evidence:
+      - human_agreement_estimate_history
+    unresolved_alternatives:
+      - exact confidence-floor value
+      - per-axis calibration method
+
+  future_data_cutoff:
+    formal_definition: >-
+      The maximum candle close time that may inform a decision at the
+      decision_time. Past the cutoff, no candle may be referenced.
+    plain_definition: >-
+      "You cannot peek." Every future candle after the decision time is
+      forbidden knowledge.
+    candidate_generation_rules:
+      - Determined by the decision time, the asset's structural horizon,
+      - and the venue's candle schedule. No market truth certificate is
+        valid unless the cutoff is explicit and the certificate enumerates
+        candles beyond the cutoff.
+    semantic_selection_rules:
+      - Any interpretation that references a candle whose close time is
+        beyond the cutoff must be rejected by the deterministic validator.
+    confirmation:
+      - The market_truth_certificate enumerates candles beyond the cutoff
+        and confirms they were not used.
+    invalidation:
+      - Any future-candle reference detected by the temporal validator.
+    lifecycle:
+      - The cutoff is fixed at decision time; it does not move.
+    timeframe_ownership:
+      - Cutoff applies independently per timeframe used in the decision.
+    positive_example: >-
+      Decision time 2026-07-09 19:00 UTC. The 15m candle closing at
+      19:15 UTC exists in the source data but is NOT referenced by any
+      candidate, break, or POI in the interpretation.
+    negative_example: >-
+      The detector references the 19:15 candle to "confirm" the sweep
+      that occurred at 18:45. Rejected; future leakage.
+    ambiguous_example: >-
+      The 19:00 candle closes exactly at the decision time. Recorded as
+      the last allowed candle; not future.
+    forbidden_shortcuts:
+      - "the last candle is always available"
+      - "use the full source dataset, future candles don't matter"
+      - "decision time is approximate"
+    required_evidence:
+      - decision_time
+      - last_allowed_candle_close_time_per_timeframe
+      - market_truth_certificate_id
+    optional_evidence: []
+    unresolved_alternatives:
+      - exact decision-time boundary (round to bar open vs close)
+      - partial-candle handling at decision time
+
+authority_and_provenance:
+  schema: smc_codex_market_structure_constitution_v1
+  version: 1.0.0
+  status: PROPOSED_DOCTRINE_DRAFT_PENDING_HUMAN_APPROVAL
+  prepared_by: AI assistant on behalf of the trader
+  approved_by: NONE
+  approval_required_for:
+    - >-
+      module authority: any code may read but only after approval may any
+      code act on a doctrine entry as authoritative.
+    - >-
+      contestable claims: every contested_decision must be resolved before
+      its doctrine clause may be used in a CERTIFIED interpretation.
+  doctrine_hash_record:
+    location: specs/MARKET_STRUCTURE_CONSTITUTION_V1.sha256
+    algorithm: sha256
+    computed_over: the canonical file bytes of
+      specs/MARKET_STRUCTURE_CONSTITUTION_V1.yaml with the
+      DOCTRINE_HASH_PLACEHOLDER line preserved.
+  companion_documents:
+    - docs/MARKET_STRUCTURE_CONSTITUTION_V1.md  (human-readable companion)
+    - specs/MARKET_STRUCTURE_CONSTITUTION_V1.sha256  (integrity record)
+    - foundation_programme/pre_outputs/08_constitution_adjudication.md
+        (decision log placeholder for human adjudication)
+  change_protocol:
+    - Any change to a doctrine clause requires a version bump and a new
+      doctrine_hash. The previous version remains in the git history.
+    - Contested_decision transitions (PROPOSED -> APPROVED / REJECTED /
+      DEFERRED) must be logged in the companion adjudication document.
+    - No change may be backported silently to a CERTIFIED interpretation.
