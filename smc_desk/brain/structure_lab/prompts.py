@@ -135,12 +135,36 @@ def compact_role_payload(payload: dict[str, Any]) -> tuple[dict[str, Any], list[
     return new_payload, summaries
 
 
-def build_role_prompt(role: str, payload: dict[str, Any]) -> dict[str, Any]:
+def build_role_prompt(
+    role: str,
+    payload: dict[str, Any],
+    *,
+    candidate_payload_design: str | None = None,
+) -> dict[str, Any]:
+    """Build a role prompt.
+
+    ``candidate_payload_design`` selects the candidate-objects payload strategy:
+    None / ``"flat"`` keep the legacy recency cap; ``"anchor_tools"`` uses the
+    anchor-preserving retriever with the retrieval-tools surface (programme
+    §4.6 default). Other designs (full, anchor) are available via
+    ``smc_desk.brain.structure_lab.ab_designs.build_candidate_payload`` for the
+    step-15 A/B comparison.
+    """
     if role not in ROLE_SCHEMAS:
         raise ValueError(f"Unknown structure-lab role: {role}")
     contract = load_structure_reasoning_contract()
     schema = ROLE_SCHEMAS[role].model_json_schema()
-    compacted_payload, compaction_summaries = compact_role_payload(payload)
+    if candidate_payload_design in {"full", "flat", "anchor", "anchor_tools"}:
+        # Programme §4.6 anchor-preserving retrieval path. The case is the
+        # payload itself (it carries candidate_objects + formal_structure_graph
+        # + the anchor source fields the retriever reads).
+        from smc_desk.brain.structure_lab.ab_designs import build_candidate_payload
+        built = build_candidate_payload(payload, design=candidate_payload_design)
+        compacted_payload = dict(payload)
+        compacted_payload["candidate_objects"] = built["candidate_objects"]
+        summaries = [built["stats"]]
+    else:
+        compacted_payload, summaries = compact_role_payload(payload)
     prompt = "\n\n".join(
         [
             "You are one governed role inside an AI-first SMC structure laboratory.",
@@ -159,5 +183,5 @@ def build_role_prompt(role: str, payload: dict[str, Any]) -> dict[str, Any]:
         "input_sha256": object_sha256(compacted_payload),
         "output_schema_sha256": object_sha256(schema),
         "contract_sha256": contract["contract_file_sha256"],
-        "compaction_summaries": compaction_summaries,
+        "compaction_summaries": summaries,
     }
