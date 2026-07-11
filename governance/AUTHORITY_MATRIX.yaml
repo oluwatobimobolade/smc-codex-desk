@@ -2,15 +2,15 @@ authority_levels:
   level_1_market_truth:
     examples: [ohlcv, timestamps, venue, contract, fees, funding, candle_completion]
     authority: highest_factual_authority
-    current_implementation: [smc_desk/data, tools/sync_market_data.py, data/ohlcv/binance_futures]
+    current_implementation: [smc_desk/data/ohlcv_contract.py, smc_desk/data/market_truth_certificate.py, smc_desk/data/timeframe_reconstruction.py, tools/sync_market_data.py, data/ohlcv/binance_futures]
   level_2_mathematical_geometry:
     examples: [price_crossed_level, body_close, fvg_boundaries, mitigation_percentage]
     authority: deterministic_within_data_and_definition
-    current_implementation: [smc_desk/perception, smc_desk/engine.py]
+    current_implementation: [smc_desk/perception, smc_desk/data/timeframe_reconstruction.py]
   level_3_operational_perception:
     examples: [swing, protected_high, protected_low, BOS, CHoCH, liquidity_sweep]
     authority: frozen_ontology_research_authority
-    current_implementation: [specs/PERCEPTION_ONTOLOGY_V2.yaml, smc_desk/perception]
+    current_implementation: [specs/PERCEPTION_DETECTOR_CONFIG_V2.yaml, smc_desk/perception/config.py, smc_desk/perception]
   level_4_human_adjudicated_interpretation:
     examples: [ambiguous_structure_significance, professional_scenario_relevance]
     authority: reference_under_review_process
@@ -22,7 +22,7 @@ authority_levels:
   level_6_ai_or_trader_narrative:
     examples: [intent_story, likely_manipulation, institutional_accumulation]
     authority: hypothesis_only
-    current_implementation: [reports, colleague_thesis]
+    current_implementation: [specs/AI_CENTERED_STRUCTURE_REASONING_V1.yaml, smc_desk/brain/structure_reasoning_roles.py, reports, colleague_thesis]
 
 permissions:
   may_modify_market_truth: [Market Truth Engineer, Release Manager]
@@ -36,3 +36,7 @@ prohibited_overrides:
   - vision_may_not_override_ohlcv_price_authority
   - ai_labels_may_not_become_gold_without_human_adjudication
   - profitability_claims_require_economic_evidence
+
+operational_precedence_contract: governance/AUTHORITY_PRECEDENCE.yaml
+controlled_status_vocabulary: governance/STATUS_VOCABULARY.yaml
+registered_controlling_sources: governance/SOURCE_DOCUMENT_REGISTER.yaml

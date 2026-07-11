@@ -1,0 +1,55 @@
+{
+  "schema": "wp_test_report_v1",
+  "work_package": "WP-0041B-AI-ANNOTATION-RENDER-LOOP",
+  "gate": "GATE-PROFESSIONAL-AI-ANNOTATION-RENDER-001",
+  "status": "PASS_LOCAL_OBSERVE_ONLY",
+  "date": "2026-07-11",
+  "baseline_commit": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+  "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/WP0041B_SOURCE_MANIFEST.tsv",
+  "source_manifest_sha256": "9310b4a9c7ce9edfd0d1e44e93e7dc9aae88690ee4a1a733e40a32b71a8a2cfb",
+  "validation_record_id": "WP-0041B-AI-ANNOTATION-RENDER-LOOP-FINAL-20260711",
+  "validation_registry_result": "PASS; 815 passed, 1 skipped in 144.81s",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_wp0041b_ai_annotation_render_loop.py tests/test_br004_006_ai_first_readiness.py",
+      "result": "16 passed in 1.69s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_wp0040_formal_structure_graph.py tests/test_wp0041_professional_annotation_planner.py tests/test_wp0041a_annotation_integrity_repair.py tests/test_wp0041b_ai_annotation_render_loop.py tests/test_br004_006_ai_first_readiness.py tests/test_canonical_runtime_authority.py",
+      "result": "65 passed in 3.39s"
+    },
+    {
+      "command": ".venv/bin/python tools/run_ai_structure_lab.py --evidence-pack ... --responses ... --provider-mode MANUAL_AI_ASSISTED_JSON",
+      "result": "AI_PANEL_COMPLETE; 3 planned objects resolved and rendered across 4H/1H; pixel review PASS; no trade box"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python tools/check_authority_boundaries.py && .venv/bin/python tools/check_governance_consistency.py",
+      "result": "PASS; 98 active files scanned; no forbidden legacy imports; governance consistent"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "815 passed, 1 skipped in 155.35s"
+    }
+  ],
+  "btc_run": {
+    "path": "analysis_runs/WP0041B_AI_ANNOTATION_RENDER_LOOP_BTCUSDT_20260711",
+    "run_sha256": "c511e4f04ccaa2a01ba7bcd4b963ab1a430d9ab5322050027842aec13c6e59f5",
+    "run_manifest_file_sha256": "e05bf464f3892dff6a85c4b18e890d76deb64024ba3bf85533649cef985f1ee6",
+    "render_manifest_sha256": "9b72f4e4c97d7167ed39eeb74682eecd56c8efbfe4aa24e861749ce5c4ef9017",
+    "render_manifest_file_sha256": "30ba770f925fb565bc66b192c89aa5f57360da5edcfb576375869ebc218d1dde",
+    "planned_object_count": 3,
+    "rendered_object_count": 3,
+    "rendered_image_count": 2,
+    "pixel_review_status": "PASS",
+    "trade_box_rendered": false
+  },
+  "ai_geometry_authority": false,
+  "human_gold_created": false,
+  "execution_authority_changed": false,
+  "predictive_authority_changed": false,
+  "global_readiness_gate_passed": false
+}

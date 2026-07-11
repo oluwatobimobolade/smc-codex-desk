@@ -1,0 +1,58 @@
+schema: smc_codex_authority_precedence_v1
+effective_date: "2026-07-10"
+principle: authority_is_domain_scoped_and_lower_authority_cannot_silently_override_higher_authority
+
+domains:
+  market_facts:
+    order:
+      - canonical_closed_ohlcv_and_decision_time
+      - deterministic_timeframe_reconstruction
+      - browser_or_chart_visual_audit
+      - ai_or_human_narrative
+  product_intent:
+    order:
+      - registered_product_constitution_pdf
+      - current_governance_contracts
+      - work_package_reports
+      - historical_notes
+  repository_operation:
+    order:
+      - governance/README_FIRST.md
+      - governance/CURRENT_STATE.yaml
+      - governance/AUTHORITY_PRECEDENCE.yaml
+      - governance/AUTHORITY_MATRIX.yaml
+      - evidence/VALIDATION_REGISTRY.json
+      - current_work_package
+      - historical_reports
+  perception_semantics:
+    order:
+      - human_adjudicated_gold_with_registered_doctrine
+      - active_perception_specification
+      - deterministic_formal_structure_graph
+      - governed_ai_hypothesis
+      - unadjudicated_engine_weak_label
+  strategy_evidence:
+    order:
+      - registered_empirical_outcome_evidence
+      - active_research_strategy_contract
+      - project_hypothesis
+      - historical_strategy_document
+
+canonical_runtime:
+  module: smc_desk.colleague.orchestrator_v3
+  command_surface: python -m smc_desk.colleague
+  live_research_wrapper: tools/run_live_ai_smc_full_system.py
+  comparison_only:
+    - smc_desk.colleague.orchestrator
+    - smc_desk.colleague.orchestrator_v2
+    - tools/analyze_live_dual_lens.py
+  execution_authority: disabled
+
+conflict_rules:
+  - current_machine_readable_governance_supersedes_stale_onboarding_text
+  - a_validation_record_applies_only_to_its_recorded_source_state
+  - a_report_cannot_override_source_code_or_failed_tests
+  - browser_visuals_cannot_override_canonical_ohlcv
+  - ai_output_cannot_override_deterministic_geometry
+  - historical_documents_are_not_current_runtime_authority
+  - ambiguity_must_be_exposed_not_silently_resolved

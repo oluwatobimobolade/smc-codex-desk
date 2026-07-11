@@ -1,5 +1,5 @@
 config_id: PERCEPTION_DETECTOR_CONFIG_V2
-status: split_contract_ready_code_migration_pending
+status: canonical_detector_runtime_active
 authority: perception_detector_parameters_only
 source_monolith: specs/PERCEPTION_ONTOLOGY_V2.yaml
 

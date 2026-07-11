@@ -448,3 +448,93 @@ Evidence:
 - `governance/WORK_PACKAGES/WP-0038-AVAX-EURNZD-REPAIR-PACK/final_report.md`
 - `analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_20260629_230022/`
 - `analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_20260629_230943/EURNZD/`
+
+## 2026-07-10 — WP-0044 Governance Reconciliation
+
+Decision: close governance ambiguity before beginning the new expert structure
+and annotation programme.
+
+- `orchestrator_v3` is the canonical runtime; v1/v2 and the old dual-lens tool are comparison-only.
+- Validation is append-only and bound to an exact commit or recorded worktree state.
+- `latest_validation` is prohibited because it hid newer work behind WP-0022.
+- The two controlling PDFs are registered by exact bytes and SHA-256.
+- The companion repository is historical reference only.
+- The preserved WP-0041A stash was restored and integrated with WP-0043; the stash remains as a recovery copy.
+- The next approved programme is BR-001 through BR-006, not immediate detector redesign.
+
+Authority remains research-only. No predictive or execution promotion is created.
+
+## 2026-07-10 - Build The Perception Foundation Before SMC Semantics
+
+Decision: do not tune BOS, CHoCH, protected structure, ranges, liquidity, or
+POIs until market truth and experiment authority are independently sealed.
+
+- Removed indirect legacy imports from the canonical path. Perception V2 now
+  reads detector-only config; canonical context utilities use pure data modules.
+- Certified every derived 1H/4H/1D bar against exact canonical 15m source rows.
+- Made partial HTF candles, duplicate/out-of-order/missing rows, source mismatch,
+  and future append leakage explicit test failures or exclusions.
+- Defined AI as the semantic structure brain: it selects, relates, challenges,
+  explains, and abstains. It cannot move levels, change candles, use future data,
+  bypass graph invariants, or promote a trade.
+- Sealed deterministic baseline runs with source, environment, data, authority,
+  AI-role, result, and output hashes.
+- Real BTCUSDT baseline reproduced with identical stable outputs.
+
+BR-001 through BR-003 are a validated local foundation slice. The full bridge
+gate remains closed pending protected benchmarks and independent human truth.
+
+## 2026-07-10 - Make AI The Operating SMC Colleague, Not An Unchecked Authority
+
+Decision: use AI as the principal interpreter and annotation planner for routine
+SMC research, while deterministic market truth, certified geometry, formal graph
+invariants, and blind benchmark access remain non-negotiable controls.
+
+- AI handles clean-chart reading, candidate reconciliation, causal structure
+  narrative, sparse annotation selection, and two separate downgrade-only
+  critiques.
+- Human review is not required for every daily analysis. It is reserved for
+  later constitutional certification, disagreement study, and promotion of
+  doctrine beyond AI weak consensus.
+- Public development and annotation cases are usable immediately as AI weak
+  labels. The blind benchmark remains inaccessible to training, tuning, prompt
+  development, and case memory; it may open only for frozen final evaluation.
+- The first source-grounded doctrine panel accepts only five conservative pilot
+  rules. Displacement thresholds and deeper-order-block ranking stay explicit
+  competing hypotheses rather than hidden code changes.
+- The first BTCUSDT AI-assisted run used the clean 4H/1H charts and formal
+  graph. It recognized the later 4H/1D bearish parent, treated the earlier 1H
+  bullish move as stale recovery, selected two sparse marks, and produced no
+  signal.
+
+This creates a professional AI-first research system without confusing an AI
+consensus, replay result, or test pass for human gold truth or market edge.
+
+## 2026-07-11 - Require Rendered Proof Before AI Visual Approval
+
+Decision: close the gap between semantic annotation planning and visual review.
+The AI remains responsible for selecting the few SMC objects that tell the
+market story, but deterministic evidence remains solely responsible for their
+geometry. The visual critic may run only after the final images exist.
+
+Consequences:
+
+- Selected evidence IDs are resolved to price/time geometry through a certified
+  bridge; unsupported, wick-only, unconfirmed, or timeframe-mismatched objects
+  fail closed.
+- The renderer produces sparse per-timeframe charts and proves each annotation
+  against a clean baseline with object and pixel reconciliation.
+- A visual PASS must cite the exact render-manifest hash and every annotated
+  image hash. Reviewing `EXISTING_CHARTS_ONLY`, a missing render, or stale hashes
+  cannot pass.
+- The BTCUSDT proof contains only the controlling 4H CHoCH, its protected high,
+  and an explicitly subordinate dashed 1H stale recovery. It remains
+  `THESIS_ONLY`, with no trade box and no signal authority.
+
+Evidence:
+
+- `smc_desk/brain/structure_lab/annotation_bridge.py`
+- `smc_desk/rendering/structure_lab_annotation_renderer.py`
+- `tests/test_wp0041b_ai_annotation_render_loop.py`
+- `analysis_runs/WP0041B_AI_ANNOTATION_RENDER_LOOP_BTCUSDT_20260711/`
+- `governance/WORK_PACKAGES/WP-0041B-AI-ANNOTATION-RENDER-LOOP/TEST_REPORT.json`

@@ -62,8 +62,8 @@ def review_annotation_scene(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[
 def apply_visual_cleanup(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[str, Any]:
     """Return a render scene with only the critic-approved objects visible."""
     out = dict(scene)
-    review = review_annotation_scene(out, df)
-    cleanup = set(review["cleanup_object_ids"])
+    initial_review = review_annotation_scene(out, df)
+    cleanup = set(initial_review["cleanup_object_ids"])
     if cleanup:
         out["visible_drawing_objects"] = [
             item for item in out.get("visible_drawing_objects", [])
@@ -75,7 +75,11 @@ def apply_visual_cleanup(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[str
             if str(item.get("semantic_object_id") or "") not in cleanup
         ]
         out["visible_level_count"] = len(out["visible_levels"])
-    out["visual_critic"] = review
+    final_review = review_annotation_scene(out, df)
+    final_review["pre_cleanup_status"] = initial_review["status"]
+    final_review["cleanup_applied"] = sorted(cleanup)
+    final_review["pre_cleanup_issues"] = initial_review["issues"]
+    out["visual_critic"] = final_review
     return out
 
 

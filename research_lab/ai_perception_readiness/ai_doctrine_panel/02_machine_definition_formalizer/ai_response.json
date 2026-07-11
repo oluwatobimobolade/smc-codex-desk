@@ -1,0 +1,21 @@
+{
+  "schema": "machine_definition_formalizer_output_v1",
+  "role": "machine_definition_formalizer",
+  "claims": [
+    {"claim_id": "F-BREAK-001", "concept": "confirmed_structure_break", "statement": "Pilot definition: a break object requires scope, direction, broken_object_id, broken_price, confirmation_candle_id, and a body close beyond the broken wick extreme. Wick-only contact creates a probe/sweep candidate.", "source_ids": ["SRC-001", "SRC-002", "SRC-003", "SRC-005"], "status": "FORMAL_PILOT_RULE", "confidence": 0.96},
+    {"claim_id": "F-CHOCH-001", "concept": "external_choch", "statement": "Pilot definition: external CHoCH is the first opposing body-close break of the current parent protected point. An opposing internal break remains recovery/pullback evidence unless the parent point is broken.", "source_ids": ["SRC-001", "SRC-002", "SRC-003", "SRC-006"], "status": "FORMAL_PILOT_RULE", "confidence": 0.95},
+    {"claim_id": "F-BOS-001", "concept": "bos", "statement": "Pilot definition: BOS is a same-direction continuation break after structural direction is established; if prior direction is unresolved, classify the break event without forcing BOS versus CHoCH.", "source_ids": ["SRC-001", "SRC-002", "SRC-003"], "status": "FORMAL_PILOT_RULE", "confidence": 0.9},
+    {"claim_id": "F-DISPLACEMENT-001", "concept": "displacement", "statement": "Pilot split: body-close geometry determines break existence; displacement is recorded separately as quality. Trade/action promotion may require displacement, but perception must not erase a geometric break solely for weak impulse until adjudicated evidence resolves the conflict.", "source_ids": ["SRC-001", "SRC-002", "SRC-003"], "status": "CONTESTED_PILOT_SPLIT", "confidence": 0.84},
+    {"claim_id": "F-POI-001", "concept": "poi_identity", "statement": "Pilot definition: OB, FVG, breaker, and generic supply/demand remain different object kinds with separate origin evidence and lifecycle. Overlap may create confluence but not identity.", "source_ids": ["SRC-002", "SRC-003", "SRC-004", "SRC-005"], "status": "FORMAL_PILOT_RULE", "confidence": 0.94},
+    {"claim_id": "F-ABSTAIN-001", "concept": "abstention", "statement": "Pilot abstention: missing parent direction, unconfirmed protected point, insufficient left context, contradictory parent/child evidence, or ungrounded POI requires UNCLEAR or REVIEW_REQUIRED.", "source_ids": ["SRC-001", "SRC-002", "SRC-006"], "status": "FORMAL_PILOT_RULE", "confidence": 0.95}
+  ],
+  "unresolved_conflicts": [
+    "Displacement threshold and whether it changes object existence.",
+    "Objective rule for selecting among multiple origin candles or candle clusters."
+  ],
+  "recommendations": [
+    "Model event existence and event quality as separate fields.",
+    "Require causal links from protected point to qualified break.",
+    "Do not give pilot definitions runtime authority before blind evaluation."
+  ]
+}

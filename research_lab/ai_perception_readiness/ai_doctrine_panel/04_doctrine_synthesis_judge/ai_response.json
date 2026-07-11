@@ -1,0 +1,24 @@
+{
+  "schema": "doctrine_synthesis_judge_output_v1",
+  "role": "doctrine_synthesis_judge",
+  "claims": [
+    {"claim_id": "J-CLOSE-001", "concept": "structure_break_confirmation", "statement": "Accept for pilot: confirmed structural breaks require body-close acceptance beyond the exact broken swing/protected extreme; wick-only penetration is probe/sweep evidence.", "source_ids": ["SRC-001", "SRC-002", "SRC-003", "SRC-005", "SRC-006"], "status": "ACCEPT_FOR_PILOT", "confidence": 0.97},
+    {"claim_id": "J-HIERARCHY-001", "concept": "internal_external_hierarchy", "statement": "Accept for pilot: child/internal structure may describe timing or recovery but cannot flip parent external structure without a confirmed parent protected-point break.", "source_ids": ["SRC-001", "SRC-002", "SRC-003", "SRC-006"], "status": "ACCEPT_FOR_PILOT", "confidence": 0.97},
+    {"claim_id": "J-CAUSAL-001", "concept": "causal_grounding", "statement": "Accept for pilot: every BOS/CHoCH/protected-point claim must name the exact structural object, confirmation candle, scope, and causal relationship.", "source_ids": ["SRC-001", "SRC-002", "SRC-005", "SRC-006"], "status": "ACCEPT_FOR_PILOT", "confidence": 0.95},
+    {"claim_id": "J-ABSTAIN-001", "concept": "abstention", "statement": "Accept for pilot: insufficient left context, unresolved prior direction, unconfirmed protected point, or contradictory hierarchy requires explicit uncertainty rather than forced classification.", "source_ids": ["SRC-001", "SRC-002", "SRC-006"], "status": "ACCEPT_FOR_PILOT", "confidence": 0.96},
+    {"claim_id": "J-POI-001", "concept": "poi_identity", "statement": "Accept for pilot: FVG, OB, breaker, and supply/demand are distinct object kinds; confluence does not permit relabeling one as another.", "source_ids": ["SRC-002", "SRC-003", "SRC-004", "SRC-005", "SRC-006"], "status": "ACCEPT_FOR_PILOT", "confidence": 0.96},
+    {"claim_id": "J-DISPLACEMENT-001", "concept": "displacement", "statement": "Keep contested: body close may establish geometric break existence while displacement grades quality/actionability, but the source set does not yet justify one universal threshold or whether weak breaks should retain BOS/CHoCH labels.", "source_ids": ["SRC-001", "SRC-002", "SRC-003"], "status": "KEEP_CONTESTED", "confidence": 0.99},
+    {"claim_id": "J-DEEPOB-001", "concept": "deeper_order_block_priority", "statement": "Keep contested: deeper origin OBs may deserve contextual priority and shallow zones may be inducement, but nearest-versus-deeper ranking is not universal and must survive blind cases.", "source_ids": ["SRC-004", "SRC-006"], "status": "KEEP_CONTESTED", "confidence": 0.95},
+    {"claim_id": "J-AUTONOMY-001", "concept": "ai_authority", "statement": "Reject: AI agreement alone is sufficient to create human gold or modify runtime doctrine. AI consensus is a high-value research proposal that remains certification-pending.", "source_ids": ["SRC-001", "SRC-006"], "status": "REJECT", "confidence": 1.0}
+  ],
+  "unresolved_conflicts": [
+    "Displacement as existence gate versus quality/actionability attribute.",
+    "Objective protected-point selection when the impulse origin is a candle cluster.",
+    "Contextual ranking of shallow reaction POI versus deeper origin OB."
+  ],
+  "recommendations": [
+    "Build blind positive, negative, and ambiguous cases for the five accepted pilot rules before changing detector semantics.",
+    "Keep displacement and deeper-OB priority as explicit competing hypotheses in the benchmark.",
+    "Use AI consensus for routine operation and escalation, with later human certification only for constitution promotion."
+  ]
+}

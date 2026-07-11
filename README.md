@@ -1,57 +1,38 @@
-# smc-codex-desk
+# SMC Codex Desk
 
-`smc-codex-desk` is a local Smart Money Concepts analysis workstation for Codex.
+SMC Codex Desk is a local, evidence-grounded Smart Money Concepts research
+workstation. It is an observe-only market colleague, not a trading bot and not
+a certified predictive system.
 
-It is designed as an analyst stack, not a trading bot:
+## Current Authority
 
-1. Intake
-Accept chart screenshots, OHLCV CSV files, or both.
+- Canonical runtime: `smc_desk.colleague.orchestrator_v3`.
+- Canonical command surface: `python -m smc_desk.colleague`.
+- Market truth: completed canonical OHLCV and decision time.
+- Formal structure and annotation: deterministic research authority guarded by
+  evidence, parent/child invariants, and downgrade-only validation.
+- Paper execution, live-capital execution, and predictive promotion: disabled.
 
-2. Analysis
-Apply deterministic heuristics for swings, liquidity, BOS, CHoCH, FVGs, order blocks, dealing range, premium/discount, and trade planning.
+Start with [`governance/README_FIRST.md`](governance/README_FIRST.md). Authority
+precedence, controlled status language, source-document hashes, repository
+ownership, and validation history are machine-readable under `governance/` and
+`evidence/VALIDATION_REGISTRY.json`.
 
-3. Output
-Produce JSON, Markdown, and annotated PNG artifacts that can be stored in a journal or dashboard.
+The repository `/Users/tobimobolade/smc-live-market-truth-integration` is a
+historical companion only. It cannot define current runtime or validation
+authority.
 
-## What This Does Well
+## What The Current System Does
 
-- Builds a clean local repo Codex can extend
-- Produces consistent structured outputs
-- Creates annotated charts from OHLCV data
-- Compares your bias against the model plan
-- Downloads public Binance USD-M futures OHLCV data for replay testing
-- Runs a no-lookahead SMC replay backtest with near-miss diagnostics
-- Separates swing/external structure from internal entry structure so local CHoCH cannot flip HTF bias
-- Gives you a rulebook and prompt pack to keep the workflow disciplined
+- Validates and reconstructs completed multi-timeframe OHLCV.
+- Generates deterministic SMC candidates and a formal MTF structure graph.
+- Produces evidence-grounded, sparse professional annotation plans.
+- Records structured JSON, Markdown, manifests, and PNG evidence.
+- Refuses trade presentation when graph, geometry, lifecycle, or critic gates fail.
 
-## What This Does Not Guarantee
-
-- It does not guarantee profitable trades
-- It does not guarantee performance better than discretionary professionals
-- It does not auto-execute orders
-- Screenshot-only mode is a review canvas unless you also provide OHLCV data or manual notes
-
-## Elite Quality Gates
-
-The deterministic engine is intentionally conservative. A setup cannot be marked `Execute` unless the checklist is complete:
-
-- Directional bias is defined
-- Bias comes from swing/external structure; internal CHoCH is entry confirmation only
-- A fresh POI exists by default (`require_fresh_poi=true`; partial POIs are research opt-in)
-- POI aligns with premium/discount
-- Liquidity is swept before the break
-- BOS/CHoCH has candle-body displacement
-- Price is at or near the POI
-- Logical target gives at least `1:3` R:R
-
-Anything missing becomes `Watch` or `Pass` with `0%` risk. This is by design. The system should prevent low-quality trades more often than it produces trade ideas.
-
-If you want serious performance, the priority order is:
-
-1. Encode your own BOS, CHoCH, OB, FVG, and liquidity rules
-2. Validate on historical data
-3. Review false positives and false negatives
-4. Tighten the rules before adding live capture
+Passing these software gates does not establish economic edge or market
+correctness. Human-adjudicated perception benchmarks and blind validation remain
+required before structure or annotation promotion.
 
 ## Quick Start
 
@@ -62,6 +43,21 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+Run the canonical authority smoke:
+
+```bash
+python -m smc_desk.colleague --smoke --output-root /tmp/smc_authority_smoke
+```
+
+The full live-research mapping is temporarily exposed through
+`tools/run_live_ai_smc_full_system.py` until the compact reproducibility and
+provenance bridge is complete.
+
+## Historical And Comparison Utilities
+
+Commands below this point include useful research and comparison tools. They do
+not supersede the canonical runtime or governance contracts above.
 
 Generate sample market data:
 
@@ -187,12 +183,18 @@ A V2 perception stack with full object lifecycle, provenance, and tick-precision
 
 ### Testing
 
-All deterministic tests are cataloged in `evidence/VALIDATION_REGISTRY.json`.
+Validation history is append-only in `evidence/VALIDATION_REGISTRY.json`. Every
+record is tied to a commit or explicit worktree state. There is no generic
+`latest_validation` claim.
 
-The system uses a validation registry to decouple the evaluation harness from the engine logic. To run the full validation registry:
+To run canonical validation and append a named record:
 
 ```bash
-python3 tools/run_validation_registry.py
+python tools/run_validation_registry.py \
+  --record-id <unique-id> \
+  --work-package <work-package> \
+  --gate <gate-id> \
+  --report <report-path>
 ```
 
 ### Downloading Binance futures data for backtesting

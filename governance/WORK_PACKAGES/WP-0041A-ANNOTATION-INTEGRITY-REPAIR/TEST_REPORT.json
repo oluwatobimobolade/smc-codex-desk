@@ -1,17 +1,17 @@
 {
   "schema": "wp_test_report_v1",
   "work_package": "WP-0041A-ANNOTATION-INTEGRITY-REPAIR",
-  "status": "PASS",
-  "created_at": "2026-07-09T21:50:00Z",
+  "status": "PASS_REAUDITED",
+  "created_at": "2026-07-10T08:10:30Z",
   "supersedes_partial_work_acknowledged_in": "governance/WORK_PACKAGES/WP-0041-PROFESSIONAL-AI-SMC-ANNOTATION-PLANNER/final_report.md",
   "commands": [
     {
       "command": ".venv/bin/python -m pytest tests/test_wp0041a_annotation_integrity_repair.py tests/test_wp0041_professional_annotation_planner.py -q",
-      "result": "10 passed"
+      "result": "17 passed"
     },
     {
-      "command": ".venv/bin/python -m pytest tests/test_wp0034_ai_smc_trader_brain.py tests/test_wp0040_formal_structure_graph.py tests/test_smc_annotation_correctness.py tests/test_wp0037_external_agent_handoff.py tests/test_wp0038_avax_eurnzd_repairs.py tests/test_wp0041_professional_annotation_planner.py tests/test_wp0041a_annotation_integrity_repair.py -q",
-      "result": "85 passed"
+      "command": ".venv/bin/python -m pytest -q tests/test_wp0037_acceptance_gauntlet.py tests/test_wp0037_active_range_authority.py tests/test_wp0037_external_agent_handoff.py tests/test_wp0038_avax_eurnzd_repairs.py tests/test_wp0039_parent_child_structure_guard.py tests/test_wp0040_formal_structure_graph.py tests/test_wp0041_professional_annotation_planner.py tests/test_wp0041a_annotation_integrity_repair.py tests/test_15m_choch_not_enough_without_poi_context.py tests/test_active_poi_must_be_inside_protected_range.py tests/test_trade_box_only_when_trade_plan_ready.py tests/test_watch_state_blocks_trade_box.py tests/test_mtf.py tests/test_mtf_current.py tests/test_wp0024_partial_htf_rejection.py tests/test_offline_full_system_xauusd.py",
+      "result": "126 passed"
     },
     {
       "command": ".venv/bin/python -m compileall smc_desk tools tests -q",
@@ -19,7 +19,7 @@
     },
     {
       "command": ".venv/bin/python -m pytest -q",
-      "result": "745 passed, 1 skipped (baseline 740 + 5 WP-0041A tests; full suite green from project root)"
+      "result": "760 passed, 1 skipped in 132.44s (full suite green from project root)"
     }
   ],
   "adversarial_cases_covered": [
@@ -27,7 +27,14 @@
     "test_wp0041a_rejects_internal_break_disguised_as_external_structure: detects scope/label mismatch (internal evidence relabeled as external BOS) as annotation_v2_structure_scope_mismatch and annotation_v2_internal_structure_not_labeled",
     "test_wp0041a_path_requires_a_certified_active_poi: path projection without active POI evidence rejected as annotation_v2_path_without_active_poi",
     "test_wp0041a_trade_box_is_v2_native_and_suppresses_legacy_text: scene level_source=annotation_plan_v2, legacy labels suppressed, V2 trade box renders and visual critic PASSES",
-    "test_wp0041a_visual_critic_requests_cleanup_for_overlapping_marks: local visual critic returns CLEANUP_REQUIRED with cleanup_object_ids for overlapping local labels (density cleanup, not promotion)"
+    "test_wp0041a_visual_critic_requests_cleanup_for_overlapping_marks: cleanup is applied and the final scene is reviewed again to PASSED",
+    "test_wp0041a_wick_probe_cannot_be_drawn_as_confirmed_bos: candidate or wick-only structure cannot become confirmed BOS",
+    "test_wp0041a_local_composer_selects_confirmed_watch_poi_without_trade_levels: active POI selection remains observe-only",
+    "test_wp0041a_visual_critic_hard_failure_downgrades_official_decision: visual veto strips trade authority",
+    "test_wp0041a_empty_v2_plan_suppresses_legacy_clutter: V2 remains authoritative even with zero selected objects",
+    "test_wp0041a_one_candle_poi_is_locally_visible_but_not_full_width: exact POI remains legible and bounded",
+    "test_wp0041a_out_of_window_evidence_is_not_snapped_to_chart_edge: stale geometry is absent and validator refuses it",
+    "test_wp0041a_consumed_order_block_cannot_be_selected_as_active_poi: subsequent candles veto a detector POI with stale lifecycle"
   ],
   "evidence_artifacts_written_per_run": [
     "14_clean_annotation_render/annotation_plan_v2.json",
@@ -42,7 +49,14 @@
     "P2: renderer suppresses generic banners/footer/explanatory text when level_source=annotation_plan_v2",
     "P2: live planner wired to evidence-grounded composer that selects only recent, graph-compatible SMC objects",
     "P2: V2 trade-box ownership repaired end-to-end with native geometry plus legacy gate",
-    "P2: test coverage extended from 5 to 10 focused tests covering moved BOS, internal-as-external, missing POI path, native trade box, and visual-critic cleanup"
+    "P2: test coverage extended to 10 focused WP-0041A tests and 15 combined WP-0041/WP-0041A tests",
+    "Re-audit: confirmation/lifecycle/wick-probe state is enforced by canonical evidence anchors",
+    "Re-audit: visual critic REVIEW_REQUIRED now hard-downgrades the official decision and removes trade levels",
+    "Re-audit: local runner selects real watch-only POIs and keeps thesis wording synchronized",
+    "Re-audit: empty V2 plans suppress all legacy chart clutter",
+    "Re-audit: offline XAU replay is decision-time-correct and cannot claim live data"
+    ,"Re-audit: official chart and evidence pack share one candle window and timestamps override raw indices"
+    ,"Re-audit: off-window or candle-consumed POIs are rejected before official annotation"
   ],
   "execution_authority": "disabled",
   "paper_execution": "disabled",

@@ -1,0 +1,7 @@
+{
+  "claims": [],
+  "recommendations": [],
+  "role": "counterexample_hunter",
+  "schema": "counterexample_hunter_output_v1",
+  "unresolved_conflicts": []
+}

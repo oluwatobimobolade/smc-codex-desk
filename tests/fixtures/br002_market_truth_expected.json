@@ -1,0 +1,29 @@
+{
+  "schema": "br002_independent_market_truth_fixture_v1",
+  "base": {
+    "start": "2026-01-01T00:00:00Z",
+    "rows": 96,
+    "formula": "open=100+i, high=102+i, low=99+i, close=101+i, volume=10+i"
+  },
+  "independent_expected_ohlcv": {
+    "first_1h": {"open": 100.0, "high": 105.0, "low": 99.0, "close": 104.0, "volume": 46.0},
+    "first_4h": {"open": 100.0, "high": 117.0, "low": 99.0, "close": 116.0, "volume": 280.0},
+    "first_1d": {"open": 100.0, "high": 197.0, "low": 99.0, "close": 196.0, "volume": 5520.0}
+  },
+  "cases": [
+    {"id": "normal_15m_to_1h", "expected": "PASS"},
+    {"id": "normal_15m_to_4h", "expected": "PASS"},
+    {"id": "daily_boundary_reconstruction", "expected": "PASS"},
+    {"id": "decision_exactly_on_boundary", "expected": "PASS"},
+    {"id": "decision_between_boundaries", "expected": "PASS_PARTIAL_EXCLUDED"},
+    {"id": "incomplete_1h", "expected": "EXCLUDED"},
+    {"id": "incomplete_4h", "expected": "EXCLUDED"},
+    {"id": "incomplete_1d", "expected": "EXCLUDED"},
+    {"id": "missing_15m", "expected": "FAIL"},
+    {"id": "duplicate_timestamp", "expected": "FAIL"},
+    {"id": "out_of_order", "expected": "FAIL"},
+    {"id": "source_mismatch", "expected": "FAIL"},
+    {"id": "future_rows_appended", "expected": "UNCHANGED_AT_T"},
+    {"id": "live_tail_overlap", "expected": "FAIL"}
+  ]
+}

@@ -1,0 +1,21 @@
+schema: smc_codex_repository_register_v1
+effective_date: "2026-07-10"
+
+repositories:
+  canonical:
+    path: /Users/tobimobolade/smc-codex-desk
+    role: canonical_source_and_governance_repository
+    authority: current
+    validation_registry: evidence/VALIDATION_REGISTRY.json
+  companion_archive:
+    path: /Users/tobimobolade/smc-live-market-truth-integration
+    role: historical_companion_and_reference_only
+    authority: non_authoritative
+    import_into_canonical_runtime: prohibited
+    validation_registry_authority: ignored
+    mutation_policy: do_not_modify_from_canonical_work_packages
+
+rules:
+  - only_the_canonical_repository_may_define_current_runtime_authority
+  - companion_files_may_be_cited_as_historical_evidence_only
+  - duplicate_validation_registries_do_not_share_authority

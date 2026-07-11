@@ -1,0 +1,22 @@
+{
+  "schema": "evidence_researcher_output_v1",
+  "role": "evidence_researcher",
+  "claims": [
+    {"claim_id": "R-CLOSE-001", "concept": "structure_break_confirmation", "statement": "Confirmed BOS and external CHoCH require a candle-body close beyond the exact broken swing or protected point; wick-only penetration is not a confirmed structural break.", "source_ids": ["SRC-001", "SRC-002", "SRC-003", "SRC-005"], "status": "COMMON_PROJECT_DOCTRINE", "confidence": 0.96},
+    {"claim_id": "R-HIERARCHY-001", "concept": "internal_external_hierarchy", "statement": "Internal structure is lower-order timing evidence and cannot independently reverse parent external structure.", "source_ids": ["SRC-001", "SRC-002", "SRC-003", "SRC-006"], "status": "COMMON_PROJECT_DOCTRINE", "confidence": 0.95},
+    {"claim_id": "R-PROTECTED-001", "concept": "protected_point", "statement": "A protected point must be linked to the origin swing of a move that produced a qualified structural break; an arbitrary recent high or low is insufficient.", "source_ids": ["SRC-001", "SRC-002", "SRC-005", "SRC-006"], "status": "COMMON_PROJECT_DOCTRINE", "confidence": 0.9},
+    {"claim_id": "R-DISPLACEMENT-001", "concept": "displacement", "statement": "The source set conflicts on displacement: one manual treats it as a quality attribute for BOS/CHoCH existence, while house doctrine and consensus research sometimes make it mandatory for a valid or actionable break.", "source_ids": ["SRC-001", "SRC-002", "SRC-003"], "status": "CONTESTED", "confidence": 0.99},
+    {"claim_id": "R-POI-001", "concept": "fvg_vs_order_block", "statement": "An FVG is an imbalance and must not be relabeled as an order block; POI kind and lifecycle must remain explicit.", "source_ids": ["SRC-004", "SRC-005", "SRC-006"], "status": "COMMON_PROJECT_DOCTRINE", "confidence": 0.95},
+    {"claim_id": "R-DEEP-OB-001", "concept": "deeper_order_block_priority", "statement": "A shallow POI may be inducement in front of a deeper origin OB, but automatic deeper-OB priority is a project hypothesis that still requires case evidence and cannot be universal doctrine.", "source_ids": ["SRC-004", "SRC-006"], "status": "PROJECT_HYPOTHESIS", "confidence": 0.88},
+    {"claim_id": "R-ABSTAIN-001", "concept": "ambiguity", "statement": "Insufficient left context or unclear hierarchy requires explicit abstention rather than forced BOS/CHoCH classification.", "source_ids": ["SRC-001", "SRC-002", "SRC-006"], "status": "COMMON_PROJECT_DOCTRINE", "confidence": 0.94}
+  ],
+  "unresolved_conflicts": [
+    "Whether displacement is required for the existence of BOS/CHoCH or only for quality/actionability.",
+    "Whether deeper origin OB priority should be a default ranking rule or only a contextual hypothesis."
+  ],
+  "recommendations": [
+    "Separate structural existence from structural quality/actionability in the constitution.",
+    "Require exact broken-object IDs and confirmation-candle IDs for every structural event.",
+    "Keep deeper-OB preference contested until independent cases support it."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "br001_003_reproducibility_check_v1",
+  "date": "2026-07-10",
+  "symbol": "BTCUSDT",
+  "source": "data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv",
+  "decision_time": "2026-06-20T00:00:00Z",
+  "window_15m": 3000,
+  "run_a": "analysis_runs/BR001_003_BTCUSDT_BASELINE_20260710",
+  "run_b": "/tmp/BR001_003_BTCUSDT_REPEAT",
+  "experiment_fingerprint_a": "92a25a13e0da2c153994fc00ca8546b256b388910fb3871fcb8cb66bfea66944",
+  "experiment_fingerprint_b": "92a25a13e0da2c153994fc00ca8546b256b388910fb3871fcb8cb66bfea66944",
+  "stable_output_hashes_match": {
+    "perception_result.json": true,
+    "market_truth_certificate.json": true,
+    "input_manifest.json": true,
+    "authority_trace.json": true,
+    "ai_trace.json": true,
+    "annotation_plan.json": true,
+    "validation_summary.json": true,
+    "source_manifest.json": true,
+    "environment_manifest.json": true
+  },
+  "result": "PASS",
+  "contaminated_process_refusal_test": true,
+  "note": "run_manifest hashes differ by design because created_at is run-specific; the deterministic experiment fingerprint and all stable outputs match."
+}

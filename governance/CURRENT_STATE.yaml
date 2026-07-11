@@ -2,9 +2,9 @@ project:
   name: SMC Codex Desk
   product: Dual-Lens Market Colleague
   release: colleague-core-rc0
-  status: research_foundation
-  current_date: "2026-07-05"
-  last_updated: "2026-07-05"
+  status: research_foundation_ai_annotation_render_loop_validated_with_closed_readiness_gate
+  current_date: "2026-07-11"
+  last_updated: "2026-07-11"
 
 scope:
   certified_initial_scope:
@@ -57,6 +57,24 @@ authority:
   smc_detector_rebuild: implemented_wp0022_stage_ab_internal_external_liquidity_sweep_ob_inducement
   decision_quality_diagram_repair: passed_wp0027_protected_poi_inducement_story_chart_repair
   smc_narrative_authority: passed_wp0029_single_official_model_watch_chart_trade_box_gating
+  formal_mtf_structure_graph: implemented_wp0040_deterministic_graph_authority_observe_only
+  professional_ai_smc_annotation: validated_wp0041b_ai_selects_certified_ids_deterministic_geometry_renders_sparse_charts
+  annotation_visual_critic: render_bound_exact_manifest_and_image_hash_attestation_downgrade_only
+  closed_candle_partial_htf_guard: verified_wp0024_exact_decision_time_boundary
+  offline_xau_replay: verified_stale_demo_canonical_15m_completed_htf_only_not_live
+  canonical_runtime: validated_with_limitations_wp0043_orchestrator_v3
+  governance_consistency: validated_wp0044_source_bound_registry_and_precedence
+  canonical_market_truth_certificate: validated_local_br001_003_exact_15m_lineage_partial_htf_exclusion
+  perception_runtime_config: detector_only_no_strategy_authority_br001_003
+  perception_experiment_envelope: deterministic_baseline_reproducible_br001_003
+  ai_structure_reasoning_contract: semantic_brain_geometry_and_trade_authority_denied
+  protected_benchmark_partitions: validated_br004_public_ai_weak_partitions_access_ledger_blind_set_unpopulated
+  governed_ai_structure_lab: validated_wp0041b_six_role_render_before_visual_critic_pixel_verified
+  ai_doctrine_panel: validated_br006_local_source_grounded_consensus_certification_pending
+  perception_bridge_validation: current_815_passed_1_skipped_wp0041b_render_loop_validated
+  validation_registry: append_only_v2_explicit_current_gate
+  controlling_documents: sha256_verified_wp0044
+  companion_repository: historical_non_authoritative
   prediction: research_only
   paper_execution: disabled
   live_execution: disabled
@@ -70,6 +88,25 @@ active_contracts:
   strategy_profile: STRATEGY_PROFILE_SWEEP_RETRACE_V1
   scenario_contract: SCENARIO_CONTRACT_V1
   decision_policy: DECISION_POLICY_V1
+  authority_precedence: SMC_CODEX_AUTHORITY_PRECEDENCE_V1
+  controlled_status_vocabulary: SMC_CODEX_CONTROLLED_STATUS_VOCABULARY_V1
+  ai_structure_reasoning: AI_CENTERED_STRUCTURE_REASONING_V1
+
+current_gate:
+  id: GATE-PROFESSIONAL-AI-ANNOTATION-RENDER-001
+  work_package: WP-0041B-AI-ANNOTATION-RENDER-LOOP
+  status: validated_local_observe_only_readiness_gate_still_closed
+  next_programme: BLIND_CASE_COHORT_AND_OPTIONAL_HUMAN_CONSTITUTION_CERTIFICATION
+
+annotation_render_gate:
+  id: GATE-PROFESSIONAL-AI-ANNOTATION-RENDER-001
+  description: AI semantic selections resolve to certified geometry, render before visual critique, and pass object-mapping and pixel checks.
+  status: passed_wp0041b_local_observe_only
+  evidence:
+    - governance/WORK_PACKAGES/WP-0041B-AI-ANNOTATION-RENDER-LOOP/TEST_REPORT.json
+    - reports/current/WP0041B_AI_ANNOTATION_RENDER_LOOP_20260711.md
+    - analysis_runs/WP0041B_AI_ANNOTATION_RENDER_LOOP_BTCUSDT_20260711/ai_structure_lab_manifest.json
+    - analysis_runs/WP0041B_AI_ANNOTATION_RENDER_LOOP_BTCUSDT_20260711/06_professional_annotation_render/render_manifest.json
 
 next_gate:
   id: GATE-COLLEAGUE-CORE-001

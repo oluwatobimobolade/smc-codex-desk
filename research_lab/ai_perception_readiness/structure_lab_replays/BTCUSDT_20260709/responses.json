@@ -1,0 +1,164 @@
+{
+  "blind_visual_structure_reader": {
+    "schema": "blind_visual_structure_read_v1",
+    "role": "blind_visual_structure_reader",
+    "observations": [
+      {
+        "visual_id": "V-4H-DOWNSIDE",
+        "timeframe": "4h",
+        "kind": "candidate_break",
+        "direction": "bearish",
+        "timestamp": "2026-07-08T12:00:00Z",
+        "price": 62410.1,
+        "confidence": 0.84,
+        "reason": "A large 4h bearish expansion visibly accepts below the prior structural floor."
+      },
+      {
+        "visual_id": "V-1H-RECOVERY",
+        "timeframe": "1h",
+        "kind": "candidate_break",
+        "direction": "bullish",
+        "timestamp": "2026-07-06T22:00:00Z",
+        "price": 63990.7,
+        "confidence": 0.68,
+        "reason": "The 1h chart shows a prior bullish recovery, but it appears earlier than the later 4h selloff."
+      },
+      {
+        "visual_id": "V-RANGE",
+        "timeframe": "4h",
+        "kind": "range_boundary",
+        "direction": "bearish",
+        "timestamp": null,
+        "price": null,
+        "confidence": 0.82,
+        "reason": "Price is operating inside a visible 4h swing range after the downside expansion."
+      }
+    ],
+    "timeframe_summaries": {
+      "1d": "Broad parent context appears bearish.",
+      "4h": "Confirmed-looking downside expansion controls the visible recent leg.",
+      "1h": "A bullish recovery is visible but may be subordinate or stale.",
+      "15m": "Short-term movement is insufficient by itself to resolve the higher-timeframe conflict."
+    },
+    "unresolved_visual_questions": [
+      "The chart alone cannot certify whether the 1h recovery crossed the parent protected level.",
+      "No single POI is visually strong enough to label without certified object evidence."
+    ],
+    "abstain": false
+  },
+  "deterministic_candidate_reconciler": {
+    "schema": "candidate_reconciliation_v1",
+    "role": "deterministic_candidate_reconciler",
+    "accepted_evidence_ids": [
+      "CHOCH_bearish_1783497600.0",
+      "CHOCH_bullish_1783371600.0",
+      "BTCUSDT:4h:swing_high:163:2026-07-06T20:00:00+00:00",
+      "BTCUSDT:4h:swing_low:173:2026-07-08T12:00:00+00:00"
+    ],
+    "rejected_candidates": [],
+    "visual_to_evidence_map": {
+      "V-4H-DOWNSIDE": ["CHOCH_bearish_1783497600.0"],
+      "V-1H-RECOVERY": ["CHOCH_bullish_1783371600.0"],
+      "V-RANGE": [
+        "BTCUSDT:4h:swing_high:163:2026-07-06T20:00:00+00:00",
+        "BTCUSDT:4h:swing_low:173:2026-07-08T12:00:00+00:00"
+      ]
+    },
+    "unresolved_conflicts": [
+      "The 1h bullish recovery conflicts with the bearish parent, but the formal graph records it as stale and not parent-breaking."
+    ],
+    "ambiguity_status": "MIXED"
+  },
+  "causal_episode_constructor": {
+    "schema": "causal_structure_episode_v1",
+    "role": "causal_episode_constructor",
+    "controlling_timeframe": "4h",
+    "parent_external_state": "bearish",
+    "child_internal_state": "bullish",
+    "active_leg_evidence_ids": ["CHOCH_bearish_1783497600.0"],
+    "protected_point_evidence_ids": [
+      "BTCUSDT:4h:swing_high:163:2026-07-06T20:00:00+00:00",
+      "BTCUSDT:4h:swing_low:173:2026-07-08T12:00:00+00:00"
+    ],
+    "event_sequence_evidence_ids": [
+      "CHOCH_bullish_1783371600.0",
+      "CHOCH_bearish_1783497600.0"
+    ],
+    "liquidity_evidence_ids": [],
+    "selected_poi_evidence_id": null,
+    "causal_story": "The 1d bearish parent and later confirmed 4h bearish change of character govern. The earlier 1h bullish change is a subordinate recovery and is stale relative to the later parent break. The chart therefore has a mixed hierarchy, not a certified reversal and not a trade-ready POI.",
+    "classification": "PULLBACK",
+    "confidence": 0.88,
+    "alternatives": [
+      {
+        "label": "parent_reversal",
+        "evidence_ids": [
+          "CHOCH_bullish_1783371600.0",
+          "BTCUSDT:4h:swing_high:163:2026-07-06T20:00:00+00:00"
+        ],
+        "reason": "Rejected for now because the child recovery has not body-closed beyond the parent protected level and predates the later 4h bearish break.",
+        "confidence": 0.12
+      }
+    ],
+    "what_would_change_the_read": [
+      "A confirmed parent-level body close beyond the protected 4h high with a newly resolved active range.",
+      "A certified, fresh POI plus confirmation after the hierarchy resolves."
+    ]
+  },
+  "adversarial_structure_critic": {
+    "schema": "structure_critic_v1",
+    "role": "adversarial_structure_critic",
+    "verdict": "PASS",
+    "violations": [],
+    "required_corrections": [],
+    "promotion_allowed": false
+  },
+  "annotation_planner": {
+    "schema": "semantic_annotation_selection_v1",
+    "role": "annotation_planner",
+    "selections": [
+      {
+        "object_type": "structure_segment",
+        "semantic_object_id": "CHOCH_bearish_1783497600.0",
+        "timeframe": "4h",
+        "label": "4H CHOCH",
+        "reason": "This is the later confirmed parent-aligned break that governs the current structure reading.",
+        "priority": 1
+      },
+      {
+        "object_type": "liquidity_line",
+        "semantic_object_id": "BTCUSDT:4h:swing_high:163:2026-07-06T20:00:00+00:00",
+        "timeframe": "4h",
+        "label": "Protected High",
+        "reason": "Show the exact parent invalidation reference without extending a line across the entire chart.",
+        "priority": 2
+      },
+      {
+        "object_type": "structure_segment",
+        "semantic_object_id": "CHOCH_bullish_1783371600.0",
+        "timeframe": "1h",
+        "label": "1H CHoCH (stale recovery)",
+        "reason": "Show the earlier child recovery on its own timeframe as subordinate context; it predates the later 4H bearish parent break and cannot flip that parent.",
+        "priority": 3
+      }
+    ],
+    "hidden_evidence_ids": [],
+    "clutter_budget": 3,
+    "geometry_source": "certified_evidence_resolver",
+    "trade_box_allowed": false
+  },
+  "visual_annotation_critic": {
+    "schema": "visual_annotation_review_v1",
+    "role": "visual_annotation_critic",
+    "verdict": "PASS",
+    "issues": [],
+    "cleanup_requests": [],
+    "visual_inspection_basis": "rendered_images",
+    "reviewed_render_manifest_sha256": "9b72f4e4c97d7167ed39eeb74682eecd56c8efbfe4aa24e861749ce5c4ef9017",
+    "reviewed_image_sha256": [
+      "2852433bf982326a94441857c8a13f358ddfc0c485cc6df24a0e98254a0ee395",
+      "1c58251b77fead8d88e8b2dacbf196e9ad5a0e58d55111acf66462073eeebfb3"
+    ],
+    "promotion_allowed": false
+  }
+}

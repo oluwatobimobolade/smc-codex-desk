@@ -12,11 +12,27 @@ documents:
       authority: capability_status
     - path: governance/DATASET_REGISTRY.yaml
       authority: dataset_status
+    - path: governance/AUTHORITY_PRECEDENCE.yaml
+      authority: domain_scoped_authority_precedence
+    - path: governance/STATUS_VOCABULARY.yaml
+      authority: controlled_work_package_status_language
+    - path: governance/SOURCE_DOCUMENT_REGISTER.yaml
+      authority: controlling_source_hash_registry
+    - path: governance/REPOSITORY_REGISTER.yaml
+      authority: canonical_and_companion_repository_roles
+    - path: evidence/VALIDATION_REGISTRY.json
+      authority: append_only_source_bound_validation_history
+    - path: governance/WORK_PACKAGES/WP-0044-GOVERNANCE-AND-EVIDENCE-RECONCILIATION/final_report.md
+      authority: governance_reconciliation_gate_report
+    - path: governance/WORK_PACKAGES/BR-001-003-PERCEPTION-EXPERIMENT-FOUNDATION/final_report.md
+      authority: current_perception_foundation_validation_report
   external_controlling_sources:
     - path: /Users/tobimobolade/Downloads/SMC Codex Desk.pdf
       authority: product_constitution
+      hash_register: governance/SOURCE_DOCUMENT_REGISTER.yaml
     - path: /Users/tobimobolade/Downloads/Master Strategy Truth Audit.pdf
       authority: strategy_and_repository_directive
+      hash_register: governance/SOURCE_DOCUMENT_REGISTER.yaml
   active_strategy_candidate:
     - path: strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/README.md
       authority: active_research_candidate_summary
@@ -34,12 +50,22 @@ documents:
     - path: specs/LOCAL_FIRST_RESEARCH_LAB.md
       authority: local_first_lab_workflow
     - path: specs/PERCEPTION_DETECTOR_CONFIG_V2.yaml
-      authority: split_perception_detector_config_target
+      authority: canonical_perception_detector_runtime_config
+    - path: specs/AI_CENTERED_STRUCTURE_REASONING_V1.yaml
+      authority: ai_semantic_reasoning_and_prohibition_contract
     - path: specs/STRATEGY_EXECUTION_CONFIG_V1.yaml
       authority: split_strategy_execution_config_target
     - path: specs/AUTHORITY_CONFIG_SPLIT_WP0015.yaml
       authority: ontology_strategy_split_manifest
   transitional_tools:
+    - path: tools/run_perception_experiment.py
+      authority: sealed_deterministic_perception_baseline_entrypoint
+    - path: smc_desk/data/market_truth_certificate.py
+      authority: certified_decision_time_candle_and_htf_lineage
+    - path: smc_desk/colleague/orchestrator_v3.py
+      authority: canonical_market_colleague_runtime
+    - path: smc_desk/colleague/__main__.py
+      authority: canonical_command_surface_with_partial_cli_mapping
     - path: tools/run_market_colleague_case.py
       authority: entrypoint_for_colleague_orchestrator
     - path: smc_desk/colleague/
@@ -111,9 +137,9 @@ documents:
     - path: reports/current/BASELINE_RECONCILIATION_WP0017C_REPORT.md
       authority: current_local_baseline_reconciliation_report
     - path: tools/run_wp0020_market_colleague_gauntlet.py
-      authority: wp0020_market_colleague_gauntlet_entrypoint
+      authority: historical_wp0020_v2_comparison_entrypoint
     - path: smc_desk/colleague/wp0020_gauntlet.py
-      authority: wp0020_market_colleague_gauntlet_orchestrator
+      authority: historical_wp0020_v2_comparison_orchestrator
     - path: governance/WORK_PACKAGES/WP-0020-MARKET-COLLEAGUE-GAUNTLET/
       authority: wp0020_market_colleague_gauntlet_work_package
     - path: reports/current/MARKET_COLLEAGUE_GAUNTLET_WP0020_REPORT.md

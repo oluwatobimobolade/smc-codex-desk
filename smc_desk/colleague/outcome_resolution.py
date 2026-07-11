@@ -7,7 +7,7 @@ from typing import Any
 
 import pandas as pd
 
-from smc_desk.case_library import file_sha256
+from smc_desk.data.hashing import file_sha256
 from smc_desk.colleague.run_context import TIMEFRAME_DURATIONS, load_local_15m
 
 

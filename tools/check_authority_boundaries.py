@@ -14,11 +14,11 @@ extended the active-package set to include ``smc_desk/brain`` and
 (``tools/run_live_ai_smc_full_system.py`` and
 ``tools/run_wp0020_market_colleague_gauntlet.py``).
 
-WP-0043 also removed the blanket ``mtf.py`` allow — ``mtf.py`` is deprecated per
-``governance/DEPRECATION_REGISTER.md`` and must be replaced with
-``smc_desk.perception.formal_structure_graph`` or routed via
-``smc_desk/colleague/legacy_comparison.py``. The dual-lens runner is now
-explicitly tagged ``comparison_only`` and added to ALLOWED_FOR_LEGACY.
+BR-001 closes an indirect-import loophole: importing ``case_library``, ``mtf``,
+or ``rules`` can load the legacy engine even when no forbidden engine function
+is named locally.  The checker therefore rejects whole legacy module roots in
+active authority code. Historical v1/v2 gauntlets remain explicit comparison
+adapters and are not part of the canonical v3 command surface.
 """
 from __future__ import annotations
 
@@ -30,8 +30,7 @@ from typing import List, Set
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-# Forbidden imports — WP-0043 expanded. These are legacy-engine entry points
-# that must not appear in any canonical-runtime module.
+# Forbidden call names retained for diagnostic detail.
 FORBIDDEN_TARGETS: Set[str] = {
     "analyze_dataframe",
     "build_trade_plan",
@@ -40,6 +39,16 @@ FORBIDDEN_TARGETS: Set[str] = {
     "StrategyEngineV1",
     "load_ohlcv_csv",
     "load_rule_config",
+}
+
+# Importing any of these modules is itself a violation.  Checking only selected
+# function aliases allowed canonical files to import case_library/mtf/rules and
+# pull the legacy engine into memory indirectly.
+FORBIDDEN_MODULES: Set[str] = {
+    "smc_desk.engine",
+    "smc_desk.case_library",
+    "smc_desk.mtf",
+    "smc_desk.rules",
 }
 
 # Packages where legacy imports are forbidden (WP-0043 expansion).
@@ -55,7 +64,7 @@ ACTIVE_PACKAGES: List[Path] = [
 # explicitly via ALLOWED_FOR_LEGACY below.
 CANONICAL_TOOLS: List[Path] = [
     ROOT / "tools" / "run_live_ai_smc_full_system.py",
-    ROOT / "tools" / "run_wp0020_market_colleague_gauntlet.py",
+    ROOT / "tools" / "run_perception_experiment.py",
 ]
 
 # Files that are ALLOWED to import legacy (comparison adapters / opt-ins).
@@ -63,6 +72,10 @@ CANONICAL_TOOLS: List[Path] = [
 ALLOWED_FOR_LEGACY: Set[str] = {
     "legacy_comparison.py",            # canonical comparison adapter (WP-0012A)
     "analyze_live_dual_lens.py",       # explicitly tagged comparison_only (WP-0043)
+    "orchestrator.py",                 # v1 comparison-only runtime
+    "orchestrator_v2.py",              # v2 comparison-only runtime
+    "live_shadow.py",                  # pre-v3 comparison/research harness
+    "wp0020_gauntlet.py",              # historical v2 gauntlet, not canonical v3
 }
 
 
@@ -92,24 +105,27 @@ def check_imports(file_path: Path) -> List[Finding]:
 
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
-            if node.module and (
-                node.module == "engine"
-                or node.module.endswith(".engine")
-                or "smc_desk.engine" in node.module
-            ):
+            module = node.module or ""
+            if _is_forbidden_module(module):
                 for alias in node.names:
-                    if alias.name in FORBIDDEN_TARGETS:
-                        lineno = node.lineno - 1
-                        scope = _classify_scope(source_lines, lineno)
-                        findings.append(Finding(file_path, node.lineno, alias.name, scope))
+                    lineno = node.lineno - 1
+                    scope = _classify_scope(source_lines, lineno)
+                    findings.append(
+                        Finding(file_path, node.lineno, f"{module}.{alias.name}", scope)
+                    )
 
-        # Also check regular imports (e.g. import smc_desk.engine)
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if "engine" in alias.name.lower() and "StrategyEngine" in alias.name:
-                    findings.append(Finding(file_path, node.lineno, alias.name, "top_level"))
+                if _is_forbidden_module(alias.name):
+                    lineno = node.lineno - 1
+                    scope = _classify_scope(source_lines, lineno)
+                    findings.append(Finding(file_path, node.lineno, alias.name, scope))
 
     return findings
+
+
+def _is_forbidden_module(module: str) -> bool:
+    return any(module == target or module.startswith(f"{target}.") for target in FORBIDDEN_MODULES)
 
 
 def _classify_scope(lines: List[str], lineno: int) -> str:

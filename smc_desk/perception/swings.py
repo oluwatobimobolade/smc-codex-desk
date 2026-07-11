@@ -111,8 +111,8 @@ class SwingDetector:
 class MultiScaleSwingDetector:
     def __init__(self, config=None):
         if config is None:
-            from smc_desk.rules import load_rule_config
-            config = load_rule_config()
+            from smc_desk.perception.config import load_perception_config
+            config = load_perception_config()
         scales = config.swing_scales
         self.detectors = [
             SwingDetector(bars_left=scales.local, bars_right=scales.local, scale_name="local"),

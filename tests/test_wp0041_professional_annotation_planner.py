@@ -99,6 +99,8 @@ def _watch_payload_with_v2() -> dict:
 def _pack_with_v2_geometry() -> dict:
     pack = deepcopy(_pack())
     window = pack["ohlcv_windows"]["15m"]
+    # Keep the fixture POI partially touched but not fully consumed after confirmation.
+    window[19]["high"] = 100.5
     stamps = [str(candle["timestamp"]) for candle in window]
     breaks = pack["detector_candidates"]["15m"]["structure_breaks"]
     breaks[0].update(
@@ -109,12 +111,15 @@ def _pack_with_v2_geometry() -> dict:
             "candidate_at": stamps[11],
             "confirmed_at": stamps[11],
             "evidence": {"broken_price": 98.0, "structure_scope": "external"},
+            "confirmation_status": "confirmed",
+            "activity_status": "inactive",
+            "mitigation_status": "untouched",
         }
     )
     poi = pack["detector_candidates"]["15m"]["order_blocks"][0]
-    poi.update({"pivot_time": stamps[12], "candidate_at": stamps[18], "confirmed_at": stamps[18]})
+    poi.update({"pivot_time": stamps[12], "candidate_at": stamps[18], "confirmed_at": stamps[18], "confirmation_status": "confirmed", "activity_status": "inactive", "mitigation_status": "untouched"})
     liquidity = pack["detector_candidates"]["15m"]["liquidity_levels"][0]
-    liquidity.update({"pivot_time": stamps[10], "candidate_at": stamps[19], "confirmed_at": stamps[19]})
+    liquidity.update({"pivot_time": stamps[10], "candidate_at": stamps[19], "confirmed_at": stamps[19], "confirmation_status": "confirmed", "activity_status": "inactive", "mitigation_status": "untouched"})
     return pack
 
 

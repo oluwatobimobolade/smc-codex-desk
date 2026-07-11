@@ -1,0 +1,49 @@
+{
+  "schema": "wp_test_report_v1",
+  "work_package": "BR-001-003-PERCEPTION-EXPERIMENT-FOUNDATION",
+  "status": "PASS_LOCAL_FOUNDATION_SLICE",
+  "date": "2026-07-10",
+  "baseline_commit": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+  "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/BR001_003_SOURCE_MANIFEST.tsv",
+  "source_manifest_sha256": "e4e3e25681b993a4954f4a739667551bc4f0b3680fcdfccd3259eb9a251f92e5",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_br001_003_perception_foundation.py tests/test_canonical_runtime_authority.py tests/test_wp0024_partial_htf_rejection.py tests/test_offline_full_system_xauusd.py",
+      "result": "37 passed in 4.70s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_br001_003_perception_foundation.py tests/test_canonical_runtime_authority.py tests/test_runtime_config_split.py tests/test_phase2_pilot.py tests/test_wp0022_smc_detector_rebuild.py tests/test_wp0040_formal_structure_graph.py tests/test_wp0041_professional_annotation_planner.py tests/test_wp0041a_annotation_integrity_repair.py",
+      "result": "92 passed in 4.77s"
+    },
+    {
+      "command": ".venv/bin/python tools/check_authority_boundaries.py",
+      "result": "PASS; 93 files scanned; zero forbidden module imports"
+    },
+    {
+      "command": ".venv/bin/python tools/run_perception_experiment.py baseline --symbol BTCUSDT --source data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv --decision-time 2026-06-20T00:00:00Z --out analysis_runs/BR001_003_BTCUSDT_BASELINE_20260710 --window-15m 3000",
+      "result": "PASS; fingerprint 92a25a13e0da2c153994fc00ca8546b256b388910fb3871fcb8cb66bfea66944"
+    },
+    {
+      "command": "repeat the same BTCUSDT baseline into /tmp/BR001_003_BTCUSDT_REPEAT",
+      "result": "PASS; same experiment fingerprint and all stable output hashes matched"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "FAIL attempt retained: 1 failed, 797 passed, 1 skipped in 114.41s; canonical baseline correctly rejected legacy-contaminated shared process"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "799 passed, 1 skipped in 113.30s after fresh-process test repair"
+    }
+  ],
+  "independent_market_truth_scenarios": 14,
+  "net_tests_added": 20,
+  "failed_validation_retained": true,
+  "execution_authority_changed": false,
+  "predictive_authority_changed": false,
+  "readiness_gate_passed": false
+}

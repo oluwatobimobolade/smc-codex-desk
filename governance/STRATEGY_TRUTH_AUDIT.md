@@ -1,7 +1,9 @@
 # Strategy Truth Audit
 
-Status: initial WP-0001 audit scaffold. This is not the final full repository
-strategy audit.
+Status: `HISTORICAL` WP-0001 audit scaffold. This is not the current controlling
+strategy audit and cannot direct runtime behavior. Current source authority is
+registered in `governance/SOURCE_DOCUMENT_REGISTER.yaml`; active operational
+research contracts remain under `strategies/active/` and `specs/`.
 
 ## Mandatory Truth Statement
 

@@ -1,61 +1,279 @@
 {
-  "status": "PASS",
-  "suites": {
-    "unittest": {"exit_code": 0},
-    "pytest": {"exit_code": 0},
-    "stress": {"exit_code": 0}
+  "schema": "smc_codex_validation_registry_v2",
+  "registry_status": "PASS",
+  "policy": {
+    "records_are_append_only": true,
+    "generic_latest_validation_is_prohibited": true,
+    "current_gate_is_explicit": true,
+    "test_results_apply_only_to_recorded_source_state": true,
+    "failed_records_are_retained": true
   },
-  "latest_validation": {
-    "id": "WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB",
-    "date": "2026-06-27",
-    "authority_mode": "observe_only_detector_research",
-    "commands": [
-      {
-        "command": "PYTHONPATH=. .venv/bin/pytest tests/test_wp0022_smc_detector_rebuild.py -q",
-        "result": "7 passed"
+  "current_gate": {
+    "record_id": "WP-0041B-AI-ANNOTATION-RENDER-LOOP-FINAL-20260711",
+    "work_package": "WP-0041B-AI-ANNOTATION-RENDER-LOOP",
+    "gate": "GATE-PROFESSIONAL-AI-ANNOTATION-RENDER-001"
+  },
+  "records": [
+    {
+      "record_id": "WP-0022-DETECTOR-REBUILD-20260627",
+      "work_package": "WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB",
+      "date": "2026-06-27",
+      "status": "PASS",
+      "source": {
+        "git_head": "c54860a3b00a869d67a4b781b7fb9cae16c7b5c8",
+        "source_state": "historical_committed_validation"
       },
-      {
-        "command": "PYTHONPATH=. .venv/bin/pytest tests/test_wp0022_smc_detector_rebuild.py tests/test_gauntlet_stage3.py tests/test_gauntlet_stage5.py tests/stress_tests/test_C_minimal_pairs.py tests/stress_tests/test_D_swing_structure.py tests/test_v2_perception.py tests/test_perception_bridge.py tests/test_event_ledger.py tests/test_wp0021_professional_smc_interpretation.py tests/decision/test_btc_supply_retrace_regression.py tests/test_wp0020_market_colleague_gauntlet.py -q",
-        "result": "55 passed in 1.37s"
+      "primary_result": "523 passed, 1 skipped in 86.34s",
+      "report": "governance/WORK_PACKAGES/WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB/TEST_REPORT.json",
+      "authority_mode": "observe_only_detector_research",
+      "limitations": [
+        "historical_record_migrated_from_validation_registry_v1"
+      ]
+    },
+    {
+      "record_id": "WP-0041A-ANNOTATION-REAUDIT-20260710",
+      "work_package": "WP-0041A-ANNOTATION-INTEGRITY-REPAIR",
+      "date": "2026-07-10",
+      "status": "PASS",
+      "source": {
+        "git_head": "554e4997e520615735aa6f6daa136746f3bc252c",
+        "source_state": "preserved_worktree_reaudit_restored_from_stash_at_wp0044"
       },
-      {
-        "command": "PYTHONPATH=. .venv/bin/python -m compileall -q smc_desk/perception smc_desk/perception_bridge.py tests/test_wp0022_smc_detector_rebuild.py",
-        "result": "passed"
+      "primary_result": "760 passed, 1 skipped in 132.44s",
+      "report": "governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json",
+      "authority_mode": "observe_only_annotation_integrity",
+      "limitations": [
+        "not_predictive_or_execution_certification"
+      ]
+    },
+    {
+      "record_id": "WP-0043-CANONICAL-RUNTIME-20260710",
+      "work_package": "WP-0043-CANONICAL-RUNTIME-AND-AUTHORITY-CONSOLIDATION",
+      "date": "2026-07-10",
+      "status": "PASS",
+      "source": {
+        "git_head": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+        "source_state": "committed"
       },
-      {
-        "command": "PYTHONPATH=. .venv/bin/python tools/run_wp0020_market_colleague_gauntlet.py --symbol BTCUSDT --mode csv --source analysis_runs/WP0020_LIVE_BTCUSDT_20260627_095711/01_verified_ohlcv/BTCUSDT_15m_verified_closed.csv --visual-mode skip --out analysis_runs/WP0022_BTCUSDT_DETECTOR_REBUILD_REPLAY_20260627",
-        "result": "PARTIAL_PASS due visual skipped; contradiction_result=ALIGN; final_state=WATCH_BEARISH_RETRACE_TO_SUPPLY; final_colleague_action=NO_SIGNAL"
+      "primary_result": "754 passed, 1 skipped in 103.57s",
+      "report": "governance/WORK_PACKAGES/WP-0043-CANONICAL-RUNTIME-AND-AUTHORITY-CONSOLIDATION/TEST_REPORT.json",
+      "authority_mode": "canonical_runtime_research_only",
+      "limitations": [
+        "full_cli_mapping_deferred",
+        "paper_and_live_execution_disabled"
+      ]
+    },
+    {
+      "record_id": "WP-0044-GOVERNANCE-ATTEMPT-1-20260710",
+      "work_package": "WP-0044-GOVERNANCE-AND-EVIDENCE-RECONCILIATION",
+      "gate": "GATE-GOVERNANCE-CONSISTENCY-001",
+      "date": "2026-07-10",
+      "status": "FAIL",
+      "source": {
+        "git_head": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+        "source_state": "dirty_worktree_before_release_identity_correction"
       },
-      {
-        "command": "PYTHONPATH=. .venv/bin/pytest -q",
-        "result": "523 passed, 1 skipped in 86.34s"
+      "primary_result": "1 failed, 778 passed, 1 skipped in 139.50s",
+      "report": "governance/WORK_PACKAGES/WP-0044-GOVERNANCE-AND-EVIDENCE-RECONCILIATION/TEST_REPORT.json",
+      "authority_mode": "governance_reconciliation_research_only",
+      "limitations": [
+        "release_identifier_changed_outside_required_scope",
+        "failure_retained_and_corrected"
+      ]
+    },
+    {
+      "record_id": "WP-0044-GOVERNANCE-CONSISTENCY-20260710",
+      "work_package": "WP-0044-GOVERNANCE-AND-EVIDENCE-RECONCILIATION",
+      "gate": "GATE-GOVERNANCE-CONSISTENCY-001",
+      "date": "2026-07-10",
+      "status": "PASS",
+      "source": {
+        "git_head": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+        "source_state": "dirty_worktree_with_sha256_manifest",
+        "source_manifest": "foundation_programme/WP-0044/source_manifest.tsv",
+        "source_manifest_sha256": "ec7155e83cb66bf04b77e43771bb0b31c1a6af9bba9b974fe5dc85f171dc9101"
       },
-      {
-        "command": "PYTHONPATH=. .venv/bin/python tools/check_governance_consistency.py",
-        "result": "GOVERNANCE CONSISTENCY: PASS"
+      "primary_result": "779 passed, 1 skipped in 137.89s",
+      "report": "governance/WORK_PACKAGES/WP-0044-GOVERNANCE-AND-EVIDENCE-RECONCILIATION/TEST_REPORT.json",
+      "authority_mode": "governance_reconciled_research_only",
+      "limitations": [
+        "validated_worktree_not_yet_a_new_commit",
+        "full_cli_mapping_deferred_to_bridge",
+        "perception_annotation_readiness_gate_not_yet_passed",
+        "paper_and_live_execution_disabled"
+      ]
+    },
+    {
+      "record_id": "BR-001-003-PERCEPTION-FOUNDATION-20260710",
+      "work_package": "BR-001-003-PERCEPTION-EXPERIMENT-FOUNDATION",
+      "gate": "GATE-PERCEPTION-MARKET-TRUTH-001",
+      "date": "2026-07-10",
+      "status": "PASS",
+      "source": {
+        "git_head": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+        "source_state": "dirty_worktree_with_sha256_manifest",
+        "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/BR001_003_SOURCE_MANIFEST_pre_provenance_hardening.tsv",
+        "source_manifest_sha256": "aa5e54d517316e1bd8c7bea3f759ebe097d41ae42c3b3e466f28b3e85526e7d3"
       },
-      {
-        "command": "PYTHONPATH=. .venv/bin/python tools/check_authority_boundaries.py",
-        "result": "AUTHORITY BOUNDARY CHECK: PASS"
+      "primary_result": "798 passed, 1 skipped in 110.32s",
+      "report": "governance/WORK_PACKAGES/BR-001-003-PERCEPTION-EXPERIMENT-FOUNDATION/TEST_REPORT.json",
+      "authority_mode": "observe_only_perception_foundation",
+      "real_baseline": {
+        "symbol": "BTCUSDT",
+        "decision_time": "2026-06-20T00:00:00Z",
+        "experiment_fingerprint": "cdf726eb5ae4219d24136ef0ab04fbae314156d223222e0ab360e189f7464cfc",
+        "reproduced": true
       },
-      {
-        "command": "PYTHONPATH=. .venv/bin/python - <<'PY' ... parse evidence/VALIDATION_REGISTRY.json governance/WORK_PACKAGES/WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB/TEST_REPORT.json governance/CURRENT_STATE.yaml governance/NEXT_ACTIONS.yaml",
-        "result": "PARSE PASS for validation registry, WP-0022 test report, current state, and next actions"
-      }
-    ],
-    "report": "governance/WORK_PACKAGES/WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB/TEST_REPORT.json",
-    "secondary_reports": [
-      "governance/WORK_PACKAGES/WP-0022-SMC-DETECTOR-REBUILD-STAGE-AB/final_report.md",
-      "reports/current/SMC_DETECTOR_REBUILD_WP0022_REPORT.md",
-      "analysis_runs/WP0022_BTCUSDT_DETECTOR_REBUILD_REPLAY_20260627/11_final_report/gauntlet_report.json",
-      "analysis_runs/WP0022_BTCUSDT_DETECTOR_REBUILD_REPLAY_20260627/06_cognitive/final_colleague_output.json"
-    ],
-    "real_data_smoke_run": "saved_live_btcusdt_csv_detector_rebuild_replay_visual_skipped",
-    "previous_baseline": "WP-0021A-PARENT-SUBORDINATION-AUTHORITY-CLEANUP (516 passed, 1 skipped)",
-    "git_head": "c54860a3b00a869d67a4b781b7fb9cae16c7b5c8",
-    "python_version": "Python 3.14.5",
-    "working_tree_status_lines": 134,
-    "market_edge_claimed": false,
-    "execution_authority_changed": false
-  }
+      "limitations": [
+        "pre_provenance_hardening_validation",
+        "validated_local_foundation_not_clean_environment_certification",
+        "br004_protected_benchmark_pending",
+        "br005_governed_ai_role_execution_pending",
+        "br006_human_adjudication_pilot_pending",
+        "perception_annotation_readiness_gate_not_passed",
+        "paper_and_live_execution_disabled"
+      ]
+    },
+    {
+      "record_id": "BR-001-003-PROVENANCE-HARDENING-ATTEMPT-1-20260710",
+      "work_package": "BR-001-003-PERCEPTION-EXPERIMENT-FOUNDATION",
+      "gate": "GATE-PERCEPTION-MARKET-TRUTH-001",
+      "date": "2026-07-10",
+      "status": "FAIL",
+      "source": {
+        "git_head": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+        "source_state": "dirty_worktree_provenance_hardened_before_process_isolation_test_fix",
+        "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/BR001_003_SOURCE_MANIFEST_failed_isolation_test.tsv",
+        "source_manifest_sha256": "30379166bf7a6548ec33c555b6875e4b43301146501573b1799e96fdbc4bb2bd"
+      },
+      "primary_result": "1 failed, 797 passed, 1 skipped in 114.41s",
+      "report": "governance/WORK_PACKAGES/BR-001-003-PERCEPTION-EXPERIMENT-FOUNDATION/TEST_REPORT.json",
+      "authority_mode": "observe_only_perception_foundation",
+      "failure": {
+        "test": "test_baseline_envelope_is_reproducible_and_complete",
+        "cause": "canonical baseline was invoked inside a shared pytest process after legacy comparison tests had loaded smc_desk.rules; fail-closed runtime guard correctly rejected the contaminated process",
+        "repair": "run canonical reproducibility checks in fresh subprocesses and add an explicit contaminated-process refusal regression"
+      },
+      "limitations": [
+        "failed_attempt_retained",
+        "no_market_truth_or_detector_semantic_failure",
+        "paper_and_live_execution_disabled"
+      ]
+    },
+    {
+      "record_id": "BR-001-003-PERCEPTION-FOUNDATION-FINAL-20260710",
+      "work_package": "BR-001-003-PERCEPTION-EXPERIMENT-FOUNDATION",
+      "gate": "GATE-PERCEPTION-MARKET-TRUTH-001",
+      "date": "2026-07-10",
+      "status": "PASS",
+      "source": {
+        "git_head": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+        "source_state": "dirty_worktree_with_sha256_manifest",
+        "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/BR001_003_SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "e4e3e25681b993a4954f4a739667551bc4f0b3680fcdfccd3259eb9a251f92e5"
+      },
+      "primary_result": "799 passed, 1 skipped in 113.30s",
+      "report": "governance/WORK_PACKAGES/BR-001-003-PERCEPTION-EXPERIMENT-FOUNDATION/TEST_REPORT.json",
+      "authority_mode": "observe_only_perception_foundation",
+      "real_baseline": {
+        "symbol": "BTCUSDT",
+        "decision_time": "2026-06-20T00:00:00Z",
+        "experiment_fingerprint": "92a25a13e0da2c153994fc00ca8546b256b388910fb3871fcb8cb66bfea66944",
+        "reproduced": true
+      },
+      "limitations": [
+        "validated_local_foundation_not_clean_environment_certification",
+        "br004_protected_benchmark_pending",
+        "br005_governed_ai_role_execution_pending",
+        "br006_human_adjudication_pilot_pending",
+        "perception_annotation_readiness_gate_not_passed",
+        "paper_and_live_execution_disabled"
+      ]
+    },
+    {
+      "record_id": "BR-004-006-AI-FIRST-PERCEPTION-LAB-FINAL-20260711",
+      "work_package": "BR-004-006-AI-FIRST-PERCEPTION-LAB",
+      "gate": "GATE-GOVERNED-PERCEPTION-AI-001",
+      "date": "2026-07-11",
+      "recorded_at": "2026-07-11T01:33:40.108602+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 73,
+        "python_version": "3.14.5",
+        "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/BR004_006_SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "371e1960ec29b5a954faf7922f4e84c203285b159e604924df6f1db0fc59a07e"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "810 passed, 1 skipped in 117.62s (0:01:57)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "810 passed, 1 skipped in 117.62s (0:01:57)",
+      "report": "governance/WORK_PACKAGES/BR-004-006-AI-FIRST-PERCEPTION-LAB/TEST_REPORT.json",
+      "authority_mode": "ai_first_observe_only",
+      "limitations": [
+        "blind_benchmark_unpopulated",
+        "human_certification_not_started",
+        "manual_ai_assisted_smoke_not_live_vision_benchmark",
+        "perception_annotation_readiness_gate_not_passed",
+        "paper_and_live_execution_disabled"
+      ]
+    },
+    {
+      "record_id": "WP-0041B-AI-ANNOTATION-RENDER-LOOP-FINAL-20260711",
+      "work_package": "WP-0041B-AI-ANNOTATION-RENDER-LOOP",
+      "gate": "GATE-PROFESSIONAL-AI-ANNOTATION-RENDER-001",
+      "date": "2026-07-11",
+      "recorded_at": "2026-07-11T02:18:23.090584+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 77,
+        "python_version": "3.14.5",
+        "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/WP0041B_SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "9310b4a9c7ce9edfd0d1e44e93e7dc9aae88690ee4a1a733e40a32b71a8a2cfb"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "815 passed, 1 skipped in 144.81s (0:02:24)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "815 passed, 1 skipped in 144.81s (0:02:24)",
+      "report": "reports/current/WP0041B_AI_ANNOTATION_RENDER_LOOP_20260711.md",
+      "authority_mode": "ai_annotation_observe_only",
+      "limitations": [
+        "Historical BTCUSDT replay only; broader frozen-case visual evaluation remains pending.",
+        "Manual AI-assisted JSON mode used no external model API and creates AI weak consensus only.",
+        "No predictive, paper-trading, live-trading, or execution authority was created.",
+        "The global perception and annotation readiness gate remains closed."
+      ]
+    }
+  ]
 }

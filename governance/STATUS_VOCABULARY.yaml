@@ -1,0 +1,42 @@
+schema: smc_codex_controlled_status_vocabulary_v1
+effective_date: "2026-07-10"
+applies_to: new_or_amended_work_packages_after_wp0044
+
+statuses:
+  PROPOSED:
+    meaning: designed_but_not_implemented
+    required_evidence: [objective, scope, acceptance_gate]
+  IMPLEMENTED:
+    meaning: code_or_document_exists_but_acceptance_validation_is_incomplete
+    required_evidence: [changed_files, source_state]
+  VALIDATED:
+    meaning: declared_tests_passed_for_one_exact_source_state_and_scope
+    required_evidence: [test_report, source_identity, limitations]
+  VALIDATED_WITH_LIMITATIONS:
+    meaning: gate_passed_but_named_non_blocking_scope_remains_deferred
+    required_evidence: [test_report, source_identity, explicit_limitations]
+  CERTIFIED:
+    meaning: independent_required_evidence_and_governance_approval_passed_for_the_declared_scope
+    required_evidence: [validation_record, approval_record, scope, expiry_or_revalidation_rule]
+  PROMOTED:
+    meaning: certified_component_is_now_current_authority_for_its_domain
+    required_evidence: [certification, authority_matrix_update, rollback]
+  DEPRECATED:
+    meaning: retained_for_compatibility_or_comparison_but_not_current_authority
+    required_evidence: [replacement_or_reason, allowed_importers]
+  HISTORICAL:
+    meaning: preserved_evidence_that_cannot_direct_current_runtime_or_policy
+    required_evidence: [classification_reason]
+  REJECTED:
+    meaning: evaluated_and_not_accepted
+    required_evidence: [failure_or_decision_record]
+  BLOCKED:
+    meaning: acceptance_cannot_continue_until_a_named_external_or_input_dependency_changes
+    required_evidence: [blocking_condition, attempted_resolution]
+
+prohibited_shortcuts:
+  - implemented_does_not_mean_validated
+  - validated_does_not_mean_certified
+  - certified_perception_does_not_mean_predictive_edge
+  - passing_annotation_tests_does_not_certify_market_interpretation
+  - historical_test_counts_are_not_the_current_gate

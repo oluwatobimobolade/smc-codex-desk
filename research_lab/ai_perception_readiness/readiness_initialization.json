@@ -1,0 +1,71 @@
+{
+  "benchmark_registry": "/Users/tobimobolade/smc-codex-desk/research_lab/ai_perception_readiness/protected_benchmark/public/benchmark_registry.json",
+  "benchmark_validation": {
+    "blind_populated": false,
+    "issues": [],
+    "partition_counts": {
+      "annotation_comprehension_cases": 0,
+      "blind_validation_cases": 0,
+      "development_cases": 0,
+      "doctrine_examples": 0
+    },
+    "registry_sha256": "6defdce2eb260ac65bd2fe1b46699e4924f25e430e159580af26a53404681143",
+    "schema": "protected_benchmark_validation_v1",
+    "status": "PASS"
+  },
+  "blind_cases_populated": false,
+  "doctrine_panel": {
+    "export_sha256": "523c61ccef78641965d85833f1690122e00cf3e8f04511560103350922c85df9",
+    "human_certification_status": "NOT_STARTED",
+    "packets": [
+      {
+        "input_sha256": "35001a3c913d4bf4ed7aa2833c94238c727ebba84a784c88f256c6ac37da0428",
+        "prompt_sha256": "9c94137818c3135db67010c054c866d63f97af3deacffe089ca35c69425bbf2a",
+        "role": "evidence_researcher",
+        "schema": "ai_doctrine_role_packet_v1",
+        "source_manifest_sha256": "23f094148781d76a68c8b936591e6ef6ba889b320afa0204bf9c738c37f77444",
+        "truth_class": "AI_WEAK_DOCTRINE_RESEARCH"
+      },
+      {
+        "input_sha256": "88472095396f58106a9f55b81da81dbf3cc513d721141506ee924c3f2f77d8bd",
+        "prompt_sha256": "a3eb40a45f3d0844768965a39ede8eaac2ee9b0e28c67d98738f2e7f53529138",
+        "role": "machine_definition_formalizer",
+        "schema": "ai_doctrine_role_packet_v1",
+        "source_manifest_sha256": "23f094148781d76a68c8b936591e6ef6ba889b320afa0204bf9c738c37f77444",
+        "truth_class": "AI_WEAK_DOCTRINE_RESEARCH"
+      },
+      {
+        "input_sha256": "27c11c149e5b2ad57ffd3600003306a255367c32350128b9e1023b12a89b811d",
+        "prompt_sha256": "0b25bdab9f83ef629229c4b07e727645911c4730ee87fb0395a0331aa0c19d33",
+        "role": "counterexample_hunter",
+        "schema": "ai_doctrine_role_packet_v1",
+        "source_manifest_sha256": "23f094148781d76a68c8b936591e6ef6ba889b320afa0204bf9c738c37f77444",
+        "truth_class": "AI_WEAK_DOCTRINE_RESEARCH"
+      },
+      {
+        "input_sha256": "1d7db43eff9fe10f57a7a3ee136f93d003623076b3730be9e348d8540af45c12",
+        "prompt_sha256": "e08fe3c1e4cf808abff626778be869f49a9adf26eb1cb90feeae0bbf11e07edd",
+        "role": "doctrine_synthesis_judge",
+        "schema": "ai_doctrine_role_packet_v1",
+        "source_manifest_sha256": "23f094148781d76a68c8b936591e6ef6ba889b320afa0204bf9c738c37f77444",
+        "truth_class": "AI_WEAK_DOCTRINE_RESEARCH"
+      }
+    ],
+    "roles": [
+      "evidence_researcher",
+      "machine_definition_formalizer",
+      "counterexample_hunter",
+      "doctrine_synthesis_judge"
+    ],
+    "runtime_authority": false,
+    "schema": "ai_doctrine_panel_export_v1",
+    "source_manifest_sha256": "23f094148781d76a68c8b936591e6ef6ba889b320afa0204bf9c738c37f77444",
+    "status": "READY_FOR_AI_RESEARCH",
+    "truth_class": "AI_WEAK_DOCTRINE_RESEARCH"
+  },
+  "human_gold_created": false,
+  "operating_model": "AI_FIRST_HUMAN_CERTIFICATION_LATER",
+  "readiness_gate_passed": false,
+  "root": "/Users/tobimobolade/smc-codex-desk/research_lab/ai_perception_readiness",
+  "schema": "ai_perception_readiness_initialization_v1"
+}

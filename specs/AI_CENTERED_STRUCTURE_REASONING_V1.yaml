@@ -1,0 +1,130 @@
+contract_id: AI_CENTERED_STRUCTURE_REASONING_V1
+status: research_contract_active
+purpose: >-
+  Put AI at the center of SMC semantic interpretation while preserving
+  deterministic market truth, geometry, evidence identity, and refusal gates.
+
+authority_order:
+  - certified_market_truth
+  - deterministic_candidate_geometry
+  - human_adjudicated_doctrine
+  - ai_semantic_reasoning
+  - annotation_rendering
+  - outcome_research
+
+global_ai_permissions:
+  - select_among_evidence_grounded_candidates
+  - construct_causal_structure_episodes
+  - distinguish_parent_external_and_child_internal_structure
+  - rank_competing_interpretations
+  - explain_rejected_alternatives
+  - declare_ambiguity_and_abstain
+  - propose_sparse_annotation_objects
+
+global_ai_prohibitions:
+  - invent_or_modify_ohlcv
+  - move_candidate_time_or_price_coordinates
+  - use_rows_after_decision_time
+  - convert_wick_probe_to_confirmed_body_close_break
+  - promote_internal_child_break_to_parent_reversal_without_proof
+  - bypass_deterministic_validation
+  - promote_trade_or_execution_authority
+  - overwrite_human_adjudicated_gold
+
+roles:
+  blind_visual_structure_reader:
+    order: 1
+    reads:
+      - clean_chart_images
+      - decision_time
+      - symbol_and_timeframe_only
+    may_output:
+      - candidate_visual_swings
+      - candidate_structure_events
+      - ambiguity
+    must_not_read:
+      - detector_labels
+      - future_candles
+      - outcome
+    output_schema: blind_visual_structure_read_v1
+
+  deterministic_candidate_reconciler:
+    order: 2
+    reads:
+      - blind_visual_read
+      - certified_detector_candidates
+      - formal_structure_graph
+    may_output:
+      - accepted_candidate_ids
+      - rejected_candidate_ids_with_reasons
+      - unresolved_conflicts
+    output_schema: candidate_reconciliation_v1
+
+  causal_episode_constructor:
+    order: 3
+    reads:
+      - reconciled_candidates
+      - formal_structure_graph
+      - certified_candles
+    may_output:
+      - controlling_timeframe
+      - active_leg
+      - protected_point_interpretation
+      - liquidity_to_break_sequence
+      - continuation_or_reversal_hypotheses
+      - alternative_interpretations
+    output_schema: causal_structure_episode_v1
+
+  adversarial_structure_critic:
+    order: 4
+    reads:
+      - causal_episode
+      - formal_structure_graph
+      - invariant_results
+    may_output:
+      - pass
+      - request_revision
+      - downgrade_to_review_required
+      - contradiction_evidence_ids
+    promotion_allowed: false
+    output_schema: structure_critic_v1
+
+  annotation_planner:
+    order: 5
+    reads:
+      - critic_accepted_or_downgraded_episode
+      - certified_geometry
+      - formal_structure_graph
+    may_output:
+      - structure_segment
+      - liquidity_line
+      - poi_zone
+      - path_projection_when_allowed
+    coordinate_authority: certified_geometry_only
+    output_schema: annotation_plan_v2
+
+  visual_annotation_critic:
+    order: 6
+    reads:
+      - rendered_annotation
+      - annotation_plan
+      - formal_structure_graph
+    may_output:
+      - pass
+      - cleanup_request
+      - downgrade_to_review_required
+    promotion_allowed: false
+    output_schema: visual_annotation_review_v1
+
+non_ai_vetoes:
+  - market_truth_contract
+  - decision_time_guard
+  - evidence_id_validator
+  - formal_graph_invariants
+  - annotation_geometry_validator
+  - holdout_access_guard
+
+execution_authority:
+  signal_allowed: false
+  paper_execution: disabled
+  live_execution: disabled

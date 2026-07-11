@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Sequence, Dict
+from typing import Any, List, Sequence, Dict
 from pydantic import BaseModel, ConfigDict, Field
 
 from smc_desk.data.schemas import Candle
@@ -9,6 +9,7 @@ from smc_desk.perception.fvg import FVGDetector, FairValueGapObject
 from smc_desk.perception.inducement import InducementDetector
 from smc_desk.perception.liquidity import LiquidityLevelDetector, SweepDetector
 from smc_desk.perception.order_blocks import OrderBlockDetector, mark_poi_grade_fvgs
+from smc_desk.perception.config import PerceptionRuntimeConfig, load_perception_config
 from smc_desk.perception.ontology import (
     InducementObject,
     LiquidityLevelObject,
@@ -16,7 +17,6 @@ from smc_desk.perception.ontology import (
     SweepObject,
     SwingObject,
 )
-from smc_desk.rules import RuleConfig, load_rule_config
 
 
 class PerceptionSnapshot(BaseModel):
@@ -34,9 +34,14 @@ class PerceptionSnapshot(BaseModel):
 
 
 class PerceptionEngineV2:
-    def __init__(self, expected_instrument: str = None, expected_timeframe: str = None, config: RuleConfig = None):
+    def __init__(
+        self,
+        expected_instrument: str | None = None,
+        expected_timeframe: str | None = None,
+        config: PerceptionRuntimeConfig | Any | None = None,
+    ):
         if config is None:
-            config = load_rule_config()
+            config = load_perception_config()
         self.config = config
         self.swing_detector = MultiScaleSwingDetector(config=config)
         self.structure_detector = StructureDetector(

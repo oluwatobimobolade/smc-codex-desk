@@ -13,6 +13,7 @@ dependencies = [
   "plotly>=5.20",
   "opencv-python>=4.10",
   "requests>=2.31",
+  "PyYAML>=6.0",
 ]
 
 [tool.setuptools.packages.find]

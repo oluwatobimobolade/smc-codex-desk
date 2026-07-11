@@ -1,0 +1,410 @@
+{
+  "counterexample_hunter": {
+    "claims": [
+      {
+        "claim_id": "X-WICK-001",
+        "concept": "wick_probe",
+        "confidence": 0.98,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-005",
+          "SRC-006"
+        ],
+        "statement": "Counterexample: price wicks beyond a protected high, closes below it, then falls. Any external bullish CHoCH label is false; only sweep/probe evidence is defensible.",
+        "status": "NEGATIVE_CASE_REQUIRED"
+      },
+      {
+        "claim_id": "X-INTERNAL-001",
+        "concept": "internal_external_hierarchy",
+        "confidence": 0.98,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003",
+          "SRC-006"
+        ],
+        "statement": "Counterexample: a 15m or 1H internal lower high breaks while the 4H/1D protected high remains intact. The child may be bullish recovery but parent structure cannot flip.",
+        "status": "NEGATIVE_CASE_REQUIRED"
+      },
+      {
+        "claim_id": "X-FIRSTBREAK-001",
+        "concept": "bos_vs_choch",
+        "confidence": 0.95,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002"
+        ],
+        "statement": "Ambiguous case: the visible window begins immediately before a body-close break and does not establish prior direction. Calling BOS or CHoCH is hindsight; classify an observed break with INSUFFICIENT_CONTEXT.",
+        "status": "AMBIGUOUS_CASE_REQUIRED"
+      },
+      {
+        "claim_id": "X-DRIFT-001",
+        "concept": "displacement",
+        "confidence": 0.96,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "statement": "Contested case: price slowly closes a few ticks beyond a protected level and holds. Geometry says accepted break, while impulse doctrine says low-quality or non-actionable. The constitution must represent both facts without collapsing them.",
+        "status": "CONTESTED_CASE_REQUIRED"
+      },
+      {
+        "claim_id": "X-FVGOB-001",
+        "concept": "fvg_vs_order_block",
+        "confidence": 0.96,
+        "source_ids": [
+          "SRC-004",
+          "SRC-005",
+          "SRC-006"
+        ],
+        "statement": "Counterexample: a visible three-candle gap has no qualifying opposite origin candle linked to the structural impulse. It is FVG-only and must not be annotated OB.",
+        "status": "NEGATIVE_CASE_REQUIRED"
+      },
+      {
+        "claim_id": "X-DEEPOB-001",
+        "concept": "deeper_order_block_priority",
+        "confidence": 0.9,
+        "source_ids": [
+          "SRC-004"
+        ],
+        "statement": "Counterexample: price decisively rejects the shallow qualified OB and never reaches the deeper block. Mechanical deeper-OB priority would hide valid reaction evidence; ranking must remain conditional.",
+        "status": "COUNTEREXAMPLE_TO_UNIVERSAL_RULE"
+      }
+    ],
+    "human_gold_created": false,
+    "output_sha256": "7348b844f94422fbb8dcfa190bdcb625f233e30cd093d0a9ad1989d360091240",
+    "recommendations": [
+      "Blind cases must include wick probes, stale child breaks, marginal body closes, first-break ambiguity, FVG-only pockets, and shallow-versus-deep OB reactions.",
+      "Score object identity separately from narrative relationship correctness."
+    ],
+    "role": "counterexample_hunter",
+    "runtime_authority": false,
+    "schema": "counterexample_hunter_output_v1",
+    "truth_class": "AI_WEAK_DOCTRINE_RESEARCH",
+    "unresolved_conflicts": [
+      "How much body penetration establishes acceptance rather than marginal noise.",
+      "How to rank shallow reaction evidence against deeper origin quality without hindsight."
+    ]
+  },
+  "doctrine_synthesis_judge": {
+    "claims": [
+      {
+        "claim_id": "J-CLOSE-001",
+        "concept": "structure_break_confirmation",
+        "confidence": 0.97,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003",
+          "SRC-005",
+          "SRC-006"
+        ],
+        "statement": "Accept for pilot: confirmed structural breaks require body-close acceptance beyond the exact broken swing/protected extreme; wick-only penetration is probe/sweep evidence.",
+        "status": "ACCEPT_FOR_PILOT"
+      },
+      {
+        "claim_id": "J-HIERARCHY-001",
+        "concept": "internal_external_hierarchy",
+        "confidence": 0.97,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003",
+          "SRC-006"
+        ],
+        "statement": "Accept for pilot: child/internal structure may describe timing or recovery but cannot flip parent external structure without a confirmed parent protected-point break.",
+        "status": "ACCEPT_FOR_PILOT"
+      },
+      {
+        "claim_id": "J-CAUSAL-001",
+        "concept": "causal_grounding",
+        "confidence": 0.95,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-005",
+          "SRC-006"
+        ],
+        "statement": "Accept for pilot: every BOS/CHoCH/protected-point claim must name the exact structural object, confirmation candle, scope, and causal relationship.",
+        "status": "ACCEPT_FOR_PILOT"
+      },
+      {
+        "claim_id": "J-ABSTAIN-001",
+        "concept": "abstention",
+        "confidence": 0.96,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-006"
+        ],
+        "statement": "Accept for pilot: insufficient left context, unresolved prior direction, unconfirmed protected point, or contradictory hierarchy requires explicit uncertainty rather than forced classification.",
+        "status": "ACCEPT_FOR_PILOT"
+      },
+      {
+        "claim_id": "J-POI-001",
+        "concept": "poi_identity",
+        "confidence": 0.96,
+        "source_ids": [
+          "SRC-002",
+          "SRC-003",
+          "SRC-004",
+          "SRC-005",
+          "SRC-006"
+        ],
+        "statement": "Accept for pilot: FVG, OB, breaker, and supply/demand are distinct object kinds; confluence does not permit relabeling one as another.",
+        "status": "ACCEPT_FOR_PILOT"
+      },
+      {
+        "claim_id": "J-DISPLACEMENT-001",
+        "concept": "displacement",
+        "confidence": 0.99,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "statement": "Keep contested: body close may establish geometric break existence while displacement grades quality/actionability, but the source set does not yet justify one universal threshold or whether weak breaks should retain BOS/CHoCH labels.",
+        "status": "KEEP_CONTESTED"
+      },
+      {
+        "claim_id": "J-DEEPOB-001",
+        "concept": "deeper_order_block_priority",
+        "confidence": 0.95,
+        "source_ids": [
+          "SRC-004",
+          "SRC-006"
+        ],
+        "statement": "Keep contested: deeper origin OBs may deserve contextual priority and shallow zones may be inducement, but nearest-versus-deeper ranking is not universal and must survive blind cases.",
+        "status": "KEEP_CONTESTED"
+      },
+      {
+        "claim_id": "J-AUTONOMY-001",
+        "concept": "ai_authority",
+        "confidence": 1.0,
+        "source_ids": [
+          "SRC-001",
+          "SRC-006"
+        ],
+        "statement": "Reject: AI agreement alone is sufficient to create human gold or modify runtime doctrine. AI consensus is a high-value research proposal that remains certification-pending.",
+        "status": "REJECT"
+      }
+    ],
+    "human_gold_created": false,
+    "output_sha256": "5aa7990baa7b2fc07dd08135efa8d690f387537df2c796ae6839db07c1951e17",
+    "recommendations": [
+      "Build blind positive, negative, and ambiguous cases for the five accepted pilot rules before changing detector semantics.",
+      "Keep displacement and deeper-OB priority as explicit competing hypotheses in the benchmark.",
+      "Use AI consensus for routine operation and escalation, with later human certification only for constitution promotion."
+    ],
+    "role": "doctrine_synthesis_judge",
+    "runtime_authority": false,
+    "schema": "doctrine_synthesis_judge_output_v1",
+    "truth_class": "AI_WEAK_DOCTRINE_RESEARCH",
+    "unresolved_conflicts": [
+      "Displacement as existence gate versus quality/actionability attribute.",
+      "Objective protected-point selection when the impulse origin is a candle cluster.",
+      "Contextual ranking of shallow reaction POI versus deeper origin OB."
+    ]
+  },
+  "evidence_researcher": {
+    "claims": [
+      {
+        "claim_id": "R-CLOSE-001",
+        "concept": "structure_break_confirmation",
+        "confidence": 0.96,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003",
+          "SRC-005"
+        ],
+        "statement": "Confirmed BOS and external CHoCH require a candle-body close beyond the exact broken swing or protected point; wick-only penetration is not a confirmed structural break.",
+        "status": "COMMON_PROJECT_DOCTRINE"
+      },
+      {
+        "claim_id": "R-HIERARCHY-001",
+        "concept": "internal_external_hierarchy",
+        "confidence": 0.95,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003",
+          "SRC-006"
+        ],
+        "statement": "Internal structure is lower-order timing evidence and cannot independently reverse parent external structure.",
+        "status": "COMMON_PROJECT_DOCTRINE"
+      },
+      {
+        "claim_id": "R-PROTECTED-001",
+        "concept": "protected_point",
+        "confidence": 0.9,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-005",
+          "SRC-006"
+        ],
+        "statement": "A protected point must be linked to the origin swing of a move that produced a qualified structural break; an arbitrary recent high or low is insufficient.",
+        "status": "COMMON_PROJECT_DOCTRINE"
+      },
+      {
+        "claim_id": "R-DISPLACEMENT-001",
+        "concept": "displacement",
+        "confidence": 0.99,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "statement": "The source set conflicts on displacement: one manual treats it as a quality attribute for BOS/CHoCH existence, while house doctrine and consensus research sometimes make it mandatory for a valid or actionable break.",
+        "status": "CONTESTED"
+      },
+      {
+        "claim_id": "R-POI-001",
+        "concept": "fvg_vs_order_block",
+        "confidence": 0.95,
+        "source_ids": [
+          "SRC-004",
+          "SRC-005",
+          "SRC-006"
+        ],
+        "statement": "An FVG is an imbalance and must not be relabeled as an order block; POI kind and lifecycle must remain explicit.",
+        "status": "COMMON_PROJECT_DOCTRINE"
+      },
+      {
+        "claim_id": "R-DEEP-OB-001",
+        "concept": "deeper_order_block_priority",
+        "confidence": 0.88,
+        "source_ids": [
+          "SRC-004",
+          "SRC-006"
+        ],
+        "statement": "A shallow POI may be inducement in front of a deeper origin OB, but automatic deeper-OB priority is a project hypothesis that still requires case evidence and cannot be universal doctrine.",
+        "status": "PROJECT_HYPOTHESIS"
+      },
+      {
+        "claim_id": "R-ABSTAIN-001",
+        "concept": "ambiguity",
+        "confidence": 0.94,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-006"
+        ],
+        "statement": "Insufficient left context or unclear hierarchy requires explicit abstention rather than forced BOS/CHoCH classification.",
+        "status": "COMMON_PROJECT_DOCTRINE"
+      }
+    ],
+    "human_gold_created": false,
+    "output_sha256": "85ca3e0c2ea6dde5e075de1ebfcd8cb36ef763bab4e31235b5512cced76abb4c",
+    "recommendations": [
+      "Separate structural existence from structural quality/actionability in the constitution.",
+      "Require exact broken-object IDs and confirmation-candle IDs for every structural event.",
+      "Keep deeper-OB preference contested until independent cases support it."
+    ],
+    "role": "evidence_researcher",
+    "runtime_authority": false,
+    "schema": "evidence_researcher_output_v1",
+    "truth_class": "AI_WEAK_DOCTRINE_RESEARCH",
+    "unresolved_conflicts": [
+      "Whether displacement is required for the existence of BOS/CHoCH or only for quality/actionability.",
+      "Whether deeper origin OB priority should be a default ranking rule or only a contextual hypothesis."
+    ]
+  },
+  "machine_definition_formalizer": {
+    "claims": [
+      {
+        "claim_id": "F-BREAK-001",
+        "concept": "confirmed_structure_break",
+        "confidence": 0.96,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003",
+          "SRC-005"
+        ],
+        "statement": "Pilot definition: a break object requires scope, direction, broken_object_id, broken_price, confirmation_candle_id, and a body close beyond the broken wick extreme. Wick-only contact creates a probe/sweep candidate.",
+        "status": "FORMAL_PILOT_RULE"
+      },
+      {
+        "claim_id": "F-CHOCH-001",
+        "concept": "external_choch",
+        "confidence": 0.95,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003",
+          "SRC-006"
+        ],
+        "statement": "Pilot definition: external CHoCH is the first opposing body-close break of the current parent protected point. An opposing internal break remains recovery/pullback evidence unless the parent point is broken.",
+        "status": "FORMAL_PILOT_RULE"
+      },
+      {
+        "claim_id": "F-BOS-001",
+        "concept": "bos",
+        "confidence": 0.9,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "statement": "Pilot definition: BOS is a same-direction continuation break after structural direction is established; if prior direction is unresolved, classify the break event without forcing BOS versus CHoCH.",
+        "status": "FORMAL_PILOT_RULE"
+      },
+      {
+        "claim_id": "F-DISPLACEMENT-001",
+        "concept": "displacement",
+        "confidence": 0.84,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "statement": "Pilot split: body-close geometry determines break existence; displacement is recorded separately as quality. Trade/action promotion may require displacement, but perception must not erase a geometric break solely for weak impulse until adjudicated evidence resolves the conflict.",
+        "status": "CONTESTED_PILOT_SPLIT"
+      },
+      {
+        "claim_id": "F-POI-001",
+        "concept": "poi_identity",
+        "confidence": 0.94,
+        "source_ids": [
+          "SRC-002",
+          "SRC-003",
+          "SRC-004",
+          "SRC-005"
+        ],
+        "statement": "Pilot definition: OB, FVG, breaker, and generic supply/demand remain different object kinds with separate origin evidence and lifecycle. Overlap may create confluence but not identity.",
+        "status": "FORMAL_PILOT_RULE"
+      },
+      {
+        "claim_id": "F-ABSTAIN-001",
+        "concept": "abstention",
+        "confidence": 0.95,
+        "source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-006"
+        ],
+        "statement": "Pilot abstention: missing parent direction, unconfirmed protected point, insufficient left context, contradictory parent/child evidence, or ungrounded POI requires UNCLEAR or REVIEW_REQUIRED.",
+        "status": "FORMAL_PILOT_RULE"
+      }
+    ],
+    "human_gold_created": false,
+    "output_sha256": "8e1f0953b996b1ae54bfd74f56ac7d0f4e59526d66fb68139cb2fe908484178d",
+    "recommendations": [
+      "Model event existence and event quality as separate fields.",
+      "Require causal links from protected point to qualified break.",
+      "Do not give pilot definitions runtime authority before blind evaluation."
+    ],
+    "role": "machine_definition_formalizer",
+    "runtime_authority": false,
+    "schema": "machine_definition_formalizer_output_v1",
+    "truth_class": "AI_WEAK_DOCTRINE_RESEARCH",
+    "unresolved_conflicts": [
+      "Displacement threshold and whether it changes object existence.",
+      "Objective rule for selecting among multiple origin candles or candle clusters."
+    ]
+  }
+}

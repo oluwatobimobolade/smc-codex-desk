@@ -1,0 +1,68 @@
+{
+  "access_ledger": "/Users/tobimobolade/smc-codex-desk/research_lab/ai_perception_readiness/protected_benchmark/access_ledger.jsonl",
+  "blind_storage_root": "/Users/tobimobolade/smc-codex-desk/research_lab/ai_perception_readiness/protected_benchmark/private_blind",
+  "case_memory_exclusion_required": true,
+  "no_overlap_required": true,
+  "partitions": {
+    "annotation_comprehension_cases": {
+      "cases": [
+        {
+          "case_id": "annotation_comprehension_cases:GBPUSD:20260709T190608Z:eeb991505253",
+          "case_memory_key": "public:annotation_comprehension_cases:eeb991505253504f",
+          "chart_sha256": [
+            "27dcea01287bec03b045d2b7aa6b8d8cdcc7b7b7ca95bb2e1aa82f59a8832e4f",
+            "374b0e8bae478afa01d63d81b70ef3f32a4165d9e6e17176a73668eb19fdb14a",
+            "badbcb08c1c4e4b0b1c91cf6b5a46f2ee9dc536054a9954f4505f2c13f080e3b",
+            "bfd776c114f8135178f069bfda707aa480b1eeb063b58d56d4b5a8541e104e35"
+          ],
+          "content_commitment_sha256": "eeb991505253504f03f7976556b630fd25db9db932b70e0356d477458862e112",
+          "decision_end": "2026-07-09T19:06:08.136023Z",
+          "decision_start": "2026-07-08T19:06:08.136023Z",
+          "partition": "annotation_comprehension_cases",
+          "public_metadata_only": true,
+          "symbol": "GBPUSD"
+        }
+      ],
+      "name": "annotation_comprehension_cases",
+      "status": "READY",
+      "truth_status": "AI_WEAK_LABELS"
+    },
+    "blind_validation_cases": {
+      "cases": [],
+      "name": "blind_validation_cases",
+      "status": "UNPOPULATED",
+      "truth_status": "NO_LABELS"
+    },
+    "development_cases": {
+      "cases": [
+        {
+          "case_id": "development_cases:BTCUSDT:20260709T190504Z:93c3e27fcb11",
+          "case_memory_key": "public:development_cases:93c3e27fcb1168c6",
+          "chart_sha256": [
+            "18f8a76c3f0c8c7e7c345483a9ab90e41153b012c59a406e2aa0e08817bdc64e",
+            "a403ba82f96ae683d926401acb14cb3a0694e1027e179e82889295907380737a",
+            "a8dfc01dec2f1f395c212ace5485645da716d200760f79df35e1b009bde441e0",
+            "ab547106689a67a9dbb2db3253dd0c30e109682555b6e12c0e397041fa7c6b17"
+          ],
+          "content_commitment_sha256": "93c3e27fcb1168c6c8204c6d1287a69791887c6a0d8b74727b9af81ed17b4631",
+          "decision_end": "2026-07-09T19:05:04.786241Z",
+          "decision_start": "2026-07-08T19:05:04.786241Z",
+          "partition": "development_cases",
+          "public_metadata_only": true,
+          "symbol": "BTCUSDT"
+        }
+      ],
+      "name": "development_cases",
+      "status": "READY",
+      "truth_status": "AI_WEAK_LABELS"
+    },
+    "doctrine_examples": {
+      "cases": [],
+      "name": "doctrine_examples",
+      "status": "READY",
+      "truth_status": "NO_LABELS"
+    }
+  },
+  "registry_id": "PERCEPTION_BENCHMARK_REGISTRY_V1",
+  "schema": "protected_benchmark_registry_v1"
+}

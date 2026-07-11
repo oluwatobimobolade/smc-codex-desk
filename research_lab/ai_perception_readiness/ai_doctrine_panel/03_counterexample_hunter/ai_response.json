@@ -1,0 +1,20 @@
+{
+  "schema": "counterexample_hunter_output_v1",
+  "role": "counterexample_hunter",
+  "claims": [
+    {"claim_id": "X-WICK-001", "concept": "wick_probe", "statement": "Counterexample: price wicks beyond a protected high, closes below it, then falls. Any external bullish CHoCH label is false; only sweep/probe evidence is defensible.", "source_ids": ["SRC-001", "SRC-002", "SRC-005", "SRC-006"], "status": "NEGATIVE_CASE_REQUIRED", "confidence": 0.98},
+    {"claim_id": "X-INTERNAL-001", "concept": "internal_external_hierarchy", "statement": "Counterexample: a 15m or 1H internal lower high breaks while the 4H/1D protected high remains intact. The child may be bullish recovery but parent structure cannot flip.", "source_ids": ["SRC-001", "SRC-002", "SRC-003", "SRC-006"], "status": "NEGATIVE_CASE_REQUIRED", "confidence": 0.98},
+    {"claim_id": "X-FIRSTBREAK-001", "concept": "bos_vs_choch", "statement": "Ambiguous case: the visible window begins immediately before a body-close break and does not establish prior direction. Calling BOS or CHoCH is hindsight; classify an observed break with INSUFFICIENT_CONTEXT.", "source_ids": ["SRC-001", "SRC-002"], "status": "AMBIGUOUS_CASE_REQUIRED", "confidence": 0.95},
+    {"claim_id": "X-DRIFT-001", "concept": "displacement", "statement": "Contested case: price slowly closes a few ticks beyond a protected level and holds. Geometry says accepted break, while impulse doctrine says low-quality or non-actionable. The constitution must represent both facts without collapsing them.", "source_ids": ["SRC-001", "SRC-002", "SRC-003"], "status": "CONTESTED_CASE_REQUIRED", "confidence": 0.96},
+    {"claim_id": "X-FVGOB-001", "concept": "fvg_vs_order_block", "statement": "Counterexample: a visible three-candle gap has no qualifying opposite origin candle linked to the structural impulse. It is FVG-only and must not be annotated OB.", "source_ids": ["SRC-004", "SRC-005", "SRC-006"], "status": "NEGATIVE_CASE_REQUIRED", "confidence": 0.96},
+    {"claim_id": "X-DEEPOB-001", "concept": "deeper_order_block_priority", "statement": "Counterexample: price decisively rejects the shallow qualified OB and never reaches the deeper block. Mechanical deeper-OB priority would hide valid reaction evidence; ranking must remain conditional.", "source_ids": ["SRC-004"], "status": "COUNTEREXAMPLE_TO_UNIVERSAL_RULE", "confidence": 0.9}
+  ],
+  "unresolved_conflicts": [
+    "How much body penetration establishes acceptance rather than marginal noise.",
+    "How to rank shallow reaction evidence against deeper origin quality without hindsight."
+  ],
+  "recommendations": [
+    "Blind cases must include wick probes, stale child breaks, marginal body closes, first-break ambiguity, FVG-only pockets, and shallow-versus-deep OB reactions.",
+    "Score object identity separately from narrative relationship correctness."
+  ]
+}

@@ -52,7 +52,7 @@ calibration.
 - Upgraded critic to graph challenger: reads graph first, can ONLY downgrade, NEVER promote.
 - 2026-07-07 audit repair: graph `signal_allowed` is always false; `invariant_passed` carries graph health without implying execution permission. Child parent-break logic now requires body close beyond parent protected level, stale child breaks are ignored, wick probes remain informational unless promoted, and structure-map headers no longer overlap.
 - 20 WP-0040 tests, all green. Fresh observe-only smoke on BTCUSDT + SUIUSDT passed (THESIS_ONLY, graph conflict, invariants PASS, trade promotion blocked).
-- Test suite: 735 passed, 1 skipped.
+- Historical WP-0040 completion validation: 735 passed, 1 skipped. The current repository count is recorded under WP-0041A below.
 
 **WP-0041 Professional AI SMC Annotation Planner (2026-07-09):** AI-directed professional markup under graph authority.
 - Added `annotation_plan_v2` as the professional SMC drawing instruction layer beside legacy labels/levels.
@@ -72,7 +72,24 @@ calibration.
 - Live runner wired to `compose_local_annotation_plan_v2` so live path produces evidence-grounded V2 markup instead of generic range decoration.
 - V2 `trade_box` geometry verified against validated entry/stop/target plans within tolerance; legacy text is suppressed.
 - Adversarial tests cover: moved-BOS price/span mismatch, internal-as-external relabel, path-without-active-POI, native V2 trade box, and visual-critic overlap cleanup.
-- Validation: 6 WP-0041A focused tests passed, WP-0041+WP-0041A combined 10 passed, affected suite 85 passed, full suite 745 passed / 1 skipped (baseline 740 + 5 new adversarial tests).
+- 2026-07-10 re-audit added confirmation/lifecycle anchors, wick-probe rejection, evidence-grounded active-POI selection, critic-enforced official downgrade, empty-V2 legacy suppression, bounded one-candle POI display, and decision-time-correct offline XAU replay.
+- A final coordinate audit found that evidence indices used 120 candles while the official chart used 240. Official rendering now uses the evidence-window length, timestamp geometry overrides raw indices, and out-of-window evidence cannot snap to an edge. POI lifecycle is independently replayed from subsequent candles because order-block detector lifecycle is incomplete.
+- The final live deterministic GBPUSD smoke mapped a fresh watch-only 15m OB at its true July 10 origin, explicitly recorded the bullish-HTF/bearish-active-range conflict, rendered only a bounded OB plus local BOS/BSL, and kept entry/SL/TP/trade box absent. The visual critic passed.
+- Validation after re-audit: 12 WP-0041A tests passed, WP-0041+WP-0041A combined 17 passed, affected integrity suite 126 passed, and the full repository suite passed 760 / skipped 1.
+
+**BR-004 to BR-006 AI-First Perception Lab (2026-07-10):** AI becomes the operating structure colleague under hard market-truth controls.
+- Protected benchmark registry now separates doctrine, development, blind validation, and annotation-comprehension partitions. Its blind directory is hash-ledger guarded and remains unpopulated; public BTCUSDT development and GBPUSD annotation cases are weak AI labels only.
+- The six-role lab is executable without an external API: blind chart reader -> certified candidate reconciler -> causal episode builder -> adversarial critic -> sparse annotation planner -> visual critic. Every prompt, input, raw output, parsed output, provider mode, and evidence ID is logged; a critic can only revise or downgrade.
+- Source-grounded AI doctrine panel completed: five pilot rules accepted (body-close over exact protected level, parent/child subordination, causal grounding, abstention, POI identity); displacement threshold and deeper-OB priority remain contested hypotheses. It cannot modify detector semantics.
+- BTCUSDT was inspected on clean 4H/1H charts and run in `MANUAL_AI_ASSISTED_JSON` mode with no API. It correctly treated the 1H bullish recovery as stale/subordinate to the later 4H/1D bearish parent and produced no signal. The output is AI weak consensus, never gold or execution authority.
+- Final validation for this source-bound slice: 810 passed, 1 skipped. The global perception/annotation readiness gate stays closed pending blind cases and repeated frozen evaluation.
+
+**WP-0041B Professional AI Annotation Render Loop (2026-07-11):** The AI-selected structure story now becomes a real, verified chart.
+- Added a certified semantic-to-geometry resolver. AI selects evidence IDs; deterministic evidence owns every price, timestamp, span, type, and timeframe.
+- Added a sparse multi-timeframe renderer with clean baselines, exact object reconciliation, image hashes, changed-pixel proof, nonblank checks, and clutter limits.
+- Moved the visual critic after rendering. A PASS now requires attestation of the exact render manifest and every annotated image hash; stale or absent render evidence is rejected.
+- BTCUSDT historical proof rendered three selected objects across 4H and 1H: controlling bearish 4H CHoCH, protected high, and dashed stale 1H bullish recovery. No POI or trade box was invented.
+- Full validation: 815 passed, 1 skipped. This is observe-only mechanism validation, not predictive edge or execution readiness.
 
 **Pipeline:** Live/Historical OHLCV → PEV2 (15m/1H/4H/1D) → Event Ledger → MTF Graph & Parent-Child Guard → Formal Structure Graph (AUTHORITATIVE) → Strategy-State Engine & POI Refinement → Evidence Graph → Decision.
 
@@ -144,7 +161,7 @@ orchestrator.
 ## Current Release Candidate
 
 - Release ID: `colleague-core-rc0`
-- Status: research foundation / production-ready colleague loop
+- Status: research foundation with canonical runtime and reconciled governance
 - Live execution: disabled
 - Paper execution: disabled
 - Predictive authority: not certified
@@ -155,4 +172,23 @@ Do not claim guaranteed profitability, a foolproof strategy, certain future pric
 
 ## Next Approved Milestone
 
-Complete `WP-0024-NEXT`: Stage E execution readiness (premium/discount gates affecting POI watch quality, liquidity target maps, ATR threading into all structure layers, and 15m/1h/4h/1d backfill paginator).
+Complete the compact Perception and Annotation Readiness Bridge, BR-001 through
+BR-006. The bridge must prove reproducibility, candle/timeframe truth,
+provenance, benchmark separation, governed AI roles, and an independent human
+structure pilot before authoritative structure semantics are redesigned.
+
+**BR-001 to BR-003 local foundation (2026-07-10):**
+- Canonical perception no longer imports legacy engine/rules/mtf/case-library authority indirectly.
+- PerceptionEngineV2 loads detector-only `PERCEPTION_DETECTOR_CONFIG_V2`.
+- `market_truth_certificate_v1` binds every completed 1H/4H/1D candle to exact 15m source rows and decision time.
+- The AI is central to semantic hierarchy, causal episodes, alternatives, ambiguity, and annotation selection, but has no candle, coordinate, invariant-bypass, trade-promotion, or execution authority.
+- BTCUSDT deterministic baseline fingerprint `92a25a13e0da2c153994fc00ca8546b256b388910fb3871fcb8cb66bfea66944` reproduced exactly.
+- Final validation reached 799 passed, 1 skipped after retaining one failed contamination-guard attempt. Readiness remains closed until BR-004 through BR-006.
+
+**WP-0042 to WP-0044 foundation reconciliation (2026-07-10):**
+- WP-0042 froze commit `554e499` and preserved the WP-0041A re-audit in `stash@{0}`.
+- WP-0043 established `smc_desk.colleague.orchestrator_v3` as canonical and passed with the explicit limitation that full CLI mapping remains deferred.
+- WP-0044 restored the preserved WP-0041A code, retained the stash as recovery evidence, and reconciled it with WP-0043.
+- Validation history is append-only and source-bound; the generic `latest_validation` claim is prohibited.
+- Both controlling PDFs are present and SHA-256 registered. The companion repository is historical and non-authoritative.
+- `smc_desk.mtf` is mixed transitional authority: deterministic resampling remains canonical while old snapshot helpers are comparison-only.

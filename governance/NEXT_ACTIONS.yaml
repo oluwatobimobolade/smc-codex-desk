@@ -310,8 +310,8 @@ next_actions:
     priority: 41
     title: Annotation integrity repair — evidence anchoring, real visual critic, sparse renderer, V2 trade-box ownership
     owner: Market Colleague Architect
-    status: COMPLETE_ACCEPTED_FULL_SYSTEM_VALIDATED
-    gate: 745_tests_passing_adversarial_evidence_anchor_visual_critic_validated
+    status: COMPLETE_ACCEPTED_REAUDITED_20260710
+    gate: 760_tests_passing_annotation_integrity_coordinate_and_decision_time_truth_validated
     evidence_required:
       - governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/final_report.md
       - governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json
@@ -320,12 +320,127 @@ next_actions:
       - smc_desk/brain/annotation_candidate_composer.py (evidence-grounded selector)
       - smc_desk/brain/annotation_visual_critic.py (downgrade-only critic)
       - tests/test_wp0041a_annotation_integrity_repair.py (adversarial cases)
+      - tests/test_wp0024_partial_htf_rejection.py (forming HTF candle exclusion)
+      - tests/test_offline_full_system_xauusd.py (offline cutoff and OHLC truth contract)
+      - analysis_runs/WP0041A_REAUDIT_20260710/LIVE_FINAL_VERIFIED/LIVE_FULL_SYSTEM_AI_SMC_V3_20260710_082247/GBPUSD/
+      - analysis_runs/WP0041A_REAUDIT_20260710/OFFLINE_FULL_SYSTEM_XAUUSD_STALE_20260710_082328/
     completed_scope:
       - drawn price/span/scope/kind/type mechanically verified against detector + graph anchors
       - static self-review replaced with downgrade-only visual critic saved as annotation_visual_review.json
       - renderer suppresses generic banners/footer/explanatory text when level_source=annotation_plan_v2
       - live planner wired to evidence-grounded candidate composer
       - V2 trade_box geometry verified against validated entry/stop/target plans
+      - wick-only and unconfirmed structure cannot be drawn as BOS or CHoCH
+      - unconfirmed, terminal, invalidated, or fully mitigated POIs cannot be rendered as active zones
+      - visual critic REVIEW_REQUIRED is an official hard downgrade that strips trade levels
+      - active watch POI selection is evidence-grounded and cannot create entry, stop, target, or execution authority
+      - empty V2 plans suppress legacy labels, levels, banners, and generic path clutter
+      - stale offline XAU replay trims canonical 15m at decision time and derives completed HTFs only
+      - official chart length equals the evidence window and timestamp geometry overrides raw indices
+      - out-of-window evidence cannot snap to a chart edge or pass validation
+      - subsequent candles independently reconstruct POI freshness, partial mitigation, consumption, and invalidation
     prohibited_claims:
       - WP-0041A creates no trading edge, execution authority, or live readiness
       - passing tests means code behaved as specified; it does not prove market correctness
+  - id: WP-0041B
+    priority: 41
+    title: Professional AI annotation render loop
+    owner: AI Structure and Rendering Engineer
+    status: VALIDATED_LOCAL_OBSERVE_ONLY
+    gate: GATE-PROFESSIONAL-AI-ANNOTATION-RENDER-001
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0041B-AI-ANNOTATION-RENDER-LOOP/final_report.md
+      - governance/WORK_PACKAGES/WP-0041B-AI-ANNOTATION-RENDER-LOOP/TEST_REPORT.json
+      - foundation_programme/PERCEPTION_READINESS_BRIDGE/WP0041B_SOURCE_MANIFEST.tsv
+      - analysis_runs/WP0041B_AI_ANNOTATION_RENDER_LOOP_BTCUSDT_20260711/ai_structure_lab_manifest.json
+      - analysis_runs/WP0041B_AI_ANNOTATION_RENDER_LOOP_BTCUSDT_20260711/06_professional_annotation_render/render_manifest.json
+    completed_scope:
+      - AI planner selects evidence IDs while deterministic code owns price and timestamp geometry
+      - local structure segments, liquidity lines, and POI zones render from certified evidence only
+      - visual critic runs after rendering and attests exact manifest and image hashes
+      - every planned object must be rendered and pass clean-baseline pixel comparison
+      - render errors and empty plans fail closed to REVIEW_REQUIRED
+      - BTCUSDT historical proof renders sparse 4H and 1H charts with no trade box
+    remaining_scope:
+      - freeze and evaluate a broader positive, negative, and ambiguous case cohort
+      - connect the validated lab bridge to the canonical full-system command after cohort validation
+      - retain optional human constitutional certification before doctrine promotion
+    prohibited_claims:
+      - no predictive edge, human gold, paper authority, or live execution authority was created
+  - id: WP-0042
+    priority: 42
+    title: Immutable baseline and repository census
+    owner: Foundation Programme
+    status: VALIDATED
+    gate: GATE-BASELINE-CENSUS-001
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0042-IMMUTABLE-BASELINE-AND-REPOSITORY-CENSUS/final_report.md
+      - foundation_programme/WP-0042/file_manifest.tsv
+  - id: WP-0043
+    priority: 43
+    title: Canonical runtime and authority consolidation
+    owner: Foundation Programme
+    status: VALIDATED_WITH_LIMITATIONS
+    gate: GATE-CANONICAL-RUNTIME-001
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0043-CANONICAL-RUNTIME-AND-AUTHORITY-CONSOLIDATION/final_report.md
+      - governance/WORK_PACKAGES/WP-0043-CANONICAL-RUNTIME-AND-AUTHORITY-CONSOLIDATION/TEST_REPORT.json
+      - tests/test_canonical_runtime_authority.py
+    limitations:
+      - canonical command surface does not yet map the complete live research CLI
+      - reproducible clean-environment installation belongs to BR-001
+  - id: WP-0044
+    priority: 44
+    title: Governance and evidence reconciliation
+    owner: Governance Authority Engineer
+    status: VALIDATED
+    gate: GATE-GOVERNANCE-CONSISTENCY-001
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-0044-GOVERNANCE-AND-EVIDENCE-RECONCILIATION/final_report.md
+      - governance/WORK_PACKAGES/WP-0044-GOVERNANCE-AND-EVIDENCE-RECONCILIATION/TEST_REPORT.json
+      - governance/AUTHORITY_PRECEDENCE.yaml
+      - governance/STATUS_VOCABULARY.yaml
+      - governance/SOURCE_DOCUMENT_REGISTER.yaml
+      - evidence/VALIDATION_REGISTRY.json
+      - tests/test_wp0044_governance_reconciliation.py
+    completed_scope:
+      - append-only source-bound validation history replaces latest_validation
+      - both controlling PDFs are size and SHA-256 verified
+      - WP-0042 PDF finding amended without rewriting history
+      - canonical and companion repository roles are explicit
+      - onboarding points to orchestrator_v3 and the compact readiness bridge
+      - WP-0041A preserved stash restored and reconciled with WP-0043
+  - id: BR-001-THROUGH-BR-006
+    priority: 45
+    title: Compact Perception and Annotation Readiness Bridge
+    owner: Perception Research Programme
+    status: VALIDATED_BR004_005_AI_FIRST_SLICE_BR006_AI_DOCTRINE_CERTIFICATION_PENDING
+    gate: GATE-PERCEPTION-ANNOTATION-READY-001
+    evidence_required:
+      - GATE-PERCEPTION-REPRODUCIBILITY-001
+      - GATE-PERCEPTION-MARKET-TRUTH-001
+      - GATE-PERCEPTION-PROVENANCE-001
+      - GATE-PERCEPTION-BENCHMARK-INTEGRITY-001
+      - GATE-GOVERNED-PERCEPTION-AI-001
+      - GATE-HUMAN-STRUCTURE-PILOT-001
+    prohibited_scope:
+      - no authoritative detector redesign before bridge closure
+      - no predictive paper or live execution promotion
+    completed_scope:
+      - pure canonical hashing, OHLCV contract, and timeframe reconstruction modules
+      - detector-only PerceptionEngineV2 runtime config with no strategy/risk fields
+      - fourteen independent market-truth fixture scenarios
+      - exact 15m-to-1h/4h/1d lineage and incomplete-bucket exclusion
+      - sealed deterministic baseline experiment with source/environment/input/output hashes
+      - AI-centered semantic reasoning authority contract
+      - real BTCUSDT baseline reproduced with identical stable hashes
+      - protected benchmark registry with hash-chained access ledger and public AI-weak development/annotation partitions
+      - six governed AI roles with strict schemas, prompt/input/output hashes, evidence-ID grounding, bounded repair, and downgrade-only critics
+      - source-grounded AI doctrine panel with five pilot rules, two explicit contested hypotheses, and no runtime modification authority
+      - BTCUSDT AI-assisted no-API structure replay with formal-graph agreement, sparse annotation selection, and no signal authority
+    remaining_scope:
+      - independent clean-environment repetition and full baseline/AI/render/evaluate command mapping
+      - blind positive, negative, and ambiguous benchmark cases isolated from public AI case memory
+      - a larger repeated AI-assisted/vision-provider cohort, measured against the locked benchmark after a freeze
+      - optional independent human doctrine and adjudication pilot for constitutional promotion only
+      - final BR-007 readiness decision

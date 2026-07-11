@@ -138,6 +138,12 @@ def validate_ai_smc_decision(
         "annotation_v2_trade_target_mismatch",
         "annotation_v2_trade_price_mismatch",
         "annotation_v2_split_trade_box_forbidden",
+        "annotation_v2_structure_not_confirmed",
+        "annotation_v2_poi_not_confirmed",
+        "annotation_v2_poi_not_active",
+        "annotation_v2_evidence_outside_visible_window",
+        "annotation_v2_poi_observed_consumed",
+        "annotation_v2_poi_lifecycle_unverifiable",
     }
 
     # Calculate statuses

@@ -91,15 +91,22 @@ def test_dual_lens_tool_is_tagged_comparison_only() -> None:
     assert '"analyze_live_dual_lens.py"' in checker_src
 
 
-def test_run_context_inline_loader_preserves_semantics() -> None:
-    """The inlined loader must keep its contract: lowercase + date→timestamp."""
+def test_run_context_pure_loader_preserves_semantics(tmp_path: Path) -> None:
+    """The pure loader keeps lowercase/date/numeric semantics without legacy imports."""
     import importlib
     importlib.invalidate_caches()
     rc = importlib.import_module("smc_desk.colleague.run_context")
     assert callable(getattr(rc, "_local_load_ohlcv_csv", None))
-    src = (ROOT / "smc_desk" / "colleague" / "run_context.py").read_text()
-    assert "rename(columns=" in src or 'rename(columns={"date"' in src or '"date"' in src
-    assert 'pd.to_numeric' in src
+    source = tmp_path / "sample.csv"
+    source.write_text(
+        "Date,Open,High,Low,Close,Volume\n"
+        "2026-01-01T00:00:00Z,1,3,0.5,2,10\n",
+        encoding="utf-8",
+    )
+    frame = rc._local_load_ohlcv_csv(str(source))
+    assert list(frame.columns) == ["timestamp", "open", "high", "low", "close", "volume"]
+    assert float(frame.iloc[0]["close"]) == 2.0
+    assert str(frame.iloc[0]["timestamp"]) == "2026-01-01 00:00:00"
 
 
 def test_canonical_main_smoke_emits_authority_trace(tmp_path: Path) -> None:
@@ -130,7 +137,20 @@ def test_canonical_main_smoke_emits_authority_trace(tmp_path: Path) -> None:
     assert "module_versions" in trace
 
 
-def test_boundary_checker_rejects_new_forbidden_import(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "statement, expected",
+    [
+        ("from smc_desk.engine import analyze_dataframe\n", "smc_desk.engine.analyze_dataframe"),
+        ("from smc_desk.case_library import file_sha256\n", "smc_desk.case_library.file_sha256"),
+        ("from smc_desk.mtf import resample_ohlcv\n", "smc_desk.mtf.resample_ohlcv"),
+        ("from smc_desk.rules import load_rule_config\n", "smc_desk.rules.load_rule_config"),
+    ],
+)
+def test_boundary_checker_rejects_new_forbidden_import(
+    tmp_path: Path,
+    statement: str,
+    expected: str,
+) -> None:
     """A synthetic file with a forbidden import must be flagged.
 
     This is a regression net: if the checker ever stops catching the leak, this
@@ -139,10 +159,7 @@ def test_boundary_checker_rejects_new_forbidden_import(tmp_path: Path) -> None:
     bad = tmp_path / "smc_desk" / "_wp0043_boundary_test"
     bad.mkdir(parents=True)
     p = bad / "leaky.py"
-    p.write_text(
-        "from smc_desk.engine import analyze_dataframe\n",
-        encoding="utf-8",
-    )
+    p.write_text(statement, encoding="utf-8")
 
     # Execute the checker against an in-memory ACTIVE_PACKAGES pointing at
     # this dir. We use a tiny driver script.
@@ -159,4 +176,4 @@ def test_boundary_checker_rejects_new_forbidden_import(tmp_path: Path) -> None:
     proc = _run([str(driver)])
     assert proc.returncode != 0
     assert "AUTHORITY BOUNDARY CHECK: FAIL" in proc.stdout
-    assert "analyze_dataframe" in proc.stdout
+    assert expected in proc.stdout

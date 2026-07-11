@@ -17,7 +17,7 @@ from typing import Any, Mapping
 import pandas as pd
 from PIL import Image
 
-from smc_desk.case_library import file_sha256
+from smc_desk.data.hashing import file_sha256
 from smc_desk.colleague.orchestrator_v2 import run_colleague_brain_v2
 from smc_desk.colleague.smc_narrative_authority import (
     assert_narrative_authority_contract,

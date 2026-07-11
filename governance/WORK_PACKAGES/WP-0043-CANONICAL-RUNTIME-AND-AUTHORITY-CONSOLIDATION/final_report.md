@@ -1,7 +1,8 @@
 # WP-0043 — Canonical Runtime and Authority Consolidation
 
 **Gate:** `GATE-CANONICAL-RUNTIME-001`
-**Status:** code-complete; awaiting gate review
+**Status:** `VALIDATED_WITH_LIMITATIONS`
+**Gate decision:** `GATE-CANONICAL-RUNTIME-001` PASS
 **Date:** 2026-07-10
 **Baseline:** `554e499` (frozen at WP-0042)
 
@@ -89,7 +90,7 @@ Files explicitly allowed (with justification in DEPRECATION_REGISTER):
 | `authority_trace.json` | not emitted | emitted by both `__main__ --smoke` and v3 run |
 | R1 silent leak | present in `run_context.py` | **fixed** |
 
-## What is NOT done (deferred to later WPs)
+## Explicit Limitations
 
 - The `__main__.py` shim currently exposes `--smoke` and pre-flight checks
   but not the full CLI mapping (the live entrypoint remains

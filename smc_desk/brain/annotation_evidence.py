@@ -26,6 +26,11 @@ class AnnotationEvidenceAnchor:
     end_time: str | None
     start_index: int | None
     end_index: int | None
+    confirmation_status: str | None
+    activity_status: str | None
+    mitigation_status: str | None
+    is_wick_only_probe: bool
+    confidence: float | None
     source: str
 
 
@@ -67,9 +72,62 @@ def build_annotation_evidence_index(evidence_pack: Mapping[str, Any]) -> dict[st
             end_time=None,
             start_index=None,
             end_index=None,
+            confirmation_status="confirmed",
+            activity_status="active",
+            mitigation_status="untouched",
+            is_wick_only_probe=False,
+            confidence=1.0,
             source="formal_structure_graph.active_range",
         )
+    _add_active_range_pivot_anchors(index, evidence_pack)
     return index
+
+
+def _add_active_range_pivot_anchors(
+    index: dict[str, AnnotationEvidenceAnchor],
+    evidence_pack: Mapping[str, Any],
+) -> None:
+    authority = evidence_pack.get("active_range_authority") or {}
+    selected = authority.get("selected_range") if isinstance(authority, Mapping) else None
+    if isinstance(selected, Mapping):
+        authority = selected
+    if not isinstance(authority, Mapping):
+        return
+    source_pivots = authority.get("source_pivots") or []
+    if not isinstance(source_pivots, list):
+        return
+    for raw in source_pivots:
+        if not isinstance(raw, Mapping):
+            continue
+        pivot_id = raw.get("pivot_id")
+        timeframe = str(raw.get("timeframe") or authority.get("timeframe") or "unknown")
+        timestamp = _time_string(raw.get("timestamp"))
+        price = _float(raw.get("price"))
+        kind = str(raw.get("kind") or "").lower()
+        if not pivot_id or timestamp is None or price is None or kind not in {"high", "low"}:
+            continue
+        pivot_index = index_for_time(evidence_pack, timeframe, timestamp)
+        index[str(pivot_id)] = AnnotationEvidenceAnchor(
+            object_id=str(pivot_id),
+            evidence_type="swing_pivot",
+            timeframe=timeframe,
+            direction="bearish" if kind == "high" else "bullish",
+            structure_scope="external",
+            kind=f"swing_{kind}",
+            price_low=price,
+            price_high=price,
+            exact_price=price,
+            start_time=timestamp,
+            end_time=timestamp,
+            start_index=pivot_index,
+            end_index=pivot_index,
+            confirmation_status="confirmed",
+            activity_status="active",
+            mitigation_status="untouched",
+            is_wick_only_probe=False,
+            confidence=1.0,
+            source="active_range_authority.source_pivots",
+        )
 
 
 def price_tolerance(price: float | None, *, basis_points: float = 8.0) -> float:
@@ -107,17 +165,63 @@ def index_for_time(evidence_pack: Mapping[str, Any], timeframe: str, value: str 
     target = _parse_time(value)
     if target is None:
         return None
-    best: tuple[float, int] | None = None
+    parsed_stamps: list[tuple[int, datetime]] = []
     for idx, candle in enumerate(candles):
         if not isinstance(candle, Mapping):
             continue
         stamp = _parse_time(str(candle.get("timestamp") or candle.get("open_time") or ""))
         if stamp is None:
             continue
+        parsed_stamps.append((idx, stamp))
+    if not parsed_stamps:
+        return None
+    first_stamp = min(stamp for _idx, stamp in parsed_stamps)
+    last_stamp = max(stamp for _idx, stamp in parsed_stamps)
+    if target < first_stamp or target > last_stamp:
+        return None
+    best: tuple[float, int] | None = None
+    for idx, stamp in parsed_stamps:
         delta = abs((stamp - target).total_seconds())
         if best is None or delta < best[0]:
             best = (delta, idx)
     return None if best is None else best[1]
+
+
+def observed_poi_state(anchor: AnnotationEvidenceAnchor, evidence_pack: Mapping[str, Any]) -> str:
+    """Return fresh/partial/consumed/invalidated from candles after confirmation."""
+    windows = evidence_pack.get("ohlcv_windows") or {}
+    candles = windows.get(anchor.timeframe) if isinstance(windows, Mapping) else None
+    if (
+        not isinstance(candles, list)
+        or anchor.end_index is None
+        or anchor.price_low is None
+        or anchor.price_high is None
+    ):
+        return "unverifiable"
+    touched = False
+    for raw in candles[anchor.end_index + 1 :]:
+        if not isinstance(raw, Mapping):
+            continue
+        low = _float(raw.get("low"))
+        high = _float(raw.get("high"))
+        close = _float(raw.get("close"))
+        if low is None or high is None or close is None:
+            return "unverifiable"
+        if anchor.direction == "bullish":
+            if close < anchor.price_low:
+                return "invalidated"
+            if low <= anchor.price_low:
+                return "consumed"
+            touched = touched or low <= anchor.price_high
+        elif anchor.direction == "bearish":
+            if close > anchor.price_high:
+                return "invalidated"
+            if high >= anchor.price_high:
+                return "consumed"
+            touched = touched or high >= anchor.price_low
+        else:
+            return "unverifiable"
+    return "partial" if touched else "fresh"
 
 
 def _candidate_anchor(
@@ -161,6 +265,11 @@ def _candidate_anchor(
         end_time=end_time,
         start_index=index_for_time(evidence_pack, str(item.get("timeframe") or timeframe), start_time),
         end_index=index_for_time(evidence_pack, str(item.get("timeframe") or timeframe), end_time),
+        confirmation_status=_enum_value(item.get("confirmation_status")),
+        activity_status=_enum_value(item.get("activity_status")),
+        mitigation_status=_enum_value(item.get("mitigation_status")),
+        is_wick_only_probe=bool(evidence.get("is_unconfirmed_probe") or item.get("is_wick_only_probe")),
+        confidence=_float(item.get("confidence")),
         source=f"detector_candidates.{timeframe}.{bucket}",
     )
 

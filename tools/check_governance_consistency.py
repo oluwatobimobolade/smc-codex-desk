@@ -10,6 +10,7 @@ Exit non-zero on any inconsistency.
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 from pathlib import Path
 from typing import Any
@@ -27,6 +28,20 @@ def load_yaml(path: Path) -> dict[str, Any]:
         return yaml.safe_load(f) or {}
 
 
+def load_json(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def check_consistency() -> tuple[bool, list[str]]:
     """Return (pass, issues). pass=True means no inconsistencies found."""
     issues: list[str] = []
@@ -35,6 +50,11 @@ def check_consistency() -> tuple[bool, list[str]]:
     authority_matrix = load_yaml(ROOT / "governance" / "AUTHORITY_MATRIX.yaml")
     next_actions = load_yaml(ROOT / "governance" / "NEXT_ACTIONS.yaml")
     capability_matrix = load_yaml(ROOT / "governance" / "CAPABILITY_MATRIX.yaml")
+    precedence = load_yaml(ROOT / "governance" / "AUTHORITY_PRECEDENCE.yaml")
+    status_vocabulary = load_yaml(ROOT / "governance" / "STATUS_VOCABULARY.yaml")
+    source_register = load_yaml(ROOT / "governance" / "SOURCE_DOCUMENT_REGISTER.yaml")
+    repository_register = load_yaml(ROOT / "governance" / "REPOSITORY_REGISTER.yaml")
+    validation_registry = load_json(ROOT / "evidence" / "VALIDATION_REGISTRY.json")
 
     # 1. Verify core authority claims are consistent
     authority = current_state.get("authority", {})
@@ -109,6 +129,85 @@ def check_consistency() -> tuple[bool, list[str]]:
         for phrase in ["paper_execute", "live_execute", "place_order"]:
             if phrase in text and "disabled" not in text[max(0, text.find(phrase) - 100):text.find(phrase) + len(phrase) + 100]:
                 issues.append(f"{path.name}: contains '{phrase}' without explicit disablement context")
+
+    # 8. Registry v2 is append-only and points to a real source-bound record.
+    if validation_registry.get("schema") != "smc_codex_validation_registry_v2":
+        issues.append("VALIDATION_REGISTRY.json must use smc_codex_validation_registry_v2")
+    if "latest_validation" in validation_registry:
+        issues.append("VALIDATION_REGISTRY.json latest_validation is prohibited; use explicit current_gate")
+    records = validation_registry.get("records") or []
+    record_ids = [str(item.get("record_id") or "") for item in records if isinstance(item, dict)]
+    if len(record_ids) != len(set(record_ids)):
+        issues.append("VALIDATION_REGISTRY.json contains duplicate record_id values")
+    current_record = str((validation_registry.get("current_gate") or {}).get("record_id") or "")
+    if not current_record or current_record not in set(record_ids):
+        issues.append("VALIDATION_REGISTRY.json current_gate must reference an existing validation record")
+    for item in records:
+        if not isinstance(item, dict):
+            issues.append("VALIDATION_REGISTRY.json records must be objects")
+            continue
+        source = item.get("source") or {}
+        if not source.get("git_head") or not source.get("source_state"):
+            issues.append(f"Validation record {item.get('record_id')} lacks source identity")
+        report = item.get("report")
+        if report and not (ROOT / str(report)).exists():
+            issues.append(f"Validation record {item.get('record_id')} report does not exist: {report}")
+    current_payload = next((item for item in records if item.get("record_id") == current_record), None)
+    if isinstance(current_payload, dict):
+        source = current_payload.get("source") or {}
+        manifest_value = source.get("source_manifest")
+        manifest_hash = source.get("source_manifest_sha256")
+        if manifest_value or manifest_hash:
+            manifest_path = ROOT / str(manifest_value or "")
+            if not manifest_path.exists():
+                issues.append(f"Current validation source manifest does not exist: {manifest_value}")
+            elif sha256_file(manifest_path) != manifest_hash:
+                issues.append("Current validation source manifest hash does not match registry")
+
+    # 9. Registered controlling documents must match their recorded bytes.
+    if source_register.get("schema") != "smc_codex_source_document_register_v1":
+        issues.append("SOURCE_DOCUMENT_REGISTER.yaml schema missing or invalid")
+    for doc_id, document in (source_register.get("documents") or {}).items():
+        if not isinstance(document, dict):
+            issues.append(f"Source document {doc_id} entry is invalid")
+            continue
+        path = Path(str(document.get("path") or "")).expanduser()
+        if document.get("availability") == "present_verified":
+            if not path.exists():
+                issues.append(f"Registered source document missing: {doc_id} at {path}")
+                continue
+            if path.stat().st_size != int(document.get("size_bytes") or -1):
+                issues.append(f"Registered source document size mismatch: {doc_id}")
+            if sha256_file(path) != document.get("sha256"):
+                issues.append(f"Registered source document hash mismatch: {doc_id}")
+
+    # 10. Authority precedence, controlled statuses, repository ownership, and onboarding.
+    if precedence.get("schema") != "smc_codex_authority_precedence_v1":
+        issues.append("AUTHORITY_PRECEDENCE.yaml schema missing or invalid")
+    canonical = precedence.get("canonical_runtime") or {}
+    if canonical.get("module") != "smc_desk.colleague.orchestrator_v3":
+        issues.append("Canonical runtime must be smc_desk.colleague.orchestrator_v3")
+    required_statuses = {
+        "PROPOSED", "IMPLEMENTED", "VALIDATED", "VALIDATED_WITH_LIMITATIONS",
+        "CERTIFIED", "PROMOTED", "DEPRECATED", "HISTORICAL", "REJECTED", "BLOCKED",
+    }
+    declared_statuses = set((status_vocabulary.get("statuses") or {}).keys())
+    missing_statuses = sorted(required_statuses - declared_statuses)
+    if missing_statuses:
+        issues.append(f"STATUS_VOCABULARY.yaml missing statuses: {missing_statuses}")
+    repositories = repository_register.get("repositories") or {}
+    companion = repositories.get("companion_archive") or {}
+    if companion.get("authority") != "non_authoritative" or companion.get("import_into_canonical_runtime") != "prohibited":
+        issues.append("Companion repository must be non-authoritative and prohibited from canonical imports")
+
+    readme_first = (ROOT / "governance" / "README_FIRST.md").read_text(encoding="utf-8")
+    if "python -m smc_desk.colleague" not in readme_first:
+        issues.append("README_FIRST.md does not identify the canonical command surface")
+    if "WP-0001-COLLEAGUE-FOUNDATION" in readme_first:
+        issues.append("README_FIRST.md still points current work at WP-0001")
+    root_readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    if "smc_desk.colleague.orchestrator_v3" not in root_readme:
+        issues.append("README.md does not identify orchestrator_v3 as canonical")
 
     return len(issues) == 0, issues
 

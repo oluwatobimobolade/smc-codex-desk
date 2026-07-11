@@ -1,0 +1,51 @@
+{
+  "schema": "wp_test_report_v1",
+  "work_package": "BR-004-006-AI-FIRST-PERCEPTION-LAB",
+  "gate": "GATE-GOVERNED-PERCEPTION-AI-001",
+  "status": "PASS_LOCAL_AI_FIRST_SLICE",
+  "date": "2026-07-10",
+  "baseline_commit": "b067a9995eff4814cc87661f7cabba0e50a2e0e1",
+  "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/BR004_006_SOURCE_MANIFEST.tsv",
+  "source_manifest_sha256": "371e1960ec29b5a954faf7922f4e84c203285b159e604924df6f1db0fc59a07e",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_br004_006_ai_first_readiness.py",
+      "result": "11 passed in 0.87s"
+    },
+    {
+      "command": ".venv/bin/python tools/finalize_ai_doctrine_panel.py --panel research_lab/ai_perception_readiness/ai_doctrine_panel",
+      "result": "PASS; five pilot claims, two contested claims, one rejected authority claim; runtime authority false"
+    },
+    {
+      "command": ".venv/bin/python tools/build_ai_public_benchmark_pilot.py ...",
+      "result": "PASS; development=1, annotation=1, blind=0; registry validation PASS"
+    },
+    {
+      "command": ".venv/bin/python tools/run_ai_structure_lab.py ... --provider-mode MANUAL_AI_ASSISTED_JSON",
+      "result": "PASS; BTCUSDT AI_PANEL_COMPLETE; graph-aligned no-signal output; paper/live disabled"
+    },
+    {
+      "command": ".venv/bin/python tools/check_authority_boundaries.py",
+      "result": "PASS; 97 active files scanned; zero forbidden legacy imports"
+    },
+    {
+      "command": ".venv/bin/python tools/check_governance_consistency.py",
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "810 passed, 1 skipped in 117.62s"
+    }
+  ],
+  "public_ai_weak_cases": 2,
+  "blind_cases_populated": 0,
+  "human_gold_created": false,
+  "detector_semantics_changed": false,
+  "execution_authority_changed": false,
+  "predictive_authority_changed": false,
+  "readiness_gate_passed": false
+}

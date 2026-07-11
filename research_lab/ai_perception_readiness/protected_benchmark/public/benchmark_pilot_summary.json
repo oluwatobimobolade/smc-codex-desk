@@ -1,0 +1,20 @@
+{
+  "blind_cases_populated": false,
+  "human_gold_created": false,
+  "registry_path": "/Users/tobimobolade/smc-codex-desk/research_lab/ai_perception_readiness/protected_benchmark/public/benchmark_registry.json",
+  "schema": "ai_public_benchmark_pilot_v1",
+  "truth_boundary": "PUBLIC_AI_WEAK_LABELS_ONLY",
+  "validation": {
+    "blind_populated": false,
+    "issues": [],
+    "partition_counts": {
+      "annotation_comprehension_cases": 1,
+      "blind_validation_cases": 0,
+      "development_cases": 1,
+      "doctrine_examples": 0
+    },
+    "registry_sha256": "665a7744f42ad5eaa1a72d344de67b43a5972948368ad9d4f524e6e244cbd13a",
+    "schema": "protected_benchmark_validation_v1",
+    "status": "PASS"
+  }
+}

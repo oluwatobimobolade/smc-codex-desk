@@ -1,0 +1,28 @@
+schema: smc_codex_source_document_register_v1
+verified_at: "2026-07-10T13:55:00+01:00"
+hash_algorithm: sha256
+
+documents:
+  SMC_CODEX_DESK_PRODUCT_CONSTITUTION:
+    path: /Users/tobimobolade/Downloads/SMC Codex Desk.pdf
+    authority_domain: product_intent
+    authority: controlling_product_constitution
+    availability: present_verified
+    size_bytes: 262565
+    filesystem_modified_at: "2026-06-25T18:00:38+01:00"
+    sha256: c620a4f9b92b1c3a8c10cef9df070dff0bd00de0f9097c2403833effe8386dc6
+    execution_authority: none
+  MASTER_STRATEGY_TRUTH_AUDIT:
+    path: /Users/tobimobolade/Downloads/Master Strategy Truth Audit.pdf
+    authority_domain: strategy_and_repository_direction
+    authority: controlling_strategy_audit_source
+    availability: present_verified
+    size_bytes: 107783
+    filesystem_modified_at: "2026-06-25T18:00:46+01:00"
+    sha256: 8ccf85dcc951b94ae775b4f3b5c4c8923e7b359dca12b49107e5e1207374e308
+    execution_authority: none
+
+rules:
+  - hashes_must_be_rechecked_when_file_size_or_modified_time_changes
+  - external_documents_define_intent_but_cannot_override_market_facts
+  - local_governance_records_operational_interpretation_and_amendments

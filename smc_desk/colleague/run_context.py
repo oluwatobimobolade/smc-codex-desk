@@ -8,37 +8,18 @@ from typing import Any
 
 import pandas as pd
 
-from smc_desk.case_library import data_quality_report, normalize_ohlcv_timestamps
 from smc_desk.data.schemas import Candle
-from smc_desk.mtf import resample_ohlcv
+from smc_desk.data.ohlcv_contract import (
+    data_quality_report,
+    load_ohlcv_csv,
+    normalize_ohlcv_timestamps,
+)
+from smc_desk.data.timeframe_reconstruction import resample_ohlcv
 
 
 def _local_load_ohlcv_csv(path: str) -> pd.DataFrame:
-    """Inline equivalent of the legacy smc_desk.engine.load_ohlcv_csv.
-
-    WP-0043 moved this loader here so that run_context.py (a canonical-runtime
-    module) does not import from the deprecated smc_desk.engine module. The
-    semantics are preserved exactly: lowercase columns, rename date->timestamp,
-    require {timestamp, open, high, low, close}, fill missing volume with 0.0,
-    coerce timestamps and OHLC numerics, drop rows with missing prices.
-    """
-    csv_path = Path(path)
-    df = pd.read_csv(csv_path)
-    df.columns = [column.strip().lower() for column in df.columns]
-    if "date" in df.columns and "timestamp" not in df.columns:
-        df = df.rename(columns={"date": "timestamp"})
-    required = {"timestamp", "open", "high", "low", "close"}
-    missing = required.difference(df.columns)
-    if missing:
-        raise ValueError(f"Missing OHLCV columns: {sorted(missing)}")
-    if "volume" not in df.columns:
-        df["volume"] = 0.0
-    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=False)
-    df = df.sort_values("timestamp").dropna(subset=["timestamp"]).reset_index(drop=True)
-    for column in ["open", "high", "low", "close", "volume"]:
-        df[column] = pd.to_numeric(df[column], errors="coerce")
-    df = df.dropna(subset=["open", "high", "low", "close"]).reset_index(drop=True)
-    return df
+    """Load OHLCV through the pure canonical data contract."""
+    return load_ohlcv_csv(path)
 
 
 TIMEFRAME_DURATIONS = {

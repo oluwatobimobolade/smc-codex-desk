@@ -395,14 +395,28 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
         levels.append({"label": f"{target_side} liquidity watch", "kind": "liquidity", "price": target_price, "timeframe": active_tf})
     if invalidation_price is not None:
         levels.append({"label": "watch invalidation, not SL", "kind": "invalidation", "price": invalidation_price, "timeframe": active_tf})
-    from smc_desk.brain.annotation_candidate_composer import compose_local_annotation_plan_v2
+    from smc_desk.brain.annotation_candidate_composer import compose_local_annotation_plan_v2, select_local_active_poi
+
+    active_poi_payload = select_local_active_poi(
+        evidence_pack=pack,
+        direction=direction,
+        active_range=active_range_payload,
+    )
+    has_active_poi = active_poi_payload is not None
+    range_conflict = bool(
+        isinstance(selected_range, dict)
+        and selected_range.get("status") == "RESOLVED_ACTIVE_RANGE"
+        and range_direction in {"bullish", "bearish"}
+        and direction in {"bullish", "bearish"}
+        and range_direction != direction
+    )
 
     annotation_plan_v2 = compose_local_annotation_plan_v2(
         evidence_pack=pack,
         official_state=official_state,
         direction=direction,
         active_range=active_range_payload,
-        active_poi=None,
+        active_poi=active_poi_payload,
     )
     return {
         "schema": "ai_smc_trader_decision_v1",
@@ -442,7 +456,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             "narrative": (
                 f"{parent_child_sentence} This is a context conflict, so no clean direction is promoted into a trade plan."
                 if parent_child_conflict and parent_child_sentence
-                else "This live system test sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
+                else (
+                    "A confirmed active POI is mapped for observation, but no validated sweep/displacement/entry confirmation is promoted into a trade plan."
+                    if has_active_poi
+                    else "This live system test sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
+                )
             ),
         },
         "displacement_assessment": {
@@ -452,7 +470,7 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             "evidence_object_ids": [],
             "summary": "No validated displacement candidate was promoted for this observe-only test run.",
         },
-        "active_poi": {
+        "active_poi": active_poi_payload or {
             "poi_id": None,
             "timeframe": None,
             "kind": None,
@@ -505,13 +523,22 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
         "annotation_plan_v2": annotation_plan_v2,
         "self_review": {
             "active_range_check": "passed" if selected_range else "failed",
-            "poi_check": "not_applicable",
+            "poi_check": "passed" if has_active_poi else "not_applicable",
             "annotation_check": "passed",
             "refusal_check": "passed",
             "corrections_made": [
-                "Refused executable trade because sweep/displacement/active POI were not validated.",
+                (
+                    "Kept the confirmed active POI as watch evidence only because sweep/displacement/entry confirmation were not validated."
+                    if has_active_poi
+                    else "Refused executable trade because sweep/displacement/active POI were not validated."
+                ),
                 "Used structural active range authority instead of OHLCV summary extremes.",
                 "Reconciled raw OHLC summary bias with confirmed structure narrative.",
+                *(
+                    ["Kept the directional thesis conditional because the active-range direction opposes HTF consensus."]
+                    if range_conflict
+                    else []
+                ),
                 *(
                     ["Downgraded to mixed/THESIS_ONLY because parent and child context timeframes conflict."]
                     if parent_child_conflict
@@ -521,7 +548,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             if selected_range
             else ["Downgraded to review because active range authority was unresolved."],
             "remaining_uncertainties": [
-                "No validated active POI promoted into trade readiness.",
+                (
+                    "The mapped active POI has not produced validated entry confirmation."
+                    if has_active_poi
+                    else "No validated active POI promoted into trade readiness."
+                ),
                 "No confirmed sweep/displacement sequence promoted into execution.",
             ],
         },
@@ -532,8 +563,17 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             )
             if parent_child_conflict and parent_child_sentence
             else (
-                f"{symbol}: {official_state}. Directional context is {direction}, but the system does not have validated "
-                "sweep/displacement/active POI/entry evidence, so it refuses a trade plan."
+                f"{symbol}: {official_state}. Directional context is {direction}"
+                + (
+                    f", while the certified active-range map remains {range_direction}"
+                    if range_conflict
+                    else ""
+                )
+                + (
+                    ". A confirmed active POI is mapped, but sweep/displacement/entry confirmation is absent, so it remains watch evidence and no trade plan is allowed."
+                    if has_active_poi
+                    else ". The system does not have validated sweep/displacement/active POI/entry evidence, so it refuses a trade plan."
+                )
             )
         ),
     }
