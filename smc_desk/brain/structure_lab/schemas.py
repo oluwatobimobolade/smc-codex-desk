@@ -100,7 +100,17 @@ class StructureCriticReview(StrictModel):
 
 
 class AnnotationSelection(StrictModel):
-    object_type: Literal["structure_segment", "poi_zone", "liquidity_line", "path_projection"]
+    # WP-0044 stabilization: path_projection is intentionally absent from the
+    # AI-selectable set. A path projection draws a forward arrow past the last
+    # candle (mild forecast), so it must NOT be an AI-selected object -- that
+    # would grant the AI forecasting authority it does not hold. The deterministic
+    # conservative composer (annotation_candidate_composer.compose_local_annotation_plan_v2)
+    # is the only sanctioned emitter of path_projection, gated on a certified
+    # active POI and an official state in PATH_ALLOWED_STATES. The certified
+    # evidence resolver (annotation_bridge._resolve_selection) has no branch for
+    # it, so the AI schema and the resolver now agree: structure_segment, poi_zone,
+    # and liquidity_line are the only AI-selectable object types.
+    object_type: Literal["structure_segment", "poi_zone", "liquidity_line"]
     semantic_object_id: str
     timeframe: Timeframe
     label: str

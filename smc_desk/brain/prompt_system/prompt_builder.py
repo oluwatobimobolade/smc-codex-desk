@@ -69,7 +69,7 @@ def build_layered_ai_smc_prompt(evidence_pack: Mapping[str, Any]) -> str:
             "fields": SCHEMA_FIELDS,
             "annotation_plan_must_include_reasoning_order": True,
             "annotation_plan_v2_optional_but_preferred": True,
-            "annotation_plan_v2_object_types": ["structure_segment", "poi_zone", "liquidity_line", "path_projection", "trade_box"],
+            "annotation_plan_v2_object_types": ["structure_segment", "poi_zone", "liquidity_line"],
             "strict_json_only": True,
         },
         "official_state_options": [
