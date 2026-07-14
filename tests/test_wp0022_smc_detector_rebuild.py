@@ -298,6 +298,17 @@ def test_order_block_and_poi_grade_fvg_link_to_structure_break() -> None:
     source = _candle(t0, "100", "101", "95", "96")
     displacement = _candle(t0 + timedelta(minutes=15), "96", "111", "96", "110")
     brk = _break("bos_bull", Direction.BULLISH, candle=displacement, broken_price="105", confirmed_at=displacement.close_time)
+    # WP-SMC-10/3: the causal OB-origin gate requires a displacement profile on
+    # the break (populated by engine_v2._enrich_breaks_with_displacement on the
+    # canonical path). These detector-unit tests bypass engine_v2, so we supply
+    # the profile the engine would have produced for this fat-body, close-beyond
+    # break (moderate quality: score >= 0.45, bps >= 4.0).
+    brk.metadata["displacement"] = {
+        "score": 0.85, "break_quality": "strong",
+        "close_beyond_structure_bps": 47.6,
+        "scored_by": "score_break_displacement",
+        "scoring_version": "wp_smc10_canonical_v1",
+    }
     fvg = _fvg("fvg_bull", Direction.BULLISH, "101", "104", displacement.open_time)
 
     marked = mark_poi_grade_fvgs([fvg], [brk])
@@ -317,6 +328,14 @@ def test_inducement_marks_internal_liquidity_and_taken_sweep() -> None:
     source = _candle(t0, "100", "101", "95", "96")
     displacement = _candle(t0 + timedelta(minutes=15), "96", "111", "96", "110")
     brk = _break("bos_bull", Direction.BULLISH, candle=displacement, broken_price="105", confirmed_at=displacement.close_time)
+    # WP-SMC-10/3: supply the displacement profile the canonical engine would
+    # have enriched onto this break (see test_order_block_... above).
+    brk.metadata["displacement"] = {
+        "score": 0.85, "break_quality": "strong",
+        "close_beyond_structure_bps": 47.6,
+        "scored_by": "score_break_displacement",
+        "scoring_version": "wp_smc10_canonical_v1",
+    }
     ob = OrderBlockDetector(lookback=3, min_body_ratio=0.2).detect([source, displacement], [brk], [], displacement.close_time)[0]
     internal_low = _swing(
         "idm_low",

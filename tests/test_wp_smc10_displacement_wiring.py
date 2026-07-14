@@ -76,10 +76,12 @@ def _build_break(*, body_ratio: float, body_pen: Decimal, broken_price: Decimal,
     )
 
 
-def test_enrichment_flags_are_off_by_default(monkeypatch):
-    """The flag must default OFF so this commit is a zero-behaviour-change addition."""
+def test_enrichment_flags_default_on_after_cutover(monkeypatch):
+    """After WP-SMC-10/3 cutover the displacement-scoring flag defaults ON so the
+    canonical path carries real displacement_strength by default. Tests that want
+    the legacy (OFF) behaviour must set the env explicitly."""
     monkeypatch.delenv("SMC_CANONICAL_DISPLACEMENT_SCORING", raising=False)
-    assert canonical_displacement_scoring_enabled() is False
+    assert canonical_displacement_scoring_enabled() is True
 
 
 def test_enrichment_breaks_with_strong_displacement_get_positive_score():
@@ -133,7 +135,7 @@ def test_enrichment_swallows_scorer_errors_and_keeps_legacy_zero():
 
 def test_engine_v2_analyze_does_not_enrich_when_flag_off(monkeypatch):
     """Flag OFF -> analyze must never call _enrich_breaks_with_displacement."""
-    monkeypatch.delenv("SMC_CANONICAL_DISPLACEMENT_SCORING", raising=False)
+    monkeypatch.setenv("SMC_CANONICAL_DISPLACEMENT_SCORING", "0")
     import smc_desk.perception.engine_v2 as engine_v2_module
     calls = {"n": 0}
     original = engine_v2_module._enrich_breaks_with_displacement

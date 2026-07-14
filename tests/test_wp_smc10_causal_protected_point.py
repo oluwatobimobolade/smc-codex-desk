@@ -101,10 +101,11 @@ def _confirmed_break_fixture():
 
 # -------- flag default -----------------------------------------------------
 
-def test_causal_protected_point_flag_default_off(monkeypatch):
-    """Flag must default OFF -> zero behaviour change at this commit."""
+def test_causal_protected_point_flag_default_on_after_cutover(monkeypatch):
+    """After WP-SMC-10/3 cutover the protected-point flag defaults ON; legacy
+    (OFF) behaviour is opt-in via env."""
     monkeypatch.delenv("SMC_CAUSAL_PROTECTED_POINT", raising=False)
-    assert causal_protected_point_enabled() is False
+    assert causal_protected_point_enabled() is True
 
 
 # -------- adapter + match unit tests ---------------------------------------
@@ -197,9 +198,8 @@ def test_match_candidate_to_swing_handles_string_price():
 # -------- confirm-break flag gating ----------------------------------------
 
 def test_confirm_break_does_not_record_selection_when_flag_off(monkeypatch):
-    """Flag OFF -> no ``protected_point_selection`` key on confirmed breaks.
-    Zero-behaviour-change contract for Commit 2."""
-    monkeypatch.delenv("SMC_CAUSAL_PROTECTED_POINT", raising=False)
+    """Flag OFF -> no ``protected_point_selection`` key on confirmed breaks."""
+    monkeypatch.setenv("SMC_CAUSAL_PROTECTED_POINT", "0")
     candles, swings = _confirmed_break_fixture()
     state, breaks = StructureDetector().detect(candles, swings, candles[-1].close_time)
     confirmed = [b for b in breaks if b.confirmation_status == ConfirmationStatus.CONFIRMED]
@@ -255,7 +255,7 @@ def test_confirm_break_swallows_algorithm_errors_and_falls_back(monkeypatch):
 def test_confirm_break_keeps_legacy_assignment_when_flag_off(monkeypatch):
     """Flag OFF -> state.protected_high_id stays at the legacy recency swing
     (the VGM-006 forbidden_shortcut assignment), matching the pre-WP behaviour."""
-    monkeypatch.delenv("SMC_CAUSAL_PROTECTED_POINT", raising=False)
+    monkeypatch.setenv("SMC_CAUSAL_PROTECTED_POINT", "0")
     candles, swings = _confirmed_break_fixture()
     state, breaks = StructureDetector().detect(candles, swings, candles[-1].close_time)
     # The fixture ends with state.current_direction == Direction.BULLISH (the

@@ -7,6 +7,7 @@ from decimal import Decimal
 from typing import Iterable, List, Optional
 
 from smc_desk.data.schemas import Candle
+from smc_desk.perception.causal_repair_flags import causal_ob_origin_gate_enabled
 from smc_desk.perception.lifecycle import EventType, SMCEvent, apply_event
 from smc_desk.perception.ontology import (
     ConfirmationStatus,
@@ -23,7 +24,7 @@ class OrderBlockDetector:
         self.detector_version = detector_version
         self.lookback = lookback
         self.min_body_ratio = min_body_ratio
-        self.configuration_hash = hashlib.sha256(b"order_block_v2_wp0022").hexdigest()[:8]
+        self.configuration_hash = hashlib.sha256(b"order_block_v3_causal_origin_cluster").hexdigest()[:8]
 
     def detect(
         self,
@@ -45,50 +46,95 @@ class OrderBlockDetector:
                 break_index = _first_candle_at_or_after(candles, brk.candidate_at)
             if break_index is None:
                 continue
-            source_index = self._find_source_candle(candles, break_index, brk.direction)
-            if source_index is None:
+            origin_cluster = self._find_origin_cluster(candles, break_index, brk.direction)
+            if origin_cluster is None:
                 continue
-            source = candles[source_index]
-            body_ratio = _body_ratio(source)
+            cluster_start, cluster_end = origin_cluster
+            cluster = candles[cluster_start : cluster_end + 1]
+            source = cluster[-1]
+            body_ratio = max((_body_ratio(candle) for candle in cluster), default=0.0)
             if body_ratio < self.min_body_ratio:
                 continue
-            origin_fvg = _nearby_origin_fvg(brk, fvg_list)
+            cluster_ids = [_candle_id(candle) for candle in cluster]
+            departure = candles[cluster_end + 1 : break_index + 1]
+            departure_ids = [_candle_id(candle) for candle in departure]
+
+            # WP-SMC-10/3: causal OB-origin gate. An order block IS the origin of
+            # displacement -- the opposing base whose departure produced the
+            # impulsive, structure-breaking move. When the flag is ON we admit a
+            # cluster as an OB only when (a) the accepted break carries a real
+            # displacement_score (populated by engine_v2._enrich_breaks_with_displacement)
+            # of at least the "moderate" quality threshold, AND (b) the cluster's
+            # departure overlap with the break's source candles holds (it does by
+            # construction -- departure leads into the break). When the flag is OFF
+            # the detector keeps its legacy geometric behaviour: nearest
+            # opposing-color cluster, body-ratio gate only.
+            admission = _admit_origin_cluster(brk, departure_ids)
+            if admission["admitted"] is False:
+                # Geometric candidate retained for audit but not emitted as a POI.
+                # We do NOT append to order_blocks here.
+                continue
+            origin_fvg = _causal_origin_fvg(
+                brk,
+                fvg_list,
+                origin_start=cluster[0].open_time,
+                departure_ids=set(departure_ids),
+            )
             evidence = OrderBlockEvidence(
                 originating_fvg_id=None if origin_fvg is None else origin_fvg.object_id,
                 volume_ratio=1.0,
                 structure_break_id=brk.object_id,
-                source_candle_id=f"c_{source.open_time.timestamp()}",
+                source_candle_id=_candle_id(source),
                 body_ratio=body_ratio,
                 poi_grade=True,
             )
+            break_identity = hashlib.sha256(str(brk.object_id).encode("utf-8")).hexdigest()[:10]
             obj = OrderBlockObject(
-                object_id=f"ob_{brk.direction.value if hasattr(brk.direction, 'value') else brk.direction}_{source.open_time.timestamp()}",
+                object_id=(
+                    f"ob_{brk.direction.value if hasattr(brk.direction, 'value') else brk.direction}_"
+                    f"{cluster[0].open_time.timestamp()}_{cluster[-1].open_time.timestamp()}_"
+                    f"break_{break_identity}"
+                ),
                 venue=source.venue,
                 instrument=source.instrument,
                 timeframe=source.timeframe,
-                pivot_time=source.open_time,
+                pivot_time=cluster[0].open_time,
                 candidate_at=brk.candidate_at,
                 confirmed_at=brk.confirmed_at,
                 current_as_of=current_time,
                 schema_version="1.0.0",
                 detector_version=self.detector_version,
                 configuration_hash=self.configuration_hash,
-                source_candle_ids=[f"c_{source.open_time.timestamp()}", *brk.source_candle_ids],
+                source_candle_ids=[*cluster_ids, *departure_ids],
                 last_updated_at=current_time,
                 confidence=min(0.92, 0.58 + body_ratio * 0.34 + (0.08 if origin_fvg else 0.0)),
                 direction=brk.direction,
-                price_low=min(source.low, source.high),
-                price_high=max(source.low, source.high),
+                price_low=min(candle.low for candle in cluster),
+                price_high=max(candle.high for candle in cluster),
                 evidence=evidence,
                 confirmation_status=ConfirmationStatus.CONFIRMED,
+                metadata={
+                    "candidate_authority": "causal_candidate_not_final_poi",
+                    "causal_link_method": "explicit_break_departure_trace",
+                    "linked_break_id": brk.object_id,
+                    "origin_geometry": "single_candle" if len(cluster) == 1 else "multi_candle_cluster",
+                    "origin_cluster_start_id": cluster_ids[0],
+                    "origin_cluster_end_id": cluster_ids[-1],
+                    "origin_cluster_candle_ids": cluster_ids,
+                    "departure_candle_ids": departure_ids,
+                    "originating_fvg_link_method": (
+                        "causal_impulse_overlap" if origin_fvg is not None else None
+                    ),
+                    "causal_origin_admission": admission,
+                },
             )
             apply_event(
                 obj,
                 SMCEvent(
                     event_type=EventType.OBJECT_CREATED,
-                    timestamp=source.open_time,
-                    trigger_candle_id=f"c_{source.open_time.timestamp()}",
-                    details="Order-block source candle candidate created",
+                    timestamp=cluster[0].open_time,
+                    trigger_candle_id=cluster_ids[0],
+                    details="Causal order-block origin cluster candidate created",
                 ),
             )
             apply_event(
@@ -96,23 +142,110 @@ class OrderBlockDetector:
                 SMCEvent(
                     event_type=EventType.OBJECT_CONFIRMED,
                     timestamp=brk.confirmed_at,
-                    trigger_candle_id=f"c_{source.open_time.timestamp()}",
-                    details="Last opposing candle before structure-breaking displacement",
+                    trigger_candle_id=_candle_id(candles[break_index]),
+                    details="Origin cluster explicitly linked to the accepted structure-breaking departure",
                 ),
             )
             order_blocks.append(obj)
         return order_blocks
 
-    def _find_source_candle(self, candles: List[Candle], break_index: int, direction: Direction) -> Optional[int]:
+    def _find_origin_cluster(
+        self, candles: List[Candle], break_index: int, direction: Direction,
+    ) -> Optional[tuple[int, int]]:
+        """Return the contiguous opposing base nearest the causal departure.
+
+        This remains candidate generation. Final POI authority is decided later,
+        but the detector must preserve the full base instead of pretending the
+        first opposite-coloured candle is always the complete origin.
+        """
         direction_value = getattr(direction, "value", direction)
         start = max(0, break_index - self.lookback)
+        source_index: int | None = None
         for idx in range(break_index - 1, start - 1, -1):
             candle = candles[idx]
-            if direction_value == "bullish" and candle.close < candle.open:
-                return idx
-            if direction_value == "bearish" and candle.close > candle.open:
-                return idx
-        return None
+            if _is_opposing(candle, direction_value):
+                source_index = idx
+                break
+        if source_index is None:
+            return None
+
+        cluster_start = source_index
+        while cluster_start > start and _is_opposing(candles[cluster_start - 1], direction_value):
+            cluster_start -= 1
+        return cluster_start, source_index
+
+
+# WP-SMC-10/3 thresholds. A cluster is admitted as a causal OB origin when the
+# accepted break's displacement quality is at least "moderate" per
+# smc_desk.perception.displacement.score_break_displacement (score >= 0.45 and
+# close_beyond_structure_bps >= 4.0). Below that the departure did not produce
+# real displacement, so the cluster is a geometric base, not a causal origin.
+_ORIGIN_DISPLACEMENT_MIN_SCORE = 0.45
+_ORIGIN_DISPLACEMENT_MIN_BPS = 4.0
+
+
+def _admit_origin_cluster(brk: StructureBreakObject, departure_ids: list[str]) -> dict:
+    """Decide whether an origin cluster is admitted as a causal order block.
+
+    When the origin gate flag is OFF, every geometric candidate is admitted
+    (legacy behaviour) and the admission record tags itself ``gate_disabled``.
+
+    When the flag is ON, the cluster is admitted only when the linked break
+    carries a real displacement profile (metadata['displacement'] populated by
+    engine_v2._enrich_breaks_with_displacement when the displacement-scoring flag
+    is also on) meeting the moderate-quality threshold AND the departure is
+    non-empty (a real departure must exist between the cluster and the break).
+
+    Returns a JSON-serialisable admission record attached to the OB's metadata.
+    """
+    if not causal_ob_origin_gate_enabled():
+        return {
+            "admitted": True,
+            "gate": "disabled",
+            "reason": "causal_ob_origin_gate_off_legacy_geometric_admission",
+        }
+
+    disp = brk.metadata.get("displacement") if isinstance(brk.metadata, dict) else None
+    if not isinstance(disp, dict):
+        return {
+            "admitted": False,
+            "gate": "enabled",
+            "reason": "no_displacement_profile_on_break",
+            "hint": "requires SMC_CANONICAL_DISPLACEMENT_SCORING=1 on the engine path",
+        }
+    score = float(disp.get("score") or 0.0)
+    bps = float(disp.get("close_beyond_structure_bps") or 0.0)
+    quality = str(disp.get("break_quality") or "weak")
+    if not departure_ids:
+        return {
+            "admitted": False,
+            "gate": "enabled",
+            "reason": "no_departure_trace",
+            "score": score,
+            "close_beyond_structure_bps": bps,
+            "break_quality": quality,
+        }
+    if score < _ORIGIN_DISPLACEMENT_MIN_SCORE or bps < _ORIGIN_DISPLACEMENT_MIN_BPS:
+        return {
+            "admitted": False,
+            "gate": "enabled",
+            "reason": "departure_lacks_displacement",
+            "score": score,
+            "close_beyond_structure_bps": bps,
+            "break_quality": quality,
+            "thresholds": {
+                "min_score": _ORIGIN_DISPLACEMENT_MIN_SCORE,
+                "min_bps": _ORIGIN_DISPLACEMENT_MIN_BPS,
+            },
+        }
+    return {
+        "admitted": True,
+        "gate": "enabled",
+        "reason": "departure_produced_displacement_into_accepted_break",
+        "score": score,
+        "close_beyond_structure_bps": bps,
+        "break_quality": quality,
+    }
 
 
 def mark_poi_grade_fvgs(
@@ -121,7 +254,11 @@ def mark_poi_grade_fvgs(
     *,
     max_seconds: int = 8 * 60 * 60,
 ) -> list[FairValueGapObject]:
-    """Mark the subset of raw FVGs that are close enough to a structure break origin."""
+    """Mark FVGs only when their source candles overlap the accepted break impulse.
+
+    ``max_seconds`` remains for call compatibility and bounds stale associations;
+    proximity alone is never enough.
+    """
     fvg_list = list(fvgs)
     confirmed_breaks = [b for b in structure_breaks if b.confirmed_at and b.confirmation_status == ConfirmationStatus.CONFIRMED]
     for fvg in fvg_list:
@@ -133,25 +270,39 @@ def mark_poi_grade_fvgs(
                 continue
             if fvg.confirmed_at is None or brk.confirmed_at is None:
                 continue
-            if abs((fvg.confirmed_at - brk.confirmed_at).total_seconds()) > max_seconds:
+            delta = (brk.confirmed_at - fvg.confirmed_at).total_seconds()
+            if delta < 0 or delta > max_seconds:
+                continue
+            if not set(fvg.source_candle_ids).intersection(brk.source_candle_ids):
                 continue
             fvg.evidence.poi_grade = True
             fvg.evidence.origin_break_id = brk.object_id
-            fvg.evidence.location_context = "structure_break_displacement_origin"
+            fvg.evidence.location_context = "causal_impulse_overlap"
+            fvg.metadata["causal_link_method"] = "break_source_candle_overlap"
+            fvg.metadata["linked_break_id"] = brk.object_id
             break
     return fvg_list
 
 
-def _nearby_origin_fvg(brk: StructureBreakObject, fvgs: list[FairValueGapObject]) -> FairValueGapObject | None:
+def _causal_origin_fvg(
+    brk: StructureBreakObject,
+    fvgs: list[FairValueGapObject],
+    *,
+    origin_start: datetime,
+    departure_ids: set[str],
+) -> FairValueGapObject | None:
     candidates = []
     for fvg in fvgs:
         if not fvg.confirmed_at or not brk.confirmed_at:
             continue
         if _direction(fvg.direction) != _direction(brk.direction):
             continue
-        delta = abs((fvg.confirmed_at - brk.confirmed_at).total_seconds())
-        if delta <= 8 * 60 * 60:
-            candidates.append((delta, fvg))
+        if fvg.confirmed_at < origin_start or fvg.confirmed_at > brk.confirmed_at:
+            continue
+        if not set(fvg.source_candle_ids).intersection(departure_ids):
+            continue
+        delta = (brk.confirmed_at - fvg.confirmed_at).total_seconds()
+        candidates.append((delta, fvg))
     if not candidates:
         return None
     return sorted(candidates, key=lambda item: item[0])[0][1]
@@ -173,3 +324,16 @@ def _body_ratio(candle: Candle) -> float:
 
 def _direction(value: object) -> str:
     return str(getattr(value, "value", value)).lower()
+
+
+def _is_opposing(candle: Candle, direction: object) -> bool:
+    direction_value = str(getattr(direction, "value", direction)).lower()
+    return (
+        direction_value == "bullish" and candle.close < candle.open
+    ) or (
+        direction_value == "bearish" and candle.close > candle.open
+    )
+
+
+def _candle_id(candle: Candle) -> str:
+    return f"c_{candle.open_time.timestamp()}"
