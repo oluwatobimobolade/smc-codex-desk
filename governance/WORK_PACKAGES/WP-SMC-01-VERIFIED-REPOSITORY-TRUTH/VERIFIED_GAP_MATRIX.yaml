@@ -1,0 +1,176 @@
+schema: verified_gap_matrix_v1
+recorded_at: "2026-07-12"
+source_commit: 4aa1a23173227430961f662442bf8d57ed2995d6
+working_tree_state: dirty_preserved
+status_vocabulary:
+  - CONFIRMED_GAP
+  - PARTIAL
+  - ALREADY_IMPLEMENTED
+  - REPAIRED_IN_WORKING_TREE
+  - UNVERIFIED
+  - FUTURE_PROGRAMME
+items:
+  - id: VGM-001
+    area: structure
+    claim: canonical_break_acceptance_uses_displacement_strength
+    status: REPAIRED_IN_WORKING_TREE
+    evidence:
+      - smc_desk/perception/structure.py::StructureDetector._create_break (still emits 0.0 at candidate creation -- correct, displacement scored at confirmation)
+      - smc_desk/perception/engine_v2.py::_enrich_breaks_with_displacement wires score_break_displacement onto the canonical path (WP-SMC-10/1)
+      - gated behind SMC_CANONICAL_DISPLACEMENT_SCORING, default ON after WP-SMC-10/3 cutover
+      - tests/test_wp_smc10_displacement_wiring.py
+    action: WP-SMC-10 cutover 2026-07-14; benchmark before flag-lock
+  - id: VGM-002
+    area: structure
+    claim: first_valid_break_is_not_automatically_BOS
+    status: CONFIRMED_GAP
+    evidence:
+      - smc_desk/perception/structure.py treats current_direction=None as continuation and assigns BOS
+    action: WP-SMC-03 then WP-SMC-04
+  - id: VGM-003
+    area: structure
+    claim: opposing_external_break_cannot_fall_back_to_BOS
+    status: CONFIRMED_GAP
+    evidence:
+      - smc_desk/perception/structure.py assigns BOS when an opposing external break does not hit the selected protected point
+    action: WP-SMC-03 then WP-SMC-04
+  - id: VGM-004
+    area: structure
+    claim: internal_child_structure_cannot_flip_parent_structure
+    status: ALREADY_IMPLEMENTED
+    evidence:
+      - smc_desk/perception/formal_structure_graph.py parent-child invariants
+      - tests/test_wp0040_formal_structure_graph.py
+    action: preserve regression coverage
+  - id: VGM-005
+    area: break_lifecycle
+    claim: body_close_requires_follow_through_or_retest_before_final_acceptance
+    status: CONFIRMED_GAP
+    evidence:
+      - smc_desk/perception/structure.py confirms a candidate on the same candle once its close crosses the level
+    action: WP-SMC-03 then WP-SMC-04
+  - id: VGM-006
+    area: protected_points
+    claim: causal_candidate_selection_and_ambiguity_abstention_exist
+    status: ALREADY_IMPLEMENTED
+    evidence:
+      - smc_desk/structure/protected_point.py
+      - tests/test_protected_point_and_range.py
+      - smc_desk/perception/structure.py::_confirm_break now calls protected_point.select via _run_causal_protected_point_selection when SMC_CAUSAL_PROTECTED_POINT is ON (default ON since WP-SMC-10/3)
+      - tests/test_wp_smc10_causal_protected_point.py
+    action: canonical-path promotion via WP-SMC-10 (2026-07-14); benchmark before flag-lock
+  - id: VGM-007
+    area: sweep_breakout
+    claim: direction_time_and_causal_linkage_are_validated
+    status: PARTIAL
+    evidence:
+      - smc_desk/structure/level_interactions.py
+      - tests/test_level_interactions.py
+    action: add the complete positive_negative_adversarial_future-invariance fixture matrix
+  - id: VGM-008
+    area: active_range
+    claim: outside_above_and_outside_below_are_explicit_and_child_containment_is_checked
+    status: ALREADY_IMPLEMENTED
+    evidence:
+      - smc_desk/structure/active_range.py
+      - smc_desk/perception/formal_structure_graph.py
+      - tests/test_protected_point_and_range.py
+    action: retain experimental status until doctrine approval
+  - id: VGM-009
+    area: order_blocks
+    claim: origin_cluster_and_departure_to_break_lineage_are_preserved
+    status: REPAIRED_IN_WORKING_TREE
+    evidence:
+      - smc_desk/perception/order_blocks.py
+      - tests/test_causal_poi_authority.py
+    action: seal source and keep reaction_guaranteed false
+  - id: VGM-010
+    area: poi_authority
+    claim: duplicate_lineages_external_origin_priority_and_child_refinement_are_fail_closed
+    status: REPAIRED_IN_WORKING_TREE
+    evidence:
+      - smc_desk/perception/causal_poi_authority.py
+      - tests/test_causal_poi_authority.py
+      - analysis_runs/FRESH_GBPUSD_FULL_SYSTEM_20260712_163004/CAUSAL_CERTIFICATE_REPAIR_FINAL
+    action: affected and full regression suites
+  - id: VGM-011
+    area: fvg
+    claim: complete_geometry_lifecycle_and_causal-role_validator_exists
+    status: PARTIAL
+    evidence:
+      - smc_desk/perception/fvg.py
+      - smc_desk/perception/poi_lifecycle.py
+      - smc_desk/brain/annotation_plan_validator.py
+    action: WP-SMC-07 and WP-SMC-09
+  - id: VGM-012
+    area: poi_ranking
+    claim: deterministic_ai_and_empirical_axes_are_separate
+    status: ALREADY_IMPLEMENTED
+    evidence:
+      - smc_desk/structure/poi_ranker.py
+    action: empirical axis remains unavailable until labeled outcomes exist
+  - id: VGM-013
+    area: inducement
+    claim: inducement_is_a_hypothesis_not_fact
+    status: ALREADY_IMPLEMENTED
+    evidence:
+      - smc_desk/structure/inducement.py
+      - smc_desk/brain/annotation_semantics.py
+    action: human-gold evaluation later
+  - id: VGM-014
+    area: ai_runtime
+    claim: six_role_governed_runtime_with_independent_critic_exists
+    status: ALREADY_IMPLEMENTED
+    evidence:
+      - smc_desk/brain/structure_lab/runtime.py
+      - smc_desk/brain/structure_lab/schemas.py
+    action: expose one explicit experimental engine facade and preserve provenance labels
+  - id: VGM-015
+    area: ai_runtime
+    claim: bounded_autonomous_retrieval_tool_loop_exists
+    status: CONFIRMED_GAP
+    evidence:
+      - structure-lab runtime uses prebuilt anchor-preserving context
+      - RetrievalTools exists but is not an iterative provider tool loop
+    action: WP-SMC-08
+  - id: VGM-016
+    area: validators
+    claim: evidence_existence_is_not_treated_as_full_semantic_correctness
+    status: PARTIAL
+    evidence:
+      - smc_desk/validation/evidence.py
+      - smc_desk/validation/invariants.py
+      - smc_desk/validation/temporal.py
+      - smc_desk/validation/narrative.py
+    action: extend object-specific semantic validators in WP-SMC-09
+  - id: VGM-017
+    area: annotation
+    claim: semantic_selection_is_resolved_to_deterministic_local_geometry_and_pixel_checked
+    status: ALREADY_IMPLEMENTED
+    evidence:
+      - smc_desk/brain/structure_lab/annotation_bridge.py
+      - smc_desk/rendering/structure_lab_annotation_renderer.py
+      - tests/test_wp0041b_ai_annotation_render_loop.py
+    action: benchmark trader comprehension rather than styling alone
+  - id: VGM-018
+    area: experimental_interface
+    claim: HybridPerceptionEngineV3Experimental_public_facade_exists
+    status: CONFIRMED_GAP
+    evidence:
+      - experimental runtime currently exposed only as run_perception_programme
+    action: add isolated wrapper after WP-SMC-01 gate
+  - id: VGM-019
+    area: human_gold
+    claim: sufficient_blind_adjudicated_market_cohort_exists
+    status: FUTURE_PROGRAMME
+    evidence:
+      - governance reports explicitly state the cohort is unpopulated
+    action: WP-SMC-11 through WP-SMC-14
+  - id: VGM-020
+    area: prediction
+    claim: predictive_edge_or_reaction_certainty_has_been_proven
+    status: FUTURE_PROGRAMME
+    evidence:
+      - no admissible claim exists in the current authority model
+    action: separate predictive programme only after perception promotion
+

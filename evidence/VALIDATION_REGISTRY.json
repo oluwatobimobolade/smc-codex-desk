@@ -9,9 +9,9 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-0041B-AI-ANNOTATION-RENDER-LOOP-FINAL-20260711",
-    "work_package": "WP-0041B-AI-ANNOTATION-RENDER-LOOP",
-    "gate": "GATE-PROFESSIONAL-AI-ANNOTATION-RENDER-001"
+    "record_id": "WP-SMC-10-CAUSAL-OB-ORIGIN-20260714",
+    "work_package": "WP-SMC-10-OB-ORIGIN-CAUSAL-REPAIR",
+    "gate": "GATE-WP-SMC-10-CAUSAL-OB-ORIGIN-001"
   },
   "records": [
     {
@@ -273,6 +273,370 @@
         "Manual AI-assisted JSON mode used no external model API and creates AI weak consensus only.",
         "No predictive, paper-trading, live-trading, or execution authority was created.",
         "The global perception and annotation readiness gate remains closed."
+      ]
+    },
+    {
+      "record_id": "PERCEPTION-PROGRAMME-INTEGRITY-REPAIR-FINAL-20260711",
+      "work_package": "PERCEPTION-PROGRAMME-INTEGRITY-REPAIR",
+      "gate": "GATE-PERCEPTION-PROGRAMME-INTEGRITY-001",
+      "date": "2026-07-11",
+      "recorded_at": "2026-07-11T19:33:21.083883+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "4aa1a23173227430961f662442bf8d57ed2995d6",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 48,
+        "python_version": "3.14.5",
+        "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/PERCEPTION_PROGRAMME_REPAIR_SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "4117719dc798b1abed6502d8853b70cf7c7bc2ad8beee090fc0d3e0894ff11fc"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "941 passed, 1 skipped in 126.45s (0:02:06)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "941 passed, 1 skipped in 126.45s (0:02:06)",
+      "report": "reports/current/PERCEPTION_PROGRAMME_INTEGRITY_REPAIR_20260711.md",
+      "authority_mode": "local_experimental_observe_only",
+      "limitations": [
+        "Market Structure Constitution remains proposed with 14 unresolved decisions.",
+        "Blind adjudicated benchmark remains unpopulated; synthetic fixtures are not expert truth.",
+        "Runtime uses anchor-preserving context; bounded retrieval tool-call execution remains unimplemented.",
+        "No predictive, paper-trading, live-trading, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "CAUSAL-POI-AUTHORITY-REPAIR-FINAL-20260712",
+      "work_package": "CAUSAL-POI-AUTHORITY-REPAIR",
+      "gate": "GATE-CAUSAL-POI-AUTHORITY-001",
+      "date": "2026-07-12",
+      "recorded_at": "2026-07-12T13:49:25Z",
+      "status": "PASS",
+      "source": {
+        "git_head": "4aa1a23173227430961f662442bf8d57ed2995d6",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines_before_recording": 65,
+        "python_version": "3.14.5"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "954 passed, 1 skipped in 116.35s"
+        },
+        {
+          "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols BTCUSDT XRPUSDT --output-root analysis_runs/CAUSAL_POI_AUTHORITY_SMOKE_FINAL_20260712",
+          "exit_code": 0,
+          "summary": "Live closed-candle observe-only workflows validated; both remained THESIS_ONLY."
+        },
+        {
+          "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols XRPUSDT --output-root analysis_runs/CAUSAL_POI_AUTHORITY_SMOKE_FINAL2_20260712",
+          "exit_code": 0,
+          "summary": "Standalone FVG promotion blocked by unresolved OB lineage."
+        }
+      ],
+      "primary_result": "954 passed, 1 skipped in 116.35s",
+      "report": "reports/current/CAUSAL_POI_AUTHORITY_REPAIR_20260712.md",
+      "authority_mode": "deterministic_causal_poi_observe_only",
+      "limitations": [
+        "No POI reaction is guaranteed before future price action.",
+        "Blind expert-adjudicated classification accuracy remains pending.",
+        "No predictive, paper-trading, live-trading, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-01-04-EXPERT-PERCEPTION-FOUNDATION-20260712",
+      "work_package": "WP-SMC-01-THROUGH-04",
+      "gate": "GATE-WP-SMC-EXPERIMENTAL-BREAK-001",
+      "date": "2026-07-12",
+      "recorded_at": "2026-07-12T19:40:00Z",
+      "status": "PASS_LOCAL_EXPERIMENTAL_OBSERVE_ONLY",
+      "source": {
+        "git_head": "4aa1a23173227430961f662442bf8d57ed2995d6",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "baseline_manifest": "governance/WORK_PACKAGES/WP-SMC-01-VERIFIED-REPOSITORY-TRUTH/BASELINE_SOURCE_MANIFEST.tsv",
+        "baseline_manifest_sha256": "7e037c581c0fef159d2311cb19b67d3c02688590c3cc6abf3de229fe05a032a4",
+        "post_implementation_manifest": "governance/WORK_PACKAGES/WP-SMC-03-04-EXPERIMENTAL-BREAK-LIFECYCLE/SOURCE_MANIFEST.tsv",
+        "post_implementation_manifest_sha256": "0cefcc819f0d15ab4164bede7c9d433a6bcda7103d7b32d036d1841f54bd8c96"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "981 passed, 1 skipped in 128.09s"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py && .venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS; 115 active files scanned; governance consistent"
+        }
+      ],
+      "primary_result": "981 passed, 1 skipped in 128.09s",
+      "report": "reports/current/WP_SMC_01_04_EXPERT_PERCEPTION_FOUNDATION_20260712.md",
+      "authority_mode": "local_experimental_observe_only",
+      "limitations": [
+        "Constitution V2 is proposed and ten thresholds remain pending adjudication.",
+        "The break lifecycle receives a certified level; atlas-to-break integration remains pending.",
+        "No expert accuracy, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-PERCEPTION-INTERROGATION-HARDENING-FINAL-20260713",
+      "work_package": "WP-SMC-05-08-PERCEPTION-INTERROGATION-HARDENING",
+      "gate": "GATE-SMC-PERCEPTION-INTERROGATION-001",
+      "date": "2026-07-13",
+      "recorded_at": "2026-07-13T01:11:11+01:00",
+      "status": "PASS_IMPLEMENTATION_EMPIRICAL_CERTIFICATION_OPEN",
+      "source": {
+        "git_head": "4aa1a23173227430961f662442bf8d57ed2995d6",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 113,
+        "python_version": "3.14.5",
+        "smoke_run": "analysis_runs/PERCEPTION_INTERROGATION_HARDENING_FINAL_20260713/LIVE_FULL_SYSTEM_AI_SMC_V3_20260713_000734/BTCUSDT"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1015 passed, 1 skipped in 149.26s"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": "git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols BTCUSDT --output-root analysis_runs/PERCEPTION_INTERROGATION_HARDENING_FINAL_20260713 --allow-shallow-context",
+          "exit_code": 0,
+          "summary": "Observe-only BTC run completed; 5772/5772 contracts complete, runtime causal integrity PASS, annotation VALIDATED, certification NOT_CERTIFIED."
+        }
+      ],
+      "primary_result": "1015 passed, 1 skipped; implementation contract coverage 100/100; empirical certification NOT_CERTIFIED",
+      "report": "governance/WORK_PACKAGES/WP-SMC-05-08-PERCEPTION-INTERROGATION-HARDENING/TEST_REPORT.json",
+      "authority_mode": "local_observe_only_perception_research",
+      "limitations": [
+        "Implementation contract coverage is not perception accuracy.",
+        "Zero independently adjudicated gold cases and zero linked calibration records exist.",
+        "Real visual perturbation, sweep-versus-breakout gold, and no-evidence abstention response reports remain missing.",
+        "No predictive edge, guaranteed POI reaction, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-INTERROGATION-COHORT-READY-20260713",
+      "work_package": "WP-SMC-05-08-PERCEPTION-INTERROGATION-HARDENING",
+      "gate": "GATE-SMC-PERCEPTION-INTERROGATION-001",
+      "date": "2026-07-13",
+      "recorded_at": "2026-07-13T01:50:48+01:00",
+      "status": "PASS_COHORT_INTEGRITY_EMPIRICAL_REVIEW_PENDING",
+      "source": {
+        "git_head": "4aa1a23173227430961f662442bf8d57ed2995d6",
+        "source_state": "dirty_worktree_source_frozen",
+        "working_tree_status_lines": 120,
+        "python_version": "3.14.5",
+        "system_code_freeze_file_count": 410,
+        "system_code_freeze_sha256": "7fdf58769aec4cdb68cbf9d1cf134124e0732c2420fa9e42b7607debb1dece91",
+        "cohort_manifest": "review_queues/SMC_INTERROGATION_30_V1_20260713/cohort_manifest.json",
+        "cohort_content_sha256": "4915c1072f537cd28363a298308836a69393ad3e250754a896f5ac22a89f7265"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python tools/build_perception_interrogation_cohort.py --output review_queues/SMC_INTERROGATION_30_V1_20260713",
+          "exit_code": 0,
+          "summary": "Built 30 engine-blind selected historical review cases across five symbols."
+        },
+        {
+          "command": ".venv/bin/python tools/verify_perception_interrogation_cohort.py review_queues/SMC_INTERROGATION_30_V1_20260713 --strict",
+          "exit_code": 0,
+          "summary": "PASS; 1230 files, 15900 candles, 30 one-candle counterfactuals, zero issues."
+        },
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1022 passed, 1 skipped in 145.33s"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_governance_consistency.py && .venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        }
+      ],
+      "primary_result": "30-case cohort integrity PASS; empirical certification remains NOT_CERTIFIED",
+      "report": "reports/current/SMC_INTERROGATION_30_CASE_COHORT_20260713.md",
+      "authority_mode": "reviewer_blind_historical_perception_evaluation_observe_only",
+      "limitations": [
+        "The 30 cases are empty review instruments, not adjudicated gold truth.",
+        "Two independent human reviews and one blind adjudication remain required per case.",
+        "Real visual perturbation and no-evidence responses remain uncollected.",
+        "Historical development-era cases are not an untouched future holdout.",
+        "No perception score, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-SIGNED-EVIDENCE-AUTHORITY-20260713",
+      "work_package": "WP-SMC-05-08-PERCEPTION-INTERROGATION-HARDENING",
+      "gate": "GATE-SMC-PERCEPTION-INTERROGATION-001",
+      "date": "2026-07-13",
+      "recorded_at": "2026-07-13T02:18:26+01:00",
+      "status": "PASS_SIGNED_CHAIN_TRUST_PROVISIONING_PENDING",
+      "source": {
+        "git_head": "4aa1a23173227430961f662442bf8d57ed2995d6",
+        "source_state": "dirty_worktree_source_frozen",
+        "working_tree_status_lines": 126,
+        "python_version": "3.14.5",
+        "system_code_freeze_file_count": 410,
+        "system_code_freeze_sha256": "74906372ab6c6b8e77a0611567f11ced4017ad212dbcff140f208705e45e96fa",
+        "cohort_manifest": "review_queues/SMC_INTERROGATION_30_V1_20260713/cohort_manifest.json",
+        "cohort_content_sha256": "28207e847f60d1507f984eb7ca1900ac18ece4cf23b1286242dbf53a08ac584c",
+        "trust_registry_status": "UNPROVISIONED"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1030 passed, 1 skipped in 159.95s"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_governance_consistency.py && .venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/verify_perception_interrogation_cohort.py review_queues/SMC_INTERROGATION_30_V1_20260713 --strict",
+          "exit_code": 0,
+          "summary": "PASS; 1230 files, 15900 candles, 30 counterfactuals, trust registry explicitly unprovisioned."
+        }
+      ],
+      "primary_result": "Signed empirical authority chain validated; external trust identities and reviews remain missing",
+      "report": "reports/current/SMC_SIGNED_EVIDENCE_AUTHORITY_20260713.md",
+      "authority_mode": "cryptographically_gated_observe_only_perception_research",
+      "limitations": [
+        "The cohort trust registry has not been provisioned with independent public keys.",
+        "No signed reviewer, adjudicator, visual, sweep, gold, calibration, or cohort-score evidence exists.",
+        "The historical cohort is not an untouched future holdout.",
+        "No empirical perception score, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-09-AI-SEAT-RUNTIME-CONTRACT-20260713",
+      "work_package": "WP-SMC-09-AI-SEAT-RUNTIME-CONTRACT",
+      "gate": "GATE-AI-SEAT-RUNTIME-CONTRACT-001",
+      "date": "2026-07-13",
+      "recorded_at": "2026-07-13T11:11:01+01:00",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_EMPIRICAL_CERTIFICATION_UNCHANGED",
+      "source": {
+        "git_head": "4aa1a23173227430961f662442bf8d57ed2995d6",
+        "source_state": "dirty_worktree_preserved",
+        "working_tree_status_lines": 140,
+        "python_version": "3.14.5",
+        "ai_seat_profile_sha256": "147563fe253da56d552e8f30fb0d60b4f08422588e9ff639c9c568ce865b1ad6",
+        "constitution_v2_sha256": "52f69f1537ea14e28ac76ed1aca3a23bca441c6ed129fc848d3f0882f0fc9ee4",
+        "gauntlet_protocol_sha256": "9950af293fdcc574db8f5f6231512621e1bc15d4fbe64eddd7f80741303b5ae0",
+        "sealed_btc_packet_sha256": "3b321739d71cf6708b624b2c450ddbfaeb597d4650da1d053e25ce132c4aefca"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_ai_seat_runtime_contract.py tests/test_wp0037_external_agent_handoff.py tests/test_perception_gauntlet_v2.py tests/test_interrogation_cohort_builder.py tests/test_wp0041_professional_annotation_planner.py tests/test_wp0041a_annotation_integrity_repair.py tests/test_wp0041b_ai_annotation_render_loop.py",
+          "exit_code": 0,
+          "summary": "62 passed"
+        },
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1052 passed, 1 skipped in 163.09s"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": "export and verify real BTCUSDT ai_smc_agent_packet_v2",
+          "exit_code": 0,
+          "summary": "PASS; 16 hash-bound files and mechanical mirror evidence for 15m/1h/4h/1d"
+        }
+      ],
+      "primary_result": "AI seat v2 packet integrity and fail-closed exam enforcement validated",
+      "report": "reports/current/AI_SEAT_RUNTIME_CONTRACT_V2_20260713.md",
+      "authority_mode": "hash_bound_external_ai_reasoning_observe_only",
+      "limitations": [
+        "The AI self-exam does not certify semantic correctness.",
+        "Constitution V2 remains proposed with ten pending human-adjudication decisions.",
+        "No real external AI response was semantically adjudicated in this work package.",
+        "No perception accuracy, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-10-CAUSAL-OB-ORIGIN-20260714",
+      "work_package": "WP-SMC-10-OB-ORIGIN-CAUSAL-REPAIR",
+      "gate": "GATE-WP-SMC-10-CAUSAL-OB-ORIGIN-001",
+      "date": "2026-07-14",
+      "recorded_at": "2026-07-14T13:56:36.983629+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "0c3acc0076eb5179b7952ae159497a6dbe869a2f",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 141,
+        "python_version": "3.14.5"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1077 passed, 1 skipped in 346.20s (0:05:46)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1077 passed, 1 skipped in 346.20s (0:05:46)",
+      "report": "reports/current/WP_SMC_10_CAUSAL_OB_ORIGIN_REPAIR_20260714.md",
+      "authority_mode": "deterministic_classification_lineage_repair_observe_only",
+      "limitations": [
+        "No perception accuracy, predictive edge, signal, paper, live, or execution authority was created.",
+        "The AI self-exam is not run here; this WP repairs deterministic classification and lineage only.",
+        "Constitution V2 remains proposed with ten pending human-adjudication decisions.",
+        "BR-004-006 contested decisions remain PROPOSED; adjudication deferred to project owner.",
+        "Causal protected-point override fires only when the pick maps to a registered SwingObject; cluster picks fall back to legacy assignment."
       ]
     }
   ]
