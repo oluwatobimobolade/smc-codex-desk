@@ -10,6 +10,7 @@ from smc_desk.perception.inducement import InducementDetector
 from smc_desk.perception.liquidity import LiquidityLevelDetector, SweepDetector
 from smc_desk.perception.order_blocks import OrderBlockDetector, mark_poi_grade_fvgs
 from smc_desk.perception.config import PerceptionRuntimeConfig, load_perception_config
+from smc_desk.perception.causal_repair_flags import canonical_displacement_scoring_enabled
 from smc_desk.perception.ontology import (
     InducementObject,
     LiquidityLevelObject,
@@ -122,6 +123,15 @@ class PerceptionEngineV2:
         # 3. Detect Fair Value Gaps
         fvgs = self.fvg_detector.detect(valid_candles, decision_time)
 
+        # 3a. (WP-SMC-10) Canonical displacement scoring. Off by default; when the
+        # flag is on, confirmed breaks carry a real displacement_strength (scored
+        # from their evidence + the just-detected FVGs) instead of the legacy
+        # hardcoded 0.0. This is the live ranking axis the causal POI authority
+        # reads (smc_desk.perception.causal_poi_authority._pairwise_key) and the
+        # signal the causal OB-origin gate requires. No behaviour change when off.
+        if canonical_displacement_scoring_enabled():
+            _enrich_breaks_with_displacement(breaks, fvgs)
+
         # 4. Stage B trader primitives. These are still observe-only perception
         # objects; they do not authorize a trade.
         fvgs = mark_poi_grade_fvgs(fvgs, breaks)
@@ -162,3 +172,54 @@ class PerceptionEngineV2:
             inducements=inducements,
             poi_grade_fvgs=poi_grade_fvgs,
         )
+
+
+def _enrich_breaks_with_displacement(
+    breaks: List[StructureBreakObject],
+    fvgs: List[FairValueGapObject],
+) -> None:
+    """Score displacement on every confirmed break in-place.
+
+    Replaces the hardcoded ``evidence.displacement_strength=0.0`` (structure.py:203)
+    with the real ``DisplacementProfile.displacement_score`` from
+    ``smc_desk.perception.displacement.score_break_displacement``. Stashes the full
+    profile (break_quality, valid_for_bias_flip, body/range ratios, bps, ATR) in
+    ``brk.metadata['displacement']`` so downstream consumers (the causal POI
+    authority, the formal structure graph, the annotation composer) can read it
+    without re-running the scorer.
+
+    Only confirmed breaks are enriched; candidate/probe breaks stay at 0.0 because
+    their body-close penetration is intentionally unset until confirmation
+    (structure.py:142-147).
+
+    The mutation is in-place; ``StructureBreakEvidence`` and ``StructureBreakObject``
+    are not frozen, so direct assignment is safe.
+    """
+    from smc_desk.perception.displacement import score_break_displacement
+
+    for brk in breaks:
+        evidence = brk.evidence
+        if not brk.confirmed_at or evidence.is_unconfirmed_probe:
+            continue
+        try:
+            profile = score_break_displacement(brk, fvgs=fvgs)
+        except Exception:
+            # Displacement scoring is strictly advisory (deterministic ranking aid,
+            # not an authority flag). If the scorer raises on a malformed break,
+            # leave the legacy zero in place rather than failing the whole analyse.
+            continue
+        evidence.displacement_strength = float(profile.displacement_score)
+        brk.metadata.setdefault("displacement", {})
+        brk.metadata["displacement"].update({
+            "score": float(profile.displacement_score),
+            "break_quality": profile.break_quality,
+            "valid_for_bias_flip": bool(profile.valid_for_bias_flip),
+            "body_to_range_ratio": float(profile.body_to_range_ratio),
+            "body_to_atr_ratio": float(profile.body_to_atr_ratio),
+            "close_beyond_structure_bps": float(profile.close_beyond_structure_bps),
+            "fvg_created_after_break": bool(profile.fvg_created_after_break),
+            "impulse_candle_count": int(profile.impulse_candle_count),
+            "wick_rejection_ratio": float(profile.wick_rejection_ratio),
+            "scored_by": "score_break_displacement",
+            "scoring_version": "wp_smc10_canonical_v1",
+        })
