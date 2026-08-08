@@ -22,15 +22,90 @@ def prefer_formal_graph_override(
     structure_narrative: dict[str, Any],
     formal_graph: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
-    """When a formal graph is present, override the narrative's parent-child context."""
+    """Make the formal graph authoritative over narrative structure labels.
+
+    Raw OHLC drift is useful context when no graph node exists. Once a formal
+    node exists, however, even an explicit ``unknown`` is authoritative: the
+    prose layer must not promote drift into a confirmed structural bias.
+    """
     if not isinstance(formal_graph, Mapping) or not formal_graph:
         return structure_narrative
-    pc = formal_graph.get("parent_child_context")
-    if not isinstance(pc, Mapping):
-        return structure_narrative
     result = dict(structure_narrative)
-    result["parent_child_context"] = dict(pc)
-    result["parent_child_context"]["source"] = "formal_structure_graph"
+    raw_timeframes = result.get("timeframes")
+    timeframes = {
+        str(timeframe): dict(item)
+        for timeframe, item in (raw_timeframes.items() if isinstance(raw_timeframes, Mapping) else [])
+        if isinstance(item, Mapping)
+    }
+    graph_timeframes = formal_graph.get("timeframes")
+    unknown_graph_timeframes: set[str] = set()
+    authority_notes: list[str] = []
+
+    if isinstance(graph_timeframes, Mapping):
+        for timeframe, graph_node in graph_timeframes.items():
+            if not isinstance(graph_node, Mapping):
+                continue
+            timeframe = str(timeframe)
+            item = dict(timeframes.get(timeframe, {}))
+            external_bias = str(graph_node.get("external_bias") or "unknown").lower()
+            if external_bias not in DIRECTIONS:
+                external_bias = "unknown"
+                unknown_graph_timeframes.add(timeframe)
+            internal_state = str(graph_node.get("internal_state") or "none")
+
+            item["external_bias"] = external_bias
+            item["internal_state"] = internal_state
+            item["formal_graph_authority"] = True
+            if external_bias in DIRECTIONS:
+                opposite = "bearish" if external_bias == "bullish" else "bullish"
+                item["label"] = (
+                    f"{external_bias}_external_{opposite}_internal_pullback"
+                    if internal_state == f"{opposite}_internal_pullback"
+                    else external_bias
+                )
+                item["vote_bias"] = external_bias
+            else:
+                item["label"] = "unknown"
+                item["vote_bias"] = "unknown"
+                authority_notes.append(
+                    f"{timeframe}: formal graph has no confirmed external structure; "
+                    "raw OHLC drift is context only and was not promoted to bias."
+                )
+
+            latest_external = graph_node.get("latest_external_break")
+            if isinstance(latest_external, Mapping):
+                item["latest_external_break_id"] = latest_external.get("object_id")
+                item["latest_external_confirmed_at"] = latest_external.get("confirmed_at")
+            elif external_bias == "unknown":
+                item["latest_external_break_id"] = None
+                item["latest_external_confirmed_at"] = None
+
+            latest_internal = graph_node.get("latest_internal_break")
+            if isinstance(latest_internal, Mapping):
+                item["latest_internal_break_id"] = latest_internal.get("object_id")
+                item["latest_internal_confirmed_at"] = latest_internal.get("confirmed_at")
+
+            timeframes[timeframe] = item
+
+    result["timeframes"] = timeframes
+    result["formal_graph_authority"] = True
+    existing_evidence = list(result.get("evidence") or [])
+    result["evidence"] = list(dict.fromkeys([*existing_evidence, *authority_notes]))
+    conflicts = result.get("conflicts")
+    if isinstance(conflicts, list) and unknown_graph_timeframes:
+        result["conflicts"] = [
+            conflict
+            for conflict in conflicts
+            if not (
+                isinstance(conflict, Mapping)
+                and str(conflict.get("timeframe")) in unknown_graph_timeframes
+            )
+        ]
+
+    pc = formal_graph.get("parent_child_context")
+    if isinstance(pc, Mapping):
+        result["parent_child_context"] = dict(pc)
+        result["parent_child_context"]["source"] = "formal_structure_graph"
     return result
 
 

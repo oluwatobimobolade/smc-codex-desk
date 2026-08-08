@@ -33,6 +33,12 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable, Mapping, Sequence
 
 from smc_desk.data.hashing import object_sha256
+from smc_desk.perception.programme_schema import (
+    canonical_object_id,
+    candidate_time,
+    flatten_candidate_objects,
+    graph_anchor_records,
+)
 
 # Soft budget for the fill set. The anchor set ALWAYS fits regardless of budget.
 DEFAULT_FILL_BUDGET = 600
@@ -90,11 +96,11 @@ class ContextRetrievalResult:
     def context_ids(self) -> set[str]:
         ids = {a.candidate_id for a in self.anchors}
         for rec in self.anchor_records:
-            cid = rec.get("object_id")
+            cid = canonical_object_id(rec)
             if isinstance(cid, str):
                 ids.add(cid)
         for rec in self.fill:
-            cid = rec.get("object_id")
+            cid = canonical_object_id(rec)
             if isinstance(cid, str):
                 ids.add(cid)
         return ids
@@ -108,28 +114,11 @@ def _candidate_pool(case: Mapping[str, Any]) -> list[Mapping[str, Any]]:
         {"15m": {"swings": [...], "fvgs": [...], ...},
          "1h": {"swings": [...], ...}, ...}
     """
-    pool: list[Mapping[str, Any]] = []
-    co = case.get("candidate_objects") or {}
-    if not isinstance(co, Mapping):
-        return pool
-    for timeframe, buckets in co.items():
-        if not isinstance(buckets, Mapping):
-            continue
-        for bucket, items in buckets.items():
-            if not isinstance(items, list):
-                continue
-            for item in items:
-                if isinstance(item, Mapping) and item.get("object_id"):
-                    pool.append(item)
-    return pool
+    return flatten_candidate_objects(case.get("candidate_objects") or {})
 
 
 def _recency(candidate: Mapping[str, Any]) -> str:
-    for key in ("confirmed_at", "candidate_at", "pivot_time"):
-        v = candidate.get(key)
-        if isinstance(v, str) and v:
-            return v
-    return ""
+    return candidate_time(candidate)
 
 
 def _collect_anchors(case: Mapping[str, Any]) -> list[AnchorHit]:
@@ -148,53 +137,13 @@ def _collect_anchors(case: Mapping[str, Any]) -> list[AnchorHit]:
     anchors: list[AnchorHit] = []
     graph = case.get("formal_structure_graph") or {}
 
-    rng = graph.get("active_range") if isinstance(graph.get("active_range"), Mapping) else None
-    if rng:
-        if rng.get("high_object_id"):
-            anchors.append(AnchorHit(
-                candidate_id=str(rng["high_object_id"]), anchor_kind="active_external_high",
-                source="formal_structure_graph.active_range.high",
-                reason="active range upper boundary per programme §4.6"))
-        if rng.get("low_object_id"):
-            anchors.append(AnchorHit(
-                candidate_id=str(rng["low_object_id"]), anchor_kind="active_external_low",
-                source="formal_structure_graph.active_range.low",
-                reason="active range lower boundary per programme §4.6"))
-        if rng.get("range_id"):
-            anchors.append(AnchorHit(
-                candidate_id=str(rng["range_id"]), anchor_kind="range_endpoint",
-                source="formal_structure_graph.active_range",
-                reason="active dealing range endpoint per programme §7"))
-
-    pp = graph.get("protected_point")
-    if isinstance(pp, Mapping) and pp.get("object_id"):
+    for item in graph_anchor_records(graph):
         anchors.append(AnchorHit(
-            candidate_id=str(pp["object_id"]), anchor_kind="protected_point",
-            source="formal_structure_graph.protected_point",
-            reason="current protected point per programme §5 (causal origin of impulse)"))
-
-    for br in graph.get("accepted_breaks") or []:
-        if not isinstance(br, Mapping):
-            continue
-        if br.get("origin_object_id"):
-            anchors.append(AnchorHit(
-                candidate_id=str(br["origin_object_id"]), anchor_kind="break_origin",
-                source=f"formal_structure_graph.accepted_breaks[{br.get('object_id') or '?'}]",
-                reason=f"origin of accepted break direction={br.get('direction')}"))
-
-    for ht in graph.get("active_htf_pois") or []:
-        if isinstance(ht, Mapping) and ht.get("poi_id"):
-            anchors.append(AnchorHit(
-                candidate_id=str(ht["poi_id"]), anchor_kind="htf_active_poi",
-                source=f"formal_structure_graph.active_htf_pois[{ht['poi_id']}]",
-                reason=f"active higher-timeframe POI at {ht.get('timeframe')}"))
-
-    for lvl in graph.get("unswept_external_liquidity") or []:
-        if isinstance(lvl, Mapping) and lvl.get("object_id"):
-            anchors.append(AnchorHit(
-                candidate_id=str(lvl["object_id"]), anchor_kind="unswept_external_liquidity",
-                source="formal_structure_graph.unswept_external_liquidity",
-                reason="external liquidity level not yet consumed per programme §2.2"))
+            candidate_id=item["object_id"],
+            anchor_kind=item["anchor_kind"],
+            source=item["anchor_source"],
+            reason=item["anchor_reason"],
+        ))
 
     for cid in case.get("blind_reader_reference_ids") or []:
         anchors.append(AnchorHit(
@@ -230,7 +179,7 @@ def _rank_fill_candidates(
     """
     scored: list[tuple[tuple, int, Mapping[str, Any]]] = []
     for index, c in enumerate(pool):
-        cid = c.get("object_id")
+        cid = canonical_object_id(c)
         if not isinstance(cid, str) or cid in excluded:
             continue
         causal = 0
@@ -244,8 +193,8 @@ def _rank_fill_candidates(
         tf_weight = {"1d": 5, "4h": 4, "1h": 3, "15m": 2}.get(tf, 1)
         life = str(c.get("lifecycle", "CANDIDATE"))
         life_weight = {"STRUCTURAL": 3, "PROTECTED": 3, "CANDIDATE": 1, "STALE": 0, "REJECTED": 0}.get(life, 1)
-        recency = _recency(c)  # str (possibly empty); never dict
-        scored.append((-causal, -tf_weight, -life_weight, recency, index, c))
+        recency = _recency_epoch(c)
+        scored.append((-causal, -tf_weight, -life_weight, -recency, index, c))
     scored.sort()
     return [entry[-1] for entry in scored]
 
@@ -264,9 +213,11 @@ def retrieve_for_case(
 
     by_id: dict[str, Mapping[str, Any]] = {}
     for c in candidate_pool:
-        cid = c.get("object_id")
-        if isinstance(cid, str):
+        cid = canonical_object_id(c)
+        if cid:
             by_id[cid] = c
+
+    graph_records = {item["object_id"]: item for item in graph_anchor_records(case.get("formal_structure_graph") or {})}
 
     # The anchor set ALWAYS fits in context (programme §4.6). Missing anchors
     # are reported explicitly -- they are not silently dropped.
@@ -274,6 +225,9 @@ def retrieve_for_case(
     missing_anchor_ids: list[str] = []
     for a in anchors:
         rec = by_id.get(a.candidate_id)
+        if rec is None and a.candidate_id in graph_records:
+            graph_item = graph_records[a.candidate_id]
+            rec = {**dict(graph_item["record"]), "object_id": a.candidate_id}
         if rec is None:
             missing_anchor_ids.append(a.candidate_id)
             anchor_records.append(
@@ -299,6 +253,17 @@ def retrieve_for_case(
         missing_anchor_ids=tuple(missing_anchor_ids),
         budget=fill_budget,
     )
+
+
+def _recency_epoch(candidate: Mapping[str, Any]) -> float:
+    value = _recency(candidate)
+    if not value:
+        return 0.0
+    try:
+        import pandas as pd
+        return float(pd.Timestamp(value).timestamp())
+    except (TypeError, ValueError):
+        return 0.0
 
 
 def to_compact_payload(result: ContextRetrievalResult, *, include_fill: bool = True) -> dict[str, Any]:

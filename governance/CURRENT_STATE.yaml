@@ -2,9 +2,9 @@ project:
   name: SMC Codex Desk
   product: Dual-Lens Market Colleague
   release: colleague-core-rc0
-  status: research_foundation_ai_annotation_render_loop_validated_with_closed_readiness_gate
-  current_date: "2026-07-11"
-  last_updated: "2026-07-11"
+  status: perception_interrogation_implementation_complete_empirical_certification_closed
+  current_date: "2026-07-13"
+  last_updated: "2026-07-13"
 
 scope:
   certified_initial_scope:
@@ -57,7 +57,11 @@ authority:
   smc_detector_rebuild: implemented_wp0022_stage_ab_internal_external_liquidity_sweep_ob_inducement
   decision_quality_diagram_repair: passed_wp0027_protected_poi_inducement_story_chart_repair
   smc_narrative_authority: passed_wp0029_single_official_model_watch_chart_trade_box_gating
-  formal_mtf_structure_graph: implemented_wp0040_deterministic_graph_authority_observe_only
+  formal_mtf_structure_graph: repaired_wp0040_live_side_specific_anchors_parent_break_guard_observe_only
+  canonical_poi_lifecycle: integrated_v3_before_evidence_sealing_active_pois_populated
+  target_hierarchy: repaired_internal_management_vs_external_model_completion_swept_liquidity_guard
+  causal_poi_authority: validated_observe_only_origin_cluster_break_lineage_external_primary_fvg_subordination
+  scenario_poi_mapping: validated_formal_graph_reconciliation_sparse_watch_annotation_984_passed_1_skipped
   professional_ai_smc_annotation: validated_wp0041b_ai_selects_certified_ids_deterministic_geometry_renders_sparse_charts
   annotation_visual_critic: render_bound_exact_manifest_and_image_hash_attestation_downgrade_only
   closed_candle_partial_htf_guard: verified_wp0024_exact_decision_time_boundary
@@ -71,7 +75,30 @@ authority:
   protected_benchmark_partitions: validated_br004_public_ai_weak_partitions_access_ledger_blind_set_unpopulated
   governed_ai_structure_lab: validated_wp0041b_six_role_render_before_visual_critic_pixel_verified
   ai_doctrine_panel: validated_br006_local_source_grounded_consensus_certification_pending
-  perception_bridge_validation: current_815_passed_1_skipped_wp0041b_render_loop_validated
+  perception_bridge_validation: current_984_passed_1_skipped_scenario_poi_mapping_repair
+  perception_programme_integrity: validated_local_experimental_observe_only_941_passed_1_skipped
+  perception_programme_doctrine: proposed_non_authoritative_14_decisions_unresolved
+  perception_programme_tool_loop: anchor_context_only_unimplemented_tools_not_advertised
+  wp_smc_repository_truth: passed_source_bound_dirty_baseline_960_passed_1_skipped
+  market_structure_constitution_v2: proposed_hash_sealed_non_authoritative_10_decisions_pending
+  hybrid_perception_engine_v3: isolated_experimental_facade_not_promoted
+  experimental_break_lifecycle: validated_observe_only_first_break_probe_displacement_choch_mss_future_guard
+  perception_interrogation_hardening: signed_evidence_chain_full_suite_1030_passed_1_skipped_empirical_not_certified
+  ai_seat_runtime_contract: passed_v2_hash_bound_exam_required_observe_only_1052_passed_1_skipped
+  ai_seat_profile: proposed_observe_only_typed_authority_no_self_certification
+  external_agent_handoff: v2_sealed_inputs_exact_profile_constitution_gauntlet_and_metamorphic_evidence
+  ai_seat_mechanical_mirror: case_specific_hash_bound_15m_1h_4h_1d_artifacts_required_for_station_8
+  ai_seat_unresolved_claims: dissent_and_doctrine_pending_force_review_required
+  annotation_object_budget: context_5_watch_review_7_trade_plan_8
+  object_evidence_contracts: complete_hash_bound_dual_geometry_uncalibrated_confidence_prohibited
+  runtime_causal_integrity: live_btc_pass_480_candles_5772_contracts_zero_violations
+  empirical_perception_certification: not_certified_zero_adjudicated_cases_real_visual_reports_missing
+  perception_interrogation_cohort: integrity_pass_30_cases_1230_files_15900_candles_30_counterfactuals_not_gold
+  perception_system_code_freeze: 410_files_sha256_74906372ab6c6b8e77a0611567f11ced4017ad212dbcff140f208705e45e96fa
+  blind_adjudication_scoring: implemented_normalized_anonymous_10_dimensions_10_catastrophic_gates_calibration_quarantined
+  signed_evidence_authority: ed25519_payload_cohort_system_role_binding_validated
+  empirical_trust_registry: unprovisioned_six_distinct_external_identities_required
+  empirical_dimension_authority: signed_unique_30_case_blind_score_only_implementation_score_prohibited
   validation_registry: append_only_v2_explicit_current_gate
   controlling_documents: sha256_verified_wp0044
   companion_repository: historical_non_authoritative
@@ -93,10 +120,43 @@ active_contracts:
   ai_structure_reasoning: AI_CENTERED_STRUCTURE_REASONING_V1
 
 current_gate:
-  id: GATE-PROFESSIONAL-AI-ANNOTATION-RENDER-001
-  work_package: WP-0041B-AI-ANNOTATION-RENDER-LOOP
-  status: validated_local_observe_only_readiness_gate_still_closed
-  next_programme: BLIND_CASE_COHORT_AND_OPTIONAL_HUMAN_CONSTITUTION_CERTIFICATION
+  id: GATE-SMC-PERCEPTION-INTERROGATION-001
+  work_package: WP-SMC-05-08-PERCEPTION-INTERROGATION-HARDENING
+  status: signed_chain_and_cohort_complete_trust_provisioning_and_empirical_reviews_pending
+  next_programme: provision_external_keys_then_two_reviews_blind_adjudication_and_visual_responses
+
+perception_interrogation_gate:
+  id: GATE-SMC-PERCEPTION-INTERROGATION-001
+  description: Every exported object is point-in-time evidence-bound, geometry-safe, confidence-honest, adversarially testable, and subject to a fail-closed empirical certification contract.
+  status: signed_evidence_chain_and_cohort_integrity_pass_empirical_not_certified
+  evidence:
+    - governance/WORK_PACKAGES/WP-SMC-05-08-PERCEPTION-INTERROGATION-HARDENING/TEST_REPORT.json
+    - governance/WORK_PACKAGES/WP-SMC-05-08-PERCEPTION-INTERROGATION-HARDENING/final_report.md
+    - reports/current/SMC_PERCEPTION_INTERROGATION_HARDENING_20260713.md
+    - analysis_runs/PERCEPTION_INTERROGATION_HARDENING_FINAL_20260713/LIVE_FULL_SYSTEM_AI_SMC_V3_20260713_000734/BTCUSDT/final_report.json
+    - review_queues/SMC_INTERROGATION_30_V1_20260713/cohort_manifest.json
+    - review_queues/SMC_INTERROGATION_30_V1_20260713/cohort_verification.json
+    - reports/current/SMC_INTERROGATION_30_CASE_COHORT_20260713.md
+    - reports/current/SMC_SIGNED_EVIDENCE_AUTHORITY_20260713.md
+
+ai_seat_runtime_contract_gate:
+  id: GATE-AI-SEAT-RUNTIME-CONTRACT-001
+  description: Every new external AI packet is hash-bound to exact authority documents and requires an independently validated ten-station exam before promotion.
+  status: passed_local_observe_only_empirical_certification_unchanged
+  evidence:
+    - governance/WORK_PACKAGES/WP-SMC-09-AI-SEAT-RUNTIME-CONTRACT/TEST_REPORT.json
+    - governance/WORK_PACKAGES/WP-SMC-09-AI-SEAT-RUNTIME-CONTRACT/final_report.md
+    - reports/current/AI_SEAT_RUNTIME_CONTRACT_V2_20260713.md
+    - analysis_runs/AI_SEAT_RUNTIME_CONTRACT_V2_BTCUSDT_20260713/ai_agent_packet/run_manifest.json
+
+perception_programme_integrity_gate:
+  id: GATE-PERCEPTION-PROGRAMME-INTEGRITY-001
+  description: The experimental constitution, atlas, AI structure panel, deterministic validators, and WP-0041B annotation boundary operate as one fail-closed source-bound research path.
+  status: passed_local_experimental_observe_only
+  evidence:
+    - governance/WORK_PACKAGES/PERCEPTION-PROGRAMME-INTEGRITY-REPAIR/TEST_REPORT.json
+    - reports/current/PERCEPTION_PROGRAMME_INTEGRITY_REPAIR_20260711.md
+    - foundation_programme/PERCEPTION_READINESS_BRIDGE/PERCEPTION_PROGRAMME_REPAIR_SOURCE_MANIFEST.tsv
 
 annotation_render_gate:
   id: GATE-PROFESSIONAL-AI-ANNOTATION-RENDER-001
@@ -280,3 +340,4 @@ known_constraints:
   - Do not treat WP-0022 SMC detector primitives as strategy edge; Stage C/D decision wiring, target logic, calibration, and out-of-sample outcome testing remain separate.
   - Do not treat WP-0027 diagram and decision-quality repairs as predictive edge; they improve interpretation, chart readability, refusal honesty, and outcome contracts only.
   - Do not treat WP-0029 SMC Narrative Authority as predictive edge; it fixes official interpretation, chart authority, thesis sequencing, and trade-box gating only.
+  - Do not claim any POI will react 100 percent. Causal POI authority certifies rule classification and refusal, not future price behavior or strategy edge.

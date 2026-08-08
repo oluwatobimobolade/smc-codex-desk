@@ -85,7 +85,7 @@ def main() -> None:
     )
 
     summary = {
-        "schema": "agent_packet_export_v1",
+        "schema": "agent_packet_export_v2",
         "symbol": symbol,
         "packet_dir": str(packet_dir),
         "manifest": manifest,

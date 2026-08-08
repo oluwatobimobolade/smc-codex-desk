@@ -9,6 +9,12 @@
 **Live smoke:** BTCUSDT + SUIUSDT observe-only full-system smoke passed
 **Governance:** PASS
 
+**2026-07-12 live integrity re-audit:** PASS. A live XRPUSDT audit found and
+repaired collapsed/stale protected anchors, false parent-break eligibility,
+missing canonical POI lifecycle integration, ambiguous canonical labels, and
+open/close cutoff ambiguity. Full validation is now 943 passed, 1 skipped.
+See `reports/current/WP0040_LIVE_STRUCTURE_INTEGRITY_REPAIR_20260712.md`.
+
 ---
 
 ## What Exists

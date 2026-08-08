@@ -5,12 +5,14 @@ from smc_desk.brain.prompt_system.prompt_contract import PromptModule
 
 PROMPT = PromptModule(
     name="trade_readiness_prompt",
-    version="1.0.0",
+    version="1.2.0",
     purpose="Separate analysis from trade readiness and enforce strict refusal.",
     text="""Trade readiness rules:
 
 Being directionally right is not enough.
 A trade is valid only if location, liquidity, displacement, POI, entry, invalidation, target, and RR all align.
+The active POI must match causal_poi_authority. An execution refinement may narrow the entry but cannot erase or replace its controlling parent origin.
+The target plan must distinguish partial internal-liquidity management from the external model-completion target. R:R readiness is measured to the explicit unswept model-completion target, while intervening internal liquidity must be disclosed as reaction risk.
 
 Use strict refusal states:
 - THESIS_ONLY when there is context but no actionable setup model.

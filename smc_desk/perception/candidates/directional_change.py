@@ -69,7 +69,7 @@ def detect(
                 # check down-cross from the running high
                 move = pivot_price - lows[i]
                 if move >= thr * max(atr_arr[i], 1e-12):
-                    out.append(_make(df, timeframe, pivot_i, pivot_price, pivot_type, thr, move, atr_arr[i]))
+                    out.append(_make(df, timeframe, pivot_i, i, pivot_price, pivot_type, thr, move, atr_arr[i]))
                     # switch to tracking lows starting from the cross bar
                     direction = -1
                     pivot_i = i
@@ -83,7 +83,7 @@ def detect(
                 # check up-cross from the running low
                 move = highs[i] - pivot_price
                 if move >= thr * max(atr_arr[i], 1e-12):
-                    out.append(_make(df, timeframe, pivot_i, pivot_price, pivot_type, thr, move, atr_arr[i]))
+                    out.append(_make(df, timeframe, pivot_i, i, pivot_price, pivot_type, thr, move, atr_arr[i]))
                     direction = 1
                     pivot_i = i
                     pivot_price = highs[i]
@@ -95,6 +95,7 @@ def _make(
     df: pd.DataFrame,
     timeframe: str,
     pivot_i: int,
+    confirmation_i: int,
     pivot_price: float,
     pivot_type: str,
     threshold: float,
@@ -108,6 +109,9 @@ def _make(
         pivot_time=iso_from_index(df, pivot_i),
         pivot_price=float(pivot_price),
         generator_source=GENERATOR_DIRECTIONAL_CHANGE,
+        confirmed_at=iso_from_index(df, confirmation_i),
+        available_at=iso_from_index(df, confirmation_i),
+        generator_sources=(GENERATOR_DIRECTIONAL_CHANGE,),
         scale="atlas",
         volatility_normalized_move=float(round(move_price / max(atr_at_i, 1e-12), 4)),
         bars_left=None,

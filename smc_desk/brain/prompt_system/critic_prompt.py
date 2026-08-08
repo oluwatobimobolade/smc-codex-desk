@@ -10,6 +10,7 @@ def build_critic_prompt(decision_payload: Mapping[str, Any], evidence_pack: Mapp
     from smc_desk.perception.formal_structure_graph import graph_to_dict_string
 
     graph = evidence_pack.get("formal_structure_graph") or {}
+    episode_graph = evidence_pack.get("formal_causal_episode_graph") or {}
     graph_serialized = graph_to_dict_string(graph) if graph else "{}"
 
     prompt = {
@@ -19,6 +20,7 @@ def build_critic_prompt(decision_payload: Mapping[str, Any], evidence_pack: Mapp
             "Your job is to challenge the proposed trading decision against the FORMAL STRUCTURE GRAPH and raw price evidence.",
             "You can ONLY downgrade or veto. You can NEVER promote a decision to a higher state.",
             "Read the formal_structure_graph FIRST, before any candle or OHLC summary evidence.",
+            "Before the V1 graph, read formal_causal_episode_graph. If its stricter replay challenges the controlling break or POI lineage, veto; never promote around the contradiction.",
             "If the graph says PARENT_CHILD_CONFLICT, the decision direction MUST be mixed. Veto any clean bullish/bearish label.",
             "If the graph invariants are not PASS, the decision MUST NOT be TRADE_PLAN_READY. Veto or downgrade.",
             "If the graph says trade_promotion_blocked, veto any TRADE_PLAN_READY state.",
@@ -27,6 +29,7 @@ def build_critic_prompt(decision_payload: Mapping[str, Any], evidence_pack: Mapp
             "Output your critique in strict JSON format matching the schema below."
         ],
         "formal_structure_graph": graph_serialized,
+        "formal_causal_episode_graph": episode_graph,
         "proposed_decision": decision_payload,
         "evidence_pack": {
             "symbol": evidence_pack.get("symbol"),

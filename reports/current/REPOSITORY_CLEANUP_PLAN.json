@@ -1,0 +1,15 @@
+{
+  "status": "dry_run_only",
+  "created_at": "2026-06-25T15:00:00Z",
+  "destructive_actions": [],
+  "archive_first_policy": true,
+  "candidate_safe_delete_patterns": [
+    "__pycache__/",
+    ".pytest_cache/",
+    "*.pyc",
+    ".DS_Store",
+    "dummy.png",
+    "dummy_clean.png"
+  ],
+  "requires_approval_before_apply": true
+}

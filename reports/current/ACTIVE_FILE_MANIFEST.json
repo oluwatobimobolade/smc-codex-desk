@@ -1,0 +1,19 @@
+{
+  "manifest_version": "0.1",
+  "status": "initial",
+  "active_product_authority": [
+    "governance/README_FIRST.md",
+    "governance/CORE_MEMORY.md",
+    "governance/CURRENT_STATE.yaml",
+    "governance/AUTHORITY_MATRIX.yaml"
+  ],
+  "active_strategy_candidate": [
+    "strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/README.md",
+    "strategies/active/REGIME_ALIGNED_SMC_CONTINUATION_V1/STRATEGY_CONTRACT.yaml"
+  ],
+  "transitional_runtime": [
+    "tools/run_market_colleague_case.py",
+    "smc_desk/engine.py",
+    "smc_desk/perception/engine_v2.py"
+  ]
+}

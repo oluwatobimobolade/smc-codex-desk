@@ -10,6 +10,7 @@ from smc_desk.vision.blind_reader import BlindReader
 from smc_desk.vision.overlay_auditor import OverlayAuditor
 from smc_desk.vision.reconciliation import VisionReconciler
 from smc_desk.vision.vision_audit import enforce_authority_mode, CalibrationCertificate
+from smc_desk.evaluation.calibration import issue_calibration_certificate
 from smc_desk.vision.image_validation import validate_image_file
 from smc_desk.perception.engine_v2 import PerceptionSnapshot
 
@@ -36,7 +37,7 @@ def test_v4_authority_mode_observe_only():
         enforce_authority_mode(config_invalid)
         
     # With cert it should pass
-    cert = CalibrationCertificate(
+    cert = issue_calibration_certificate(
         gold_set_version="1.0",
         gold_set_hash="hash",
         model_name="claude-3-5-sonnet",
@@ -46,9 +47,21 @@ def test_v4_authority_mode_observe_only():
         evaluation_timestamp=datetime.now(timezone.utc),
         approved_authority_level="calibrated_veto",
         approver="admin",
-        certificate_hash="cert_hash"
+        adjudicated_case_count=30,
+        calibration_record_count=50,
+        expected_calibration_error=0.05,
+        brier_score=0.08,
+        perturbation_consistency_rate=0.98,
+        abstention_test_passed=True,
     )
-    enforce_authority_mode(config_invalid, cert) # Should pass
+    with pytest.raises(ValueError, match="signed calibration"):
+        enforce_authority_mode({
+            **config_invalid,
+            "cohort_id": "COHORT-1",
+            "cohort_content_sha256": "cohort-hash",
+            "system_code_freeze_sha256": "system-hash",
+            "trust_registry_sha256": "missing-trust-hash",
+        }, cert)
 
 def test_v4_blind_first_workflow(temp_store):
     img_path, store_dir = temp_store

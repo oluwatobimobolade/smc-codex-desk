@@ -115,9 +115,15 @@ def run_structure_lab(
     output_dir: str | Path,
     max_repair_attempts: int = 1,
     annotation_renderer: Callable[[Mapping[str, Any], Mapping[str, Any], Path], Mapping[str, Any]] | None = None,
+    candidate_payload_design: str | None = None,
 ) -> dict[str, Any]:
     if max_repair_attempts not in {0, 1}:
         raise ValueError("Structure lab permits at most one bounded repair attempt.")
+    if candidate_payload_design not in {None, "full", "flat", "anchor"}:
+        raise ValueError(
+            "Runtime supports full, flat, or anchor payloads. anchor_tools is an A/B prompt "
+            "surface only until a bounded tool-call execution loop exists."
+        )
     root = Path(output_dir).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
     _validate_case_contract(case)
@@ -130,7 +136,11 @@ def run_structure_lab(
 
     for order, role in enumerate(REQUIRED_ROLES, start=1):
         role_payload = _role_input(role, runtime_case, outputs)
-        prompt_packet = build_role_prompt(role, role_payload)
+        prompt_packet = build_role_prompt(
+            role,
+            role_payload,
+            candidate_payload_design=candidate_payload_design,
+        )
         parsed, audit, raw_text = _complete_validated_role(
             role=role,
             prompt_packet=prompt_packet,
@@ -177,6 +187,9 @@ def run_structure_lab(
         "provider_name": provider.provider_name,
         "model_name": provider.model_name,
         "provider_mode": provider.provider_mode,
+        "candidate_payload_design": candidate_payload_design or "flat",
+        "retrieval_tools_advertised": False,
+        "retrieval_tools_executed": False,
         "role_order": list(REQUIRED_ROLES),
         "role_audits": audits,
         "annotation_render": {
@@ -200,6 +213,7 @@ def run_structure_lab(
             "outputs": outputs,
             "audits": audits,
             "render_manifest": render_manifest,
+            "candidate_payload_design": candidate_payload_design or "flat",
             "final_status": final_status,
         }
     )

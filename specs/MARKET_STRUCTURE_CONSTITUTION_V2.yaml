@@ -1,0 +1,277 @@
+schema: smc_codex_market_structure_constitution_v2
+version: 2.0.0
+prepared_date: "2026-07-12"
+status: PROPOSED_RESEARCH_DOCTRINE_NO_EXECUTION_AUTHORITY
+
+authority_contract:
+  canonical_runtime_changed: false
+  signal_allowed: false
+  paper_execution_allowed: false
+  live_execution_allowed: false
+  predictive_edge_claim_allowed: false
+  promotion_requires_human_adjudication: true
+  promotion_requires_blind_benchmark: true
+
+layers:
+  core_market_structure:
+    owns:
+      - completed_candle_facts
+      - candidate_swings
+      - internal_and_external_structure
+      - protected_points
+      - break_lifecycle
+      - active_ranges
+      - liquidity_interactions
+    excludes:
+      - ote
+      - kill_zones
+      - session_entry_models
+      - fixed_trade_setups
+  optional_ict_execution_doctrine:
+    owns:
+      - order_block_execution_models
+      - fair_value_gap_execution_models
+      - breaker_blocks
+      - mitigation_blocks
+      - ote
+    authority: strategy_module_only
+  strategy_timing_and_session_rules:
+    owns:
+      - kill_zones
+      - session_filters
+      - news_filters
+      - minimum_rr
+      - risk_and_execution_rules
+    authority: strategy_module_only
+  annotation_vocabulary:
+    owns:
+      - semantic_labels
+      - local_segment_rules
+      - lifecycle_badges
+      - uncertainty_labels
+    authority: communication_only
+
+authority_boundaries:
+  deterministic_code:
+    - canonical_ohlcv
+    - completed_candle_cutoff
+    - exact_price_and_time
+    - candidate_geometry
+    - body_and_wick_facts
+    - event_order
+    - lifecycle_calculation
+    - hashes_and_provenance
+    - hard_invariants
+  ai:
+    - contextual_relevance
+    - internal_external_hypothesis
+    - causal_candidate_comparison
+    - alternative_narratives
+    - poi_pairwise_ranking
+    - ambiguity_assessment
+    - semantic_annotation_selection
+  validators:
+    - geometry_possibility
+    - temporal_possibility
+    - direction_consistency
+    - decision_time_availability
+    - lifecycle_eligibility
+    - parent_child_validity
+    - constitution_compliance
+  human_experts_later:
+    - doctrine_adjudication
+    - independent_gold_labels
+    - disagreement_resolution
+    - promotion_evidence
+
+event_ontology:
+  - INITIAL_DIRECTION_BREAK
+  - INTERNAL_BOS_BULLISH
+  - INTERNAL_BOS_BEARISH
+  - EXTERNAL_BOS_BULLISH
+  - EXTERNAL_BOS_BEARISH
+  - INTERNAL_CHOCH_BULLISH
+  - INTERNAL_CHOCH_BEARISH
+  - EXTERNAL_MSS_CANDIDATE_BULLISH
+  - EXTERNAL_MSS_CANDIDATE_BEARISH
+  - EXTERNAL_MSS_CONFIRMED_BULLISH
+  - EXTERNAL_MSS_CONFIRMED_BEARISH
+  - WICK_PROBE
+  - BREAKOUT_CANDIDATE
+  - ACCEPTED_BREAKOUT
+  - FAILED_BREAKOUT
+  - SWEEP_CANDIDATE
+  - CONFIRMED_SWEEP
+  - UNRESOLVED
+
+structure_doctrine:
+  first_break:
+    classification: INITIAL_DIRECTION_BREAK
+    forbidden_labels_without_prior_direction:
+      - INTERNAL_BOS_BULLISH
+      - INTERNAL_BOS_BEARISH
+      - EXTERNAL_BOS_BULLISH
+      - EXTERNAL_BOS_BEARISH
+  scope:
+    choch: early_internal_opposite_transition
+    mss_candidate: externally_meaningful_reversal_candidate
+    mss_confirmed: external_reversal_after_parent_narrative_invalidation
+    child_rule: lower_timeframe_structure_cannot_overwrite_parent_external_structure
+  break_lifecycle:
+    probe_condition: wick_penetrates_certified_level
+    probe_output: WICK_PROBE
+    body_close_condition: candle_body_closes_beyond_certified_level
+    body_close_output: BREAKOUT_CANDIDATE
+    minimum_normalized_penetration:
+      metric: atr
+      research_default: 0.10
+      status: TUNABLE_NOT_ADJUDICATED
+    displacement_requirement:
+      external: required
+      internal: grading_evidence
+      research_profile:
+        minimum_body_to_range_ratio: 0.55
+        minimum_close_beyond_structure_bps: 12.0
+        minimum_displacement_score: 0.75
+      status: TUNABLE_NOT_ADJUDICATED
+    confirmation_horizons_bars:
+      - 2
+      - 6
+    accepted_if:
+      - body_close_condition_passed
+      - minimum_normalized_penetration_passed
+      - direction_consistent
+      - causal_level_link_valid
+      - external_displacement_passed_when_external
+      - follow_through_or_valid_retest_within_confirmation_horizon
+    failed_if:
+      - close_reclaims_broken_level_against_break_direction
+      - displacement_fails_for_external_break
+      - confirmation_horizon_expires
+  protected_points:
+    selection: causal_origin_candidate_set
+    latest_opposing_pivot_is_automatic: false
+    required_evidence:
+      - precedes_active_impulse
+      - directionally_opposes_active_leg
+      - unviolated_at_decision_time
+      - causal_link_to_accepted_break_or_active_range
+    ambiguity: abstain
+  active_range:
+    source: accepted_structural_endpoints
+    ohlc_summary_extremes_allowed: false
+    locations:
+      - OUTSIDE_BELOW
+      - DISCOUNT
+      - EQUILIBRIUM
+      - PREMIUM
+      - OUTSIDE_ABOVE
+    replacement_triggers:
+      - terminal_extension
+      - protected_point_invalidation
+      - parent_supersession
+      - explicit_stale
+    child_range_requires_geometric_containment: true
+
+liquidity_doctrine:
+  interaction_is_state_machine: true
+  upside_bsl:
+    confirmed_sweep_requires:
+      - wick_or_probe_above_level
+      - close_or_reclaim_below_level
+      - confirmation_after_interaction
+      - bearish_confirmation_direction
+      - causal_link_to_same_interaction
+    accepted_bullish_breakout_requires:
+      - bullish_body_close_above_level
+      - normalized_penetration
+      - bullish_displacement
+      - post_interaction_follow_through_or_retest
+  downside_ssl:
+    mirror_upside_rules: true
+  allowed_states:
+    - NO_INTERACTION
+    - WICK_PROBE
+    - SWEEP_CANDIDATE
+    - CONFIRMED_SWEEP
+    - BREAKOUT_CANDIDATE
+    - ACCEPTED_BREAKOUT
+    - FAILED_BREAKOUT
+    - UNRESOLVED
+
+poi_doctrine:
+  order_block_candidate_families:
+    - last_opposing_candle
+    - origin_cluster
+    - lower_timeframe_refinement
+  causal_eligibility_required:
+    - origin_precedes_accepted_break
+    - departure_from_origin_causes_accepted_break
+    - direction_matches_break
+    - scope_coherent
+    - lifecycle_active
+    - range_location_coherent_or_certified_parent_origin_exception
+  primary_rules:
+    - parent_external_origin_outranks_nested_internal_continuation_when_it_owns_the_accepted_break
+    - lower_timeframe_parent_scope_objects_are_refinements_only
+    - fvg_only_pocket_is_secondary_without_supported_ob_or_confirmation
+  lifecycle_states:
+    - FRESH
+    - TESTED
+    - PARTIALLY_MITIGATED
+    - FULLY_MITIGATED
+    - INVALIDATED
+    - CONSUMED
+  ranking_axes:
+    deterministic_eligibility: required
+    ai_pairwise_semantic_rank: optional_and_separate
+    empirical_reaction_score: unavailable_until_labeled_outcomes
+    depth: final_tiebreak_only
+  certainty:
+    deterministic_classification_may_be_certified: true
+    future_reaction_may_be_guaranteed: false
+  inducement:
+    status: hypothesis
+    necessary_conditions:
+      - deeper_eligible_poi_or_objective
+      - intermediate_visible_liquidity
+      - plausible_causal_path
+      - structural_reason_shallow_object_is_weaker
+      - intermediate_liquidity_unconsumed
+
+annotation_doctrine:
+  structure_segments: local_swing_to_break_only
+  full_width_structure_lines: forbidden_except_certified_htf_range_boundary
+  protected_point_label_requires_protected_point_evidence: true
+  bos_label_requires_direction_and_scope: true
+  choch_label_requires_internal_scope: true
+  mss_label_requires_external_scope_and_lifecycle_state: true
+  poi_label_requires_kind_and_lifecycle: true
+  inducement_label: IDM_HYPOTHESIS
+  trade_box_requires_trade_plan_ready: true
+  critic_authority: cleanup_or_downgrade_only
+
+abstention_doctrine:
+  abstain_on:
+    - ambiguous
+    - contradicted
+    - insufficient_context
+    - future_data_risk
+    - ungrounded_evidence
+    - parent_child_conflict
+    - unresolved_doctrine_required_for_claim
+  disagreement_is_uncertainty: true
+  majority_vote_can_override_hard_invariant: false
+
+contested_decisions:
+  - {id: minimum_normalized_penetration, status: PENDING_HUMAN_ADJUDICATION}
+  - {id: external_displacement_thresholds, status: PENDING_HUMAN_ADJUDICATION}
+  - {id: confirmation_horizon_policy, status: PENDING_HUMAN_ADJUDICATION}
+  - {id: external_swing_ownership_threshold, status: PENDING_HUMAN_ADJUDICATION}
+  - {id: range_staleness_policy, status: PENDING_HUMAN_ADJUDICATION}
+  - {id: ob_cluster_boundary_policy, status: PENDING_HUMAN_ADJUDICATION}
+  - {id: fvg_mitigation_boundary_policy, status: PENDING_HUMAN_ADJUDICATION}
+  - {id: liquidity_level_salience_decay, status: PENDING_HUMAN_ADJUDICATION}
+  - {id: ai_pairwise_rank_acceptance, status: PENDING_HUMAN_ADJUDICATION}
+  - {id: annotation_comprehension_threshold, status: PENDING_HUMAN_ADJUDICATION}
+

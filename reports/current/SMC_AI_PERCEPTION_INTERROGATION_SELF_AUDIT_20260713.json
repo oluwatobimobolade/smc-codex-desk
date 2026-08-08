@@ -1,0 +1,59 @@
+{
+  "schema": "smc_ai_perception_interrogation_self_audit_v1",
+  "audit_date": "2026-07-13",
+  "overall_verdict": "FAIL_RESEARCH_CERTIFICATION_NOT_EARNED",
+  "accuracy_claim_allowed": false,
+  "readiness_score_not_accuracy": 45.1,
+  "gold_evaluation": {
+    "status": "insufficient_ground_truth",
+    "eligible_adjudicated_cases": 0,
+    "required_cases": 20,
+    "skipped_cases": 172,
+    "precision": null,
+    "recall": null,
+    "f1": null
+  },
+  "dimensions": [
+    {"name": "raw_candle_and_level_perception", "weight": 10, "score_out_of_10": 5, "weighted_score": 5.0},
+    {"name": "exact_geometric_grounding", "weight": 15, "score_out_of_10": 4, "weighted_score": 6.0},
+    {"name": "swing_hierarchy", "weight": 15, "score_out_of_10": 4, "weighted_score": 6.0},
+    {"name": "structural_classification", "weight": 10, "score_out_of_10": 5, "weighted_score": 5.0},
+    {"name": "protected_point_and_causal_reasoning", "weight": 15, "score_out_of_10": 3, "weighted_score": 4.5},
+    {"name": "liquidity_and_sweep_classification", "weight": 10, "score_out_of_10": 4, "weighted_score": 4.0},
+    {"name": "range_poi_and_inducement_reasoning", "weight": 10, "score_out_of_10": 5, "weighted_score": 5.0},
+    {"name": "temporal_validity_and_no_lookahead", "weight": 10, "score_out_of_10": 7, "weighted_score": 7.0},
+    {"name": "uncertainty_and_abstention", "weight": 3, "score_out_of_10": 6, "weighted_score": 1.8},
+    {"name": "annotation_communication", "weight": 2, "score_out_of_10": 4, "weighted_score": 0.8}
+  ],
+  "catastrophic_gates": [
+    {"gate": 1, "status": "PROVISIONAL_PASS"},
+    {"gate": 2, "status": "PARTIAL"},
+    {"gate": 3, "status": "PROVISIONAL_PASS"},
+    {"gate": 4, "status": "PROVISIONAL_PASS"},
+    {"gate": 5, "status": "PROVISIONAL_PASS"},
+    {"gate": 6, "status": "FAIL", "reason": "annotation drawing object mutates source start geometry for display clipping"},
+    {"gate": 7, "status": "UNPROVEN_GATE_CLOSED"},
+    {"gate": 8, "status": "PARTIAL"},
+    {"gate": 9, "status": "FAIL", "reason": "numeric confidence values are heuristic and uncalibrated"},
+    {"gate": 10, "status": "PASS"}
+  ],
+  "focused_test_result": {
+    "passed": 37,
+    "failed": 0,
+    "interpretation": "software and deterministic checks only; not perception accuracy"
+  },
+  "full_repository_validation": {
+    "git_diff_check": "PASS",
+    "compileall": "PASS",
+    "passed": 990,
+    "skipped": 1,
+    "failed": 0,
+    "duration_seconds": 144.51,
+    "interpretation": "repository consistency against current tests; not expert perception accuracy"
+  },
+  "authority_contract": {
+    "signal_allowed": false,
+    "paper_execution_allowed": false,
+    "live_execution_allowed": false
+  }
+}

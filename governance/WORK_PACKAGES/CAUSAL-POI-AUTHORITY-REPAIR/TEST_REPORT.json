@@ -1,0 +1,42 @@
+{
+  "schema": "work_package_test_report_v1",
+  "record_id": "CAUSAL-POI-AUTHORITY-REPAIR-FINAL-20260712",
+  "work_package": "CAUSAL-POI-AUTHORITY-REPAIR",
+  "date": "2026-07-12",
+  "recorded_at": "2026-07-12T13:49:25Z",
+  "status": "PASS",
+  "source": {
+    "git_head": "4aa1a23173227430961f662442bf8d57ed2995d6",
+    "source_state": "dirty_worktree",
+    "working_tree_status_lines_before_recording": 65,
+    "python_version": "3.14.5"
+  },
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_causal_poi_authority.py tests/test_wp0034_ai_smc_trader_brain.py tests/test_wp0041a_annotation_integrity_repair.py tests/test_wp0022_smc_detector_rebuild.py",
+      "exit_code": 0,
+      "summary": "49 passed"
+    },
+    {
+      "command": "git diff --check && .venv/bin/python -m compileall -q smc_desk tools tests && .venv/bin/python -m pytest -q",
+      "exit_code": 0,
+      "summary": "954 passed, 1 skipped in 116.35s"
+    },
+    {
+      "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols BTCUSDT XRPUSDT --output-root analysis_runs/CAUSAL_POI_AUTHORITY_SMOKE_FINAL_20260712",
+      "exit_code": 0,
+      "summary": "Both live closed-candle observe-only workflows validated; THESIS_ONLY; no execution."
+    },
+    {
+      "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols XRPUSDT --output-root analysis_runs/CAUSAL_POI_AUTHORITY_SMOKE_FINAL2_20260712",
+      "exit_code": 0,
+      "summary": "FVG primary correctly blocked by unresolved OB lineage; sparse thesis-only render passed visual inspection."
+    }
+  ],
+  "authority_mode": "deterministic_causal_poi_observe_only",
+  "limitations": [
+    "No POI reaction can be guaranteed before future price action.",
+    "No expert-adjudicated blind accuracy result exists yet.",
+    "No predictive edge, paper authority, live authority, or execution authority was created."
+  ]
+}

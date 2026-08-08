@@ -30,7 +30,7 @@ def test_wp0041a_rejects_real_evidence_id_with_invented_bos_geometry() -> None:
 
     assert result.status == "REVIEW_REQUIRED"
     assert "annotation_v2_structure_price_mismatch" in _issue_codes(result)
-    assert "annotation_v2_structure_span_mismatch" in _issue_codes(result)
+    assert "annotation_v2_top_level_not_display_geometry" in _issue_codes(result)
 
 
 def test_wp0041a_rejects_internal_break_disguised_as_external_structure() -> None:
@@ -97,6 +97,77 @@ def test_wp0041a_local_composer_selects_confirmed_watch_poi_without_trade_levels
     assert any(obj["object_type"] == "poi_zone" for obj in plan["objects"])
     assert any(obj["object_type"] == "path_projection" for obj in plan["objects"])
     assert all(obj["object_type"] != "trade_box" for obj in plan["objects"])
+
+
+def test_wp0041a_mixed_context_draws_scenario_poi_and_material_mtf_breaks() -> None:
+    pack = _pack_with_v2_geometry()
+    window_15m = pack["ohlcv_windows"]["15m"]
+    window_1h = [deepcopy(window_15m[index]) for index in (0, 4, 8, 12, 16)]
+    pack["ohlcv_windows"]["1h"] = window_1h
+    pack["detector_candidates"]["1h"] = {
+        "structure_breaks": [
+            {
+                "object_id": "break_1h",
+                "object_type": "structure_break",
+                "timeframe": "1h",
+                "direction": "bullish",
+                "break_type": "BOS",
+                "structure_scope": "external",
+                "pivot_time": window_1h[0]["timestamp"],
+                "confirmed_at": window_1h[2]["timestamp"],
+                "confirmation_status": "confirmed",
+                "activity_status": "inactive",
+                "mitigation_status": "untouched",
+                "evidence": {"broken_price": 101.0, "structure_scope": "external"},
+            }
+        ]
+    }
+    pack["formal_structure_graph"] = {
+        "timeframes": {
+            "1h": {"latest_external_break": {"object_id": "break_1h"}},
+            "15m": {"latest_external_break": {"object_id": "break1"}},
+        }
+    }
+    pack["causal_poi_authority"] = {
+        "authority_contract": {"enforcement_ready": True},
+        "scenarios": {
+            "bearish": {
+                "status": "SELECTED",
+                "controlling_timeframe": "15m",
+                "primary_causal_poi": {
+                    "poi_id": "15m:order_block:poi1",
+                    "source_object_id": "poi1",
+                    "timeframe": "15m",
+                    "kind": "order_block",
+                    "direction": "bearish",
+                    "price_low": 100.0,
+                    "price_high": 101.0,
+                    "freshness": "partial",
+                    "lineage_role": "latest_external_continuation_origin",
+                    "range_location": "premium",
+                },
+                "execution_refinements": [],
+            },
+            "bullish": {"status": "UNRESOLVED"},
+        },
+    }
+
+    plan = compose_local_annotation_plan_v2(
+        evidence_pack=pack,
+        official_state="THESIS_ONLY",
+        direction="mixed",
+        active_range={},
+        active_poi=None,
+    )
+
+    assert [obj["object_type"] for obj in plan["objects"]] == [
+        "poi_zone",
+        "structure_segment",
+        "structure_segment",
+    ]
+    assert {obj["timeframe"] for obj in plan["objects"] if obj["object_type"] == "structure_segment"} == {"1h", "15m"}
+    assert all(obj["object_type"] != "trade_box" for obj in plan["objects"])
+    assert "no trade is authorized" in plan["objects"][0]["reason"].lower()
 
 
 def test_wp0041a_trade_box_is_v2_native_and_suppresses_legacy_text(tmp_path: Path) -> None:

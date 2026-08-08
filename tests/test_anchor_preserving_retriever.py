@@ -30,6 +30,13 @@ from smc_desk.brain.structure_lab.tools import (
 
 
 def _case():
+    """Case fixture shaped like the REAL formal_mtf_structure_graph_v1 output.
+
+    The graph emits protected_high/low per timeframe node, an active_range
+    with protected_*_swing_id fields, latest_external_break events, and (on
+    real runs) integer COUNTS for liquidity_levels — the 4h node below pins
+    that the adapter tolerates counts without crashing.
+    """
     return {
         "candidate_objects": {
             "15m": {"swings": [
@@ -44,16 +51,37 @@ def _case():
             ]},
         },
         "formal_structure_graph": {
-            "active_range": {"range_id": "range_15m", "high_object_id": "s10", "low_object_id": "s5"},
-            "protected_point": {"object_id": "s5"},
-            "accepted_breaks": [
-                {"object_id": "br1", "direction": "bullish", "origin_object_id": "s3"},
-                {"object_id": "br2", "direction": "bearish", "origin_object_id": "h12"},
-            ],
-            "active_htf_pois": [{"poi_id": "poi_4h", "timeframe": "4h"}],
-            "unswept_external_liquidity": [{"object_id": "s10"}],
+            "schema": "formal_mtf_structure_graph_v1",
+            "active_range": {
+                "status": "RESOLVED",
+                "range_id": "range_15m",
+                "protected_high_swing_id": "s10",
+                "protected_low_swing_id": "s5",
+            },
+            "timeframes": {
+                "15m": {
+                    "latest_external_break": {
+                        "object_id": "br1", "direction": "bullish",
+                        "origin_object_id": "s3", "confirmed_at": "2026-01-20T00:00:00Z",
+                    },
+                    "liquidity_levels": [
+                        {"liquidity_id": "liq_eq_lows", "activity_status": "active"},
+                        {"liquidity_id": "liq_swept", "activity_status": "consumed"},
+                    ],
+                },
+                "1h": {
+                    "latest_external_break": {
+                        "object_id": "br2", "direction": "bearish",
+                        "origin_object_id": "h12", "confirmed_at": "2026-01-21T00:00:00Z",
+                    },
+                },
+                "4h": {
+                    "order_blocks": [{"object_id": "poi_4h", "timeframe": "4h"}],
+                    "liquidity_levels": 3,   # real graph emits a count here
+                },
+            },
         },
-        "blind_reader_reference_ids": ["h7"],
+        "blind_reader_reference_ids": ["h7", "ghost_ref"],
         "critic_challenges": ["h3"],
     }
 
@@ -80,19 +108,29 @@ def test_anchors_always_preserved_even_with_zero_budget():
 
 
 def test_missing_anchors_are_reported_not_dropped():
-    """Anchors whose object_id isn't in the candidate pool are flagged, not hidden."""
+    """Anchors that resolve nowhere are flagged; graph anchors carry their records.
+
+    Graph-derived anchors (range, breaks, HTF POIs) resolve from their own
+    graph records even when absent from the candidate pool — the audit's
+    "range preserved only as a missing placeholder" failure. Only references
+    that resolve nowhere (a blind-reader id that exists in no evidence) are
+    reported missing.
+    """
     case = _case()
     res = retrieve_for_case(case, fill_budget=0)
-    # range_id 'range_15m' and HTF poi 'poi_4h' don't appear in the candidate
-    # pool; h7 (blind reader) IS in the pool, so it's not missing.
-    assert "range_15m" in res.missing_anchor_ids
-    assert "poi_4h" in res.missing_anchor_ids
+    assert "ghost_ref" in res.missing_anchor_ids
+    assert "range_15m" not in res.missing_anchor_ids
     assert "h7" not in res.missing_anchor_ids
     avail = {r["object_id"]: r.get("_available") for r in res.anchor_records if r.get("object_id")}
-    assert avail["range_15m"] is False
-    assert avail["poi_4h"] is False
-    assert avail["s5"] is True
+    assert avail["ghost_ref"] is False
+    assert avail["range_15m"] is True    # resolved from its graph record
+    assert avail["poi_4h"] is True       # resolved from its graph record
+    assert avail["s5"] is True           # resolved from the candidate pool
     assert avail["h7"] is True
+    # Consumed liquidity must NOT be anchored; active liquidity must be.
+    anchored = {a.candidate_id for a in res.anchors}
+    assert "liq_eq_lows" in anchored
+    assert "liq_swept" not in anchored
 
 
 def test_all_four_ab_designs_share_uniform_stats():
@@ -114,12 +152,15 @@ def test_anchor_design_preserves_anchors_flat_design_does_not():
     flat = build_candidate_payload(case, design="flat")
     anchor = build_candidate_payload(case, design="anchor_tools", anchor_fill_budget=5)
     assert flat["stats"]["anchors_required"] == 0     # flat has no anchor concept
-    # Anchors present in the pool (8 of 10 AnchorHits are available; range_id
-    # + HTF poi are not in the pool so are correctly flagged missing).
-    assert anchor["stats"]["anchors_preserved"] == 8
+    # 10 AnchorHits derive from the case: range high/low + range endpoint,
+    # two break origins, one HTF POI, one active liquidity, blind h7 +
+    # ghost_ref, critic h3. Only ghost_ref resolves nowhere.
+    assert anchor["stats"]["anchors_required"] == 10
+    assert anchor["stats"]["anchors_preserved"] == 9
+    assert anchor["stats"]["missing_anchor_ids"] == ["ghost_ref"]
     # Critically: even at fill_budget=0 the available anchor set still fits.
     zero = build_candidate_payload(case, design="anchor", anchor_fill_budget=0)
-    assert zero["stats"]["anchors_preserved"] == 8
+    assert zero["stats"]["anchors_preserved"] == 9
 
 
 def test_anchor_tools_attaches_tool_definitions():

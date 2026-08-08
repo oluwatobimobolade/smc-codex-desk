@@ -10,13 +10,24 @@ decision JSON, which the system then validates, grounds, and renders.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any, Literal
 
-AgentPacketSchema = Literal["ai_smc_agent_packet_v1"]
-AgentResponseSchema = Literal["ai_smc_agent_response_v1"]
+from smc_desk.brain.agent_handoff.ai_seat_exam import make_exam_transcript_template
+
+
+AGENT_PACKET_SCHEMA = "ai_smc_agent_packet_v2"
+AGENT_RESPONSE_SCHEMA = "ai_smc_agent_response_v2"
+AgentPacketSchema = Literal["ai_smc_agent_packet_v1", "ai_smc_agent_packet_v2"]
+AgentResponseSchema = Literal["ai_smc_agent_response_v1", "ai_smc_agent_response_v2"]
 
 AGENT_PACKET_FILES = [
     "00_READ_ME_FIRST.md",
+    "00_AI_SEAT_PROFILE.md",
+    "00_MARKET_STRUCTURE_CONSTITUTION_V2.yaml",
+    "00_PERCEPTION_GAUNTLET_PROTOCOL.json",
+    "00_SEMANTIC_METAMORPHIC_EVIDENCE.json",
+    "00_authority_manifest.json",
     "01_prompt_bundle.md",
     "02_evidence_pack.json",
     "03_chart_manifest.json",
@@ -37,10 +48,15 @@ AGENT_RESPONSE_FILES = [
 ]
 
 
-def make_agent_response_template() -> dict[str, Any]:
+def make_agent_response_template(
+    *,
+    authority_manifest: Mapping[str, Any] | None = None,
+    packet_hash: str = "",
+    decision_time: str = "",
+) -> dict[str, Any]:
     """Return the expected response shape for an external AI agent."""
     return {
-        "schema": "ai_smc_agent_response_v1",
+        "schema": AGENT_RESPONSE_SCHEMA,
         "agent_identity": {
             "agent_name": "",
             "agent_model": "",
@@ -48,7 +64,30 @@ def make_agent_response_template() -> dict[str, Any]:
             "review_started_at": "",
             "review_completed_at": "",
         },
-        "packet_hash": "",
+        "packet_hash": packet_hash,
+        "exam_transcript": make_exam_transcript_template(
+            authority_manifest=authority_manifest,
+            packet_hash=packet_hash,
+            decision_time=decision_time,
+        ),
+        "dissent_records": [],
+        "dissent_record_schema": {
+            "schema": "ai_seat_dissent_v1",
+            "dissent_id": "",
+            "status": "PROPOSED_ALTERNATIVE",
+            "claim": "",
+            "proposed_interpretation": "",
+            "evidence_object_ids": [],
+            "resolution_condition": "",
+        },
+        "doctrine_pending_claims": [],
+        "doctrine_pending_claim_schema": {
+            "claim_id": "",
+            "doctrine_decision_ids": [],
+            "dependent_conclusion": "",
+            "evidence_object_ids": [],
+            "resolution_condition": "",
+        },
         "decision": {
             "schema": "ai_smc_trader_decision_v1",
             "symbol": "",

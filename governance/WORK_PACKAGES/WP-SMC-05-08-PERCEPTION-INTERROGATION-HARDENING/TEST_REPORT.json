@@ -1,0 +1,64 @@
+{
+  "schema": "smc_work_package_test_report_v1",
+  "work_package": "WP-SMC-05-08-PERCEPTION-INTERROGATION-HARDENING",
+  "gate": "GATE-SMC-PERCEPTION-INTERROGATION-001",
+  "created_at": "2026-07-13T01:11:11+01:00",
+  "head": "4aa1a23",
+  "status": "SIGNED_EVIDENCE_CHAIN_VALIDATED_TRUST_PROVISIONING_AND_REVIEWS_PENDING",
+  "implementation_contract_coverage": 100.0,
+  "empirical_certification": "NOT_CERTIFIED",
+  "empirical_score": null,
+  "focused_tests": {
+    "passed": 68,
+    "failed": 0
+  },
+  "full_tests": {
+    "passed": 1030,
+    "skipped": 1,
+    "failed": 0,
+    "duration_seconds": 159.95
+  },
+  "compileall": "PASS",
+  "git_diff_check": "PASS",
+  "smoke_run": "analysis_runs/PERCEPTION_INTERROGATION_HARDENING_FINAL_20260713/LIVE_FULL_SYSTEM_AI_SMC_V3_20260713_000734/BTCUSDT",
+  "smoke_results": {
+    "official_state": "REVIEW_REQUIRED",
+    "runtime_causal_integrity": "PASS",
+    "checked_candles": 480,
+    "contract_count": 5772,
+    "complete_contract_count": 5772,
+    "incomplete_contract_count": 0,
+    "duplicate_contract_id_count": 0,
+    "poi_freeze": "FROZEN_VALID",
+    "annotation_validation": "VALIDATED",
+    "annotation_object_count": 2,
+    "perturbation_variant_count": 7
+  },
+  "remaining_empirical_gates": [
+    "minimum_30_independently_adjudicated_cases",
+    "minimum_50_linked_calibration_records",
+    "sweep_breakout_sequential_gold_report",
+    "real_visual_perturbation_consistency_report",
+    "real_no_evidence_abstention_report"
+  ],
+  "empirical_cohort": {
+    "path": "review_queues/SMC_INTERROGATION_30_V1_20260713",
+    "case_count": 30,
+    "symbols": 5,
+    "integrity_status": "PASS",
+    "checked_files": 1230,
+    "checked_candles": 15900,
+    "checked_counterfactuals": 30,
+    "system_source_file_count": 410,
+    "system_code_freeze_sha256": "74906372ab6c6b8e77a0611567f11ced4017ad212dbcff140f208705e45e96fa",
+    "cohort_content_sha256": "28207e847f60d1507f984eb7ca1900ac18ece4cf23b1286242dbf53a08ac584c",
+    "trust_registry_status": "UNPROVISIONED",
+    "gold_status": "NOT_GOLD_PENDING_TWO_REVIEWS_AND_BLIND_ADJUDICATION"
+  },
+  "prohibited_claims": [
+    "implementation_coverage_is_not_perception_accuracy",
+    "no_predictive_edge_established",
+    "no_guaranteed_poi_reaction",
+    "no_paper_or_live_execution_authority"
+  ]
+}

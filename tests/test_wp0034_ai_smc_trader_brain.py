@@ -37,14 +37,36 @@ def _pack(tmp_path=None):
         image_path = tmp_path / "BTCUSDT_15m_clean.png"
         image_path.write_bytes(b"png")
         chart_images = {"15m": image_path}
+    df = _df()
+    df.loc[10, ["open", "high", "low", "close"]] = [101.9, 102.3, 101.5, 101.8]
+    stamps = [str(value) for value in df["timestamp"]]
     pack = build_smc_evidence_pack(
         symbol="BTCUSDT",
-        timeframe_dfs={"15m": _df()},
+        timeframe_dfs={"15m": df},
         chart_images=chart_images,
         detector_candidates={
             "15m": {
-                "sweeps": [{"object_id": "sweep1", "side": "buy_side", "price": 102.0, "direction": "bearish"}],
-                "structure_breaks": [{"object_id": "break1", "direction": "bearish", "price": 98.0}],
+                "sweeps": [{
+                    "object_id": "sweep1",
+                    "side": "buy_side",
+                    "price_low": 101.5,
+                    "price_high": 102.0,
+                    "direction": "bearish",
+                    "pivot_time": stamps[10],
+                    "candidate_at": stamps[10],
+                    "confirmed_at": stamps[10],
+                    "evidence": {"swept_price": 102.0, "reclaim_confirmed": True},
+                }],
+                "structure_breaks": [{
+                    "object_id": "break1",
+                    "direction": "bearish",
+                    "price": 98.0,
+                    "pivot_time": stamps[8],
+                    "candidate_at": stamps[12],
+                    "confirmed_at": stamps[12],
+                    "confirmation_status": "confirmed",
+                    "evidence": {"broken_price": 98.0, "is_unconfirmed_probe": False},
+                }],
                 "fvgs": [{"object_id": "fvg1", "direction": "bearish", "price_low": 99.6, "price_high": 100.4}],
                 "order_blocks": [{"object_id": "poi1", "direction": "bearish", "price_low": 100.0, "price_high": 101.0}],
                 "liquidity_levels": [{"object_id": "liq1", "side": "sell_side", "price": 95.0}],
@@ -79,6 +101,9 @@ def _pack(tmp_path=None):
         active_range_authority=pack["active_range_authority"],
         timeframe_dfs={"15m": _df(), "1h": _df(), "4h": _df(), "1d": _df()},
     )
+    # These unit fixtures isolate AI decision/annotation validation. Causal
+    # episode reconciliation has dedicated tests with fully accepted V3 events.
+    pack["formal_causal_episode_graph"] = {}
     return pack
 
 

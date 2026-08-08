@@ -17,6 +17,8 @@ The orchestrator is responsible for:
 """
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -35,7 +37,7 @@ from smc_desk.brain.annotation_plan_validator import (
     annotation_validation_to_dict,
     validate_annotation_plan_v2,
 )
-from smc_desk.brain.ai_smc_trader_brain import AISMCTraderBrain
+from smc_desk.brain.ai_smc_trader_brain import AISMCTraderBrain, OFFICIAL_STATES
 from smc_desk.brain.llm_provider import AISMCProvider, LLMCompletionRequest, LLMCompletionResult
 from smc_desk.brain.prompt_system import build_prompt_registry_manifest
 from smc_desk.brain.smc_evidence_pack_builder import build_smc_evidence_pack
@@ -44,8 +46,21 @@ from smc_desk.colleague.run_context import TIMEFRAME_DURATIONS, dataframe_to_can
 from smc_desk.colleague.smc_thesis_ai_v1 import build_smc_thesis_ai_v1, render_smc_thesis_ai_v1_markdown
 from smc_desk.data.historical_backfill import DEFAULT_MINIMUM_DEPTH, FOREX_MINIMUM_DEPTH, build_context_depth_report
 from smc_desk.perception.engine_v2 import PerceptionEngineV2
+from smc_desk.perception.poi_lifecycle import build_poi_lifecycle_by_timeframe
+from smc_desk.perception.structure_hierarchy import build_mtf_structure_hierarchy
 from smc_desk.rendering.clean_mtf_chart_pack import render_clean_mtf_chart_pack
 from smc_desk.rendering.smc_trader_annotation_renderer import render_smc_trader_annotation_chart
+from smc_desk.rendering.bitmap_annotation_review import review_rendered_annotation_bitmap
+from smc_desk.rendering.native_mtf_story_pack import render_native_mtf_story_pack
+from smc_desk.evaluation.perception_interrogation import (
+    calibration_report,
+    certification_verdict,
+    evaluate_runtime_causal_integrity,
+    freeze_poi_ranking,
+    generate_chart_perturbations,
+    load_adjudicated_evaluation_inputs,
+    load_external_validation_readiness,
+)
 from smc_desk.perception.formal_structure_graph import (
     graph_invariant_violation_codes,
     graph_requires_thesis_only,
@@ -53,6 +68,8 @@ from smc_desk.perception.formal_structure_graph import (
     graph_thesis_sentence,
     graph_to_dict_string,
 )
+from smc_desk.perception.formal_causal_episode_graph import episode_graph_failure_codes
+from smc_desk.perception.evidence_contract import contract_ids_for_object
 
 
 OFFICIAL_AI_SOURCE = "AISMCTraderBrainValidated"
@@ -103,6 +120,11 @@ def run_ai_smc_orchestrator_v3(
         else:
             detector_candidates_payload = detector_candidates
             perception_report = {"source": "caller_supplied_detector_candidates", "auto_perception_ran": False}
+        detector_candidates_payload, poi_report = _enrich_detector_candidates_with_pois(
+            detector_candidates_payload,
+            timeframe_dfs=timeframe_dfs,
+        )
+        perception_report["poi_lifecycle"] = poi_report
         
         chart_pack = render_clean_mtf_chart_pack(
             timeframe_dfs,
@@ -207,6 +229,9 @@ def run_ai_smc_orchestrator_v3(
 
     official_decision = validation_result.official_decision
     formal_graph = evidence_pack.get("formal_structure_graph") or {}
+    causal_episode_graph = evidence_pack.get("formal_causal_episode_graph") or {}
+    structure_engine_v3_shadow = evidence_pack.get("structure_engine_v3_shadow") or {}
+    causal_poi_authority = evidence_pack.get("causal_poi_authority") or {}
     _write_json(root / "11_ai_smc_trader_brain" / "provider_audit.json", provider_result.audit_record())
     _write_json(root / "11_ai_smc_trader_brain" / "raw_decision.json", decision.model_dump(mode="json", by_alias=True))
     _write_json(root / "12_ai_consistency_validation" / "validation_result.json", validation_result.model_dump(mode="json", by_alias=True))
@@ -220,6 +245,10 @@ def run_ai_smc_orchestrator_v3(
 
     official_chart_path = None
     chart_manifest: dict[str, Any] = {"status": "disabled"}
+    bitmap_review: dict[str, Any] = {"overall_status": "NOT_RENDERED"}
+    semantic_image_review: dict[str, Any] = {"status": "NOT_RENDERED"}
+    native_mtf_manifest: dict[str, Any] = {"status": "NOT_RENDERED"}
+    perturbation_manifest: dict[str, Any] = {"status": "NOT_RENDERED"}
     if render_charts:
         official_chart_path = root / "14_clean_annotation_render" / f"{symbol}_official_ai_annotation.png"
         evidence_rows = len((evidence_pack.get("ohlcv_windows") or {}).get("15m") or []) or None
@@ -249,14 +278,58 @@ def run_ai_smc_orchestrator_v3(
                 timeframe="15m",
             )
             visual_review = scene.get("visual_critic") or visual_review
+        semantic_image_review = _run_post_render_semantic_image_review(
+            provider=provider,
+            initial_provider_result=provider_result,
+            evidence_pack=evidence_pack,
+            image_path=official_chart_path,
+            scene=scene,
+        )
+        if semantic_image_review.get("status") == "REVIEW_REQUIRED":
+            semantic_visual_review = {
+                "status": "REVIEW_REQUIRED",
+                "issues": semantic_image_review.get("issues") or [
+                    {"message": "Post-render semantic image review required a downgrade."}
+                ],
+            }
+            reviewed_result = apply_visual_critic_authority(validation_result, semantic_visual_review)
+            if reviewed_result.status != validation_result.status:
+                validation_result = reviewed_result
+                official_decision = validation_result.official_decision
+                _write_json(root / "12_ai_consistency_validation" / "validation_result.json", validation_result.model_dump(mode="json", by_alias=True))
+                _write_json(root / "13_official_ai_decision" / "official_decision.json", official_decision)
+                scene = render_smc_trader_annotation_chart(
+                    official_chart_df,
+                    validation_result,
+                    official_chart_path,
+                    timeframe="15m",
+                )
+                visual_review = scene.get("visual_critic") or visual_review
+        bitmap_review = review_rendered_annotation_bitmap(
+            official_chart_path,
+            scene=scene,
+            semantic_review_status=str(semantic_image_review.get("status") or "NOT_PERFORMED_NO_VISION_PROVIDER"),
+        )
         chart_manifest = {
-            "status": "PASS" if visual_review.get("status") != "REVIEW_REQUIRED" else "REVIEW_REQUIRED",
+            "status": (
+                "REVIEW_REQUIRED"
+                if visual_review.get("status") == "REVIEW_REQUIRED"
+                or bitmap_review.get("deterministic_bitmap_status") != "PASS"
+                or semantic_image_review.get("status") == "REVIEW_REQUIRED"
+                else "PASS_WITH_SEMANTIC_REVIEW_PENDING"
+                if semantic_image_review.get("status") == "NOT_PERFORMED_NO_VISION_PROVIDER"
+                else "PASS"
+            ),
             "chart_path": str(official_chart_path),
             "scene": scene,
             "source": "validated_ai_annotation_plan",
+            "bitmap_review": bitmap_review,
+            "semantic_image_review": semantic_image_review,
         }
         _write_json(root / "14_clean_annotation_render" / "annotation_manifest.json", chart_manifest)
         _write_json(root / "14_clean_annotation_render" / "annotation_visual_review.json", visual_review)
+        _write_json(root / "14_clean_annotation_render" / "annotation_bitmap_review.json", bitmap_review)
+        _write_json(root / "14_clean_annotation_render" / "annotation_semantic_image_review.json", semantic_image_review)
         annotation_validation = validate_annotation_plan_v2(validation_result.decision, evidence_pack)
         annotation_validation_payload = annotation_validation_to_dict(annotation_validation)
         _write_json(root / "14_clean_annotation_render" / "annotation_validation.json", annotation_validation_payload)
@@ -278,13 +351,105 @@ def run_ai_smc_orchestrator_v3(
                 official_state=str(official_decision.get("official_state")),
             ),
         )
+        native_mtf_manifest = render_native_mtf_story_pack(
+            timeframe_dfs=timeframe_dfs,
+            evidence_pack=evidence_pack,
+            validation_result=validation_result,
+            output_dir=root / "14_clean_annotation_render" / "native_mtf_story_pack",
+            semantic_review_status="NOT_PERFORMED_NO_VISION_PROVIDER",
+        )
+        perturbation_manifest = generate_chart_perturbations(
+            official_chart_path,
+            root / "17_perception_interrogation" / "chart_perturbations",
+        )
+        _write_json(
+            root / "17_perception_interrogation" / "chart_perturbation_manifest.json",
+            perturbation_manifest,
+        )
 
     thesis = build_smc_thesis_ai_v1(validation_result=validation_result, evidence_pack=evidence_pack)
     _write_json(root / "15_ai_thesis" / "thesis.json", thesis)
     _write_text(root / "15_ai_thesis" / "thesis.md", render_smc_thesis_ai_v1_markdown(thesis))
 
     _write_json(root / "16_formal_structure_graph" / "structure_graph.json", formal_graph)
+    _write_json(root / "16_formal_structure_graph" / "structure_engine_v3_shadow.json", structure_engine_v3_shadow)
+    _write_json(root / "16_formal_structure_graph" / "causal_episode_graph_v2.json", causal_episode_graph)
+    _write_text(
+        root / "16_formal_structure_graph" / "causal_episode_story.md",
+        _causal_episode_story_markdown(causal_episode_graph),
+    )
+    _write_json(root / "16_formal_structure_graph" / "causal_poi_authority.json", causal_poi_authority)
     _render_structure_map(timeframe_dfs, formal_graph, root / "16_formal_structure_graph" / "structure_map.png", symbol=symbol)
+
+    contract_registry = evidence_pack.get("object_evidence_contracts") or {}
+    _write_json(root / "17_perception_interrogation" / "object_evidence_contracts.json", contract_registry)
+    poi_freeze = _freeze_current_poi_ranking(evidence_pack)
+    _write_json(root / "17_perception_interrogation" / "poi_ranking_freeze.json", poi_freeze)
+    evaluation_inputs = load_adjudicated_evaluation_inputs(
+        Path(__file__).resolve().parents[2] / "data" / "gold_sets" / "ai_smc"
+    )
+    _write_json(root / "17_perception_interrogation" / "evaluation_input_readiness.json", evaluation_inputs)
+    external_validation = load_external_validation_readiness(
+        Path(__file__).resolve().parents[2] / "data" / "gold_sets" / "ai_smc" / "validation",
+        adjudicated_case_ids=evaluation_inputs["adjudicated_case_ids"],
+        minimum_adjudicated_cases=30,
+    )
+    _write_json(root / "17_perception_interrogation" / "external_validation_readiness.json", external_validation)
+    causal_integrity = evaluate_runtime_causal_integrity(
+        object_evidence_contracts=contract_registry,
+        ohlcv_windows=evidence_pack.get("ohlcv_windows") or {},
+        decision_time=str(contract_registry.get("decision_time")),
+    )
+    _write_json(root / "17_perception_interrogation" / "runtime_causal_integrity.json", causal_integrity)
+    calibration = calibration_report(evaluation_inputs["calibration_records"], minimum_records=50)
+    _write_json(root / "17_perception_interrogation" / "calibration_readiness.json", calibration)
+    annotation_contract_passed = bool(
+        official_decision.get("annotation_plan_v2")
+        and not any(
+            issue.code.startswith("annotation_v2_")
+            for issue in validation_result.issues
+            if issue.severity == "hard"
+        )
+    )
+    evidence_grounding_failed = any(
+        any(
+            token in issue.code
+            for token in ("unmatched", "missing_evidence", "unresolved_evidence", "price_mismatch", "invented")
+        )
+        for issue in validation_result.issues
+        if issue.severity == "hard"
+    )
+    blind_cohort = external_validation["blind_cohort_score"]
+    certification = certification_verdict(
+        catastrophic_gates={
+            "future_leakage": causal_integrity.get("status") == "PASS",
+            "invented_levels": not evidence_grounding_failed,
+            "evidence_contract_identity": not bool(contract_registry.get("duplicate_contract_ids")),
+            "internal_external_hierarchy": formal_graph.get("invariants", {}).get("status") == "PASS",
+            "ltf_cannot_flip_htf": not graph_requires_mixed_bias(formal_graph) or official_decision.get("direction") == "mixed",
+            "wick_is_not_close_bos": any(
+                check.get("code") == "wick_probes_are_not_breaks" and check.get("passed") is True
+                for check in formal_graph.get("invariants", {}).get("checks", [])
+            ),
+            "annotation_coordinate_integrity": annotation_contract_passed,
+            "poi_future_reaction_excluded": poi_freeze.get("status") == "FROZEN_VALID",
+            "sweep_vs_breakout_sequential_gold": bool(external_validation["sweep_breakout_sequential"]["accepted"]),
+            "confidence_calibrated": calibration.get("probabilistic_confidence_allowed") is True,
+            "abstention_available": bool(external_validation["no_evidence_abstention"]["accepted"]),
+            "blind_cohort_no_catastrophic_errors": bool(blind_cohort["accepted"]),
+        },
+        dimension_scores=blind_cohort.get("dimension_scores") or {},
+        adjudicated_case_count=int(evaluation_inputs["adjudicated_case_count"]),
+        minimum_adjudicated_cases=30,
+        calibration_status=str(calibration.get("status")),
+        perturbation_status=(
+            "PASS" if external_validation["perturbation_consistency"]["accepted"]
+            else "PENDING_REAL_VISION_RESPONSES"
+        ),
+        blind_cohort_status=str(blind_cohort.get("status") or "MISSING"),
+        implementation_contract_coverage=100.0,
+    )
+    _write_json(root / "17_perception_interrogation" / "certification_verdict.json", certification)
 
     status = _status(provider_result=provider_result, validation_result=validation_result)
     workflow_status = _workflow_status(provider_result)
@@ -311,6 +476,21 @@ def run_ai_smc_orchestrator_v3(
         "hard_issues": [issue.model_dump(mode="json") for issue in validation_result.issues if issue.severity == "hard"],
         "final_chart_template": (official_decision.get("annotation_plan") or {}).get("chart_template"),
         "official_chart": str(official_chart_path) if official_chart_path else None,
+        "annotation_bitmap_review_status": bitmap_review.get("overall_status"),
+        "annotation_semantic_image_review_status": semantic_image_review.get("status"),
+        "native_mtf_story_pack_status": native_mtf_manifest.get("status"),
+        "native_mtf_story_pack_path": str(root / "14_clean_annotation_render" / "native_mtf_story_pack" / "native_mtf_render_manifest.json") if render_charts else None,
+        "object_evidence_contract_registry_path": str(root / "17_perception_interrogation" / "object_evidence_contracts.json"),
+        "evaluation_input_readiness_path": str(root / "17_perception_interrogation" / "evaluation_input_readiness.json"),
+        "external_validation_readiness_path": str(root / "17_perception_interrogation" / "external_validation_readiness.json"),
+        "runtime_causal_integrity_path": str(root / "17_perception_interrogation" / "runtime_causal_integrity.json"),
+        "calibration_readiness_path": str(root / "17_perception_interrogation" / "calibration_readiness.json"),
+        "poi_ranking_freeze_path": str(root / "17_perception_interrogation" / "poi_ranking_freeze.json"),
+        "chart_perturbation_manifest_path": str(root / "17_perception_interrogation" / "chart_perturbation_manifest.json") if render_charts else None,
+        "certification_verdict_path": str(root / "17_perception_interrogation" / "certification_verdict.json"),
+        "perception_certification_status": certification.get("status"),
+        "perception_certification_score": certification.get("score"),
+        "perception_certification_failed_gates": certification.get("failed_catastrophic_gates"),
         "official_decision_source": OFFICIAL_AI_SOURCE,
         "legacy_authority_role": LEGACY_DEBUG_ROLE,
         "legacy_narrative_authority_allowed_for_official_output": False,
@@ -318,6 +498,15 @@ def run_ai_smc_orchestrator_v3(
         "live_execution": "disabled",
         "capital_risk": 0,
         "formal_structure_graph_path": str(root / "16_formal_structure_graph" / "structure_graph.json"),
+        "structure_engine_v3_shadow_path": str(root / "16_formal_structure_graph" / "structure_engine_v3_shadow.json"),
+        "formal_causal_episode_graph_path": str(root / "16_formal_structure_graph" / "causal_episode_graph_v2.json"),
+        "causal_episode_story_path": str(root / "16_formal_structure_graph" / "causal_episode_story.md"),
+        "causal_episode_invariant_status": (causal_episode_graph.get("invariants") or {}).get("status", "NOT_COMPUTED"),
+        "causal_episode_invariant_failures": episode_graph_failure_codes(causal_episode_graph),
+        "causal_episode_story_status": (causal_episode_graph.get("current_story") or {}).get("status", "NOT_COMPUTED"),
+        "causal_poi_authority_path": str(root / "16_formal_structure_graph" / "causal_poi_authority.json"),
+        "causal_poi_status": causal_poi_authority.get("status", "NOT_COMPUTED"),
+        "causal_poi_official_direction": causal_poi_authority.get("official_direction", "unknown"),
         "structure_map_chart": str(root / "16_formal_structure_graph" / "structure_map.png"),
         "graph_invariant_status": formal_graph.get("invariants", {}).get("status", "NOT_COMPUTED"),
         "graph_invariant_failures": graph_invariant_violation_codes(formal_graph),
@@ -343,6 +532,7 @@ def run_ai_smc_orchestrator_v3(
             "validation_status": validation_result.status,
             "graph_invariant_status": formal_graph.get("invariants", {}).get("status", "NOT_COMPUTED"),
             "graph_parent_child_status": formal_graph.get("parent_child_context", {}).get("status", "NOT_COMPUTED"),
+            "causal_episode_invariant_status": (causal_episode_graph.get("invariants") or {}).get("status", "NOT_COMPUTED"),
             "provider_model": provider_result.audit_record().get("model"),
             "render_charts": render_charts,
             "loop_count": loop_count,
@@ -427,6 +617,55 @@ def _run_perception_candidates(
                 "error": str(exc),
             }
     return candidates, report
+
+
+def _enrich_detector_candidates_with_pois(
+    candidates: Mapping[str, Any], *, timeframe_dfs: Mapping[str, pd.DataFrame],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Run the existing deterministic POI lifecycle before evidence sealing."""
+    normalized: dict[str, dict[str, Any]] = {}
+    for timeframe, raw in candidates.items():
+        value = raw.model_dump(mode="json") if hasattr(raw, "model_dump") else raw
+        normalized[timeframe] = dict(value) if isinstance(value, Mapping) else {}
+    current_prices = {
+        timeframe: float(df["close"].iloc[-1])
+        for timeframe, df in timeframe_dfs.items()
+        if timeframe in normalized and not df.empty
+    }
+    hierarchy = build_mtf_structure_hierarchy(normalized, current_prices=current_prices)
+    lifecycle = build_poi_lifecycle_by_timeframe(normalized, hierarchy, current_prices=current_prices)
+    counts: dict[str, Any] = {}
+    for timeframe, payload in normalized.items():
+        all_pois = _dedupe_pois(lifecycle.get(timeframe, []))
+        active = [poi for poi in all_pois if _is_canonically_active_poi(poi)]
+        payload["pois"] = all_pois
+        payload["active_pois"] = active
+        counts[timeframe] = {"total": len(all_pois), "active": len(active)}
+    return normalized, {"status": "PASS", "counts": counts}
+
+
+def _dedupe_pois(pois: Any) -> list[dict[str, Any]]:
+    unique: dict[str, dict[str, Any]] = {}
+    for raw in pois or []:
+        if not isinstance(raw, Mapping):
+            continue
+        poi = dict(raw)
+        key = str(poi.get("poi_id") or "")
+        if not key:
+            key = "|".join(str(poi.get(name) or "") for name in ("timeframe", "kind", "direction", "price_low", "price_high"))
+        unique.setdefault(key, poi)
+    return list(unique.values())
+
+
+def _is_canonically_active_poi(poi: Mapping[str, Any]) -> bool:
+    freshness = str(poi.get("freshness") or "").lower()
+    relation = str(poi.get("price_relation") or "").lower()
+    return (
+        poi.get("validity_status") == "VALID_ACTIVE_SETUP_POI"
+        and poi.get("scope") == "active_setup"
+        and freshness not in {"invalidated", "consumed", "full"}
+        and not relation.startswith("invalidated")
+    )
 
 
 def _select_depth_profile(symbol: str) -> Mapping[str, int]:
@@ -561,6 +800,35 @@ def _write_text(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def _freeze_current_poi_ranking(evidence_pack: Mapping[str, Any]) -> dict[str, Any]:
+    authority = evidence_pack.get("causal_poi_authority") or {}
+    registry = evidence_pack.get("object_evidence_contracts") or {}
+    contracts = registry.get("contracts") if isinstance(registry, Mapping) else {}
+    ranked: list[dict[str, Any]] = []
+    for direction in ("bullish", "bearish"):
+        scenario = (authority.get("scenarios") or {}).get(direction) if isinstance(authority, Mapping) else None
+        if not isinstance(scenario, Mapping):
+            continue
+        candidates = [scenario.get("primary_causal_poi"), *(scenario.get("secondary_reaction_pois") or [])]
+        for raw in candidates:
+            if not isinstance(raw, Mapping):
+                continue
+            item = dict(raw)
+            source_id = str(item.get("source_object_id") or item.get("poi_id") or "")
+            contract_ids = contract_ids_for_object(registry, source_id, timeframe=str(item.get("timeframe") or ""))
+            contract = contracts.get(contract_ids[0]) if isinstance(contracts, Mapping) and contract_ids else None
+            if isinstance(contract, Mapping):
+                item["first_knowable_candle"] = contract.get("first_knowable_candle")
+            ranked.append(item)
+    decision_time = str(registry.get("decision_time") or evidence_pack.get("formal_structure_graph", {}).get("decision_time"))
+    return freeze_poi_ranking(
+        ranked_pois=ranked,
+        visible_candles=(evidence_pack.get("ohlcv_windows") or {}).get("15m") or [],
+        decision_time=decision_time,
+        doctrine_hash=str(registry.get("doctrine_hash") or "unknown"),
+    )
+
+
 def _render_structure_map(
     timeframe_dfs: Mapping[str, pd.DataFrame],
     graph: Mapping[str, Any],
@@ -616,6 +884,130 @@ def _annotation_self_review_markdown(
     return "\n".join(lines) + "\n"
 
 
+def _causal_episode_story_markdown(graph: Mapping[str, Any]) -> str:
+    current = graph.get("current_story") if isinstance(graph, Mapping) else {}
+    current = current if isinstance(current, Mapping) else {}
+    invariants = graph.get("invariants") if isinstance(graph, Mapping) else {}
+    invariants = invariants if isinstance(invariants, Mapping) else {}
+    lines = [
+        "# Formal Causal Episode Story V2",
+        "",
+        f"- Story status: `{current.get('status', 'INCOMPLETE')}`",
+        f"- Invariants: `{invariants.get('status', 'REVIEW_REQUIRED')}`",
+        f"- Controlling timeframe: `{current.get('controlling_timeframe')}`",
+        f"- Summary: {current.get('summary') or 'No coherent accepted episode was available.'}",
+        "",
+        "## Authority",
+        "Observe-only and downgrade-only. This story cannot authorize entry, stop, target, paper execution, or live execution.",
+    ]
+    violations = list(invariants.get("violations") or [])
+    if violations:
+        lines.extend(["", "## Reconciliation Failures"])
+        lines.extend(f"- `{code}`" for code in violations)
+    route = current.get("route_map")
+    if isinstance(route, Mapping):
+        lines.extend(
+            [
+                "",
+                "## Route Map",
+                f"- Direction: `{route.get('direction')}`",
+                f"- Primary POI: `{(route.get('primary_poi') or {}).get('poi_id') if isinstance(route.get('primary_poi'), Mapping) else None}`",
+                f"- Candidate invalidation: `{route.get('invalidation')}`",
+                f"- External liquidity objective: `{route.get('liquidity_objective')}`",
+                f"- Confirmation: {route.get('confirmation_requirement')}",
+            ]
+        )
+    return "\n".join(lines) + "\n"
+
+
+def _run_post_render_semantic_image_review(
+    *,
+    provider: AISMCProvider,
+    initial_provider_result: LLMCompletionResult,
+    evidence_pack: Mapping[str, Any],
+    image_path: Path,
+    scene: Mapping[str, Any],
+) -> dict[str, Any]:
+    if not initial_provider_result.is_real_reasoning:
+        return {
+            "schema": "smc_annotation_semantic_image_review_v1",
+            "status": "NOT_PERFORMED_NO_VISION_PROVIDER",
+            "reviewer_mode": initial_provider_result.provider_mode,
+            "issues": [],
+            "authority_contract": {"can_downgrade": True, "can_promote": False},
+        }
+    raw_bytes = image_path.read_bytes()
+    image_manifest = {
+        "official_annotation": {
+            "path": str(image_path),
+            "exists": True,
+            "media_type": "image/png",
+            "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+            "base64": base64.b64encode(raw_bytes).decode("ascii"),
+        }
+    }
+    prompt = json.dumps(
+        {
+            "role": "Downgrade-only professional SMC bitmap critic",
+            "instructions": [
+                "Inspect the final rendered chart itself, not only the drawing JSON.",
+                "Check that each visible line connects the intended local swing and accepted break, POI identity and bounds are correct, labels do not overlap, and the chart tells one causal episode.",
+                "Compare against formal_causal_episode_graph and the supplied scene.",
+                "You may return PASS or REVIEW_REQUIRED. You may never promote a trade or invent a level.",
+                "Return strict JSON with status, issues, and cleanup_requests.",
+            ],
+            "formal_causal_episode_graph": evidence_pack.get("formal_causal_episode_graph"),
+            "scene": scene,
+            "response_schema": {
+                "status": "PASS or REVIEW_REQUIRED",
+                "issues": [{"code": "string", "message": "string"}],
+                "cleanup_requests": ["string"],
+            },
+        },
+        sort_keys=True,
+        default=str,
+    )
+    result = provider.complete(
+        LLMCompletionRequest(
+            prompt=prompt,
+            evidence_pack=evidence_pack,
+            chart_images=image_manifest,
+            prompt_version="smc_annotation_semantic_image_review_v1",
+        )
+    )
+    raw = result.raw_json
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except json.JSONDecodeError:
+            raw = {}
+    if not isinstance(raw, Mapping) or raw.get("status") not in {"PASS", "REVIEW_REQUIRED"}:
+        return {
+            "schema": "smc_annotation_semantic_image_review_v1",
+            "status": "REVIEW_REQUIRED",
+            "reviewer_mode": result.provider_mode,
+            "issues": [{"code": "semantic_image_review_schema_invalid", "message": "Vision provider did not return the required downgrade-only review schema."}],
+            "cleanup_requests": [],
+            "provider_audit": result.audit_record(),
+            "authority_contract": {"can_downgrade": True, "can_promote": False},
+        }
+    normalized_issues = [
+        dict(issue)
+        if isinstance(issue, Mapping)
+        else {"code": "semantic_image_review_issue", "message": str(issue)}
+        for issue in raw.get("issues") or []
+    ]
+    return {
+        "schema": "smc_annotation_semantic_image_review_v1",
+        "status": raw.get("status"),
+        "reviewer_mode": result.provider_mode,
+        "issues": normalized_issues,
+        "cleanup_requests": list(raw.get("cleanup_requests") or []),
+        "provider_audit": result.audit_record(),
+        "authority_contract": {"can_downgrade": True, "can_promote": False},
+    }
+
+
 def apply_visual_critic_authority(
     validation_result: ValidationResult,
     visual_review: Mapping[str, Any],
@@ -657,6 +1049,8 @@ def _report_markdown(report: Mapping[str, Any]) -> str:
     lines.append(f"Official state: `{report.get('official_state')}`")
     lines.append(f"Chart template: `{report.get('final_chart_template')}`")
     lines.append(f"Graph invariants: `{report.get('graph_invariant_status')}`")
+    lines.append(f"Causal episode invariants: `{report.get('causal_episode_invariant_status')}`")
+    lines.append(f"Causal episode story: `{report.get('causal_episode_story_status')}`")
     lines.append(f"Parent-child context: `{report.get('graph_parent_child_status')}`")
     lines.append("")
     if report.get("graph_invariant_failures"):

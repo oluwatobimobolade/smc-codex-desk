@@ -16,6 +16,10 @@ from __future__ import annotations
 from typing import Any, Mapping
 
 from smc_desk.validation.primitives import Severity, Violation
+from smc_desk.perception.programme_schema import (
+    canonical_object_id,
+    flatten_candidate_objects,
+)
 
 _HIERARCHY = {"1d": 4, "4h": 3, "1h": 2, "15m": 1, "5m": 0}
 
@@ -27,12 +31,46 @@ def check_invariants(
 ) -> tuple[Violation, ...]:
     out: list[Violation] = []
     pool_ids = _pool_ids(case)
+    graph = case.get("formal_structure_graph") or {}
+    if isinstance(graph, Mapping) and graph:
+        invariant_status = str((graph.get("invariants") or {}).get("status") or "")
+        if invariant_status and invariant_status != "PASS":
+            out.append(Violation(
+                code="FORMAL_GRAPH_NOT_PASS",
+                severity=Severity.BLOCK.value,
+                message=f"Formal graph invariant status is {invariant_status!r}, not PASS.",
+                checker="invariants.formal_graph",
+            ))
 
     for br in interpretation.get("accepted_breaks") or []:
         if not isinstance(br, Mapping):
             continue
         origin = br.get("origin_object_id")
         breaking = br.get("breaking_candidate_id")
+        if not origin:
+            out.append(Violation(
+                code="BREAK_ORIGIN_REQUIRED", severity=Severity.BLOCK.value,
+                message=f"break {br.get('object_id')} has no origin_object_id",
+                checker="invariants.break_origin",
+            ))
+        if not breaking:
+            out.append(Violation(
+                code="BREAKING_CANDIDATE_REQUIRED", severity=Severity.BLOCK.value,
+                message=f"break {br.get('object_id')} has no breaking_candidate_id",
+                checker="invariants.breaking_candidate",
+            ))
+        if not br.get("confirming_candle_time"):
+            out.append(Violation(
+                code="BREAK_CONFIRMATION_TIME_REQUIRED", severity=Severity.BLOCK.value,
+                message=f"break {br.get('object_id')} has no confirming_candle_time",
+                checker="invariants.break_confirmation",
+            ))
+        if str(br.get("direction", "")).lower() not in {"bullish", "bearish"}:
+            out.append(Violation(
+                code="BREAK_DIRECTION_REQUIRED", severity=Severity.BLOCK.value,
+                message=f"break {br.get('object_id')} has no valid direction",
+                checker="invariants.break_direction",
+            ))
         if origin and origin not in pool_ids:
             out.append(Violation(
                 code="BREAK_ORIGIN_NOT_GROUNDED",
@@ -50,7 +88,7 @@ def check_invariants(
                 checker="invariants.breaking_candidate",
             ))
         # Accepting a break requires displacement evidence
-        if br.get("accepted") and not br.get("displacement_evidence_ids"):
+        if br.get("accepted") and str(br.get("scope", "external")).lower() == "external" and not br.get("displacement_evidence_ids"):
             out.append(Violation(
                 code="ACCEPTED_BREAK_WITHOUT_DISPLACEMENT",
                 severity=Severity.ERROR.value,
@@ -60,7 +98,13 @@ def check_invariants(
             ))
 
     pp = interpretation.get("protected_point")
-    for br in interpretation.get("accepted_breaks") or []:
+    breaks = [br for br in interpretation.get("accepted_breaks") or [] if isinstance(br, Mapping)]
+    protected_break_id = pp.get("protects_break_id") if isinstance(pp, Mapping) else None
+    for br in breaks:
+        if protected_break_id and str(br.get("object_id")) != str(protected_break_id):
+            continue
+        if not protected_break_id and len(breaks) > 1:
+            continue
         if (isinstance(pp, Mapping) and isinstance(br, Mapping)
                 and pp.get("object_id") and br.get("timeframe")):
             pp_tf = _timeframe_of(str(pp.get("object_id")), case)
@@ -81,6 +125,13 @@ def check_invariants(
             if not isinstance(r, Mapping):
                 continue
             parent_id = r.get("parent_range_id")
+            if parent_id and parent_id not in by_id:
+                out.append(Violation(
+                    code="PARENT_RANGE_NOT_GROUNDED",
+                    severity=Severity.BLOCK.value,
+                    message=f"range {r.get('range_id')} references missing parent {parent_id}",
+                    checker="invariants.range_hierarchy",
+                ))
             if parent_id and parent_id in by_id:
                 parent = by_id[parent_id]
                 ctf = _hierarchy_rank(str(r.get("owner_timeframe", "")))
@@ -109,41 +160,39 @@ def check_invariants(
                 checker="invariants.lifecycle",
             ))
 
+    for index, claim in enumerate(interpretation.get("structure_claims") or []):
+        if not isinstance(claim, Mapping):
+            out.append(Violation(
+                code="STRUCTURE_CLAIM_INVALID", severity=Severity.BLOCK.value,
+                message=f"structure_claims[{index}] is not an object",
+                field_path=f"structure_claims[{index}]", checker="invariants.structure_claim",
+            ))
+            continue
+        if not claim.get("claim_type") or not claim.get("timeframe") or not claim.get("evidence_ids"):
+            out.append(Violation(
+                code="STRUCTURE_CLAIM_INCOMPLETE", severity=Severity.BLOCK.value,
+                message=f"structure_claims[{index}] requires claim_type, timeframe, and evidence_ids",
+                field_path=f"structure_claims[{index}]", checker="invariants.structure_claim",
+            ))
+
     return tuple(out)
 
 
 def _pool_ids(case: Mapping[str, Any]) -> set[str]:
-    ids: set[str] = set()
-    co = case.get("candidate_objects") or {}
-    if isinstance(co, Mapping):
-        for buckets in co.values():
-            if not isinstance(buckets, Mapping):
-                continue
-            for items in buckets.values():
-                if not isinstance(items, list):
-                    continue
-                for it in items:
-                    if isinstance(it, Mapping) and isinstance(it.get("object_id"), str):
-                        ids.add(it["object_id"])
-    return ids
+    return {
+        object_id
+        for candidate in flatten_candidate_objects(case.get("candidate_objects") or {})
+        if (object_id := canonical_object_id(candidate))
+    }
 
 
 def _all_candidates(case: Mapping[str, Any]) -> list[Mapping[str, Any]]:
-    out: list[Mapping[str, Any]] = []
-    co = case.get("candidate_objects") or {}
-    if isinstance(co, Mapping):
-        for buckets in co.values():
-            if not isinstance(buckets, Mapping):
-                continue
-            for items in buckets.values():
-                if isinstance(items, list):
-                    out.extend(it for it in items if isinstance(it, Mapping))
-    return out
+    return list(flatten_candidate_objects(case.get("candidate_objects") or {}))
 
 
 def _timeframe_of(eid: str, case: Mapping[str, Any]) -> str | None:
     for c in _all_candidates(case):
-        if c.get("object_id") == eid:
+        if canonical_object_id(c) == eid:
             tf = c.get("timeframe")
             if isinstance(tf, str):
                 return tf

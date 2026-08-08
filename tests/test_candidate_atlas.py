@@ -22,6 +22,7 @@ from smc_desk.perception.candidates.schema import (
     SwingCandidate,
     candidate_id,
 )
+from smc_desk.perception.candidates.indicators import detect_fvgs
 
 
 def _synthetic(n: int = 500, seed: int = 7) -> pd.DataFrame:
@@ -122,6 +123,24 @@ def test_atlas_does_not_look_forward(result):
         if ts.tzinfo is None:
             ts = ts.tz_localize("UTC")
         assert ts <= last_ts
+        if c.available_at:
+            assert pd.Timestamp(c.available_at) <= last_ts
+
+
+def test_fvg_direction_and_confirmation_are_causal():
+    bullish = pd.DataFrame({
+        "timestamp": pd.date_range("2026-01-01", periods=3, freq="15min", tz="UTC"),
+        "open": [100.0, 101.0, 103.0],
+        "high": [101.0, 103.0, 104.0],
+        "low": [99.0, 100.5, 102.0],
+        "close": [100.5, 102.5, 103.5],
+        "volume": [1.0, 1.0, 1.0],
+    })
+    result = detect_fvgs(bullish, min_gap_atr=0.0)
+    assert result[0]["kind"] == "bullish"
+    assert result[0]["low"] == 101.0
+    assert result[0]["high"] == 102.0
+    assert result[0]["confirmed_at"] == "2026-01-01T00:30:00Z"
 
 
 def test_candidate_records_have_unique_ids(result):

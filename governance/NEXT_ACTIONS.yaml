@@ -444,3 +444,169 @@ next_actions:
       - a larger repeated AI-assisted/vision-provider cohort, measured against the locked benchmark after a freeze
       - optional independent human doctrine and adjudication pilot for constitutional promotion only
       - final BR-007 readiness decision
+  - id: PERCEPTION-PROGRAMME-INTEGRITY-REPAIR
+    priority: 46
+    title: Repair and vertically integrate the experimental SMC perception programme
+    owner: Perception Structure and AI Annotation Engineer
+    status: VALIDATED_LOCAL_EXPERIMENTAL_OBSERVE_ONLY
+    gate: GATE-PERCEPTION-PROGRAMME-INTEGRITY-001
+    evidence_required:
+      - governance/WORK_PACKAGES/PERCEPTION-PROGRAMME-INTEGRITY-REPAIR/final_report.md
+      - governance/WORK_PACKAGES/PERCEPTION-PROGRAMME-INTEGRITY-REPAIR/TEST_REPORT.json
+      - reports/current/PERCEPTION_PROGRAMME_INTEGRITY_REPAIR_20260711.md
+      - foundation_programme/PERCEPTION_READINESS_BRIDGE/PERCEPTION_PROGRAMME_REPAIR_SOURCE_MANIFEST.tsv
+    completed_scope:
+      - fail-closed doctrine integrity and status authority
+      - canonical candidate and graph schema adapter
+      - causal timing, FVG direction, displacement-origin, protected-point, range, interaction, inducement, and POI repairs
+      - fail-closed interpretation validators and adversarial probes
+      - real atlas to six-role AI panel to annotation-render callback to certification path
+      - deterministic explicit SMC annotation label authority
+    remaining_scope:
+      - populate and freeze positive, negative, and ambiguous blind market cases
+      - implement a bounded retrieval tool-call loop before using anchor_tools at runtime
+      - optional independent human constitutional adjudication before doctrine promotion
+    prohibited_claims:
+      - synthetic fixtures are not expert or human gold truth
+      - no perception accuracy, predictive edge, paper authority, or live execution authority was created
+  - id: CAUSAL-POI-AUTHORITY-REPAIR
+    priority: 47
+    title: Replace heuristic POI choice with causal origin authority
+    owner: Perception Structure and AI Annotation Engineer
+    status: VALIDATED_LOCAL_OBSERVE_ONLY
+    gate: GATE-CAUSAL-POI-AUTHORITY-001
+    evidence_required:
+      - governance/WORK_PACKAGES/CAUSAL-POI-AUTHORITY-REPAIR/final_report.md
+      - governance/WORK_PACKAGES/CAUSAL-POI-AUTHORITY-REPAIR/TEST_REPORT.json
+      - reports/current/CAUSAL_POI_AUTHORITY_REPAIR_20260712.md
+      - tests/test_causal_poi_authority.py
+      - analysis_runs/CAUSAL_POI_AUTHORITY_SMOKE_FINAL2_20260712/LIVE_FULL_SYSTEM_AI_SMC_V3_20260712_134616/XRPUSDT/16_formal_structure_graph/causal_poi_authority.json
+    completed_scope:
+      - origin-cluster and departure-candle causal trace
+      - source-overlap FVG linkage replacing time proximity
+      - external-primary versus internal-reaction authority split
+      - pairwise causal selection with depth as final tie-break
+      - validator, prompt, annotation, renderer, and orchestrator integration
+      - live XRP refusal of FVG promotion while OB lineage remained unresolved
+    remaining_scope:
+      - frozen blind positive negative and ambiguous causal-POI cohort
+      - independent adjudication of controlling timeframe and origin cluster
+      - measured classification agreement and later outcome calibration
+    prohibited_claims:
+      - no POI is guaranteed to react
+      - no perception accuracy or predictive edge has been established
+      - no paper live or execution authority was created
+  - id: WP-SMC-01-THROUGH-04
+    priority: 48
+    title: Verified truth, Constitution V2, and experimental break lifecycle
+    owner: Perception Structure and Validation Engineer
+    status: PASSED_LOCAL_EXPERIMENTAL_OBSERVE_ONLY
+    gate: GATE-WP-SMC-EXPERIMENTAL-BREAK-001
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-SMC-01-VERIFIED-REPOSITORY-TRUTH/BASELINE_TEST_REPORT.json
+      - governance/WORK_PACKAGES/WP-SMC-02-CONSTITUTION-V2/TEST_REPORT.json
+      - governance/WORK_PACKAGES/WP-SMC-03-04-EXPERIMENTAL-BREAK-LIFECYCLE/TEST_REPORT.json
+      - reports/current/WP_SMC_01_04_EXPERT_PERCEPTION_FOUNDATION_20260712.md
+    completed_scope:
+      - exact implementation map and verified gap matrix
+      - source-bound dirty-tree baseline with 960 passed and 1 skipped
+      - hash-sealed non-authoritative Constitution V2
+      - isolated HybridPerceptionEngineV3Experimental facade
+      - probe candidate accepted failed initial BOS CHoCH and MSS lifecycle semantics
+      - future-data invariance and permanent non-execution authority contract
+      - final full repository validation with 981 passed and 1 skipped
+    remaining_scope:
+      - connect atlas candidates to certified break-level interactions
+      - integrate causal protected points and versioned active ranges
+      - implement complete symmetric liquidity interaction lifecycle
+      - populate blind adjudicated market cohort before promotion
+    prohibited_claims:
+      - no expert perception accuracy has been measured
+      - no POI reaction or predictive edge is guaranteed
+      - no signal paper live or execution authority was created
+  - id: WP-SMC-05-NEXT
+    priority: 49
+    title: Causal protected point and versioned active range integration
+    owner: Perception Structure Engineer
+    status: NEXT_GATED_EXPERIMENTAL
+    depends_on: GATE-WP-SMC-EXPERIMENTAL-BREAK-001
+    required_scope:
+      - accepted-break-to-origin graph
+      - protected-point candidate set with ambiguity abstention
+      - versioned range activation extension replacement and containment
+      - positive negative adversarial and future-invariance fixtures
+    prohibited_scope:
+      - no canonical V2 replacement
+      - no benchmark promotion before blind adjudication
+  - id: WP-SMC-PERCEPTION-INTERROGATION-HARDENING
+    priority: 50
+    title: Complete empirical SMC perception certification evidence
+    owner: Independent Review and Calibration Lead
+    status: SIGNED_CHAIN_COMPLETE_EXTERNAL_TRUST_AND_REVIEWS_REQUIRED
+    gate: GATE-SMC-PERCEPTION-INTERROGATION-001
+    evidence_required:
+      - minimum 30 independently adjudicated multi-reviewer cases
+      - minimum 50 calibration records linked to valid adjudicated case IDs
+      - point-in-time sweep versus accepted-breakout gold replay report
+      - real seven-variant visual perturbation consistency report
+      - real no-chart blank-chart random-chart unreadable-chart abstention report
+    completed_scope:
+      - immutable dual geometry and hash verification
+      - complete object evidence contract registry
+      - heuristic strength and probability separation
+      - POI pre-reaction freeze and runtime causal audit
+      - sweep lifecycle and collision-free order-block identities
+      - dynamic fail-closed empirical evidence loaders
+      - sealed 30-case five-symbol volatility-stratified cohort with no outcome-based selection
+      - 15 presentation variants four sequential cutoffs and one exact counterfactual per case
+      - normalized anonymous blind adjudication and weighted scoring
+      - Ed25519 evidence envelopes and cohort-pinned trust registry contract
+      - six-role distinct-key provisioning tool with duplicate-key rejection
+      - signed gold calibration reviewer system adjudication visual sweep and score gates
+      - source freeze across 410 files at 74906372ab6c6b8e77a0611567f11ced4017ad212dbcff140f208705e45e96fa
+      - cohort verification across 1230 files 15900 candles and 30 counterfactuals
+      - full repository validation with 1030 passed and 1 skipped
+    remaining_scope:
+      - provision six distinct external public keys and append the resulting cohort hash to governance
+      - complete reviewer A and reviewer B independently for all 30 cases
+      - freeze and sign system submissions against source hash 74906372ab6c6b8e77a0611567f11ced4017ad212dbcff140f208705e45e96fa
+      - complete blind adjudication without revealing system identity
+      - collect real perturbation and no-evidence visual responses
+      - compute calibration and cohort score
+      - run a later untouched future holdout before release-level generalisation claims
+    prohibited_claims:
+      - implementation contract coverage is not perception accuracy
+      - no synthetic or engine weak label may satisfy a gold gate
+      - no numeric certification score before every empirical gate passes
+      - no strategy edge paper execution or live execution authority
+  - id: WP-SMC-09-AI-SEAT-RUNTIME-CONTRACT
+    priority: 51
+    title: Hash-sealed AI seat profile and independently validated final exam
+    owner: AI Runtime and Validation Engineer
+    status: COMPLETE_LOCAL_OBSERVE_ONLY
+    gate: GATE-AI-SEAT-RUNTIME-CONTRACT-001
+    evidence_required:
+      - governance/WORK_PACKAGES/WP-SMC-09-AI-SEAT-RUNTIME-CONTRACT/TEST_REPORT.json
+      - governance/WORK_PACKAGES/WP-SMC-09-AI-SEAT-RUNTIME-CONTRACT/final_report.md
+      - reports/current/AI_SEAT_RUNTIME_CONTRACT_V2_20260713.md
+      - analysis_runs/AI_SEAT_RUNTIME_CONTRACT_V2_BTCUSDT_20260713/ai_agent_packet/run_manifest.json
+    completed_scope:
+      - proposed observe-only AI seat profile with typed authority
+      - exact Constitution profile gauntlet and mechanical mirror packet copies
+      - sealed packet input and response binding
+      - mandatory ten-station exam transcript and independent validation
+      - fail-closed stripping before decision parsing
+      - dissent and doctrine-pending review enforcement
+      - causal graph downgrade precedence and annotation budget reconciliation
+      - real BTC packet smoke with four mirrored timeframes
+      - full repository validation with 1052 passed and 1 skipped
+    remaining_scope:
+      - execute real external AI responses against frozen packets
+      - compare response semantics on the full mechanical gauntlet
+      - complete independent reviewer and adjudication evidence
+      - ratify or preserve all ten pending Constitution V2 decisions
+    prohibited_claims:
+      - runtime contract integrity is not perception accuracy
+      - AI self-exam cannot certify its own semantic correctness
+      - no V3 promotion from one regression case
+      - no signal paper live execution or predictive edge authority

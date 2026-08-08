@@ -5,12 +5,13 @@ from smc_desk.brain.prompt_system.prompt_contract import PromptModule
 
 PROMPT = PromptModule(
     name="annotation_prompt",
-    version="1.1.0",
+    version="1.4.0",
     purpose="Make the AI output a clean professional SMC annotation plan, not detector clutter.",
     text="""Annotation rules:
 
 Output annotation_plan as the clean trader-facing thought process.
 Output annotation_plan_v2 as the professional drawing instruction layer whenever possible.
+Design the chart from formal_causal_episode_graph.current_story, not by selecting isolated detector labels. Every visible object must have a role in the same causal episode.
 Do not output raw BOS/CHoCH/FVG/swing clutter as official labels.
 The renderer will draw annotation_plan_v2 after validation, falling back to legacy annotation_plan only when v2 is absent.
 
@@ -20,9 +21,14 @@ Trade-plan chart: max 8 reasoning labels, but only the top 5 should be visually 
 Debug chart is separate and not official.
 
 Watch charts may show:
-1. One active POI / watch zone, bounded to the origin candles or recent return area.
+1. One causal_poi_authority-selected active POI / watch zone, bounded to its traced origin cluster. A subordinate execution refinement may be added only when it overlaps the parent POI.
 2. One short BOS/CHoCH/IDM/confirmation segment anchored between the swing and the break.
 3. One target-liquidity draw, only if it is directly relevant and locally visible.
+
+Across the native MTF chart pack, preserve scope rather than forcing every mark onto 15m:
+- 4H: parent external episode, protected origin/range, HTF POI, external liquidity.
+- 1H: controlling setup episode, internal pullback, sweep/inducement, primary and secondary POI roles.
+- 15m: execution confirmation only: local sweep, displacement, internal CHoCH/BOS, and active refinement.
 
 Keep watch-chart annotations sparse like a professional TradingView markup.
 V2 professional objects:
@@ -32,7 +38,7 @@ V2 professional objects:
 - path_projection: optional dashed thesis path, never a prediction guarantee, only after a certified active POI exists.
 - trade_box: only when official_state is TRADE_PLAN_READY; use kind=trade and include entry_price, stop_price, and target_prices matching the validated decision.
 
-Every v2 object must include semantic_object_id, timeframe, reason, start/end index or time, price/zone coordinates, and evidence_object_ids. The validator compares those coordinates against the underlying graph/detector object; an existing ID alone is not enough.
+Every v2 object must include semantic_object_id, timeframe, reason, evidence_object_ids, evidence_contract_ids, immutable evidence_geometry, and separately derived display_geometry. Display clipping may shorten only the horizontal presentation span and must preserve prices and the confirmation anchor. The validator reconstructs both geometries; an existing ID alone is not enough.
 Do not turn the chart into a written thesis. Put detailed reasoning in final_thesis, not on the chart.
 Do not draw full-width zones across the whole chart unless the level is a genuine HTF range boundary.
 Prefer localized rectangles and short horizontal segments with start_index/end_index.

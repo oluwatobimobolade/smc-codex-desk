@@ -15,8 +15,13 @@ from typing import Any
 import pandas as pd
 
 from smc_desk.decision.active_range_resolver import resolve_active_range_authority
+from smc_desk.perception.causal_poi_authority import build_causal_poi_authority
+from smc_desk.perception.formal_causal_episode_graph import build_formal_causal_episode_graph
+from smc_desk.perception.evidence_contract import build_object_evidence_contracts
 from smc_desk.perception.formal_structure_graph import build_mtf_structure_graph
+from smc_desk.perception.structure_engine_v3 import StructureEngineV3Shadow
 from smc_desk.perception.structure_narrative import build_structure_narrative, prefer_formal_graph_override
+from smc_desk.perception.sweep_lifecycle import enrich_sweep_lifecycles
 from smc_desk.profile.smc_intraday_profile import get_intraday_profile
 
 
@@ -57,7 +62,7 @@ def build_smc_evidence_pack(
         if df.empty:
             raise ValueError(f"{timeframe} dataframe is empty")
         normalized = _normalize_df(df)
-        ohlcv_summaries[timeframe] = _summarize_df(normalized)
+        ohlcv_summaries[timeframe] = _summarize_df(normalized, timeframe=timeframe)
         ohlcv_windows[timeframe] = _tail_records(normalized, max_candles_per_timeframe)
         dataframe_hashes[timeframe] = _hash_dataframe(normalized)
 
@@ -66,11 +71,36 @@ def build_smc_evidence_pack(
         timeframe_dfs=timeframe_dfs,
     )
     candidate_manifest = _candidate_manifest(detector_candidates or {})
+    decision_time = _latest_closed_decision_time(ohlcv_summaries)
+    candidate_manifest = enrich_sweep_lifecycles(
+        candidate_manifest,
+        timeframe_dfs,
+        decision_time=decision_time,
+    )
+    structure_engine_v3_shadow = StructureEngineV3Shadow().analyze(
+        symbol=symbol,
+        detector_candidates=candidate_manifest,
+        timeframe_dfs=timeframe_dfs,
+        decision_time=decision_time,
+    ).to_dict()
     formal_structure_graph = build_mtf_structure_graph(
         symbol=symbol,
         detector_candidates=candidate_manifest,
         active_range_authority=active_range_authority,
         timeframe_dfs=timeframe_dfs,
+        decision_time=decision_time,
+    )
+    causal_poi_authority = build_causal_poi_authority(
+        detector_candidates=candidate_manifest,
+        formal_structure_graph=formal_structure_graph,
+    )
+    formal_causal_episode_graph = build_formal_causal_episode_graph(
+        symbol=symbol,
+        decision_time=decision_time,
+        detector_candidates=candidate_manifest,
+        structure_shadow=structure_engine_v3_shadow,
+        formal_structure_graph_v1=formal_structure_graph,
+        causal_poi_authority=causal_poi_authority,
     )
     structure_narrative = prefer_formal_graph_override(
         build_structure_narrative(
@@ -78,6 +108,13 @@ def build_smc_evidence_pack(
             raw_bias={timeframe: _summary_bias(summary) for timeframe, summary in ohlcv_summaries.items()},
         ),
         formal_structure_graph,
+    )
+    doctrine_hash = _stable_hash({"profile": profile, "notes": list(doctrine_notes or [])})
+    object_evidence_contracts = build_object_evidence_contracts(
+        detector_candidates=candidate_manifest,
+        decision_time=decision_time,
+        doctrine_hash=doctrine_hash,
+        formal_structure_graph=formal_structure_graph,
     )
     pack = {
         "schema": "smc_evidence_pack_v1",
@@ -100,7 +137,11 @@ def build_smc_evidence_pack(
         "active_range_authority": active_range_authority,
         "detector_candidates": candidate_manifest,
         "structure_narrative": structure_narrative,
+        "structure_engine_v3_shadow": structure_engine_v3_shadow,
         "formal_structure_graph": formal_structure_graph,
+        "formal_causal_episode_graph": formal_causal_episode_graph,
+        "causal_poi_authority": causal_poi_authority,
+        "object_evidence_contracts": object_evidence_contracts,
         "provenance": {
             "dataframe_hashes": dataframe_hashes,
             "pack_hash": None,
@@ -108,6 +149,9 @@ def build_smc_evidence_pack(
         "authority_contract": {
             "evidence_only": True,
             "detectors_are_candidates_only": True,
+            "structure_engine_v3_shadow_can_only_downgrade": True,
+            "formal_causal_episode_graph_can_only_downgrade": True,
+            "probabilistic_confidence_allowed": False,
             "official_decision": None,
             "signal_allowed": False,
             "entry_authorized": False,
@@ -119,6 +163,22 @@ def build_smc_evidence_pack(
     }
     pack["provenance"]["pack_hash"] = _stable_hash(pack)
     return pack
+
+
+def _latest_closed_decision_time(summaries: Mapping[str, Mapping[str, Any]]) -> str:
+    close_times = [
+        pd.Timestamp(summary["last_close_time"])
+        for summary in summaries.values()
+        if summary.get("last_close_time") is not None
+    ]
+    if not close_times:
+        raise ValueError("Cannot derive a closed-candle decision time for the evidence pack.")
+    decision_time = max(close_times)
+    if decision_time.tzinfo is None:
+        decision_time = decision_time.tz_localize("UTC")
+    else:
+        decision_time = decision_time.tz_convert("UTC")
+    return decision_time.isoformat().replace("+00:00", "Z")
 
 
 def assert_evidence_pack_has_no_decision(evidence_pack: Mapping[str, Any]) -> None:
@@ -146,14 +206,19 @@ def _normalize_df(df: pd.DataFrame) -> pd.DataFrame:
     return out.sort_values("timestamp").reset_index(drop=True)
 
 
-def _summarize_df(df: pd.DataFrame) -> dict[str, Any]:
+def _summarize_df(df: pd.DataFrame, *, timeframe: str) -> dict[str, Any]:
     high = float(df["high"].max())
     low = float(df["low"].min())
     close = float(df["close"].iloc[-1])
+    duration = {"5m": pd.Timedelta(minutes=5), "15m": pd.Timedelta(minutes=15), "1h": pd.Timedelta(hours=1), "4h": pd.Timedelta(hours=4), "12h": pd.Timedelta(hours=12), "1d": pd.Timedelta(days=1)}.get(timeframe)
+    last_open = df["timestamp"].iloc[-1]
     return {
         "candle_count": int(len(df)),
         "first_timestamp": str(df["timestamp"].iloc[0]),
-        "last_timestamp": str(df["timestamp"].iloc[-1]),
+        "last_timestamp": str(last_open),
+        "last_open_time": str(last_open),
+        "last_close_time": str(last_open + duration) if duration is not None else None,
+        "decision_cutoff_semantics": "closed_candle_time",
         "first_open": float(df["open"].iloc[0]),
         "last_close": close,
         "high": high,
@@ -224,7 +289,18 @@ def _candidate_manifest(detector_candidates: Mapping[str, Any]) -> dict[str, Any
             raw = raw.model_dump(mode="json")
         if not isinstance(raw, Mapping):
             raise TypeError(f"Detector candidates for {timeframe} must be a mapping or PerceptionSnapshot-like object")
-        timeframe_payload: dict[str, list[dict[str, Any]]] = {}
+        timeframe_payload: dict[str, Any] = {}
+        timeframe_payload["poi_lifecycle_contract"] = [{
+            "object_id": f"{timeframe}:poi_lifecycle_contract",
+            "available": "active_pois" in raw and "pois" in raw,
+            "candidate_role": "candidate_only",
+            "truth_status": "pipeline_contract_metadata",
+            "official_decision_authority": False,
+        }]
+        structure_state = raw.get("structure_state") or {}
+        if hasattr(structure_state, "model_dump"):
+            structure_state = structure_state.model_dump(mode="json")
+        timeframe_payload["structure_state"] = dict(structure_state) if isinstance(structure_state, Mapping) else {}
         for group in CANDIDATE_GROUPS:
             items = raw.get(group, [])
             if group == "swings" and isinstance(items, Mapping):
@@ -267,6 +343,9 @@ def _candidate_dict(item: Any) -> dict[str, Any]:
             "reason": "large enough, aligned with displacement, in valid model" if is_qualified else "failed minimum gap width threshold"
         }
 
+    if raw.get("confidence") is not None:
+        raw["evidence_strength"] = raw.pop("confidence")
+        raw["evidence_strength_semantics"] = "heuristic_not_probability"
     raw.setdefault("candidate_role", "candidate_only")
     raw.setdefault("truth_status", "weak_detector_candidate")
     raw.setdefault("official_decision_authority", False)

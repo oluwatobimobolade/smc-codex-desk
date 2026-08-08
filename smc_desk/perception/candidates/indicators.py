@@ -21,9 +21,11 @@ def _iso(value: Any) -> str:
     if pd.isna(value):
         return ""
     ts = pd.Timestamp(value)
-    if ts.tzinfo is not None:
-        ts = ts.tz_convert(None)
-    return ts.isoformat()
+    if ts.tzinfo is None:
+        ts = ts.tz_localize("UTC")
+    else:
+        ts = ts.tz_convert("UTC")
+    return ts.isoformat().replace("+00:00", "Z")
 
 
 def true_range(df: pd.DataFrame) -> np.ndarray:
@@ -109,9 +111,9 @@ def consecutive_directional_closes(df: pd.DataFrame) -> np.ndarray:
 def detect_fvgs(df: pd.DataFrame, min_gap_atr: float = 0.1, atr_arr: np.ndarray | None = None) -> list[dict]:
     """Detect Fair Value Gaps (three-candle imbalance), computed causally.
 
-    An up-FVG forms when candle[i-1].low > candle[i+1].high (gap between bar
-    i-1 and i+1). A down-FVG forms when candle[i-1].high < candle[i+1].low.
-    Returns a list of {index, kind, low, high, time} dicts for bars 2..n-1.
+    A bullish FVG forms when candle[i+1].low > candle[i-1].high. A bearish
+    FVG forms when candle[i+1].high < candle[i-1].low. The object becomes
+    available only when candle[i+1] closes.
     """
     h = df["high"].to_numpy(dtype=float)
     l = df["low"].to_numpy(dtype=float)
@@ -121,13 +123,27 @@ def detect_fvgs(df: pd.DataFrame, min_gap_atr: float = 0.1, atr_arr: np.ndarray 
         atr_arr = atr(df)
     fvgs: list[dict] = []
     for i in range(1, n - 1):
-        gap = l[i - 1] - h[i + 1]
-        if gap > min_gap_atr * max(atr_arr[i], 1e-12):
-            fvgs.append({"index": i, "kind": "up", "low": h[i + 1], "high": l[i - 1], "time": _iso(ts[i])})
-            continue
         gap = l[i + 1] - h[i - 1]
         if gap > min_gap_atr * max(atr_arr[i], 1e-12):
-            fvgs.append({"index": i, "kind": "down", "low": h[i - 1], "high": l[i + 1], "time": _iso(ts[i])})
+            fvgs.append({
+                "index": i,
+                "kind": "bullish",
+                "low": h[i - 1],
+                "high": l[i + 1],
+                "time": _iso(ts[i]),
+                "confirmed_at": _iso(ts[i + 1]),
+            })
+            continue
+        gap = l[i - 1] - h[i + 1]
+        if gap > min_gap_atr * max(atr_arr[i], 1e-12):
+            fvgs.append({
+                "index": i,
+                "kind": "bearish",
+                "low": h[i + 1],
+                "high": l[i - 1],
+                "time": _iso(ts[i]),
+                "confirmed_at": _iso(ts[i + 1]),
+            })
     return fvgs
 
 

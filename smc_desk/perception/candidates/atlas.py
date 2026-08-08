@@ -88,11 +88,11 @@ def build_for_timeframe(
 ) -> AtlasBuildResult:
     """Run the requested generators against ``df`` and fuse into one atlas.
 
-    ``df`` MUST already be the as-of slice (completed candles only). The
-    optional ``decision_time`` is recorded in the fusion summary for
-    provenance, but is not used to filter rows -- callers must slice before
-    calling.
+    The atlas enforces the as-of boundary itself. When ``decision_time`` is
+    supplied, only candles whose full timeframe has completed are retained.
     """
+    input_rows = len(df)
+    df = _prepare_frame(df, timeframe=config.timeframe, decision_time=decision_time)
     gens = tuple(generators) if generators is not None else ALL_GENERATORS
     out: list[SwingCandidate] = []
     counts: dict[str, int] = {g: 0 for g in ALL_GENERATORS}
@@ -138,12 +138,23 @@ def build_for_timeframe(
         )
 
     fused = _fuse(out)
+    if decision_time is not None:
+        cutoff = pd.Timestamp(decision_time)
+        cutoff = cutoff.tz_localize("UTC") if cutoff.tzinfo is None else cutoff.tz_convert("UTC")
+        fused = [
+            candidate
+            for candidate in fused
+            if not candidate.available_at or _as_utc_timestamp(candidate.available_at) <= cutoff
+        ]
     summary = {
         "timeframe": tf,
         "total_emitted": len(out),
         "after_fusion": len(fused),
         "by_generator": counts,
         "decision_time": pd.Timestamp(decision_time).isoformat() if decision_time is not None else None,
+        "rows_input": input_rows,
+        "rows_used": len(df),
+        "forming_or_future_rows_excluded": input_rows - len(df),
         "config": asdict(config),
     }
     by_id = {c.candidate_id: c for c in fused}
@@ -154,6 +165,71 @@ def build_for_timeframe(
         generator_run_counts=counts,
         fusion_summary=summary,
     )
+
+
+def build_multi_timeframe(
+    timeframe_dfs: Mapping[str, pd.DataFrame],
+    *,
+    decision_time: pd.Timestamp,
+    configs: Mapping[str, AtlasConfig] | None = None,
+) -> dict[str, AtlasBuildResult]:
+    """Build one source-consistent atlas per timeframe under one cutoff."""
+    out: dict[str, AtlasBuildResult] = {}
+    for timeframe, frame in timeframe_dfs.items():
+        cfg = (configs or {}).get(timeframe) or AtlasConfig(timeframe=timeframe)
+        if cfg.timeframe != timeframe:
+            raise ValueError(f"Atlas config timeframe {cfg.timeframe!r} does not match {timeframe!r}.")
+        out[timeframe] = build_for_timeframe(frame, config=cfg, decision_time=decision_time)
+    return out
+
+
+def _prepare_frame(
+    df: pd.DataFrame,
+    *,
+    timeframe: str,
+    decision_time: pd.Timestamp | None,
+) -> pd.DataFrame:
+    required = {"timestamp", "open", "high", "low", "close", "volume"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(f"Candidate atlas frame missing columns: {sorted(missing)}")
+    frame = df.loc[:, ["timestamp", "open", "high", "low", "close", "volume"]].copy()
+    frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, errors="raise")
+    if frame["timestamp"].duplicated().any():
+        raise ValueError("Candidate atlas refuses duplicate timestamps.")
+    if not frame["timestamp"].is_monotonic_increasing:
+        raise ValueError("Candidate atlas refuses out-of-order timestamps.")
+    if ((frame["high"] < frame[["open", "close"]].max(axis=1))
+            | (frame["low"] > frame[["open", "close"]].min(axis=1))
+            | (frame["high"] < frame["low"])).any():
+        raise ValueError("Candidate atlas refuses invalid OHLC geometry.")
+    if decision_time is not None:
+        cutoff = pd.Timestamp(decision_time)
+        cutoff = cutoff.tz_localize("UTC") if cutoff.tzinfo is None else cutoff.tz_convert("UTC")
+        frame = frame[frame["timestamp"] + _timeframe_delta(timeframe) <= cutoff]
+    return frame.reset_index(drop=True)
+
+
+def _timeframe_delta(timeframe: str) -> pd.Timedelta:
+    tf = timeframe.lower()
+    if tf.endswith("m"):
+        return pd.Timedelta(minutes=int(tf[:-1]))
+    if tf.endswith("h"):
+        return pd.Timedelta(hours=int(tf[:-1]))
+    if tf.endswith("d"):
+        return pd.Timedelta(days=int(tf[:-1]))
+    raise ValueError(f"Unsupported atlas timeframe: {timeframe!r}")
+
+
+def _utc_iso(value: Any) -> str:
+    ts = pd.Timestamp(value)
+    ts = ts.tz_localize("UTC") if ts.tzinfo is None else ts.tz_convert("UTC")
+    return ts.isoformat().replace("+00:00", "Z")
+
+
+def _as_utc_timestamp(value: Any) -> pd.Timestamp:
+    timestamp = pd.Timestamp(value)
+    return timestamp.tz_localize("UTC") if timestamp.tzinfo is None else timestamp.tz_convert("UTC")
 
 
 def _fuse(candidates: Sequence[SwingCandidate]) -> list[SwingCandidate]:
@@ -188,6 +264,9 @@ def _fuse(candidates: Sequence[SwingCandidate]) -> list[SwingCandidate]:
                 pivot_time=c.pivot_time,
                 pivot_price=c.pivot_price,
                 generator_source=c.generator_source,
+                confirmed_at=c.confirmed_at,
+                available_at=c.available_at,
+                generator_sources=tuple(gens),
                 scale=c.scale,
                 prominence=c.prominence,
                 volatility_normalized_move=c.volatility_normalized_move,
@@ -228,6 +307,9 @@ def _merge(a: SwingCandidate, b: SwingCandidate) -> SwingCandidate:
         pivot_time=a.pivot_time,
         pivot_price=a.pivot_price,
         generator_source=a.generator_source,
+        confirmed_at=max(filter(None, (a.confirmed_at, b.confirmed_at)), default=None),
+        available_at=max(filter(None, (a.available_at, b.available_at)), default=None),
+        generator_sources=tuple(sorted(set(a.generator_sources or (a.generator_source,)) | set(b.generator_sources or (b.generator_source,)))),
         scale=a.scale,
         prominence=keep("prominence"),
         volatility_normalized_move=keep("volatility_normalized_move"),
@@ -252,4 +334,5 @@ __all__ = [
     "AtlasConfig",
     "AtlasBuildResult",
     "build_for_timeframe",
+    "build_multi_timeframe",
 ] + list(ALL_GENERATORS)

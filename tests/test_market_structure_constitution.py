@@ -148,3 +148,9 @@ def test_loader_detects_hash_tamper(tmp_path: Path) -> None:
     bad_hash_path.write_text(hashlib.sha256(src.read_bytes()).hexdigest() + "\n")
     with pytest.raises(ValueError, match="hash mismatch"):
         load_doctrine(copy, bad_hash_path)
+
+
+def test_loader_fails_closed_when_hash_file_is_missing(tmp_path: Path) -> None:
+    missing = tmp_path / "missing.sha256"
+    with pytest.raises(FileNotFoundError, match="hash is required and missing"):
+        load_doctrine(DEFAULT_DOCTRINE_PATH, missing)

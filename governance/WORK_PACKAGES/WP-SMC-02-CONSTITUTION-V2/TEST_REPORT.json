@@ -1,0 +1,33 @@
+{
+  "schema": "work_package_test_report_v1",
+  "work_package": "WP-SMC-02-CONSTITUTION-V2",
+  "gate": "GATE-WP-SMC-CONSTITUTION-V2-001",
+  "date": "2026-07-12",
+  "status": "PASSED_PROPOSED_NON_AUTHORITATIVE",
+  "source_commit": "4aa1a23173227430961f662442bf8d57ed2995d6",
+  "doctrine_path": "specs/MARKET_STRUCTURE_CONSTITUTION_V2.yaml",
+  "doctrine_sha256": "52f69f1537ea14e28ac76ed1aca3a23bca441c6ed129fc848d3f0882f0fc9ee4",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_market_structure_constitution_v2.py tests/test_market_structure_constitution.py tests/test_hybrid_perception_engine_v3_experimental.py tests/test_perception_programme_run.py",
+      "result": "30 passed in 0.96s"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "negative_fixtures": [
+    "hash mismatch",
+    "proposal attempts to grant signal authority",
+    "OTE incorrectly treated as core structure",
+    "first break incorrectly labelled BOS",
+    "CHoCH/MSS scope inversion"
+  ],
+  "limitations": [
+    "Ten V2 doctrine thresholds remain pending independent adjudication.",
+    "The V2 loader is experimental and is not wired into canonical PerceptionEngineV2.",
+    "No perception accuracy or predictive claim is created."
+  ]
+}
+

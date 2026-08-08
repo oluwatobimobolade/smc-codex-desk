@@ -137,6 +137,11 @@ def test_wp0041b_resolves_ai_selections_from_certified_geometry() -> None:
     assert resolution["resolved_object_count"] == 3
     assert resolution["timeframes"] == ["1h", "4h"]
     objects = {item["semantic_object_id"]: item for item in resolution["annotation_plan_v2"]["objects"]}
+    assert objects["break-4h"]["label"] == "4H External CHoCH"
+    assert objects["break-1h"]["label"] == "1H External CHoCH"
+    assert objects["protected-high-4h"]["label"] == "4H Protected High"
+    assert resolution["label_authority"] == "deterministic_annotation_semantics_v1"
+    assert len(resolution["label_overrides"]) == 3
     assert objects["break-4h"]["price"] == 101.2
     assert objects["break-4h"]["start_index"] == 10
     assert objects["break-4h"]["end_index"] == 20

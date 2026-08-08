@@ -1,0 +1,56 @@
+{
+  "audit_version": "0.1",
+  "generated_at": "2026-06-26T08:43:54.560068+00:00",
+  "status": "runtime_config_migrated_to_split_contracts",
+  "monolith": {
+    "path": "/Users/tobimobolade/smc-codex-desk/specs/PERCEPTION_ONTOLOGY_V2.yaml",
+    "mixed_authority_terms": [
+      "confirmation_lookback",
+      "htf_approach_lookback_bars",
+      "htf_poi_watch_distance_atr",
+      "max_zone_age_bars",
+      "min_poi_width_bps",
+      "poi_proximity_atr",
+      "require_fresh_poi",
+      "risk_reward_floor",
+      "stop_buffer_atr_mult",
+      "structural_stop_margin_bps"
+    ],
+    "runtime_status": "still_runtime_source_for_backward_compatibility"
+  },
+  "detector_split": {
+    "path": "/Users/tobimobolade/smc-codex-desk/specs/PERCEPTION_DETECTOR_CONFIG_V2.yaml",
+    "mixed_authority_terms": [],
+    "clean_for_detector_authority": true
+  },
+  "strategy_split": {
+    "path": "/Users/tobimobolade/smc-codex-desk/specs/STRATEGY_EXECUTION_CONFIG_V1.yaml",
+    "strategy_terms_present": [
+      "capital_risk",
+      "confirmation_lookback",
+      "htf_approach_lookback_bars",
+      "htf_poi_watch_distance_atr",
+      "max_zone_age_bars",
+      "min_poi_width_bps",
+      "poi_proximity_atr",
+      "require_fresh_poi",
+      "risk_reward_floor",
+      "stop_buffer_atr_mult",
+      "structural_stop_margin_bps"
+    ]
+  },
+  "split_manifest": {
+    "path": "/Users/tobimobolade/smc-codex-desk/specs/AUTHORITY_CONFIG_SPLIT_WP0015.yaml",
+    "status": "split_contract_created_code_migration_pending"
+  },
+  "runtime_config": {
+    "source": "split_detector_strategy_configs",
+    "detector_config_id": "PERCEPTION_DETECTOR_CONFIG_V2",
+    "strategy_config_id": "STRATEGY_EXECUTION_CONFIG_V1",
+    "migrated_to_split_contracts": true
+  },
+  "promotion_status": "blocked_until_live_shadow_and_adjudicated_validation",
+  "market_edge_claimed": false,
+  "paper_execution_enabled": false,
+  "live_execution_enabled": false
+}

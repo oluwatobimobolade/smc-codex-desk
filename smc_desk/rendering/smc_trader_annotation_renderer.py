@@ -18,6 +18,7 @@ from matplotlib.patches import Rectangle
 
 from smc_desk.brain.annotation_visual_critic import apply_visual_cleanup
 from smc_desk.brain.ai_smc_consistency_validator import ValidationResult
+from smc_desk.brain.annotation_geometry import effective_display_geometry
 
 
 DEBUG_CHART_LABEL = "DEBUG ONLY - NOT OFFICIAL TRADE THESIS"
@@ -34,7 +35,7 @@ VISIBLE_LABEL_LIMITS = {
     "trade_plan_chart": 5,
 }
 VISIBLE_LEVEL_LIMITS = {
-    "context_chart": 2,
+    "context_chart": 3,
     "watch_chart": 3,
     "review_chart": 3,
     "trade_plan_chart": 6,
@@ -60,7 +61,11 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
     legacy_levels = list(annotation.get("levels") or [])
     annotation_plan_v2 = decision.get("annotation_plan_v2") or {}
     v2_present = isinstance(annotation_plan_v2, Mapping) and annotation_plan_v2.get("schema") == "professional_smc_annotation_plan_v2"
-    drawing_objects = list(annotation_plan_v2.get("objects") or []) if v2_present else []
+    drawing_objects = [
+        _object_with_display_geometry(raw)
+        for raw in (annotation_plan_v2.get("objects") or [])
+        if isinstance(raw, Mapping)
+    ] if v2_present else []
     if v2_present:
         labels = []
     visible_drawing_objects = _select_visible_drawing_objects(drawing_objects, chart_template)
@@ -346,6 +351,14 @@ def _resolve_scene_time_geometry(scene: Mapping[str, Any], df: pd.DataFrame) -> 
                 item["start_index"] = _timestamp_index(stamps, item.get("start_time"))
             if item.get("end_time"):
                 item["end_index"] = _timestamp_index(stamps, item.get("end_time"))
+            display = item.get("display_geometry")
+            if isinstance(display, Mapping):
+                resolved_display = dict(display)
+                if resolved_display.get("start_time"):
+                    resolved_display["start_index"] = _timestamp_index(stamps, resolved_display.get("start_time"))
+                if resolved_display.get("end_time"):
+                    resolved_display["end_index"] = _timestamp_index(stamps, resolved_display.get("end_time"))
+                item["display_geometry"] = resolved_display
             resolved.append(item)
         out[key] = resolved
     return out
@@ -535,6 +548,14 @@ def _drawing_objects_to_levels(objects: list[Mapping[str, Any]]) -> list[dict[st
             }
         )
     return levels
+
+
+def _object_with_display_geometry(raw: Mapping[str, Any]) -> dict[str, Any]:
+    """Keep provenance nested while rendering only the derived display span."""
+    item = dict(raw)
+    for key, value in effective_display_geometry(raw).items():
+        item[key] = value
+    return item
 
 
 def _assign_level_label_positions(levels: list[dict[str, Any]], *, low: float, high: float) -> list[dict[str, Any]]:

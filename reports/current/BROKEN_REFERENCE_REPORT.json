@@ -1,0 +1,5 @@
+{
+  "status": "not_fully_scanned",
+  "known_findings": [],
+  "next_required_action": "Implement tools/audit_repository_authority.py and broken-reference scan before archive moves."
+}

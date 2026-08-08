@@ -29,6 +29,8 @@ class POIObject:
     protected_low: Decimal | None
     active_range_high: Decimal | None
     active_range_low: Decimal | None
+    hierarchy_bias: str
+    bias_alignment: str
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -53,6 +55,8 @@ class POIObject:
             "protected_low": None if self.protected_low is None else str(self.protected_low),
             "active_range_high": None if self.active_range_high is None else str(self.active_range_high),
             "active_range_low": None if self.active_range_low is None else str(self.active_range_low),
+            "hierarchy_bias": self.hierarchy_bias,
+            "bias_alignment": self.bias_alignment,
         }
 
 
@@ -87,8 +91,6 @@ def build_pois_for_timeframe(
     scope_context = _scope_context(hierarchy)
     for ob in snapshot.get("order_blocks", []) or []:
         direction = str(ob.get("direction", ""))
-        if direction != bias:
-            continue
         low = Decimal(str(ob["price_low"]))
         high = Decimal(str(ob["price_high"]))
         low, high = min(low, high), max(low, high)
@@ -133,11 +135,13 @@ def build_pois_for_timeframe(
                 protected_low=validity["protected_low"],
                 active_range_high=validity["active_range_high"],
                 active_range_low=validity["active_range_low"],
+                hierarchy_bias=bias,
+                bias_alignment=_bias_alignment(direction, bias),
             )
         )
 
     latest_break = _find_break(snapshot, hierarchy.get("latest_external_break_id"))
-    if latest_break and bias in {"bullish", "bearish"} and not pois:
+    if latest_break and bias in {"bullish", "bearish"} and not any(poi.direction == bias for poi in pois):
         kind = "demand" if bias == "bullish" else "supply"
         low, high = _poi_zone_from_displacement_break(latest_break, bias)
         event_history = _event_history(latest_break)
@@ -181,6 +185,8 @@ def build_pois_for_timeframe(
                 protected_low=validity["protected_low"],
                 active_range_high=validity["active_range_high"],
                 active_range_low=validity["active_range_low"],
+                hierarchy_bias=bias,
+                bias_alignment="aligned",
             )
         )
     for fvg in snapshot.get("fvgs", []) or []:
@@ -189,7 +195,7 @@ def build_pois_for_timeframe(
         evidence = fvg.get("evidence") or {}
         if evidence.get("poi_grade") is False:
             continue
-        if direction != bias or terminal not in {"", "none"}:
+        if terminal not in {"", "none"}:
             continue
         low = Decimal(str(fvg["price_low"]))
         high = Decimal(str(fvg["price_high"]))
@@ -235,9 +241,17 @@ def build_pois_for_timeframe(
                 protected_low=validity["protected_low"],
                 active_range_high=validity["active_range_high"],
                 active_range_low=validity["active_range_low"],
+                hierarchy_bias=bias,
+                bias_alignment=_bias_alignment(direction, bias),
             )
         )
     return pois
+
+
+def _bias_alignment(direction: str, bias: str) -> str:
+    if direction not in {"bullish", "bearish"} or bias not in {"bullish", "bearish"}:
+        return "unknown"
+    return "aligned" if direction == bias else "opposing"
 
 
 def classify_poi_scope(

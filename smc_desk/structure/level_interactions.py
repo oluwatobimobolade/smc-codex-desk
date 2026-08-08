@@ -34,6 +34,7 @@ from smc_desk.data.hashing import object_sha256
 
 
 class InteractionType(str, Enum):
+    NO_INTERACTION = "no_interaction"
     PROBE = "probe"
     SWEEP_CANDIDATE = "sweep_candidate"
     CONFIRMED_SWEEP = "confirmed_sweep"
@@ -60,6 +61,8 @@ class LevelInteraction:
     level_id: str
     interacting_candle_id: str
     timeframe: str
+    level_price: float = 0.0
+    interaction_side: str | None = None  # "upside" | "downside"
     wick_penetration_atr: float = 0.0
     body_close_beyond: bool = False
     closes_beyond_count: int = 0
@@ -76,6 +79,8 @@ class LevelInteraction:
             "level_id": self.level_id,
             "interacting_candle_id": self.interacting_candle_id,
             "timeframe": self.timeframe,
+            "level_price": self.level_price,
+            "interaction_side": self.interaction_side,
             "body_close_beyond": self.body_close_beyond,
             "closes_beyond_count": self.closes_beyond_count,
             "displacement_magnitude": self.displacement_magnitude,
@@ -138,8 +143,9 @@ def classify_at_event(
     level_price = float(interacting_candle.get("_level_price", close) or close)
     candle_id = str(interacting_candle.get("object_id") or interacting_candle.get("candle_id"))
 
-    wick_above = max(high, open_, close) - level_price
-    wick_below = level_price - min(low, open_, close)
+    touched = low <= level_price <= high
+    wick_above = high - max(open_, close, level_price)
+    wick_below = min(open_, close, level_price) - low
     wick_pen = max(0.0, wick_above, wick_below) / max(atr_at_candle, 1e-12)
     # A breakout candidate requires the BODY to cross the level (open on one
     # side, close on the other). Merely closing on the far side after the body
@@ -148,25 +154,33 @@ def classify_at_event(
     downside_cross = (open_ >= level_price) and (close < level_price)
     body_close_beyond = upside_cross or downside_cross
 
-    if upside_cross:
+    side: str | None = None
+    if not touched:
+        t = InteractionType.NO_INTERACTION.value
+        notes = ("candle range did not touch the level",)
+    elif upside_cross:
+        side = "upside"
         t = InteractionType.BREAKOUT_CANDIDATE.value
         notes = ("body crossed level to the upside (open<=level, close>level)",
                  "candidate accepted breakout (pending post-horizon evidence)")
     elif downside_cross:
+        side = "downside"
         t = InteractionType.BREAKOUT_CANDIDATE.value
         notes = ("body crossed level to the downside (open>=level, close<level)",
                  "candidate accepted breakout (pending post-horizon evidence)")
-    elif high > level_price:
+    elif high >= level_price and max(open_, close) <= level_price:
+        side = "upside"
         t = InteractionType.PROBE.value
         notes = ("wick exceeded level upside, body did NOT close beyond",
                  "not a BOS by §6.3; promotion only at later horizon")
-    elif low < level_price:
+    elif low <= level_price and min(open_, close) >= level_price:
+        side = "downside"
         t = InteractionType.PROBE.value
         notes = ("wick exceeded level downside, body did NOT close beyond",
                  "not a BOS by §6.3; promotion only at later horizon")
     else:
-        t = InteractionType.PROBE.value
-        notes = ("no excursion", "interaction pre-probe")
+        t = InteractionType.UNRESOLVED.value
+        notes = ("level touched but interaction side is ambiguous",)
 
     return LevelInteraction(
         interaction_type=t,
@@ -174,9 +188,11 @@ def classify_at_event(
         level_id=level_id,
         interacting_candle_id=candle_id,
         timeframe=timeframe,
+        level_price=level_price,
+        interaction_side=side,
         wick_penetration_atr=float(round(wick_pen, 4)),
         body_close_beyond=bool(body_close_beyond),
-        closes_beyond_count=int(close > level_price) or int(close < level_price),
+        closes_beyond_count=int(body_close_beyond),
         notes=notes,
     )
 
@@ -188,6 +204,7 @@ def refine_at_horizon(
     closes_within: int,
     internal_structure_break_id: str | None = None,
     displacement_magnitude: float = 0.0,
+    closes_beyond_count: int | None = None,
 ) -> LevelInteraction:
     """Refine an at_event interaction at after_2_bars or after_6_bars.
 
@@ -199,8 +216,32 @@ def refine_at_horizon(
       ACCEPTED_BREAKOUT (or FAILED_BREAKOUT if reclaims with no structure)
     """
     cid = base.interacting_candle_id
+    beyond_count = base.closes_beyond_count if closes_beyond_count is None else max(int(closes_beyond_count), 0)
 
-    if closes_within > 0:
+    if base.interaction_type == InteractionType.NO_INTERACTION.value:
+        return LevelInteraction(
+            interaction_type=InteractionType.NO_INTERACTION.value,
+            horizon=horizon,
+            level_id=base.level_id,
+            interacting_candle_id=cid,
+            timeframe=base.timeframe,
+            level_price=base.level_price,
+            interaction_side=None,
+            notes=("no initial level interaction; promotion forbidden",),
+        )
+
+    if base.interaction_type == InteractionType.PROBE.value:
+        if closes_within > 0:
+            if horizon == Horizon.AFTER_6_BARS.value and internal_structure_break_id and displacement_magnitude > 0:
+                t = InteractionType.CONFIRMED_SWEEP.value
+                notes = ("wick probe reclaimed", "opposite displacement and internal break confirmed")
+            else:
+                t = InteractionType.SWEEP_CANDIDATE.value
+                notes = ("wick probe reclaimed; confirmation pending",)
+        else:
+            t = InteractionType.UNRESOLVED.value if horizon == Horizon.AFTER_2_BARS.value else InteractionType.CONCLUDED_PROBE.value
+            notes = ("wick probe did not establish body-close breakout evidence",)
+    elif closes_within > 0:
         if horizon == Horizon.AFTER_2_BARS.value:
             t = InteractionType.SWEEP_CANDIDATE.value
             notes = ("closes inside level at after_2_bars",)
@@ -221,7 +262,7 @@ def refine_at_horizon(
             notes = ("sustained closes beyond at after_2_bars",
                      "candidate breakout")
         else:
-            if internal_structure_break_id and displacement_magnitude > 0:
+            if base.body_close_beyond and beyond_count >= 1 and internal_structure_break_id and displacement_magnitude > 0:
                 t = InteractionType.ACCEPTED_BREAKOUT.value
                 notes = ("sustained closes beyond at after_6_bars",
                          "internal structure break present",
@@ -242,9 +283,11 @@ def refine_at_horizon(
         level_id=base.level_id,
         interacting_candle_id=cid,
         timeframe=base.timeframe,
+        level_price=base.level_price,
+        interaction_side=base.interaction_side,
         wick_penetration_atr=base.wick_penetration_atr,
         body_close_beyond=base.body_close_beyond,
-        closes_beyond_count=base.closes_beyond_count,
+        closes_beyond_count=beyond_count,
         displacement_magnitude=float(displacement_magnitude),
         internal_structure_break_id=internal_structure_break_id,
         notes=notes,
@@ -284,18 +327,76 @@ def build_report(
     )
 
 
+def build_report_from_candles(
+    *,
+    level_id: str,
+    level_price: float,
+    timeframe: str,
+    candles: Sequence[Mapping],
+    event_index: int,
+    atr_at_candle: float,
+    internal_structure_break_id: str | None = None,
+    displacement_magnitude: float = 0.0,
+) -> LevelInteractionReport:
+    """Replay all horizons from candles instead of caller-supplied booleans.
+
+    The event candle must genuinely touch the level. Horizon close counts are
+    computed relative to the interaction side and cannot promote a non-touch.
+    """
+    if event_index < 0 or event_index >= len(candles):
+        raise IndexError("event_index is outside the candle sequence")
+    event = dict(candles[event_index])
+    event["_level_price"] = float(level_price)
+    at = classify_at_event(
+        level_id=level_id,
+        timeframe=timeframe,
+        interacting_candle=event,
+        atr_at_candle=atr_at_candle,
+    )
+
+    def observed(horizon_bars: int) -> tuple[int, int]:
+        window = candles[event_index + 1 : event_index + 1 + horizon_bars]
+        within = 0
+        beyond = 0
+        for candle in window:
+            close = float(candle.get("close"))
+            if at.interaction_side == "upside":
+                beyond += int(close > level_price)
+                within += int(close <= level_price)
+            elif at.interaction_side == "downside":
+                beyond += int(close < level_price)
+                within += int(close >= level_price)
+        return within, beyond
+
+    within_2, beyond_2 = observed(2)
+    within_6, beyond_6 = observed(6)
+    a2 = refine_at_horizon(
+        base=at,
+        horizon=Horizon.AFTER_2_BARS.value,
+        closes_within=within_2,
+        closes_beyond_count=beyond_2,
+        internal_structure_break_id=internal_structure_break_id,
+        displacement_magnitude=displacement_magnitude,
+    )
+    a6 = refine_at_horizon(
+        base=at,
+        horizon=Horizon.AFTER_6_BARS.value,
+        closes_within=within_6,
+        closes_beyond_count=beyond_6,
+        internal_structure_break_id=internal_structure_break_id,
+        displacement_magnitude=displacement_magnitude,
+    )
+    return LevelInteractionReport(level_id=level_id, timeframe=timeframe, horizons=(at, a2, a6))
+
+
 def is_wick_only(report: LevelInteractionReport) -> bool:
     """Programme §6 forbids treating a wick as a sweep or BOS.
 
     A wick-only interaction must classify as PROBE / CONCLUDED_PROBE for
     every horizon. Callers can use this to enforce the rule.
     """
-    return all(
-        h.interaction_type in {
-            InteractionType.PROBE.value,
-            InteractionType.CONCLUDED_PROBE.value,
-        } for h in report.horizons
-    )
+    at = report.at_event
+    return bool(at and at.interaction_type == InteractionType.PROBE.value and not at.body_close_beyond)
 
 
 __all__ = [
@@ -304,6 +405,7 @@ __all__ = [
     "LevelInteraction",
     "LevelInteractionReport",
     "build_report",
+    "build_report_from_candles",
     "classify_at_event",
     "is_wick_only",
     "refine_at_horizon",

@@ -91,7 +91,8 @@ def test_counterfactuals_caught_with_expected_code(cf):
 
 def test_synthetic_cases_carry_expected_certification_flag():
     """Every synthetic case asserts the direction the validator should return,
-    so the suite doubles as expert-labelled ground truth (step 9)."""
+    so the suite acts as a synthetic contract fixture (step 9). It is not
+    expert-labelled or human-adjudicated market truth."""
     for c in synthetic.all_cases():
         res = _cert(c)
         assert res["certified"] == c.expected_certified

@@ -30,7 +30,7 @@ class AnnotationEvidenceAnchor:
     activity_status: str | None
     mitigation_status: str | None
     is_wick_only_probe: bool
-    confidence: float | None
+    evidence_strength: float | None
     source: str
 
 
@@ -76,7 +76,7 @@ def build_annotation_evidence_index(evidence_pack: Mapping[str, Any]) -> dict[st
             activity_status="active",
             mitigation_status="untouched",
             is_wick_only_probe=False,
-            confidence=1.0,
+            evidence_strength=1.0,
             source="formal_structure_graph.active_range",
         )
     _add_active_range_pivot_anchors(index, evidence_pack)
@@ -125,7 +125,7 @@ def _add_active_range_pivot_anchors(
             activity_status="active",
             mitigation_status="untouched",
             is_wick_only_probe=False,
-            confidence=1.0,
+            evidence_strength=1.0,
             source="active_range_authority.source_pivots",
         )
 
@@ -244,6 +244,8 @@ def _candidate_anchor(
     if price_high is None and scalar_price is not None:
         price_high = scalar_price
     exact_price = _float(evidence.get("broken_price")) if evidence_type == "structure" else None
+    if exact_price is None and evidence_type == "sweep":
+        exact_price = _float(evidence.get("swept_price"))
     if exact_price is None and price_low is not None and price_high is not None and price_low == price_high:
         exact_price = price_low
     pivot_time = _time_string(item.get("pivot_time"))
@@ -269,7 +271,7 @@ def _candidate_anchor(
         activity_status=_enum_value(item.get("activity_status")),
         mitigation_status=_enum_value(item.get("mitigation_status")),
         is_wick_only_probe=bool(evidence.get("is_unconfirmed_probe") or item.get("is_wick_only_probe")),
-        confidence=_float(item.get("confidence")),
+        evidence_strength=_float(item.get("evidence_strength") or item.get("legacy_heuristic_score") or item.get("confidence")),
         source=f"detector_candidates.{timeframe}.{bucket}",
     )
 
@@ -283,6 +285,10 @@ def _bucket_to_type(bucket: str, item: Mapping[str, Any]) -> str:
         return "fvg"
     if bucket == "liquidity_levels":
         return "liquidity"
+    if bucket == "inducements":
+        return "inducement"
+    if bucket == "sweeps":
+        return "sweep"
     return str(item.get("object_type") or bucket).lower()
 
 

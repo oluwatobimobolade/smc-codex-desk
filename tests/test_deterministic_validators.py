@@ -39,7 +39,8 @@ def _case():
 def _interp():
     return {
         "accepted_breaks": [
-            {"object_id": "br1", "timeframe": "15m", "origin_object_id": "s10",
+            {"object_id": "br1", "timeframe": "15m", "direction": "bullish",
+             "origin_object_id": "s10",
              "breaking_candidate_id": "c1", "accepted": True,
              "displacement_evidence_ids": ["c1"], "confirming_candle_time": "2026-01-05T12:00:00Z"},
         ],
@@ -145,3 +146,32 @@ def test_validation_result_blocks_and_errors():
     )
     assert len(res.blocks) >= 1
     assert res.certified is False
+
+
+def test_empty_interpretation_fails_closed():
+    res = certify_interpretation({}, _case(), decision_time="2026-01-05T13:00:00Z")
+    codes = {violation["code"] for violation in res["violations"]}
+    assert res["certified"] is False
+    assert {"EMPTY_INTERPRETATION", "INTERPRETATION_STRUCTURE_REQUIRED", "INTERPRETATION_HAS_NO_EVIDENCE"} <= codes
+
+
+def test_real_role_evidence_fields_cannot_hide_ghost_ids():
+    interpretation = {
+        "structure_claims": [{
+            "claim_type": "continuation",
+            "timeframe": "15m",
+            "evidence_ids": ["c1"],
+        }],
+        "active_leg_evidence_ids": ["ghost"],
+    }
+    res = certify_interpretation(interpretation, _case(), decision_time="2026-01-05T13:00:00Z")
+    assert res["certified"] is False
+    assert any(v["code"] == "EVIDENCE_ID_NOT_GROUNDED" and "ghost" in v["evidence_ids"] for v in res["violations"])
+
+
+@pytest.mark.parametrize("claim", ["XRP rejected 0.5234", "EURUSD rejected 1.0835", "level 99"])
+def test_low_price_and_integer_narrative_claims_require_local_evidence(claim):
+    interpretation = {**_interp(), "unscoped_comment": claim}
+    res = certify_interpretation(interpretation, _case(), decision_time="2026-01-05T13:00:00Z")
+    assert res["certified"] is False
+    assert any(v["code"] == "NARRATIVE_NAKED_CLAIM" for v in res["violations"])

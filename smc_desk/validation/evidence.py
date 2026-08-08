@@ -17,6 +17,25 @@ from __future__ import annotations
 from typing import Any, Iterable, Mapping
 
 from smc_desk.validation.primitives import Severity, Violation
+from smc_desk.perception.programme_schema import (
+    canonical_object_id,
+    flatten_candidate_objects,
+    graph_anchor_records,
+)
+
+
+REFERENCE_ID_FIELDS = {
+    "origin_object_id",
+    "breaking_candidate_id",
+    "protected_point_id",
+    "protected_point_evidence_id",
+    "selected_poi_evidence_id",
+    "semantic_object_id",
+    "broken_level_evidence_id",
+    "opposing_protected_point_evidence_id",
+    "confirming_candle_id",
+    "internal_structure_break_id",
+}
 
 
 def collect_pool_ids(
@@ -25,51 +44,37 @@ def collect_pool_ids(
 ) -> set[str]:
     """Every admissible evidence_id the interpretation may cite."""
     ids: set[str] = set()
-    co = case.get("candidate_objects") or {}
-    if isinstance(co, Mapping):
-        for tf, buckets in co.items():
-            if not isinstance(buckets, Mapping):
-                continue
-            for bucket, items in buckets.items():
-                if not isinstance(items, list):
-                    continue
-                for it in items:
-                    if isinstance(it, Mapping) and isinstance(it.get("object_id"), str):
-                        ids.add(it["object_id"])
+    for record in flatten_candidate_objects(case.get("candidate_objects") or {}):
+        oid = canonical_object_id(record)
+        if oid:
+            ids.add(oid)
     if isinstance(graph, Mapping):
-        for k in ("protected_point", "active_range"):
-            node = graph.get(k)
-            if isinstance(node, Mapping):
-                for v in node.values():
-                    if isinstance(v, str):
-                        ids.add(v)
-        for seq in (graph.get("accepted_breaks") or [],
-                    graph.get("active_htf_pois") or [],
-                    graph.get("unswept_external_liquidity") or []):
-            if isinstance(seq, list):
-                for e in seq:
-                    if isinstance(e, Mapping):
-                        for v in e.values():
-                            if isinstance(v, str):
-                                ids.add(v)
+        ids.update(item["object_id"] for item in graph_anchor_records(graph))
+        ids.update(_collect_graph_object_ids(graph))
     return ids
 
 
-def _walk_evidence_fields(obj: Any, path: str = "") -> list[tuple[str, list[str]]]:
+def walk_evidence_fields(obj: Any, path: str = "") -> list[tuple[str, list[str]]]:
     """Yield (path, [str_ids]) pairs for every evidence-like list under obj."""
     out: list[tuple[str, list[str]]] = []
     if isinstance(obj, Mapping):
         for k, v in obj.items():
             sub = f"{path}.{k}" if path else k
-            if k in {"evidence_ids", "breaking_candidate_ids", "swept_levels",
-                     "caused_breaks", "breaks_caused"} and isinstance(v, list):
+            is_plural_reference = (
+                k == "evidence_ids"
+                or k.endswith("_evidence_ids")
+                or k in {"accepted_evidence_ids", "breaking_candidate_ids", "swept_levels", "caused_breaks", "breaks_caused"}
+            )
+            if is_plural_reference and isinstance(v, (list, tuple)):
                 ids = [x for x in v if isinstance(x, str)]
                 out.append((sub, ids))
+            elif (k in REFERENCE_ID_FIELDS or k.endswith("_evidence_id")) and isinstance(v, str):
+                out.append((sub, [v] if v else []))
             elif isinstance(v, (dict, list)):
-                out.extend(_walk_evidence_fields(v, sub))
+                out.extend(walk_evidence_fields(v, sub))
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
-            out.extend(_walk_evidence_fields(v, f"{path}[{i}]"))
+            out.extend(walk_evidence_fields(v, f"{path}[{i}]"))
     return out
 
 
@@ -80,7 +85,16 @@ def check_evidence_grounding(
 ) -> tuple[Violation, ...]:
     """Return ERROR for evidence_ids not in the admissible set."""
     out: list[Violation] = []
-    for field_path, ids in _walk_evidence_fields(interpretation):
+    fields = walk_evidence_fields(interpretation)
+    cited = [eid for _, ids in fields for eid in ids]
+    if not cited:
+        out.append(Violation(
+            code="INTERPRETATION_HAS_NO_EVIDENCE",
+            severity=Severity.BLOCK.value,
+            message="Interpretation contains no recognised evidence references.",
+            checker="evidence.minimum_grounding",
+        ))
+    for field_path, ids in fields:
         for eid in ids:
             if eid not in admissible_ids:
                 out.append(Violation(
@@ -94,4 +108,26 @@ def check_evidence_grounding(
     return tuple(out)
 
 
-__all__ = ["check_evidence_grounding", "collect_pool_ids"]
+def _collect_graph_object_ids(graph: Mapping[str, Any]) -> set[str]:
+    ids: set[str] = set()
+
+    def walk(node: Any, key: str = "") -> None:
+        if isinstance(node, Mapping):
+            for child_key, value in node.items():
+                if isinstance(value, str) and (
+                    child_key in {"object_id", "swing_id", "range_id", "liquidity_id", "poi_id"}
+                    or child_key.endswith("_swing_id")
+                    or child_key.endswith("_evidence_id")
+                ) and value:
+                    ids.add(value)
+                elif isinstance(value, (Mapping, list, tuple)):
+                    walk(value, child_key)
+        elif isinstance(node, (list, tuple)):
+            for value in node:
+                walk(value, key)
+
+    walk(graph)
+    return ids
+
+
+__all__ = ["REFERENCE_ID_FIELDS", "check_evidence_grounding", "collect_pool_ids", "walk_evidence_fields"]

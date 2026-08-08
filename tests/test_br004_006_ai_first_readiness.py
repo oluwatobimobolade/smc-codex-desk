@@ -12,6 +12,7 @@ from smc_desk.brain.doctrine_panel import (
     validate_doctrine_output,
 )
 from smc_desk.brain.structure_lab.runtime import CallableRoleProvider, ReplayRoleProvider, run_structure_lab
+from smc_desk.perception.programme_run import run_perception_programme
 from smc_desk.evaluation.ai_consensus import (
     build_ai_structure_consensus,
     build_human_certification_template,
@@ -264,6 +265,48 @@ def test_ai_structure_lab_runs_six_separate_grounded_roles(tmp_path: Path) -> No
     planner = json.loads((tmp_path / "05_annotation_planner" / "parsed_response.json").read_text())
     assert planner["geometry_source"] == "certified_evidence_resolver"
     assert planner["trade_box_allowed"] is False
+
+
+def test_perception_programme_executes_real_six_role_runtime(tmp_path: Path) -> None:
+    def renderer(_plan, _outputs, output_dir):
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return {
+            "schema": "professional_ai_smc_annotation_render_manifest_v1",
+            "status": "PASS",
+            "render_manifest_sha256": "9" * 64,
+            "rendered_image_count": 1,
+            "timeframes": ["1h"],
+            "all_planned_objects_rendered": True,
+            "pixel_review_status": "PASS",
+            "images": [{"annotated_sha256": "8" * 64}],
+        }
+
+    envelope = run_perception_programme(
+        case=_lab_case(),
+        decision_time=_lab_case()["decision_time"],
+        role_provider=ReplayRoleProvider(_responses(render_attestation=True)),
+        role_output_dir=tmp_path,
+        annotation_renderer=renderer,
+    )
+    assert envelope.role_run_executed is True
+    assert envelope.role_run_status == "AI_PANEL_COMPLETE"
+    assert envelope.interpretation_source == "GOVERNED_SIX_ROLE_AI_PANEL"
+    assert envelope.role_run_manifest_sha256
+    assert envelope.annotation_render_status == "PASS"
+    assert envelope.candidate_payload_design == "anchor"
+    assert envelope.retrieval_tools_advertised is False
+    assert envelope.certification["certified"] is False  # doctrine remains proposed
+    assert envelope.certification["summary"]["blocks"] == 0
+
+
+def test_runtime_refuses_to_advertise_unimplemented_tool_loop(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="anchor_tools is an A/B prompt surface only"):
+        run_structure_lab(
+            case=_lab_case(),
+            provider=ReplayRoleProvider(_responses()),
+            output_dir=tmp_path,
+            candidate_payload_design="anchor_tools",
+        )
 
 
 def test_ai_structure_lab_allows_one_bounded_grounding_repair(tmp_path: Path) -> None:

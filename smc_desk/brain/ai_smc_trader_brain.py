@@ -12,6 +12,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from smc_desk.brain.annotation_geometry import legacy_geometry_contract
+
 
 REASONING_ORDER: list[str] = [
     "daily_context",
@@ -261,6 +263,44 @@ class AnnotationLevel(StrictModel):
     line_style: Literal["solid", "dashed", "dotted"] | None = None
 
 
+class AnnotationEvidenceGeometry(StrictModel):
+    start_index: int | None = None
+    end_index: int | None = None
+    start_time: str | None = None
+    end_time: str | None = None
+    price: float | None = None
+    price_low: float | None = None
+    price_high: float | None = None
+    source_object_ids: list[str] = Field(default_factory=list)
+    anchor_mode: Literal[
+        "exact_source",
+        "derived_level",
+        "conditional_projection",
+        "legacy_compatibility",
+    ] = "exact_source"
+    immutable: Literal[True] = True
+    geometry_hash: str
+
+
+class AnnotationDisplayGeometry(StrictModel):
+    start_index: int | None = None
+    end_index: int | None = None
+    start_time: str | None = None
+    end_time: str | None = None
+    price: float | None = None
+    price_low: float | None = None
+    price_high: float | None = None
+    clipping_rule: Literal[
+        "none",
+        "confirmation_side_max_18_bars",
+        "local_span_max_12_bars",
+        "bounded_zone_legibility",
+        "conditional_projection",
+        "legacy_unverified",
+    ] = "none"
+    derived_from_evidence_hash: str
+
+
 class AnnotationDrawingObject(StrictModel):
     object_type: Literal[
         "structure_segment",
@@ -268,6 +308,13 @@ class AnnotationDrawingObject(StrictModel):
         "liquidity_line",
         "path_projection",
         "trade_box",
+        # Professional SMC vocabulary. Without these the planner could name a
+        # dealing range, a sweep or an equal-highs pool in its thesis but had
+        # no way to draw them, so charts stayed near-empty while the evidence
+        # pack carried thousands of objects.
+        "range_zone",
+        "sweep_marker",
+        "equal_levels",
     ]
     semantic_object_id: str
     timeframe: str
@@ -288,6 +335,10 @@ class AnnotationDrawingObject(StrictModel):
         "invalidation",
         "path",
         "trade",
+        "range",
+        "sweep",
+        "equal_highs",
+        "equal_lows",
     ]
     direction: Literal["bullish", "bearish", "neutral", "mixed", "unknown"] = "unknown"
     price: float | None = None
@@ -302,9 +353,28 @@ class AnnotationDrawingObject(StrictModel):
     entry_price: float | None = None
     stop_price: float | None = None
     target_prices: list[float] = Field(default_factory=list)
+    # Dealing-range geometry. Deterministic code owns this value exactly as it
+    # owns every other price; the planner may not supply or adjust it.
+    equilibrium_price: float | None = None
     allow_htf_full_width: bool = False
     evidence_object_ids: list[str] = Field(default_factory=list)
+    evidence_contract_ids: list[str] = Field(default_factory=list)
+    evidence_geometry: AnnotationEvidenceGeometry | None = None
+    display_geometry: AnnotationDisplayGeometry | None = None
     importance: int = Field(default=2, ge=1, le=3)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _load_legacy_geometry(cls, raw: Any) -> Any:
+        if not isinstance(raw, Mapping):
+            return raw
+        value = dict(raw)
+        value.setdefault("evidence_contract_ids", list(value.get("evidence_object_ids") or []))
+        if value.get("evidence_geometry") is None or value.get("display_geometry") is None:
+            compatibility = legacy_geometry_contract(value)
+            value.setdefault("evidence_geometry", compatibility["evidence_geometry"])
+            value.setdefault("display_geometry", compatibility["display_geometry"])
+        return value
 
     @model_validator(mode="after")
     def _object_has_geometry(self) -> "AnnotationDrawingObject":
@@ -338,6 +408,25 @@ class AnnotationDrawingObject(StrictModel):
                 raise ValueError("annotation_plan_v2 trade_box requires entry_price, stop_price, and target_prices")
         elif self.kind == "trade":
             raise ValueError("annotation_plan_v2 kind=trade is reserved for trade_box")
+        if self.object_type == "range_zone":
+            if self.kind != "range":
+                raise ValueError("annotation_plan_v2 range_zone must use kind=range")
+            if self.price_low is None or self.price_high is None:
+                raise ValueError("annotation_plan_v2 range_zone requires price_low and price_high")
+            if self.equilibrium_price is None:
+                raise ValueError("annotation_plan_v2 range_zone requires equilibrium_price")
+            if not (self.price_low <= self.equilibrium_price <= self.price_high):
+                raise ValueError(
+                    "annotation_plan_v2 range_zone equilibrium_price must sit inside the range"
+                )
+        elif self.kind == "range":
+            raise ValueError("annotation_plan_v2 kind=range is reserved for range_zone")
+        if self.object_type == "sweep_marker" and self.kind != "sweep":
+            raise ValueError("annotation_plan_v2 sweep_marker must use kind=sweep")
+        if self.object_type == "equal_levels" and self.kind not in {"equal_highs", "equal_lows"}:
+            raise ValueError(
+                "annotation_plan_v2 equal_levels must use kind=equal_highs or kind=equal_lows"
+            )
         return self
 
 

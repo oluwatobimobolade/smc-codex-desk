@@ -37,6 +37,7 @@ class POIScores:
     empirical_score: float | None = None       # set after outcome evaluation
     combined_rank: int | None = None
     uncertainty: str = "insufficient_context"  # see doctrine §17 categories
+    eligible: bool = True
     causal_features: dict[str, Any] = field(default_factory=dict)
     location_features: dict[str, Any] = field(default_factory=dict)
     lifecycle_features: dict[str, Any] = field(default_factory=dict)
@@ -54,6 +55,7 @@ class POIScores:
             "empirical_score": self.empirical_score,
             "combined_rank": self.combined_rank,
             "uncertainty": self.uncertainty,
+            "eligible": self.eligible,
         })
 
 
@@ -160,13 +162,33 @@ def combined_rank_and_uncertainty(
     mutates inputs. Empirical score missing -> never 'confirmed' on the
     empirical axis; that is recorded, not silently dropped.
     """
-    def rank_key(s: POIScores) -> tuple:
-        det = s.deterministic_score
-        ai = s.ai_semantic_score if s.ai_semantic_score is not None else det
-        emp = s.empirical_score if s.empirical_score is not None else 0.0
-        return (-det, -ai, -emp)
+    eligible = [s for s in poi_scores if s.eligible]
+    det_order = sorted(eligible, key=lambda x: (-x.deterministic_score, x.poi_id))
+    ai_order = sorted(
+        [s for s in eligible if s.ai_semantic_score is not None],
+        key=lambda x: (-float(x.ai_semantic_score), x.poi_id),
+    )
+    emp_order = sorted(
+        [s for s in eligible if s.empirical_score is not None],
+        key=lambda x: (-float(x.empirical_score), x.poi_id),
+    )
+    positions = {
+        "det": {s.poi_id: i for i, s in enumerate(det_order)},
+        "ai": {s.poi_id: i for i, s in enumerate(ai_order)},
+        "emp": {s.poi_id: i for i, s in enumerate(emp_order)},
+    }
 
-    ranked = sorted(poi_scores, key=rank_key)
+    def consensus_key(s: POIScores) -> tuple:
+        ranks = [positions["det"][s.poi_id]]
+        if s.poi_id in positions["ai"]:
+            ranks.append(positions["ai"][s.poi_id])
+        if s.poi_id in positions["emp"]:
+            ranks.append(positions["emp"][s.poi_id])
+        mean_rank = sum(ranks) / len(ranks)
+        ai_tiebreak = positions["ai"].get(s.poi_id, len(eligible))
+        return (mean_rank, ai_tiebreak, positions["det"][s.poi_id], s.poi_id)
+
+    ranked = sorted(eligible, key=consensus_key)
     out: list[POIScores] = []
     for idx, s in enumerate(ranked, start=1):
         has_det = s.deterministic_score is not None
@@ -174,20 +196,19 @@ def combined_rank_and_uncertainty(
         has_emp = s.empirical_score is not None
         if has_det and has_ai and has_emp:
             # Three axes. Check agreement for uncertainty.
-            det_rank_only = sorted(poi_scores, key=lambda x: -x.deterministic_score)
-            ai_rank_only = sorted(
-                [p for p in poi_scores if p.ai_semantic_score is not None],
-                key=lambda x: -x.ai_semantic_score,
-            )
-            uncertainty = _agreement(det_rank_only, ai_rank_only, s)
+            uncertainty = _agreement(det_order, ai_order, s)
         elif has_det and has_ai:
-            uncertainty = "probable"
+            uncertainty = "probable" if _agreement(det_order, ai_order, s) == "confirmed" else "ambiguous"
         elif has_det:
             uncertainty = "probable" if s.deterministic_score > 0 else "insufficient_context"
         else:
             uncertainty = "insufficient_context"
 
         out.append(_replace(s, combined_rank=idx, uncertainty=uncertainty))
+    out.extend(
+        _replace(s, combined_rank=None, uncertainty="contradicted")
+        for s in poi_scores if not s.eligible
+    )
     return out
 
 
@@ -203,7 +224,7 @@ def _agreement(det_ranked: Sequence[POIScores], ai_ranked: Sequence[POIScores], 
     if det_pos is None or ai_pos is None:
         return "insufficient_context"
     gap = abs(det_pos - ai_pos)
-    if gap <= 1:
+    if gap == 0:
         return "confirmed"
     if gap > 3:
         return "contradicted"
@@ -227,20 +248,25 @@ def score_pois(
     """Score a batch of POIs. ai_semantic_score / empirical_score stay None."""
     out: list[POIScores] = []
     for p in pois:
+        normalized = _normalize_poi(p)
+        lifecycle = normalized["lifecycle_features"]
+        state = str(lifecycle.get("state", "")).lower()
+        eligible = state not in {"fully_mitigated", "invalid", "invalidated", "terminal", "consumed"}
         ds = deterministic_score(
-            poi=p,
+            poi=normalized,
             active_range=active_range,
-            owning_timeframe=str(p.get("origin_timeframe", "")),
+            owning_timeframe=str(normalized.get("origin_timeframe", "")),
         )
         out.append(POIScores(
-            poi_id=str(p.get("object_id") or p.get("poi_id") or ""),
-            timeframe=str(p.get("origin_timeframe", "")),
+            poi_id=str(normalized.get("object_id") or normalized.get("poi_id") or ""),
+            timeframe=str(normalized.get("origin_timeframe", "")),
             deterministic_score=ds,
-            causal_features=dict(p.get("causal_features") or {}),
-            location_features=dict(p.get("location_features") or {}),
-            lifecycle_features=dict(p.get("lifecycle_features") or {}),
-            quality_features=dict(p.get("quality_features") or {}),
-            narrative_features=dict(p.get("narrative_features") or {}),
+            causal_features=dict(normalized.get("causal_features") or {}),
+            location_features=dict(normalized.get("location_features") or {}),
+            lifecycle_features=dict(normalized.get("lifecycle_features") or {}),
+            quality_features=dict(normalized.get("quality_features") or {}),
+            narrative_features=dict(normalized.get("narrative_features") or {}),
+            eligible=eligible,
             notes=("deterministic score only; AI + empirical pending",),
         ))
     return combined_rank_and_uncertainty(out)
@@ -258,11 +284,42 @@ def attach_ai_semantic(
     Re-runs combined_rank_and_uncertainty so the combined_rank reflects the
     new axis. Does NOT touch the empirical score.
     """
+    for poi_id, score in ai_ranking.items():
+        if not isinstance(score, (int, float)) or not float("-inf") < float(score) < float("inf"):
+            raise ValueError(f"AI semantic score for {poi_id!r} must be finite.")
     with_ai = [
         _replace(s, ai_semantic_score=ai_ranking.get(s.poi_id)) if s.poi_id in ai_ranking else s
         for s in poi_scores
     ]
     return combined_rank_and_uncertainty(with_ai)
+
+
+def _normalize_poi(poi: Mapping[str, Any]) -> dict[str, Any]:
+    """Map real PEV2 POI fields into the ranker's explicit feature contract."""
+    out = dict(poi)
+    evidence = poi.get("evidence") if isinstance(poi.get("evidence"), Mapping) else {}
+    causal = dict(poi.get("causal_features") or {})
+    causal.setdefault("caused_bos", bool(evidence.get("origin_break_id")))
+    causal.setdefault("created_fvg", str(poi.get("object_type", "")) == "fvg")
+    causal.setdefault("originated_displacement", bool(evidence.get("origin_break_id") or evidence.get("displacement_id")))
+    lifecycle = dict(poi.get("lifecycle_features") or {})
+    lifecycle.setdefault(
+        "state",
+        poi.get("terminal_reason")
+        or poi.get("activity_status")
+        or poi.get("mitigation_status")
+        or "unknown",
+    )
+    quality = dict(poi.get("quality_features") or {})
+    if evidence.get("atr_ratio") is not None:
+        quality.setdefault("imbalance_size_atr", evidence.get("atr_ratio"))
+    out["origin_timeframe"] = poi.get("origin_timeframe") or poi.get("timeframe") or ""
+    out["causal_features"] = causal
+    out["location_features"] = dict(poi.get("location_features") or {})
+    out["lifecycle_features"] = lifecycle
+    out["quality_features"] = quality
+    out["narrative_features"] = dict(poi.get("narrative_features") or {})
+    return out
 
 
 __all__ = [

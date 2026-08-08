@@ -19,6 +19,13 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping, Sequence
 
+from smc_desk.perception.programme_schema import (
+    canonical_object_id,
+    candidate_price_bounds,
+    candidate_time,
+    candidate_type,
+)
+
 
 class RetrievalTools:
     """Bound a candidate pool and a graph once, then answer tool calls.
@@ -34,8 +41,8 @@ class RetrievalTools:
     ) -> None:
         self._by_id: dict[str, Mapping[str, Any]] = {}
         for c in candidate_pool:
-            cid = c.get("object_id")
-            if isinstance(cid, str):
+            cid = canonical_object_id(c)
+            if cid:
                 self._by_id[cid] = c
         self._pool: list[Mapping[str, Any]] = list(candidate_pool)
         self._graph: Mapping[str, Any] = graph or {}
@@ -63,14 +70,14 @@ class RetrievalTools:
         """Filter the pool by the four optional axes. All filters are AND."""
         results: list[dict[str, Any]] = []
         for c in self._pool:
-            if type is not None and str(c.get("type") or c.get("pivot_type") or "") != type:
+            if type is not None and candidate_type(c) != type:
                 continue
             if timeframe is not None and str(c.get("timeframe") or "") != timeframe:
                 continue
             if price_range is not None:
                 lo, hi = price_range
-                price = _to_float(c.get("price") or c.get("pivot_price"))
-                if price is None or not (lo <= price <= hi):
+                bounds = candidate_price_bounds(c)
+                if bounds is None or bounds[1] < lo or bounds[0] > hi:
                     continue
             if time_range is not None:
                 t = _candidate_time(c)
@@ -110,7 +117,13 @@ class RetrievalTools:
         Looks up accepted_breaks in the graph by object_id and resolves the
         origin_object_id back to its full candidate record.
         """
-        breaks = self._graph.get("accepted_breaks") or []
+        breaks = list(self._graph.get("accepted_breaks") or [])
+        for node in (self._graph.get("timeframes") or {}).values():
+            if isinstance(node, Mapping):
+                for key in ("latest_external_break", "latest_internal_break"):
+                    event = node.get(key)
+                    if isinstance(event, Mapping):
+                        breaks.append(event)
         target = None
         for br in breaks:
             if not isinstance(br, Mapping):
@@ -209,11 +222,7 @@ def _to_float(v: Any) -> float | None:
 
 
 def _candidate_time(c: Mapping[str, Any]) -> str:
-    for key in ("confirmed_at", "candidate_at", "pivot_time", "timestamp"):
-        v = c.get(key)
-        if isinstance(v, str) and v:
-            return v
-    return ""
+    return candidate_time(c)
 
 
 def _link_fields(rec: Mapping[str, Any]) -> dict[str, Any]:

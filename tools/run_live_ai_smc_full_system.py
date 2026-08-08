@@ -30,6 +30,7 @@ from smc_desk.perception.structure_narrative import build_structure_narrative, d
 BINANCE_BASE = "https://fapi.binance.com"
 YAHOO_BASE = "https://query1.finance.yahoo.com/v8/finance/chart"
 TIMEFRAMES = ("15m", "1h", "4h", "1d")
+TIMEFRAME_DELTAS = {"15m": pd.Timedelta(minutes=15), "1h": pd.Timedelta(hours=1), "4h": pd.Timedelta(hours=4), "1d": pd.Timedelta(days=1)}
 
 
 def main() -> None:
@@ -77,6 +78,8 @@ def main() -> None:
                 "thesis_path": str(symbol_root / "15_ai_thesis" / "thesis.md"),
                 "last_prices": {tf: float(df["close"].iloc[-1]) for tf, df in timeframe_dfs.items()},
                 "last_timestamps": {tf: str(df["timestamp"].iloc[-1]) for tf, df in timeframe_dfs.items()},
+                "last_open_timestamps": {tf: str(df["timestamp"].iloc[-1]) for tf, df in timeframe_dfs.items()},
+                "last_close_timestamps": {tf: str(df["timestamp"].iloc[-1] + TIMEFRAME_DELTAS[tf]) for tf, df in timeframe_dfs.items()},
             }
         except Exception as exc:
             summary = {
@@ -146,6 +149,8 @@ def load_binance_usdm_timeframes(symbol: str) -> tuple[dict[str, pd.DataFrame], 
             "page_count": result.manifest["page_count"],
             "server_time_ms": result.manifest["server_time_ms"],
             "last_timestamp": str(df["timestamp"].iloc[-1]),
+            "last_open_time": str(df["timestamp"].iloc[-1]),
+            "last_close_time": str(df["timestamp"].iloc[-1] + TIMEFRAME_DELTAS[interval]),
         }
     return frames, {
         "symbol": symbol,
@@ -169,7 +174,8 @@ def load_yahoo_xau_timeframes() -> tuple[dict[str, pd.DataFrame], dict[str, Any]
     fifteen = yahoo_chart_df(ticker, interval="15m", range_="60d")
     one_hour = yahoo_chart_df(ticker, interval="1h", range_="730d")
     one_day = yahoo_chart_df(ticker, interval="1d", range_="2y")
-    four_hour = resample_ohlcv(one_hour, "4h")
+    source_cutoff = pd.Timestamp(one_hour["timestamp"].iloc[-1]) + TIMEFRAME_DELTAS["1h"]
+    four_hour = resample_ohlcv(one_hour, "4h", decision_time=source_cutoff)
     frames = {"15m": fifteen, "1h": one_hour, "4h": four_hour, "1d": one_day}
     manifest = {
         "symbol": "XAUUSD",
@@ -186,7 +192,8 @@ def load_yahoo_forex_timeframes(symbol: str) -> tuple[dict[str, pd.DataFrame], d
     fifteen = yahoo_chart_df(ticker, interval="15m", range_="60d")
     one_hour = yahoo_chart_df(ticker, interval="1h", range_="730d")
     one_day = yahoo_chart_df(ticker, interval="1d", range_="2y")
-    four_hour = resample_ohlcv(one_hour, "4h")
+    source_cutoff = pd.Timestamp(one_hour["timestamp"].iloc[-1]) + TIMEFRAME_DELTAS["1h"]
+    four_hour = resample_ohlcv(one_hour, "4h", decision_time=source_cutoff)
     frames = {"15m": fifteen, "1h": one_hour, "4h": four_hour, "1d": one_day}
     manifest = {
         "symbol": symbol,
@@ -258,12 +265,29 @@ def interval_to_minutes(interval: str) -> int:
     return 1
 
 
-def resample_ohlcv(df: pd.DataFrame, rule: str) -> pd.DataFrame:
+def resample_ohlcv(
+    df: pd.DataFrame,
+    rule: str,
+    *,
+    decision_time: pd.Timestamp | str | None = None,
+) -> pd.DataFrame:
+    """Aggregate OHLCV and exclude any target bucket still forming at cutoff."""
     indexed = df.set_index("timestamp").sort_index()
     out = indexed.resample(rule, label="left", closed="left").agg(
         {"open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"}
     )
-    return out.dropna(subset=["open", "high", "low", "close"]).reset_index()
+    out = out.dropna(subset=["open", "high", "low", "close"]).reset_index()
+    if decision_time is None:
+        return out
+
+    cutoff = pd.Timestamp(decision_time)
+    timestamps = pd.to_datetime(out["timestamp"])
+    if timestamps.dt.tz is not None and cutoff.tzinfo is None:
+        cutoff = cutoff.tz_localize("UTC")
+    elif timestamps.dt.tz is None and cutoff.tzinfo is not None:
+        cutoff = cutoff.tz_convert("UTC").tz_localize(None)
+    duration = pd.to_timedelta(rule)
+    return out.loc[timestamps + duration <= cutoff].reset_index(drop=True)
 
 
 def build_basic_detector_candidates(timeframe_dfs: dict[str, pd.DataFrame], symbol: str) -> dict[str, Any]:
@@ -314,7 +338,10 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
         )
     tf_bias = _display_bias_labels(raw_tf_bias, structure_narrative)
     vote_bias = _vote_bias_labels(raw_tf_bias, structure_narrative)
-    direction = derive_strict_htf_bias(vote_bias, fallback_bias=raw_tf_bias)
+    direction = derive_strict_htf_bias(
+        vote_bias,
+        fallback_bias=_formal_graph_aware_fallback_bias(raw_tf_bias, structure_narrative),
+    )
     parent_child_context = structure_narrative.get("parent_child_context") if isinstance(structure_narrative, dict) else {}
     if not isinstance(parent_child_context, dict):
         parent_child_context = {}
@@ -323,6 +350,21 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
     if parent_child_conflict:
         direction = "mixed"
     htf_direction = direction
+    causal_episode_graph = pack.get("formal_causal_episode_graph") or {}
+    causal_episode_invariants = causal_episode_graph.get("invariants") if isinstance(causal_episode_graph, dict) else {}
+    causal_episode_graph_present = isinstance(causal_episode_graph, dict) and causal_episode_graph.get("schema") == "formal_causal_episode_graph_v2"
+    causal_episode_requires_review = bool(
+        causal_episode_graph_present
+        and (
+            not isinstance(causal_episode_invariants, dict)
+            or causal_episode_invariants.get("status") != "PASS"
+        )
+    )
+    causal_story = causal_episode_graph.get("current_story") if isinstance(causal_episode_graph, dict) else {}
+    if not isinstance(causal_story, dict):
+        causal_story = {}
+    if isinstance(causal_story, dict) and causal_story.get("status") == "MIXED_CONTEXT":
+        direction = "mixed"
 
     if isinstance(selected_range, dict) and selected_range.get("status") == "RESOLVED_ACTIVE_RANGE":
         active_tf = str(selected_range["timeframe"])
@@ -370,6 +412,8 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             "evidence_object_ids": [],
             "evidence": ["Active range authority could not certify a protected swing pair."],
         }
+    if causal_episode_requires_review:
+        official_state = "REVIEW_REQUIRED"
 
     target_side = "sell_side" if direction == "bearish" else "buy_side" if direction == "bullish" else "unknown"
     target_price = low if direction == "bearish" and low is not None else high if direction == "bullish" and high is not None else None
@@ -434,6 +478,8 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
                 *[f"{tf}: {bias}" for tf, bias in sorted(tf_bias.items())],
                 *list(structure_narrative.get("evidence", []) or []),
                 *list(parent_child_context.get("evidence", []) or []),
+                str((causal_story or {}).get("summary") or "Causal episode story unavailable."),
+                f"causal_episode_graph_invariants: {(causal_episode_invariants or {}).get('status', 'REVIEW_REQUIRED')}",
                 (
                     f"active_range_direction: {range_direction} (map only; HTF consensus {htf_direction})"
                     if isinstance(selected_range, dict) and selected_range.get("status") == "RESOLVED_ACTIVE_RANGE"
@@ -684,7 +730,11 @@ def timeframe_bias(summary: dict[str, Any]) -> str:
 def _display_bias_labels(raw_tf_bias: dict[str, str], structure_narrative: dict[str, Any]) -> dict[str, str]:
     labels = dict(raw_tf_bias)
     for timeframe, item in (structure_narrative.get("timeframes") or {}).items():
-        if isinstance(item, dict) and item.get("label") not in {None, "unknown"}:
+        if not isinstance(item, dict):
+            continue
+        if item.get("formal_graph_authority") is True:
+            labels[str(timeframe)] = str(item.get("label") or "unknown")
+        elif item.get("label") not in {None, "unknown"}:
             labels[str(timeframe)] = str(item["label"])
     return labels
 
@@ -692,9 +742,32 @@ def _display_bias_labels(raw_tf_bias: dict[str, str], structure_narrative: dict[
 def _vote_bias_labels(raw_tf_bias: dict[str, str], structure_narrative: dict[str, Any]) -> dict[str, str]:
     labels = dict(raw_tf_bias)
     for timeframe, item in (structure_narrative.get("timeframes") or {}).items():
-        if isinstance(item, dict) and item.get("vote_bias") in {"bullish", "bearish"}:
+        if not isinstance(item, dict):
+            continue
+        if item.get("formal_graph_authority") is True:
+            vote = str(item.get("vote_bias") or "unknown")
+            labels[str(timeframe)] = vote if vote in {"bullish", "bearish"} else "unknown"
+        elif item.get("vote_bias") in {"bullish", "bearish"}:
             labels[str(timeframe)] = str(item["vote_bias"])
     return labels
+
+
+def _formal_graph_aware_fallback_bias(
+    raw_tf_bias: dict[str, str],
+    structure_narrative: dict[str, Any],
+) -> dict[str, str]:
+    """Allow raw drift fallback only where no formal graph node exists."""
+    timeframes = structure_narrative.get("timeframes") or {}
+    authoritative = {
+        str(timeframe)
+        for timeframe, item in timeframes.items()
+        if isinstance(item, dict) and item.get("formal_graph_authority") is True
+    }
+    return {
+        timeframe: bias
+        for timeframe, bias in raw_tf_bias.items()
+        if timeframe not in authoritative
+    }
 
 
 def format_price(value: float | None) -> str:

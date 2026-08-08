@@ -1,0 +1,60 @@
+{
+  "schema": "wp_smc_01_baseline_test_report_v1",
+  "recorded_at": "2026-07-12T19:31:00Z",
+  "status": "PASS_SOURCE_BOUND_DIRTY_BASELINE",
+  "baseline_kind": "post_trigger_repair_source_bound_working_tree",
+  "repository": "/Users/tobimobolade/smc-codex-desk",
+  "git": {
+    "commit": "4aa1a23173227430961f662442bf8d57ed2995d6",
+    "branch": "wp-0012a-remove-legacy-authority",
+    "working_tree": "dirty_preserved",
+    "status_line_count_before_wp_smc_01_artifacts": 70,
+    "immutable_commit_claimed": false
+  },
+  "environment": {
+    "python": "3.14.5",
+    "pip": "26.0",
+    "venv": "/Users/tobimobolade/smc-codex-desk/.venv",
+    "requirements_perception_lock_sha256": "a3e75500a2bff343538f79aee17201131ffd91c415231dd007cfc084390bc995",
+    "pyproject_sha256": "05682eddd5440b94b624b7952d0e25c15948943ee0c41b38bad9658fdedb7fa0",
+    "requirements_sha256": "c0b3fc8bbf7275ff52a798ad580e98c0ec9d405fed911c39b9fe0e2e71bf360f"
+  },
+  "source_manifest": {
+    "path": "governance/WORK_PACKAGES/WP-SMC-01-VERIFIED-REPOSITORY-TRUTH/BASELINE_SOURCE_MANIFEST.tsv",
+    "record_count": 849,
+    "sha256": "7e037c581c0fef159d2311cb19b67d3c02688590c3cc6abf3de229fe05a032a4"
+  },
+  "commands": [
+    {
+      "name": "focused_authority_structure_validator_renderer_baseline",
+      "command": ".venv/bin/python -m pytest -q tests/test_causal_poi_authority.py tests/test_wp0022_smc_detector_rebuild.py tests/test_wp0040_formal_structure_graph.py tests/test_protected_point_and_range.py tests/test_level_interactions.py tests/test_deterministic_validators.py tests/test_wp0041b_ai_annotation_render_loop.py tests/test_structure_narrative_formal_graph_authority.py",
+      "result": "PASS",
+      "passed": 85,
+      "skipped": 0,
+      "duration_seconds": 2.07
+    },
+    {
+      "name": "full_repository_baseline",
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "PASS",
+      "passed": 960,
+      "skipped": 1,
+      "duration_seconds": 126.21
+    },
+    {
+      "name": "gbpusd_causal_poi_replay",
+      "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols GBPUSD --output-root analysis_runs/FRESH_GBPUSD_FULL_SYSTEM_20260712_163004/CAUSAL_CERTIFICATE_REPAIR_FINAL",
+      "result": "PASS_OBSERVE_ONLY",
+      "artifact": "analysis_runs/FRESH_GBPUSD_FULL_SYSTEM_20260712_163004/CAUSAL_CERTIFICATE_REPAIR_FINAL/LIVE_FULL_SYSTEM_AI_SMC_V3_20260712_192556/GBPUSD",
+      "official_state": "WATCH_ONLY"
+    }
+  ],
+  "claims_not_proven": [
+    "expert SMC accuracy",
+    "guaranteed POI reaction",
+    "predictive edge",
+    "paper readiness",
+    "live readiness",
+    "execution authority"
+  ]
+}

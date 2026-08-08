@@ -33,10 +33,33 @@ def validate_interpretation(
     """Run all four validators. Returns aggregated result."""
     graph = case.get("formal_structure_graph") or {}
     admissible = evidence.collect_pool_ids(case, graph)
-    if candidate_overrides:
-        admissible |= candidate_overrides
 
     violations: list[Violation] = []
+    if not interpretation:
+        violations.append(Violation(
+            code="EMPTY_INTERPRETATION",
+            severity=Severity.BLOCK.value,
+            message="Certification refuses an empty interpretation.",
+            checker="validators.completeness",
+        ))
+    if not any(interpretation.get(key) for key in ("accepted_breaks", "structure_claims", "protected_point", "active_ranges")):
+        violations.append(Violation(
+            code="INTERPRETATION_STRUCTURE_REQUIRED",
+            severity=Severity.BLOCK.value,
+            message="Interpretation must contain at least one explicit structural claim or object.",
+            checker="validators.completeness",
+        ))
+    sealed_overrides = set(case.get("sealed_candidate_override_ids") or [])
+    unauthorized = set(candidate_overrides or ()) - sealed_overrides
+    if unauthorized:
+        violations.append(Violation(
+            code="UNSEALED_EVIDENCE_OVERRIDE",
+            severity=Severity.BLOCK.value,
+            message=f"Unsealed candidate overrides are forbidden: {sorted(unauthorized)}",
+            evidence_ids=tuple(sorted(unauthorized)),
+            checker="validators.override_authority",
+        ))
+    admissible |= set(candidate_overrides or ()) & sealed_overrides
 
     ev = evidence.check_evidence_grounding(
         interpretation=interpretation, admissible_ids=admissible,
@@ -65,8 +88,9 @@ def validate_interpretation(
     blocks = tuple(v for v in violations if v.severity == Severity.BLOCK.value)
     errors = tuple(v for v in violations if v.severity == Severity.ERROR.value)
 
-    certified = (len(blocks) == 0) and (len(errors) == 0) and (not abstention_requested)
-    abstained = abstention_requested or (len(errors) > 0) or (len(blocks) > 0)
+    embedded_abstention = bool(interpretation.get("abstain") or interpretation.get("abstention_reason"))
+    certified = (len(blocks) == 0) and (len(errors) == 0) and (not abstention_requested) and (not embedded_abstention)
+    abstained = abstention_requested or embedded_abstention or (len(errors) > 0) or (len(blocks) > 0)
 
     return ValidatorResult(
         violations=tuple(violations),

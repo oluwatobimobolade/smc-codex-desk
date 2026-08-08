@@ -55,16 +55,21 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    errors = validate_response_structure(response_dir)
+    packet_manifest = json.loads((packet_dir / "run_manifest.json").read_text(encoding="utf-8"))
+    require_exam = packet_manifest.get("schema") == "ai_smc_agent_packet_v2"
+    errors = validate_response_structure(response_dir, require_exam=require_exam)
     if errors:
         raise SystemExit(f"Invalid response: {'; '.join(errors)}")
 
-    packet_manifest = json.loads((packet_dir / "run_manifest.json").read_text(encoding="utf-8"))
     evidence_pack_path = packet_dir / "02_evidence_pack.json"
     evidence_pack = json.loads(evidence_pack_path.read_text(encoding="utf-8"))
 
-    expected_hash = packet_manifest.get("evidence_pack_hash")
-    imported = import_agent_response(response_dir, expected_packet_hash=expected_hash)
+    expected_hash = packet_manifest.get("sealed_input_hash") or packet_manifest.get("evidence_pack_hash")
+    imported = import_agent_response(
+        response_dir,
+        expected_packet_hash=expected_hash,
+        packet_dir=packet_dir,
+    )
     decision = imported["decision"]
     decision_payload = imported["decision_payload"]
 
@@ -77,8 +82,8 @@ def main() -> None:
 
     provider = ExternalAIAgentProvider(
         decision_payload,
-        agent_name=decision_payload.get("agent_identity", {}).get("agent_name", "unknown"),
-        agent_model=decision_payload.get("agent_identity", {}).get("agent_model", "unknown"),
+        agent_name=imported["agent_identity"].get("agent_name", "unknown"),
+        agent_model=imported["agent_identity"].get("agent_model", "unknown"),
         packet_hash=expected_hash,
     )
 
@@ -106,6 +111,11 @@ def main() -> None:
         json.dumps(provider_result.audit_record(), indent=2, sort_keys=True, default=str),
         encoding="utf-8",
     )
+    if imported.get("exam_validation") is not None:
+        (output_dir / "exam_validation.json").write_text(
+            json.dumps(imported["exam_validation"], indent=2, sort_keys=True, default=str),
+            encoding="utf-8",
+        )
 
     final_decision_hash = hashlib.sha256(
         json.dumps(decision.model_dump(mode="json", by_alias=True), sort_keys=True, default=str).encode("utf-8")
@@ -124,14 +134,17 @@ def main() -> None:
     write_agent_audit_manifest(audit_manifest, output_dir / "agent_audit_manifest.json")
 
     summary = {
-        "schema": "agent_response_import_v1",
+        "schema": "agent_response_import_v2" if require_exam else "agent_response_import_v1",
         "symbol": decision.symbol,
         "status": status,
         "validation_result": validation_result.status,
         "official_state": validation_result.official_decision.get("official_state"),
         "provider_mode": provider_result.provider_mode,
-        "agent_identity": decision_payload.get("agent_identity", {}),
+        "agent_identity": imported["agent_identity"],
         "packet_hash_match": imported["audit"]["packet_hash_match"],
+        "packet_integrity_verified": imported["audit"]["packet_integrity_verified"],
+        "exam_validation_status": imported["audit"]["exam_validation_status"],
+        "exam_downgrade_applied": imported["audit"]["exam_downgrade_applied"],
         "output_dir": str(output_dir),
     }
     print(json.dumps(summary, indent=2, sort_keys=True, default=str))

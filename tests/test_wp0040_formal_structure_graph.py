@@ -234,6 +234,52 @@ def test_graph_timeframes_have_correct_structure() -> None:
     assert graph["timeframes"]["15m"]["internal_state"] == "bearish_internal_pullback"
 
 
+def test_graph_replaces_stale_opposite_protected_side_with_latest_confirmed_swing() -> None:
+    candidates = {
+        "1h": {
+            "structure_state": {
+                "protected_high_id": "high_protected",
+                "protected_low_id": "low_stale_above_high",
+                "last_confirmed_external_high": "high_latest",
+                "last_confirmed_external_low": "low_latest",
+            },
+            "swings": [
+                {"object_id": "high_protected", "direction": "bearish", "price_low": 117.0, "price_high": 118.0, "confirmed_at": "2026-07-01T00:00:00Z", "scale": "external"},
+                {"object_id": "low_stale_above_high", "direction": "bullish", "price_low": 124.0, "price_high": 125.0, "confirmed_at": "2026-06-01T00:00:00Z", "scale": "external"},
+                {"object_id": "high_latest", "direction": "bearish", "price_low": 116.0, "price_high": 117.0, "confirmed_at": "2026-07-02T00:00:00Z", "scale": "external"},
+                {"object_id": "low_latest", "direction": "bullish", "price_low": 95.0, "price_high": 96.0, "confirmed_at": "2026-07-02T01:00:00Z", "scale": "external"},
+            ],
+            "structure_breaks": [_break("bearish", "bearish", "2026-07-03T00:00:00Z", "external", 100.0)],
+            "sweeps": [], "fvgs": [], "order_blocks": [], "liquidity_levels": [],
+        },
+    }
+    graph = build_mtf_structure_graph(symbol="TEST", detector_candidates=candidates, active_range_authority=_default_active_range())
+    node = graph["timeframes"]["1h"]
+    assert node["protected_high"]["swing_id"] == "high_protected"
+    assert node["protected_low"]["swing_id"] == "low_latest"
+    assert graph["invariants"]["status"] == "PASS"
+
+
+def test_graph_fatally_rejects_same_swing_as_both_structure_sides() -> None:
+    candidates = {
+        "1h": {
+            "structure_state": {
+                "protected_high_id": "same_swing",
+                "last_confirmed_external_low": "same_swing",
+            },
+            "swings": [
+                {"object_id": "same_swing", "direction": "bearish", "price_low": 100.0, "price_high": 101.0, "confirmed_at": "2026-07-01T00:00:00Z", "scale": "external"},
+            ],
+            "structure_breaks": [_break("bearish", "bearish", "2026-07-03T00:00:00Z", "external", 99.0)],
+            "sweeps": [], "fvgs": [], "order_blocks": [], "liquidity_levels": [],
+        },
+    }
+    graph = build_mtf_structure_graph(symbol="TEST", detector_candidates=candidates, active_range_authority=_default_active_range())
+    assert graph["invariants"]["status"] == "FATAL_STRUCTURE_VIOLATION"
+    assert "protected_high_low_must_be_distinct" in graph["invariants"]["violations"]
+    assert graph_requires_thesis_only(graph) is True
+
+
 # ── Validator Integration Tests ─────────────────────────────────────────
 
 

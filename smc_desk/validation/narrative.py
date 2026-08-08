@@ -17,7 +17,7 @@ from typing import Any, Mapping
 
 from smc_desk.validation.primitives import Severity, Violation
 
-_PRICE_RE = re.compile(r"\b\d{3,}\.\d{1,8}\b")           # 123.456
+_PRICE_RE = re.compile(r"(?<![A-Za-z])[-+]?(?:\d*\.\d+|\d{2,})(?![A-Za-z])")
 _TIME_RE = re.compile(r"\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
 
 
@@ -40,7 +40,7 @@ def _walk(obj: Any, path: str = "",
     if isinstance(obj, Mapping):
         local_evidence = []
         for k, v in obj.items():
-            if k == "evidence_ids" and isinstance(v, list):
+            if (k == "evidence_ids" or k.endswith("_evidence_ids")) and isinstance(v, list):
                 local_evidence = [x for x in v if isinstance(x, str)]
         for k, v in obj.items():
             sub = f"{path}.{k}" if path else k
@@ -63,7 +63,12 @@ def check_narrative_grounding(
     """BLOCK narrative strings with price/time claims and no evidence nearby."""
     out: list[Violation] = []
     for path, node, evidence in _walk(interpretation):
-        if isinstance(node, str) and _contains_claim(node):
+        numeric_field = path.rsplit(".", 1)[-1] in {
+            "price", "pivot_price", "broken_price", "body_close_price",
+            "price_low", "price_high", "entry", "stop", "target", "invalidation",
+        }
+        if ((isinstance(node, str) and _contains_claim(node))
+                or (numeric_field and isinstance(node, (int, float)))):
             if not evidence:
                 out.append(Violation(
                     code="NARRATIVE_NAKED_CLAIM",

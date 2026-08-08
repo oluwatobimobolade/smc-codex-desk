@@ -82,19 +82,8 @@ class RangeObject:
 
     @property
     def sha256(self) -> str:
-        return object_sha256({
-            "range_id": self.range_id,
-            "owner_timeframe": self.owner_timeframe,
-            "direction": self.direction,
-            "origin_id": self.origin_id,
-            "terminal_id": self.terminal_id,
-            "origin_price": self.origin_price,
-            "terminal_price": self.terminal_price,
-            "lifecycle": self.lifecycle,
-            "protected_point_id": self.protected_point_id,
-            "parent_range_id": self.parent_range_id,
-            "child_range_ids": list(self.child_range_ids),
-        })
+        return object_sha256({**self.__dict__, "child_range_ids": list(self.child_range_ids),
+                              "replacement_conditions": list(self.replacement_conditions)})
 
 
 def _mid(o: float, t: float) -> float:
@@ -116,7 +105,14 @@ def propose_range(
     child_range_ids: Sequence[str] = (),
 ) -> RangeObject:
     """Propose a new active-range object per §7.2. Lifecycle starts PROPOSED."""
+    if direction not in {RangeDirection.BULLISH.value, RangeDirection.BEARISH.value}:
+        raise ValueError(f"Unsupported range direction: {direction!r}")
+    if not all((range_id, owner_timeframe, origin_id, terminal_id, creating_event_id, protected_point_id)):
+        raise ValueError("Range identity, endpoints, creating event, and protected point are required.")
+    if float(origin_price) == float(terminal_price):
+        raise ValueError("Active range requires distinct origin and terminal prices.")
     lo, hi = (origin_price, terminal_price) if origin_price <= terminal_price else (terminal_price, origin_price)
+    equilibrium = _mid(origin_price, terminal_price)
     return RangeObject(
         range_id=range_id,
         owner_timeframe=owner_timeframe,
@@ -129,9 +125,9 @@ def propose_range(
         protected_point_id=protected_point_id,
         parent_range_id=parent_range_id,
         child_range_ids=tuple(child_range_ids),
-        equilibrium_price=_mid(origin_price, terminal_price),
-        premium_zone=(hi, hi + (hi - lo)),
-        discount_zone=(lo - (hi - lo), lo),
+        equilibrium_price=equilibrium,
+        premium_zone=(equilibrium, hi),
+        discount_zone=(lo, equilibrium),
         lifecycle=RangeLifecycle.PROPOSED.value,
         replacement_conditions=(),
         invalidation_evidence_id=None,
@@ -177,6 +173,8 @@ def replace(
     explicit_stale: bool = False,
 ) -> RangeObject:
     """Transition ACTIVE -> EXTENDED / SUPERSEDED / STALE per §7.5."""
+    if rng.lifecycle not in {RangeLifecycle.ACTIVE.value, RangeLifecycle.EXTENDED.value}:
+        return rng
     ok, fired = can_replace(
         rng,
         terminal_extension=terminal_extension,
@@ -213,8 +211,8 @@ def location_in_range(rng: RangeObject, price: float) -> dict[str, Any]:
             "confidence": "insufficient_context",
         }
     eq = rng.equilibrium_price
-    top, _ = rng.premium_zone
-    _, bottom = rng.discount_zone
+    _, top = rng.premium_zone
+    bottom, _ = rng.discount_zone
     location = "premium" if price >= eq else "discount"
     return {
         "range_validity": rng.lifecycle,
@@ -227,6 +225,23 @@ def location_in_range(rng: RangeObject, price: float) -> dict[str, Any]:
     }
 
 
+def link_child_range(parent: RangeObject, child: RangeObject) -> tuple[RangeObject, RangeObject]:
+    """Validate and record a parent/child relation without allowing overwrite."""
+    hierarchy = {"1d": 4, "4h": 3, "1h": 2, "15m": 1, "5m": 0}
+    parent_rank = hierarchy.get(parent.owner_timeframe.lower())
+    child_rank = hierarchy.get(child.owner_timeframe.lower())
+    if parent_rank is None or child_rank is None or parent_rank <= child_rank:
+        raise ValueError("Parent range must own a strictly higher timeframe than its child.")
+    if child.parent_range_id not in {None, parent.range_id}:
+        raise ValueError("Child range already points to a different parent.")
+    updated_parent = RangeObject(**{
+        **parent.__dict__,
+        "child_range_ids": tuple(dict.fromkeys((*parent.child_range_ids, child.range_id))),
+    })
+    updated_child = RangeObject(**{**child.__dict__, "parent_range_id": parent.range_id})
+    return updated_parent, updated_child
+
+
 __all__ = [
     "RangeLifecycle",
     "RangeDirection",
@@ -237,4 +252,5 @@ __all__ = [
     "can_replace",
     "replace",
     "location_in_range",
+    "link_child_range",
 ]

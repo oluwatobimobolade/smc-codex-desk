@@ -47,6 +47,9 @@ class SwingCandidate:
     pivot_time: str                         # ISO-8601 candle close time
     pivot_price: float                      # high price (if pivot_type=high) or low (if low)
     generator_source: str                   # which generator produced this record
+    confirmed_at: str | None = None         # first candle time at which the candidate was knowable
+    available_at: str | None = None         # alias used by temporal validators
+    generator_sources: tuple[str, ...] = () # every generator that emitted this object
     scale: str = "unknown"                  # "micro" | "local" | "internal" | "external_candidate" | "atlas"
     prominence: float | None = None          # protrusion from surrounding extrema
     volatility_normalized_move: float | None = None  # ATR-normalised distance from neighbouring pivot
@@ -66,7 +69,10 @@ class SwingCandidate:
     causal_origin_hypotheses: list[Mapping[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        payload["object_id"] = self.candidate_id
+        payload["generator_sources"] = list(self.generator_sources or (self.generator_source,))
+        return payload
 
 
 def candidate_id(generator: str, timeframe: str, pivot_time: str, pivot_type: str) -> str:

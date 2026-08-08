@@ -1,0 +1,39 @@
+{
+  "schema": "wp_test_report_v1",
+  "work_package": "PERCEPTION-PROGRAMME-INTEGRITY-REPAIR",
+  "gate": "GATE-PERCEPTION-PROGRAMME-INTEGRITY-001",
+  "status": "PASS_LOCAL_EXPERIMENTAL_OBSERVE_ONLY",
+  "date": "2026-07-11",
+  "baseline_commit": "4aa1a23173227430961f662442bf8d57ed2995d6",
+  "source_manifest": "foundation_programme/PERCEPTION_READINESS_BRIDGE/PERCEPTION_PROGRAMME_REPAIR_SOURCE_MANIFEST.tsv",
+  "source_manifest_sha256": "4117719dc798b1abed6502d8853b70cf7c7bc2ad8beee090fc0d3e0894ff11fc",
+  "validation_record_id": "PERCEPTION-PROGRAMME-INTEGRITY-REPAIR-FINAL-20260711",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_market_structure_constitution.py tests/test_candidate_atlas.py tests/test_anchor_preserving_retriever.py tests/test_protected_point_and_range.py tests/test_level_interactions.py tests/test_poi_ranker_and_inducement.py tests/test_deterministic_validators.py tests/test_perception_harness.py tests/test_perception_programme_run.py tests/test_br004_006_ai_first_readiness.py tests/test_structure_lab_annotation_bridge.py tests/test_wp0041b_ai_annotation_render_loop.py",
+      "result": "134 passed in 11.10s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_perception_programme_run.py tests/test_br004_006_ai_first_readiness.py tests/test_wp0041b_ai_annotation_render_loop.py tests/test_perception_harness.py",
+      "result": "41 passed in 4.94s"
+    },
+    {
+      "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+      "result": "PASS"
+    },
+    {
+      "command": ".venv/bin/python tools/check_authority_boundaries.py && .venv/bin/python tools/check_governance_consistency.py",
+      "result": "PASS; 112 active files scanned; governance consistent"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "941 passed, 1 skipped"
+    }
+  ],
+  "doctrine_authoritative": false,
+  "retrieval_tools_executed": false,
+  "human_gold_created": false,
+  "execution_authority_changed": false,
+  "predictive_authority_changed": false,
+  "global_readiness_gate_passed": false
+}

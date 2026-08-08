@@ -46,6 +46,7 @@ def validate_ai_smc_decision(
     _check_reasoning_order(decision, issues)
     _check_bias_alignment(decision, issues)
     _check_formal_structure_graph(decision, evidence_pack, issues)
+    _check_formal_causal_episode_graph(decision, evidence_pack, issues)
     _check_parent_child_structure(decision, evidence_pack, issues)
     _check_no_1m_entry(decision, issues)
     _check_chart_eligibility(decision, issues)
@@ -55,6 +56,7 @@ def validate_ai_smc_decision(
     _check_claimed_sweep(decision, evidence_pack, issues)
     _check_claimed_displacement(decision, evidence_pack, issues)
     _check_active_poi(decision, evidence_pack, issues)
+    _check_causal_poi_authority(decision, evidence_pack, issues)
     _check_structural_stop(decision, issues)
     _check_target_logic(decision, evidence_pack, issues)
     _check_rr(decision, issues)
@@ -90,6 +92,11 @@ def validate_ai_smc_decision(
         "displacement_direction_unmatched",
         "poi_without_candidate",
         "poi_claim_unmatched",
+        "causal_poi_authority_unresolved",
+        "causal_poi_direction_mismatch",
+        "active_poi_not_causal_authority_selection",
+        "active_poi_zone_mismatch_causal_authority",
+        "fvg_promoted_over_causal_order_block",
         "stop_not_structural_invalidation",
         "bearish_stop_not_above_entry",
         "bearish_stop_inside_poi",
@@ -98,11 +105,15 @@ def validate_ai_smc_decision(
         "bearish_target_above_entry",
         "bullish_target_below_entry",
         "target_not_model_completion_liquidity",
+        "model_completion_not_active_range_extreme",
+        "target_liquidity_already_swept",
         "swept_low_classified_as_fresh_ssl",
         "formal_graph_invariant_violation",
         "formal_graph_trade_promotion_blocked",
         "formal_graph_requires_mixed_bias",
         "formal_graph_requires_thesis_only",
+        "causal_episode_graph_reconciliation_required",
+        "causal_episode_graph_trade_promotion_blocked",
         "annotation_v2_missing_evidence",
         "annotation_v2_unresolved_evidence",
         "annotation_v2_structure_segment_too_wide",
@@ -316,6 +327,37 @@ def _check_formal_structure_graph(
             _issue(issues, "formal_graph_requires_thesis_only",
                    "Formal structure graph has parent-child conflict. Official state must be THESIS_ONLY or REVIEW_REQUIRED, "
                    "not WATCH_ONLY or TRADE_PLAN_READY.")
+
+
+def _check_formal_causal_episode_graph(
+    decision: AISMCDecision,
+    evidence_pack: Mapping[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    graph = evidence_pack.get("formal_causal_episode_graph")
+    if not isinstance(graph, Mapping):
+        return
+    invariants = graph.get("invariants") or {}
+    contract = graph.get("authority_contract") or {}
+    if contract.get("enforcement_ready") is not True:
+        return
+    if str(invariants.get("status") or "REVIEW_REQUIRED") == "REVIEW_REQUIRED":
+        _issue(
+            issues,
+            "causal_episode_graph_reconciliation_required",
+            "The stricter causal episode replay disagrees with one or more controlling V1 breaks or POI lineages: "
+            f"{list(invariants.get('violations') or [])}. The V2 episode graph may only downgrade.",
+        )
+    current_story = graph.get("current_story") or {}
+    if (
+        str(current_story.get("status") or "INCOMPLETE") in {"INCOMPLETE", "MIXED_CONTEXT"}
+        and decision.official_state == "TRADE_PLAN_READY"
+    ):
+        _issue(
+            issues,
+            "causal_episode_graph_trade_promotion_blocked",
+            "TRADE_PLAN_READY is forbidden while the causal episode story is incomplete or parent/child mixed.",
+        )
 
 
 def _check_parent_child_structure(
@@ -603,6 +645,28 @@ def _check_claimed_sweep(decision: AISMCDecision, evidence_pack: Mapping[str, An
     for claim in decision.liquidity_story.swept_liquidity:
         if not _candidate_matches_claim(sweeps, side=claim.side, price=claim.price, evidence_ids=claim.evidence_object_ids):
             _issue(issues, "sweep_claim_unmatched", f"Swept liquidity claim was not matched to candidate evidence: {claim.label or claim.price}.")
+            continue
+        registry = evidence_pack.get("object_evidence_contracts") or {}
+        contracts = registry.get("contracts") if isinstance(registry, Mapping) else None
+        object_index = registry.get("object_id_index") if isinstance(registry, Mapping) else None
+        if isinstance(contracts, Mapping) and (registry.get("authority_contract") or {}).get("enforcement_ready") is True:
+            linked_ids = [
+                str(contract_id)
+                for object_id in claim.evidence_object_ids
+                for contract_id in ((object_index or {}).get(str(object_id), []) if isinstance(object_index, Mapping) else [])
+            ]
+            linked = [contracts.get(contract_id) for contract_id in linked_ids]
+            confirmed = any(
+                isinstance(contract, Mapping)
+                and bool(((contract.get("observed_evidence") or {}).get("sweep_lifecycle") or {}).get("structural_sweep_confirmed"))
+                for contract in linked
+            )
+            if not confirmed:
+                _issue(
+                    issues,
+                    "sweep_claim_not_structurally_confirmed",
+                    "Liquidity penetration/reclaim is still provisional or became an accepted breakout; no structurally consequential sweep is certified.",
+                )
 
 
 def _check_claimed_displacement(decision: AISMCDecision, evidence_pack: Mapping[str, Any], issues: list[ValidationIssue]) -> None:
@@ -639,6 +703,88 @@ def _check_active_poi(decision: AISMCDecision, evidence_pack: Mapping[str, Any],
     _issue(issues, "poi_claim_unmatched", "Active POI price/id did not match candidate evidence.")
 
 
+def _check_causal_poi_authority(
+    decision: AISMCDecision,
+    evidence_pack: Mapping[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    authority = evidence_pack.get("causal_poi_authority")
+    if not isinstance(authority, Mapping):
+        return
+    if (authority.get("authority_contract") or {}).get("enforcement_ready") is not True:
+        return
+    poi = decision.active_poi
+    has_poi_claim = bool(poi.poi_id or poi.evidence_object_ids or poi.price_low is not None or poi.price_high is not None)
+    if not has_poi_claim and decision.official_state != "TRADE_PLAN_READY":
+        return
+    if decision.direction not in {"bullish", "bearish"}:
+        if has_poi_claim:
+            _issue(
+                issues,
+                "causal_poi_direction_mismatch",
+                "A mixed/neutral thesis cannot promote a directional primary POI.",
+            )
+        return
+
+    scenarios = authority.get("scenarios") or {}
+    scenario = scenarios.get(decision.direction) if isinstance(scenarios, Mapping) else None
+    if not isinstance(scenario, Mapping) or scenario.get("status") != "SELECTED":
+        _issue(
+            issues,
+            "causal_poi_authority_unresolved",
+            "Causal POI authority could not prove an eligible origin for this direction. Candidate geometry cannot be promoted.",
+        )
+        return
+    primary = scenario.get("primary_causal_poi")
+    if not isinstance(primary, Mapping):
+        _issue(issues, "causal_poi_authority_unresolved", "Causal POI authority selected no primary origin.")
+        return
+
+    primary_ids = {
+        str(value)
+        for value in (primary.get("poi_id"), primary.get("source_object_id"))
+        if value
+    }
+    refinement_ids = {
+        str(value)
+        for item in (scenario.get("execution_refinements") or [])
+        if isinstance(item, Mapping)
+        for value in (item.get("poi_id"), item.get("source_object_id"))
+        if value
+    }
+    claimed_ids = {str(value) for value in (poi.poi_id, *poi.evidence_object_ids) if value}
+    if not claimed_ids.intersection(primary_ids | refinement_ids):
+        _issue(
+            issues,
+            "active_poi_not_causal_authority_selection",
+            "Active POI is not the primary causal origin or one of its certified subordinate execution refinements.",
+        )
+    if not claimed_ids.intersection(primary_ids):
+        _issue(
+            issues,
+            "active_poi_not_causal_authority_selection",
+            "The thesis must retain the controlling primary POI ID even when a lower-timeframe refinement is used.",
+        )
+    if poi.price_low is not None and poi.price_high is not None:
+        expected_low = _float(primary.get("price_low"))
+        expected_high = _float(primary.get("price_high"))
+        if expected_low is None or expected_high is None or not (
+            abs(poi.price_low - expected_low) <= max(abs(expected_low) * 0.0008, 1e-9)
+            and abs(poi.price_high - expected_high) <= max(abs(expected_high) * 0.0008, 1e-9)
+        ):
+            _issue(
+                issues,
+                "active_poi_zone_mismatch_causal_authority",
+                "Active POI bounds do not match the selected controlling causal origin.",
+            )
+    if str(poi.kind or "").lower().find("fvg") >= 0 and primary.get("kind") == "order_block":
+        _issue(
+            issues,
+            "fvg_promoted_over_causal_order_block",
+            "An FVG may refine or support the selected causal OB, but cannot replace it as primary while that OB remains eligible.",
+        )
+
+
 def _check_structural_stop(decision: AISMCDecision, issues: list[ValidationIssue]) -> None:
     if decision.official_state != "TRADE_PLAN_READY":
         return
@@ -670,6 +816,11 @@ def _check_target_logic(decision: AISMCDecision, evidence_pack: Mapping[str, Any
         return
     targets = decision.target_plan.targets
     liquidity_candidates = _all_candidates(evidence_pack, ("liquidity_levels",))
+    completion_id = decision.target_plan.model_completion_liquidity_id
+    if not completion_id:
+        _issue(issues, "model_completion_target_missing", "TRADE_PLAN_READY requires one explicit model-completion liquidity id.")
+    swept_ids, swept_prices = _swept_liquidity_evidence(evidence_pack)
+    completion_target = None
     for target in targets:
         if decision.direction == "bearish" and target.price >= entry:
             _issue(issues, "bearish_target_above_entry", "Bearish model-completion target must be below entry.")
@@ -684,6 +835,28 @@ def _check_target_logic(decision: AISMCDecision, evidence_pack: Mapping[str, Any
             matched = True
         if not matched:
             _issue(issues, "target_not_model_completion_liquidity", "Target must match model-completion liquidity evidence.")
+        target_ids = set(target.evidence_object_ids)
+        if target.target_anchor:
+            target_ids.add(target.target_anchor)
+        if completion_id and completion_id in target_ids:
+            completion_target = target
+        if target_ids.intersection(swept_ids) or any(
+            abs(float(target.price) - price) <= max(abs(price) * 0.0005, 1e-9) for price in swept_prices
+        ):
+            _issue(issues, "target_liquidity_already_swept", f"Target {target.label} references liquidity already recorded as swept.")
+
+    if completion_id and completion_target is None:
+        range_id = str((evidence_pack.get("formal_structure_graph") or {}).get("active_range", {}).get("range_id") or "")
+        completion_target = next((target for target in targets if _target_matches_active_range(decision, target.price)), None) if completion_id == range_id else None
+    if completion_id and completion_target is None:
+        _issue(issues, "model_completion_target_missing", "model_completion_liquidity_id does not map to any target level.")
+    elif completion_target is not None and decision.active_range.low is not None and decision.active_range.high is not None:
+        if not _target_matches_active_range(decision, completion_target.price):
+            _issue(
+                issues,
+                "model_completion_not_active_range_extreme",
+                "Internal liquidity may be a partial-management target, but model completion must use the controlling active-range external extreme.",
+            )
 
 
 def _check_rr(decision: AISMCDecision, issues: list[ValidationIssue]) -> None:
@@ -1026,13 +1199,8 @@ def _check_anchors_and_grounding(decision: AISMCDecision, evidence_pack: Mapping
 
 def _check_liquidity_status(decision: AISMCDecision, evidence_pack: Mapping[str, Any], issues: list[ValidationIssue]) -> None:
     swept_prices = {float(liq.price) for liq in decision.liquidity_story.swept_liquidity if liq.price is not None}
-    
-    det_candidates = (evidence_pack.get("detector_candidates") or {})
-    for tf, tf_data in det_candidates.items():
-        if isinstance(tf_data, Mapping):
-            for sweep in tf_data.get("sweeps", []):
-                if "price" in sweep:
-                    swept_prices.add(float(sweep["price"]))
+    _, detector_swept_prices = _swept_liquidity_evidence(evidence_pack)
+    swept_prices.update(detector_swept_prices)
                     
     all_refs = [
         *decision.liquidity_story.obvious_liquidity,
@@ -1047,3 +1215,25 @@ def _check_liquidity_status(decision: AISMCDecision, evidence_pack: Mapping[str,
                         "swept_low_classified_as_fresh_ssl",
                         f"Liquidity at {ref.price} classified as fresh_untaken_liquidity, but it was already swept."
                     )
+
+
+def _swept_liquidity_evidence(evidence_pack: Mapping[str, Any]) -> tuple[set[str], set[float]]:
+    swept_ids: set[str] = set()
+    swept_prices: set[float] = set()
+    for tf_data in (evidence_pack.get("detector_candidates") or {}).values():
+        if not isinstance(tf_data, Mapping):
+            continue
+        for sweep in tf_data.get("sweeps", []) or []:
+            if not isinstance(sweep, Mapping):
+                continue
+            evidence = sweep.get("evidence") or {}
+            swept_id = evidence.get("swept_level_id") or sweep.get("swept_level_id")
+            swept_price = evidence.get("swept_price") or sweep.get("price")
+            if swept_id:
+                swept_ids.add(str(swept_id))
+            if swept_price is not None:
+                try:
+                    swept_prices.add(float(swept_price))
+                except (TypeError, ValueError):
+                    pass
+    return swept_ids, swept_prices

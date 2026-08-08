@@ -14,6 +14,7 @@ from smc_desk.brain.annotation_evidence import (
     AnnotationEvidenceAnchor,
     build_annotation_evidence_index,
 )
+from smc_desk.brain.annotation_semantics import certified_annotation_semantic
 
 
 def resolve_semantic_annotation_plan(
@@ -26,6 +27,7 @@ def resolve_semantic_annotation_plan(
     evidence = build_annotation_evidence_index(evidence_pack)
     issues: list[dict[str, Any]] = []
     objects: list[dict[str, Any]] = []
+    label_overrides: list[dict[str, str]] = []
 
     if not isinstance(selections, list):
         selections = []
@@ -67,7 +69,7 @@ def resolve_semantic_annotation_plan(
         if anchor.is_wick_only_probe or anchor.confirmation_status not in {None, "confirmed"}:
             _issue(issues, "uncertified_semantic_object", f"{evidence_id} is not a confirmed drawable object.")
             continue
-        resolved = _resolve_selection(selection, anchor, evidence_pack, issues)
+        resolved = _resolve_selection(selection, anchor, evidence_pack, issues, label_overrides)
         if resolved is not None:
             objects.append(resolved)
 
@@ -103,6 +105,8 @@ def resolve_semantic_annotation_plan(
         "hidden_evidence_ids": sorted(hidden),
         "timeframes": sorted({str(obj.get("timeframe")) for obj in objects}),
         "issues": issues,
+        "label_overrides": label_overrides,
+        "label_authority": "deterministic_annotation_semantics_v1",
         "annotation_plan_v2": validated_plan,
         "geometry_authority": "certified_evidence_resolver",
         "ai_geometry_authority": False,
@@ -115,12 +119,21 @@ def _resolve_selection(
     anchor: AnnotationEvidenceAnchor,
     evidence_pack: Mapping[str, Any],
     issues: list[dict[str, Any]],
+    label_overrides: list[dict[str, str]],
 ) -> dict[str, Any] | None:
     object_type = str(selection.get("object_type") or "")
+    semantic = certified_annotation_semantic(anchor)
+    requested_label = str(selection.get("label") or "").strip()
+    if requested_label and requested_label != semantic.label:
+        label_overrides.append({
+            "semantic_object_id": anchor.object_id,
+            "requested_label": requested_label,
+            "certified_label": semantic.label,
+        })
     base = {
         "semantic_object_id": anchor.object_id,
         "timeframe": anchor.timeframe,
-        "label": str(selection.get("label") or _default_label(anchor)),
+        "label": semantic.label,
         "reason": str(selection.get("reason") or "Certified evidence selected by the AI annotation planner."),
         "direction": anchor.direction or "unknown",
         "evidence_object_ids": [anchor.object_id],
@@ -133,9 +146,7 @@ def _resolve_selection(
         if not _has_visible_span(anchor):
             _issue(issues, "structure_geometry_outside_window", f"{anchor.object_id} is outside its visible timeframe window.")
             return None
-        kind = str(anchor.kind or "structure").lower()
-        if kind not in {"bos", "choch"}:
-            kind = "structure"
+        kind = semantic.kind
         subordinate = any(
             token in f"{base['label']} {base['reason']}".lower()
             for token in ("stale", "child", "recovery", "pullback")
@@ -149,7 +160,7 @@ def _resolve_selection(
             "end_index": anchor.end_index,
             "start_time": anchor.start_time,
             "end_time": anchor.end_time,
-            "line_style": "dashed" if subordinate else "solid",
+            "line_style": "dashed" if subordinate else semantic.line_style,
             "structure_scope": anchor.structure_scope or "external",
         }
     if object_type == "liquidity_line":
@@ -164,7 +175,81 @@ def _resolve_selection(
         return {
             **base,
             "object_type": "liquidity_line",
-            "kind": "liquidity",
+            "kind": semantic.kind,
+            "price": anchor.exact_price,
+            "start_index": start_index,
+            "end_index": end_index,
+            "start_time": start_time,
+            "end_time": end_time,
+            "line_style": semantic.line_style,
+        }
+    if object_type == "range_zone":
+        if anchor.evidence_type != "active_range" or anchor.price_low is None or anchor.price_high is None:
+            _issue(issues, "range_selection_without_certified_range",
+                   f"{anchor.object_id} is not a certified active-range anchor.")
+            return None
+        span = _window_span(evidence_pack, anchor)
+        if span is None:
+            _issue(issues, "range_geometry_outside_window",
+                   f"{anchor.object_id} has no visible window to span.")
+            return None
+        start_index, end_index, start_time, end_time = span
+        low = min(anchor.price_low, anchor.price_high)
+        high = max(anchor.price_low, anchor.price_high)
+        return {
+            **base,
+            "object_type": "range_zone",
+            "kind": "range",
+            "price_low": low,
+            "price_high": high,
+            # Equilibrium is derived here, never supplied by the planner.
+            "equilibrium_price": (low + high) / 2.0,
+            "start_index": start_index,
+            "end_index": end_index,
+            "start_time": start_time,
+            "end_time": end_time,
+            "line_style": "dashed",
+        }
+    if object_type == "sweep_marker":
+        if anchor.evidence_type not in {"sweep", "liquidity", "swing_pivot"} or anchor.exact_price is None:
+            _issue(issues, "sweep_selection_without_event",
+                   f"{anchor.object_id} is not a certified sweep or liquidity interaction.")
+            return None
+        span = _local_span(evidence_pack, anchor, minimum_width=3)
+        if span is None:
+            _issue(issues, "sweep_geometry_outside_window",
+                   f"{anchor.object_id} is outside its visible timeframe window.")
+            return None
+        start_index, end_index, start_time, end_time = span
+        return {
+            **base,
+            "object_type": "sweep_marker",
+            "kind": "sweep",
+            "price": anchor.exact_price,
+            "start_index": start_index,
+            "end_index": end_index,
+            "start_time": start_time,
+            "end_time": end_time,
+            "line_style": "solid",
+        }
+    if object_type == "equal_levels":
+        if anchor.evidence_type != "liquidity" or anchor.exact_price is None:
+            _issue(issues, "equal_levels_without_liquidity_cluster",
+                   f"{anchor.object_id} is not a certified equal-highs/lows cluster.")
+            return None
+        span = _local_span(evidence_pack, anchor)
+        if span is None:
+            _issue(issues, "equal_levels_geometry_outside_window",
+                   f"{anchor.object_id} is outside its visible timeframe window.")
+            return None
+        start_index, end_index, start_time, end_time = span
+        kind = "equal_highs" if (anchor.direction or "").lower() == "bearish" else "equal_lows"
+        if anchor.kind in {"equal_highs", "equal_lows"}:
+            kind = anchor.kind
+        return {
+            **base,
+            "object_type": "equal_levels",
+            "kind": kind,
             "price": anchor.exact_price,
             "start_index": start_index,
             "end_index": end_index,
@@ -184,14 +269,14 @@ def _resolve_selection(
         return {
             **base,
             "object_type": "poi_zone",
-            "kind": anchor.evidence_type,
+            "kind": semantic.kind,
             "price_low": min(anchor.price_low, anchor.price_high),
             "price_high": max(anchor.price_low, anchor.price_high),
             "start_index": start_index,
             "end_index": end_index,
             "start_time": start_time,
             "end_time": end_time,
-            "line_style": "solid",
+            "line_style": semantic.line_style,
         }
     _issue(issues, "unsupported_semantic_object_type", f"{object_type or 'blank'} is not resolvable in the professional renderer.")
     return None
@@ -227,14 +312,32 @@ def _local_span(
     return start, end, anchor.start_time, end_time
 
 
-def _default_label(anchor: AnnotationEvidenceAnchor) -> str:
-    if anchor.evidence_type == "structure":
-        return str(anchor.kind or "structure").upper()
-    if anchor.evidence_type == "order_block":
-        return "OB"
-    if anchor.evidence_type == "fvg":
-        return "FVG"
-    return "Liquidity"
+def _window_span(
+    evidence_pack: Mapping[str, Any],
+    anchor: AnnotationEvidenceAnchor,
+) -> tuple[int, int, str, str] | None:
+    """Full visible-window span, for objects that are context rather than events.
+
+    A dealing range is a horizontal band that governs the whole chart, so it is
+    drawn across the visible window instead of anchored to one candle. The
+    range carries no pivot timestamp for that reason, which is why the local
+    event span cannot resolve it.
+    """
+    windows = evidence_pack.get("ohlcv_windows") or {}
+    candles = windows.get(anchor.timeframe) if isinstance(windows, Mapping) else None
+    if not isinstance(candles, list) or not candles:
+        return None
+
+    def _stamp(row: Any) -> str:
+        if isinstance(row, Mapping):
+            return str(row.get("timestamp") or row.get("open_time") or "")
+        return ""
+
+    start_time = _stamp(candles[0])
+    end_time = _stamp(candles[-1])
+    if not start_time or not end_time:
+        return None
+    return 0, len(candles) - 1, start_time, end_time
 
 
 def _issue(issues: list[dict[str, Any]], code: str, message: str) -> None:

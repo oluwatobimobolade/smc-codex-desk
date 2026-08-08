@@ -18,7 +18,12 @@ from smc_desk.perception.candidates import fractal as fractal
 from smc_desk.perception.candidates import indicators as indicators
 from smc_desk.perception.candidates import prominence as prominence
 from smc_desk.perception.candidates import schema as schema
-from smc_desk.perception.candidates.atlas import AtlasBuildResult, AtlasConfig, build_for_timeframe
+from smc_desk.perception.candidates.atlas import (
+    AtlasBuildResult,
+    AtlasConfig,
+    build_for_timeframe,
+    build_multi_timeframe,
+)
 from smc_desk.perception.candidates.schema import ALL_GENERATORS, SwingCandidate, candidate_id
 
 __all__ = [
@@ -28,6 +33,7 @@ __all__ = [
     "SwingCandidate",
     "atlas_mod",
     "build_for_timeframe",
+    "build_multi_timeframe",
     "candidate_id",
     "changepoint",
     "directional_change",

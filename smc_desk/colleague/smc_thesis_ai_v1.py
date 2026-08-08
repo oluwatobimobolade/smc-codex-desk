@@ -31,7 +31,7 @@ def build_smc_thesis_ai_v1(
     evidence_pack: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     official = validation_result.official_decision
-    claims = [_claim(claim_id, official) for claim_id in THESIS_SEQUENCE]
+    claims = [_claim(claim_id, official, evidence_pack or {}) for claim_id in THESIS_SEQUENCE]
     payload = {
         "schema": "smc_thesis_ai_v1",
         "source": "ValidatedAISMCDecision" if validation_result.status == "VALIDATED" else "ReviewRequiredAISMCDecision",
@@ -96,7 +96,11 @@ def assert_smc_thesis_ai_v1_contract(payload: Mapping[str, Any]) -> None:
         raise AssertionError("Only trade_plan_chart may show a trade box.")
 
 
-def _claim(claim_id: str, official: Mapping[str, Any]) -> dict[str, Any]:
+def _claim(
+    claim_id: str,
+    official: Mapping[str, Any],
+    evidence_pack: Mapping[str, Any],
+) -> dict[str, Any]:
     title = claim_id.replace("_", " ").title()
     if claim_id == "bias_summary":
         bias = official.get("bias_summary") or {}
@@ -112,7 +116,15 @@ def _claim(claim_id: str, official: Mapping[str, Any]) -> dict[str, Any]:
         text = _format_displacement(displacement)
     elif claim_id == "active_poi":
         poi = official.get("active_poi") or {}
-        text = _format_poi(poi)
+        if poi.get("poi_id") or poi.get("price_low") is not None or poi.get("price_high") is not None:
+            text = _format_poi(poi)
+        else:
+            scenario_text = _format_scenario_watch_pois(evidence_pack)
+            if scenario_text:
+                title = "Scenario Poi Map"
+                text = scenario_text
+            else:
+                text = _format_poi(poi)
     elif claim_id == "entry_readiness":
         entry = official.get("entry_plan") or {}
         text = f"entry_ready={entry.get('entry_ready')}; timeframe={entry.get('entry_timeframe')}; {entry.get('summary')}"
@@ -149,3 +161,27 @@ def _format_poi(poi: Mapping[str, Any]) -> str:
     high = poi.get("price_high", "?")
     prefix = f"{timeframe} {kind}".strip()
     return f"{prefix} {low}-{high}: {poi.get('summary') or ''}".strip()
+
+
+def _format_scenario_watch_pois(evidence_pack: Mapping[str, Any]) -> str | None:
+    authority = evidence_pack.get("causal_poi_authority") or {}
+    scenarios = authority.get("scenarios") if isinstance(authority, Mapping) else None
+    if not isinstance(scenarios, Mapping):
+        return None
+    mapped: list[str] = []
+    for direction in ("bullish", "bearish"):
+        scenario = scenarios.get(direction)
+        primary = scenario.get("primary_causal_poi") if isinstance(scenario, Mapping) and scenario.get("status") == "SELECTED" else None
+        if not isinstance(primary, Mapping):
+            continue
+        mapped.append(
+            f"{direction} scenario: {primary.get('timeframe')} {primary.get('kind')} "
+            f"{primary.get('price_low')}-{primary.get('price_high')} "
+            f"({primary.get('lineage_role')}, lifecycle={primary.get('freshness')})"
+        )
+    if not mapped:
+        return None
+    return (
+        "; ".join(mapped)
+        + ". These are conditional route-map POIs only. Mixed context prevents promotion to an official active POI or trade plan."
+    )

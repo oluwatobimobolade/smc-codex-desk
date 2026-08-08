@@ -13,6 +13,14 @@ from __future__ import annotations
 from typing import Any, Iterable, Mapping
 
 from smc_desk.validation.primitives import Severity, Violation
+from smc_desk.validation.evidence import walk_evidence_fields
+from smc_desk.perception.programme_schema import (
+    candidate_time,
+    canonical_object_id,
+    flatten_candidate_objects,
+)
+
+import pandas as pd
 
 
 def _candidate_close_time(
@@ -20,21 +28,10 @@ def _candidate_close_time(
     case: Mapping[str, Any],
 ) -> str | None:
     """Look up a candidate's candle close time by object_id."""
-    co = case.get("candidate_objects") or {}
-    if not isinstance(co, Mapping):
-        return None
-    for buckets in co.values():
-        if not isinstance(buckets, Mapping):
-            continue
-        for items in buckets.values():
-            if not isinstance(items, list):
-                continue
-            for it in items:
-                if isinstance(it, Mapping) and it.get("object_id") == eid:
-                    for k in ("confirmed_at", "candidate_at", "pivot_time", "close_time"):
-                        v = it.get(k)
-                        if isinstance(v, str) and v:
-                            return v
+    for candidate in flatten_candidate_objects(case.get("candidate_objects") or {}):
+        if canonical_object_id(candidate) == eid:
+            value = candidate_time(candidate)
+            return value or None
     return None
 
 
@@ -56,14 +53,21 @@ def check_future_data(
     and any break whose confirming_candle_time exceeds the cutoff."""
     out: list[Violation] = []
     cutoffs = per_timeframe_cutoff or {}
-    for path, ids in _walk_evidence_fields(interpretation):
+    if not decision_time:
+        return (Violation(
+            code="DECISION_TIME_REQUIRED",
+            severity=Severity.BLOCK.value,
+            message="Certification requires an explicit decision_time.",
+            checker="temporal.future_data",
+        ),)
+    for path, ids in walk_evidence_fields(interpretation):
         for eid in ids:
             ct = _candidate_close_time(eid, case)
             if ct is None:
                 continue
             tf = _timeframe_for(eid, case) or "default"
             cutoff = cutoffs.get(tf) or cutoffs.get("default") or decision_time
-            if ct > cutoff:
+            if _after(ct, cutoff):
                 out.append(Violation(
                     code="FUTURE_DATA_LEAK",
                     severity=Severity.BLOCK.value,
@@ -82,7 +86,7 @@ def check_future_data(
             continue
         tf = str(br.get("timeframe") or "default")
         cutoff = cutoffs.get(tf) or cutoffs.get("default") or decision_time
-        if br_time > cutoff:
+        if _after(br_time, cutoff):
             out.append(Violation(
                 code="FUTURE_DATA_LEAK",
                 severity=Severity.BLOCK.value,
@@ -117,7 +121,7 @@ def check_temporal_ordering(
             br_time = br.get("confirming_candle_time") or _candidate_close_time(
                 str(br.get("origin_object_id") or ""), case
             )
-            if pp_time and br_time and pp_time > br_time:
+            if pp_time and br_time and _after(pp_time, br_time):
                 out.append(Violation(
                     code="TEMPORAL_ORDER_VIOLATION",
                     severity=Severity.BLOCK.value,
@@ -130,37 +134,22 @@ def check_temporal_ordering(
 
 
 def _timeframe_for(eid: str, case: Mapping[str, Any]) -> str | None:
-    co = case.get("candidate_objects") or {}
-    if not isinstance(co, Mapping):
-        return None
-    for buckets in co.values():
-        if not isinstance(buckets, Mapping):
-            continue
-        for items in buckets.values():
-            if not isinstance(items, list):
-                continue
-            for it in items:
-                if isinstance(it, Mapping) and it.get("object_id") == eid:
-                    tf = it.get("timeframe")
-                    if isinstance(tf, str):
-                        return tf
+    for candidate in flatten_candidate_objects(case.get("candidate_objects") or {}):
+        if canonical_object_id(candidate) == eid:
+            tf = candidate.get("timeframe")
+            return tf if isinstance(tf, str) else None
     return None
 
 
-def _walk_evidence_fields(obj: Any, path: str = "") -> list[tuple[str, list[str]]]:
-    out: list[tuple[str, list[str]]] = []
-    if isinstance(obj, Mapping):
-        for k, v in obj.items():
-            sub = f"{path}.{k}" if path else k
-            if k in {"evidence_ids", "breaking_candidate_ids", "swept_levels",
-                     "caused_breaks", "breaks_caused"} and isinstance(v, list):
-                out.append((sub, [x for x in v if isinstance(x, str)]))
-            elif isinstance(v, (dict, list)):
-                out.extend(_walk_evidence_fields(v, sub))
-    elif isinstance(obj, list):
-        for i, v in enumerate(obj):
-            out.extend(_walk_evidence_fields(v, f"{path}[{i}]"))
-    return out
+def _after(left: str, right: str) -> bool:
+    try:
+        a = pd.Timestamp(left)
+        b = pd.Timestamp(right)
+        a = a.tz_localize("UTC") if a.tzinfo is None else a.tz_convert("UTC")
+        b = b.tz_localize("UTC") if b.tzinfo is None else b.tz_convert("UTC")
+        return a > b
+    except (TypeError, ValueError):
+        return True
 
 
 __all__ = ["check_future_data", "check_temporal_ordering"]

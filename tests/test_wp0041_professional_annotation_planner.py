@@ -4,6 +4,8 @@ from copy import deepcopy
 from pathlib import Path
 
 from smc_desk.brain.ai_smc_consistency_validator import validate_ai_smc_decision
+from smc_desk.brain.annotation_geometry import build_geometry_contract
+from smc_desk.perception.evidence_contract import build_object_evidence_contracts
 from smc_desk.rendering.smc_trader_annotation_renderer import (
     build_smc_trader_annotation_scene,
     render_smc_trader_annotation_chart,
@@ -87,10 +89,20 @@ def _v2_objects() -> list[dict]:
 
 def _watch_payload_with_v2() -> dict:
     payload = _watch_payload()
+    objects = _v2_objects()
+    for obj in objects:
+        obj.update(
+            build_geometry_contract(
+                evidence=obj,
+                source_object_ids=obj.get("evidence_object_ids") or [],
+                anchor_mode="conditional_projection" if obj["object_type"] == "path_projection" else "exact_source",
+                clipping_rule="conditional_projection" if obj["object_type"] == "path_projection" else "none",
+            )
+        )
     payload["annotation_plan_v2"] = {
         "schema": "professional_smc_annotation_plan_v2",
         "style": "professional_smc_sparse",
-        "objects": _v2_objects(),
+        "objects": objects,
         "notes": ["professional sparse SMC markup"],
     }
     return payload
@@ -120,6 +132,12 @@ def _pack_with_v2_geometry() -> dict:
     poi.update({"pivot_time": stamps[12], "candidate_at": stamps[18], "confirmed_at": stamps[18], "confirmation_status": "confirmed", "activity_status": "inactive", "mitigation_status": "untouched"})
     liquidity = pack["detector_candidates"]["15m"]["liquidity_levels"][0]
     liquidity.update({"pivot_time": stamps[10], "candidate_at": stamps[19], "confirmed_at": stamps[19], "confirmation_status": "confirmed", "activity_status": "inactive", "mitigation_status": "untouched"})
+    pack["object_evidence_contracts"] = build_object_evidence_contracts(
+        detector_candidates=pack["detector_candidates"],
+        decision_time=stamps[-1],
+        doctrine_hash="test-doctrine-hash",
+        formal_structure_graph=pack.get("formal_structure_graph") or {},
+    )
     return pack
 
 

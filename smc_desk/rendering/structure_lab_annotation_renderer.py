@@ -271,6 +271,52 @@ def _draw_object(ax: Any, obj: Mapping[str, Any], n: int, span: float) -> bool:
         )
         _small_label(ax, (start + end) / 2, upper, label, color, span)
         return True
+    if object_type == "range_zone":
+        price_low = _float(obj.get("price_low"))
+        price_high = _float(obj.get("price_high"))
+        equilibrium = _float(obj.get("equilibrium_price"))
+        if price_low is None or price_high is None or equilibrium is None:
+            return False
+        lower, upper = sorted((price_low, price_high))
+        width = max(1, end - start)
+        # Premium above equilibrium, discount below: the location context a
+        # trader reads before anything else.
+        ax.add_patch(
+            Rectangle((start, equilibrium), width, upper - equilibrium,
+                      facecolor="#d99090", edgecolor="none", alpha=0.07, zorder=0)
+        )
+        ax.add_patch(
+            Rectangle((start, lower), width, equilibrium - lower,
+                      facecolor="#65a7e8", edgecolor="none", alpha=0.07, zorder=0)
+        )
+        for level, style, tag in (
+            (upper, (0, (6, 4)), "Range High"),
+            (lower, (0, (6, 4)), "Range Low"),
+            (equilibrium, (0, (2, 4)), "EQ (50%)"),
+        ):
+            ax.plot([start, end], [level, level], color="#8b93a1",
+                    linewidth=1.0, linestyle=style, zorder=5)
+            _small_label(ax, min(n + 4, end + 0.7), level, tag, "#8b93a1", span)
+        return True
+    if object_type == "sweep_marker":
+        price = _float(obj.get("price"))
+        if price is None:
+            return False
+        marker = "v" if direction == "bearish" else "^"
+        ax.scatter([start], [price], s=64, marker=marker, color=color,
+                   edgecolors="white", linewidths=0.7, zorder=9)
+        _small_label(ax, start + 0.6, price, label or "Sweep", color, span)
+        return True
+    if object_type == "equal_levels":
+        price = _float(obj.get("price"))
+        if price is None:
+            return False
+        ax.plot([start, end], [price, price], color=color, linewidth=1.2,
+                linestyle=(0, (1, 2)), zorder=6)
+        kind = str(obj.get("kind") or "")
+        tag = label or ("EQH" if kind == "equal_highs" else "EQL")
+        _small_label(ax, min(n + 4, end + 0.7), price, tag, color, span)
+        return True
     if object_type == "path_projection":
         price_low = _float(obj.get("price_low"))
         price_high = _float(obj.get("price_high"))
@@ -368,7 +414,7 @@ def _ordered_timeframes(by_timeframe: Mapping[str, Any]) -> list[str]:
 
 def _object_prices(obj: Mapping[str, Any]) -> list[float]:
     values: list[float] = []
-    for key in ("price", "price_low", "price_high"):
+    for key in ("price", "price_low", "price_high", "equilibrium_price"):
         value = _float(obj.get(key))
         if value is not None:
             values.append(value)

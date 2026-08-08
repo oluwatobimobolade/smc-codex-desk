@@ -174,7 +174,7 @@ contested_decisions:
     question: >-
       Are CHoCH and MSS the same event, sequential events, or
       timeframe-dependent?
-    proposed_default: MSS_EQUALS_CHOCH_AT_INTERNAL_SCOPE
+    proposed_default: DISTINCT_BY_SCOPE_CHOCH_INTERNAL_MSS_EXTERNAL
     alternatives:
       - MSS_AND_CHOCH_ARE_DISTINCT_EVENTS
       - MSS_REQUIRED_AT_EXTERNAL_CHOCH_AT_INTERNAL
@@ -450,25 +450,30 @@ concepts:
 
   bos:
     formal_definition: >-
-      Break Of Structure. A decisive close beyond a previously protected
-      swing in the direction of the prevailing trend, on the owning
-      timeframe.
+      Break Of Structure. A decisive continuation close beyond the confirmed
+      structural swing that capped the prevailing leg (prior swing high in a
+      bullish leg, prior swing low in a bearish leg), on the owning timeframe.
+      The opposing protected point remains the invalidation anchor and is not
+      the continuation level being broken.
     plain_definition: >-
-      Trend continuation signal: the structure that protected the previous
-      leg is broken.
+      Trend continuation signal: price has accepted beyond the prior
+      continuation swing while the opposing protected point remains intact.
     candidate_generation_rules:
       - A BOS candidate is generated when price closes beyond a
-        protected level on the owning timeframe with penetration
+        confirmed structural continuation level on the owning timeframe with penetration
         >= minimum_penetration threshold.
     semantic_selection_rules:
       - >-
-        The candidate must satisfy: parent swing is protected, penetration
-        exceeds minimum_penetration, confirming body close is present,
+        The candidate must satisfy: continuation swing is confirmed,
+        opposing protected point remains intact, penetration exceeds
+        minimum_penetration, confirming body close is present, and
         displacement is present for external BOS.
     confirmation:
       - >-
-        Two of: confirming body close, displacement magnitude, ATR-normalised
-        penetration, subsequent structural construction beyond the level.
+        Body close and minimum penetration are mandatory. External BOS also
+        requires displacement. Subsequent structural construction beyond the
+        level confirms acceptance; internal BOS may grade displacement rather
+        than require it.
     invalidation:
       - Immediate reclaim within the confirmation horizon without subsequent
         structural construction. May downgrade to sweep candidate.
@@ -480,9 +485,9 @@ concepts:
         internal timeframe. A 15m BOS cannot upgrade to a 4H BOS without
         4H confirmation.
     positive_example: >-
-      A 4H body close decisively beyond the prior protected 4H swing high,
-      followed by 4H displacement and new 4H structural construction
-      above the broken level.
+      A 4H body close decisively beyond the prior confirmed 4H continuation
+      swing high, while the protected 4H low remains intact, followed by 4H
+      displacement and new 4H structural construction above the broken level.
     negative_example: >-
       A 15m wick above a 4H protected high with 15m displacement. Even
       if true, this is a 15m internal break, not a 4H BOS.
@@ -495,11 +500,13 @@ concepts:
       - "AI labels BOS without evidence IDs"
     required_evidence:
       - broken_level_evidence_id
+      - opposing_protected_point_evidence_id
       - confirming_candle_id
       - owning_timeframe
       - penetration_atr
+      - displacement_evidence_ids (required for external BOS)
     optional_evidence:
-      - displacement_magnitude
+      - displacement_magnitude (grading for internal BOS)
       - subsequent_construction_ids
     unresolved_alternatives:
       - displacement requirement strict vs grading
@@ -604,7 +611,7 @@ concepts:
     optional_evidence:
       - parent_timeframe_status
     unresolved_alternatives:
-      - same event as CHoCH (proposed default) vs distinct
+      - distinct by scope (proposed default) vs shared label with explicit scope
       - whether MSS implies HTF_BOS automatically
 
   sweep:
@@ -718,7 +725,8 @@ concepts:
         penetration threshold and reclaims within the same bar.
     semantic_selection_rules:
       - Probe records the level's salience update. It is not a sweep
-        candidate unless subsequent bars confirm displacement beyond.
+        candidate unless subsequent bars confirm reclaim and displacement
+        away from the excursion.
     confirmation:
       - Same-bar reclaim; level not closed beyond.
     invalidation:
@@ -753,8 +761,8 @@ concepts:
     formal_definition: >-
       The closing of price back inside a previously exceeded level.
     plain_definition: >-
-      The level held (or, equivalently, the sweep failed). Price came
-      back.
+      Price returned inside the exceeded level. This supports a sweep
+      hypothesis but is not sufficient by itself to confirm one.
     candidate_generation_rules:
       - Generated when price closes inside the level after an excursion.
     semantic_selection_rules:
@@ -870,8 +878,9 @@ concepts:
       - Subsequent reaction at the level. Lifetime state is ACTIVE until
         consumption.
     invalidation:
-      - Consumed by decisive close beyond the level that does not
-        reclaim; lifecycle becomes CONSUMED.
+      - Stop liquidity is CONSUMED when price trades through the pool,
+        whether price later reclaims or accepts beyond it. The same price may
+        remain a structural level after its liquidity has been consumed.
     lifecycle:
       - POTENTIAL -> ACTIVE -> TESTED -> CONSUMED
       - POTENTIAL -> ACTIVE -> STALE
@@ -978,7 +987,7 @@ concepts:
       as a story.
     candidate_generation_rules:
       - >-
-        Generated when at least one of five necessary conditions holds:
+        Generated only when all five necessary conditions hold:
         (1) a higher-ranked deeper POI or objective, (2) intermediate
         visible liquidity or POI, (3) plausible causal path,
         (4) structural reason the shallow object is weaker,
@@ -1085,7 +1094,8 @@ concepts:
       - doctrine_confidence: contested decisions resolved (vs proposed)
       - ai_agreement: inter-role convergence
       - critic_confidence: adversarial critic verdict
-      - human_agreement_estimate: expected agreement with an expert label
+      - human_agreement_estimate: optional measured agreement estimate; null
+          until independently adjudicated labels exist
     categories:
       - confirmed: all axes confirmed, evidence grounded
       - probable: most axes confirmed, no contradictions

@@ -149,7 +149,7 @@ def test_export_agent_packet_contains_charts_prompts_evidence_schema(tmp_path: P
     for filename in AGENT_PACKET_FILES:
         assert (packet_dir / filename).exists(), f"Missing {filename}"
     assert "schema" in manifest
-    assert manifest["schema"] == "ai_smc_agent_packet_v1"
+    assert manifest["schema"] == "ai_smc_agent_packet_v2"
     assert manifest["chart_count"] >= 1
 
 
@@ -436,11 +436,14 @@ def test_agent_audit_manifest_includes_identity_and_hashes() -> None:
 def test_response_template_has_required_fields() -> None:
     """The response template must include all required fields."""
     template = make_agent_response_template()
-    assert template["schema"] == "ai_smc_agent_response_v1"
+    assert template["schema"] == "ai_smc_agent_response_v2"
     assert "agent_identity" in template
     assert "packet_hash" in template
     assert "decision" in template
     assert "semantic_anchors" in template
+    assert "exam_transcript" in template
+    assert len(template["exam_transcript"]["stations"]) == 10
+    assert template["exam_transcript"]["authority_contract"]["self_certification_allowed"] is False
     sa = template["semantic_anchors"]
     for key in ("poi_anchor", "entry_anchor", "stop_anchor", "target_anchor", "invalidation_anchor"):
         assert key in sa

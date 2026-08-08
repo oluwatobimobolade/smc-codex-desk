@@ -9,7 +9,12 @@ import pytest
 from smc_desk.brain.ai_smc_consistency_validator import validate_ai_smc_decision
 from smc_desk.brain.ai_smc_trader_brain import REASONING_ORDER, parse_ai_smc_decision
 from smc_desk.brain.llm_provider import CallableAISMCProvider, LLMCompletionRequest, StubAISMCProvider
-from smc_desk.colleague.orchestrator_v3 import assert_official_report_uses_ai_brain, run_ai_smc_orchestrator_v3
+from smc_desk.colleague.orchestrator_v3 import (
+    _dedupe_pois,
+    _is_canonically_active_poi,
+    assert_official_report_uses_ai_brain,
+    run_ai_smc_orchestrator_v3,
+)
 from smc_desk.data.historical_backfill import build_context_depth_report, fetch_historical_closed_ohlcv
 from smc_desk.eval.ai_smc_gold_evaluator import compare_ai_output_to_human_labels
 from smc_desk.eval.gold_set_loader import GoldChartCase, load_gold_chart_cases
@@ -341,3 +346,57 @@ def test_gold_evaluator_compares_ai_output_to_human_labels():
     result = compare_ai_output_to_human_labels(official_decision=_payload(), gold_case=case)
     assert result["status"] == "PASS"
     assert result["score"] == 1.0
+
+
+def test_canonical_active_pois_exclude_invalidated_and_duplicates():
+    valid = {
+        "poi_id": "one",
+        "validity_status": "VALID_ACTIVE_SETUP_POI",
+        "scope": "active_setup",
+        "freshness": "fresh",
+        "price_relation": "below_poi",
+    }
+    invalidated = {
+        "poi_id": "two",
+        "validity_status": "VALID_ACTIVE_SETUP_POI",
+        "scope": "active_setup",
+        "freshness": "invalidated",
+        "price_relation": "invalidated_above",
+    }
+    deduped = _dedupe_pois([valid, dict(valid), invalidated])
+    active = [poi for poi in deduped if _is_canonically_active_poi(poi)]
+    assert [poi["poi_id"] for poi in active] == ["one"]
+
+
+def test_internal_liquidity_cannot_replace_active_range_model_completion_extreme():
+    payload = _payload()
+    payload["target_plan"] = {
+        "targets": [{
+            "price": 97.0,
+            "mapped_target_price": 97.0,
+            "target_anchor": "internal_ssl",
+            "label": "Internal SSL",
+            "timeframe": "15m",
+            "reason": "nearest internal liquidity",
+            "evidence_object_ids": ["internal_ssl"],
+        }],
+        "model_completion_liquidity_id": "internal_ssl",
+        "summary": "Internal target incorrectly promoted to model completion.",
+    }
+    pack = {"detector_candidates": {"15m": {**_candidates()["15m"], "liquidity_levels": [{"object_id": "internal_ssl", "side": "sell_side", "price": 97.0}]}}}
+    result = validate_ai_smc_decision(parse_ai_smc_decision(payload), pack)
+    assert "model_completion_not_active_range_extreme" in {issue.code for issue in result.issues}
+
+
+def test_swept_detector_liquidity_cannot_be_targeted_as_fresh_completion():
+    payload = _payload()
+    payload["liquidity_story"]["unswept_liquidity"][0]["status"] = "fresh_untaken_liquidity"
+    pack = {"detector_candidates": _candidates()}
+    pack["detector_candidates"]["15m"]["sweeps"].append({
+        "object_id": "sweep_liq1",
+        "evidence": {"swept_level_id": "liq1", "swept_price": "95.0"},
+    })
+    result = validate_ai_smc_decision(parse_ai_smc_decision(payload), pack)
+    codes = {issue.code for issue in result.issues}
+    assert "target_liquidity_already_swept" in codes
+    assert "swept_low_classified_as_fresh_ssl" in codes

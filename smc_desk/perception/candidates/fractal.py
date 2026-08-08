@@ -60,6 +60,7 @@ def detect_dataframe(
 
 
 def _make(df, timeframe, i, price, pivot_type, scale, bars_left, bars_right, atr_at_i):
+    confirmed_at = iso_from_index(df, i + bars_right)
     return SwingCandidate(
         candidate_id=candidate_id(GENERATOR_FRACTAL, timeframe, iso_from_index(df, i), pivot_type),
         timeframe=timeframe,
@@ -67,6 +68,9 @@ def _make(df, timeframe, i, price, pivot_type, scale, bars_left, bars_right, atr
         pivot_time=iso_from_index(df, i),
         pivot_price=float(price),
         generator_source=GENERATOR_FRACTAL,
+        confirmed_at=confirmed_at,
+        available_at=confirmed_at,
+        generator_sources=(GENERATOR_FRACTAL,),
         scale=scale,
         prominence=None,
         volatility_normalized_move=None,
@@ -81,6 +85,3 @@ def _make(df, timeframe, i, price, pivot_type, scale, bars_left, bars_right, atr
 
 
 __all__ = ["detect_dataframe"]
-
-
-from pandas import DataFrame  # noqa: E402

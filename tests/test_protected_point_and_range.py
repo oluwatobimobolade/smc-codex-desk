@@ -47,51 +47,79 @@ def _break(direction="bullish"):
         "direction": direction,
         "confirming_candle_time": "2026-01-05T00:00:00Z",
         "impulse_candle_ids": ["c1", "c2", "c3"],
+        "origin_cluster_candle_ids": ["c1", "c2", "c3"],
         "displacement_magnitude_atr": 1.8,
     }
 
 
 def _pool():
+    # The repaired generator only admits directionally opposing pivots
+    # (bullish break -> protected LOW candidates), so pivot_type is required.
     return [
         {"object_id": "c1", "confirmed_at": "2026-01-04T12:00:00Z", "timeframe": "4h",
-         "pivot_price": 98.0, "low": 98.0, "lifecycle": "CANDIDATE"},
+         "pivot_type": "low", "pivot_price": 98.0, "low": 98.0, "lifecycle": "CANDIDATE"},
         {"object_id": "c2", "confirmed_at": "2026-01-04T16:00:00Z", "timeframe": "4h",
-         "pivot_price": 96.0, "low": 96.0, "lifecycle": "CANDIDATE"},
+         "pivot_type": "low", "pivot_price": 96.0, "low": 96.0, "lifecycle": "CANDIDATE"},
         {"object_id": "c3", "confirmed_at": "2026-01-04T20:00:00Z", "timeframe": "4h",
-         "pivot_price": 95.0, "low": 95.0, "lifecycle": "CANDIDATE"},
+         "pivot_type": "low", "pivot_price": 95.0, "low": 95.0, "lifecycle": "CANDIDATE"},
         {"object_id": "s10", "confirmed_at": "2026-01-03T00:00:00Z", "timeframe": "4h",
-         "pivot_price": 99.0, "lifecycle": "STRUCTURAL"},
+         "pivot_type": "low", "pivot_price": 99.0, "lifecycle": "STRUCTURAL"},
     ]
 
 
+def _candles():
+    # Replayed violation evidence: closes never trade below any candidate low,
+    # so every candidate is genuinely unviolated at decision time.
+    return [
+        {"timestamp": f"2026-01-05T{hour:02d}:00:00Z", "close": 101.0 + hour * 0.1}
+        for hour in range(1, 12)
+    ]
+
+
+_DECISION_TIME = "2026-01-05T12:00:00Z"
+
+
 def test_protected_point_generates_internal_pivot_and_cluster():
-    cands = generate_candidates(accepted_break=_break(), candidate_pool=_pool(), active_range=None)
+    cands = generate_candidates(
+        accepted_break=_break(), candidate_pool=_pool(), active_range=None,
+        timeframe_candles=_candles(), decision_time=_DECISION_TIME,
+    )
     kinds = {c.origin_type for c in cands}
     assert "single_candle" in kinds      # internal pivot
     assert "cluster" in kinds            # cluster extreme
     assert all(c.predates_break for c in cands)
     assert all(c.unviolated for c in cands)
+    # Violation status must come from replayed candles, not caller booleans.
+    assert all(c.violation_checked for c in cands)
 
 
 def test_protected_point_does_not_use_latest_pivot_shortcut():
     """The latest opposing pivot that POSTDATES the break must NOT be selected."""
     pool = _pool() + [
         {"object_id": "post1", "confirmed_at": "2026-01-06T00:00:00Z", "timeframe": "4h",
-         "pivot_price": 94.0, "lifecycle": "CANDIDATE"},
+         "pivot_type": "low", "pivot_price": 94.0, "lifecycle": "CANDIDATE"},
     ]
-    cands = generate_candidates(accepted_break=_break(), candidate_pool=pool, active_range=None)
+    cands = generate_candidates(
+        accepted_break=_break(), candidate_pool=pool, active_range=None,
+        timeframe_candles=_candles(), decision_time=_DECISION_TIME,
+    )
     selected_ids = {c.candidate_id for c in cands}
     assert "post1#internal" not in selected_ids
+    assert "s10#internal" in selected_ids   # the pre-break pivot is still found
 
 
 def test_protected_point_selects_and_records_graph():
-    sel = select(accepted_break=_break(), candidate_pool=_pool(), active_range=None)
+    sel = select(
+        accepted_break=_break(), candidate_pool=_pool(), active_range=None,
+        timeframe_candles=_candles(), decision_time=_DECISION_TIME,
+    )
     assert sel.abstained is False
-    assert sel.selected.predates_break and sel.selected.unviolated
-    edges = {(s, e) for s, e, _ in sel.graph_relationships}
-    assert ("s10#internal", "protects_thesis") in edges or \
-           any(s == "s10#internal" and e == "protects_thesis" for s, e, _ in sel.graph_relationships)
-    assert any(e == "violation_invalidates_thesis" for _, e, _ in sel.graph_relationships)
+    assert sel.selected.predates_break and sel.selected.unviolated and sel.selected.violation_checked
+    # The causal origin-cluster extreme outranks the latest-pivot shortcut.
+    assert sel.selected.candidate_id == "cluster#br1"
+    assert sel.runner_up is not None and sel.runner_up.candidate_id == "s10#internal"
+    assert (sel.selected.candidate_id, "protects_thesis", "break:br1") in sel.graph_relationships
+    assert any(edge == "violation_invalidates_thesis" for _, edge, _ in sel.graph_relationships)
 
 
 def test_protected_point_abstains_when_no_candidates():

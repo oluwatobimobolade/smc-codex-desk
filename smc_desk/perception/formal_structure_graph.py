@@ -49,7 +49,48 @@ def build_mtf_structure_graph(
         "active_range": ar,
         "invariants": invariants,
         "authority_contract": contract,
+        # Hierarchical read alongside the unanimity vote in
+        # parent_child_context. The vote answers "do the timeframes agree?";
+        # this answers "what story do they tell, and where is price drawn?".
+        # Additive and observe-only: it cannot promote, and every existing
+        # consumer of parent_child_context is untouched.
+        "narrative_context": _build_narrative_context(timeframes, ar, detector_candidates),
     }
+
+
+def _build_narrative_context(
+    timeframes: Mapping[str, Any],
+    active_range: Mapping[str, Any],
+    detector_candidates: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Attach the hierarchical narrative read. Never raises into the hot path."""
+    from smc_desk.perception.narrative_hierarchy import read_narrative
+
+    try:
+        liquidity: list[Mapping[str, Any]] = []
+        if isinstance(detector_candidates, Mapping):
+            for payload in detector_candidates.values():
+                if not isinstance(payload, Mapping):
+                    continue
+                levels = payload.get("liquidity_levels")
+                if isinstance(levels, Sequence) and not isinstance(levels, (str, bytes)):
+                    liquidity.extend(x for x in levels if isinstance(x, Mapping))
+        current_price = _float_or_none((active_range or {}).get("current_price"))
+        return read_narrative(
+            timeframes=timeframes,
+            active_range=active_range,
+            current_price=current_price,
+            liquidity_levels=liquidity,
+        ).to_dict()
+    except Exception as exc:  # noqa: BLE001 -- observe-only layer must never break the graph
+        return {
+            "schema": "mtf_narrative_read_v1",
+            "state": "INSUFFICIENT_CONTEXT",
+            "is_coherent": False,
+            "error": f"{type(exc).__name__}: {str(exc)[:160]}",
+            "authority": "observe_only_narrative_read",
+            "signal_allowed": False,
+        }
 
 
 # ── Timeframe Node Builder ──────────────────────────────────────────────
@@ -78,13 +119,14 @@ def _node_for_timeframe(tf: str, payload: Mapping[str, Any]) -> dict[str, Any]:
 
     external_bias = ext_bias or "unknown"
     internal_state = _compute_internal_state(ext_bias, int_dir, external, internal)
+    protected_high, protected_low = _protected_levels(payload, external)
 
     return {
         "timeframe": tf,
         "external_bias": external_bias,
         "internal_state": internal_state,
-        "protected_high": _protected_level(external, "high") if external else None,
-        "protected_low": _protected_level(external, "low") if external else None,
+        "protected_high": protected_high,
+        "protected_low": protected_low,
         "latest_external_break": _break_summary(external) if external else None,
         "latest_internal_break": _break_summary(internal) if internal else None,
         "has_wick_probes": len(wick_probes) > 0,
@@ -244,6 +286,8 @@ def _child_broke_parent(
     child = timeframes.get(child_tf)
     if not isinstance(parent, Mapping) or not isinstance(child, Mapping):
         return False
+    if _anchors_collapsed(parent):
+        return False
     if child_bias == "bullish":
         parent_level = _protected_high_from_node(parent)
     else:
@@ -341,6 +385,7 @@ def _check_invariants(
     active_range: Mapping[str, Any],
 ) -> dict[str, Any]:
     checks = [
+        _invariant_protected_anchors_are_distinct(timeframes),
         _invariant_internal_cannot_flip_parent(timeframes, parent_child),
         _invariant_child_body_close_for_parent_break(timeframes, parent_child),
         _invariant_wick_probes_are_not_breaks(timeframes),
@@ -358,37 +403,78 @@ def _check_invariants(
     return {"status": status, "checks": checks, "violations": [v["code"] for v in violations]}
 
 
+def _invariant_protected_anchors_are_distinct(timeframes: Mapping[str, Any]) -> dict[str, Any]:
+    collapsed = [tf for tf, node in timeframes.items() if isinstance(node, Mapping) and _anchors_collapsed(node)]
+    if collapsed:
+        return {
+            "code": "protected_high_low_must_be_distinct",
+            "passed": False,
+            "severity": "fatal",
+            "detail": "The same swing/price cannot be both protected high and protected low: " + ", ".join(collapsed) + ".",
+        }
+    return {
+        "code": "protected_high_low_must_be_distinct",
+        "passed": True,
+        "severity": "info",
+        "detail": "Protected high and low anchors are side-specific; no collapsed anchor pair was found.",
+    }
+
+
 def _invariant_internal_cannot_flip_parent(timeframes: Mapping[str, Any], pc: Mapping[str, Any]) -> dict[str, Any]:
+    """A child conflict without body-close MUST carry the mixed-bias downgrade.
+
+    Reachable failure: _build_parent_child_context regresses and stops
+    stamping required_final_bias on an unresolved conflict — the exact drift
+    that would let a child timeframe silently flip the parent bias.
+    """
     if not pc.get("has_conflict"):
         return {"code": "internal_child_cannot_flip_parent", "passed": True, "severity": "info", "detail": "No parent-child conflict found."}
     if pc.get("is_child_body_closed_beyond_parent_protected"):
         return {"code": "internal_child_cannot_flip_parent", "passed": True, "severity": "info",
-                "detail": f"Child body-closed beyond parent protected level - parent flip is legitimate."}
+                "detail": "Child body-closed beyond parent protected level - parent flip is legitimate."}
+    if pc.get("required_final_bias") != "mixed":
+        return {"code": "internal_child_cannot_flip_parent", "passed": False, "severity": "fatal",
+                "detail": "Unresolved parent-child conflict does not require mixed bias; "
+                          "a child could flip the parent without body-close. "
+                          f"required_final_bias={pc.get('required_final_bias')!r}."}
     return {"code": "internal_child_cannot_flip_parent", "passed": True, "severity": "info",
             "detail": f"Parent-child conflict is acknowledged: parent {pc.get('parent_timeframe')} remains {pc.get('parent_bias')}, "
-            f"child {pc.get('child_timeframe')} is {pc.get('child_bias')} pullback/recovery. "
-            "Child cannot flip parent without body-close beyond parent protected level. This is the expected state."}
+            f"child {pc.get('child_timeframe')} is {pc.get('child_bias')} pullback/recovery with required mixed bias. "
+            "Child cannot flip parent without body-close beyond parent protected level."}
 
 
 def _invariant_child_body_close_for_parent_break(timeframes: Mapping[str, Any], pc: Mapping[str, Any]) -> dict[str, Any]:
+    """A claimed parent break MUST replay against the recorded levels.
+
+    Reachable failure: parent_child_context claims PARENT_BREAK_CONFIRMED but
+    the child's recorded body-close does not actually exceed the parent
+    protected level (or the levels are missing) when recomputed here.
+    """
+    if pc.get("status") == "PARENT_BREAK_CONFIRMED" or pc.get("is_child_body_closed_beyond_parent_protected"):
+        ptf = str(pc.get("parent_timeframe") or "")
+        ctf = str(pc.get("child_timeframe") or "")
+        cb = str(pc.get("child_bias") or "")
+        if not _child_broke_parent(timeframes, ptf, ctf, cb):
+            return {"code": "child_body_close_required_for_parent_break", "passed": False, "severity": "fatal",
+                    "detail": f"Parent break claimed for {ctf} {cb} over {ptf}, but the recorded child "
+                              "body-close does not exceed the parent protected level on recomputation."}
+        return {"code": "child_body_close_required_for_parent_break", "passed": True, "severity": "info",
+                "detail": "Parent break recomputed: child body-close genuinely exceeds the parent protected level."}
     if not pc.get("has_conflict"):
         return {"code": "child_body_close_required_for_parent_break", "passed": True, "severity": "info", "detail": "No parent-child conflict."}
-    if pc.get("is_child_body_closed_beyond_parent_protected"):
-        return {"code": "child_body_close_required_for_parent_break", "passed": True, "severity": "info",
-                "detail": "Child has body-closed beyond parent protected level. Parent break is legitimate."}
     return {"code": "child_body_close_required_for_parent_break", "passed": True, "severity": "info",
             "detail": "Parent-child conflict exists and child has NOT body-closed beyond parent protected level. "
-            "This is the expected state - parent structure governs, child is pullback/recovery. "
-            "Child body close would be required to legitimately flip the parent bias."}
+            "Parent structure governs; child is pullback/recovery."}
 
 
 def _invariant_wick_probes_are_not_breaks(timeframes: Mapping[str, Any]) -> dict[str, Any]:
-    # Wick probes existing is NORMAL market behavior. Every real asset will
-    # have candles whose wicks cross swing levels without body confirmation.
-    # The real safety net is in structure.py: _confirmed_breaks() already
-    # filters out probes, and _confirm_break() only promotes body-closed
-    # breaks. This invariant now only fails if a probe was mistakenly
-    # treated as a confirmed break (a genuine detector bug).
+    """No wick-only probe may occupy a confirmed-break position.
+
+    Reachable failure: the _confirmed_breaks filter regresses and a probe
+    (is_wick_only_probe, or a break without confirmed_at) leaks into a
+    timeframe node's latest_external_break / latest_internal_break slot.
+    """
+    leaked: list[str] = []
     probe_summary: list[str] = []
     for tf, node in timeframes.items():
         if not isinstance(node, Mapping):
@@ -396,10 +482,19 @@ def _invariant_wick_probes_are_not_breaks(timeframes: Mapping[str, Any]) -> dict
         count = node.get("wick_probe_count", 0)
         if count > 0:
             probe_summary.append(f"{tf}={count}")
+        for key in ("latest_external_break", "latest_internal_break"):
+            summary = node.get(key)
+            if not isinstance(summary, Mapping):
+                continue
+            if summary.get("is_wick_only_probe") or not summary.get("confirmed_at"):
+                leaked.append(f"{tf}.{key}={summary.get('object_id', '?')}")
+    if leaked:
+        return {"code": "wick_probes_are_not_breaks", "passed": False, "severity": "fatal",
+                "detail": f"Unconfirmed probe occupies a confirmed-break slot: {', '.join(leaked)}."}
     if probe_summary:
         return {"code": "wick_probes_are_not_breaks", "passed": True, "severity": "info",
                 "detail": f"Wick probes present (normal market noise): {', '.join(probe_summary)}. "
-                          "These are correctly segregated from confirmed breaks."}
+                          "None occupy confirmed-break slots."}
     return {"code": "wick_probes_are_not_breaks", "passed": True, "severity": "info", "detail": "No unconfirmed wick probes detected."}
 
 
@@ -419,7 +514,17 @@ def _invariant_ohcl_summary_not_range_source(active_range: Mapping[str, Any]) ->
 
 
 def _invariant_parent_child_conflict_blocks_trade(pc: Mapping[str, Any]) -> dict[str, Any]:
+    """An unresolved conflict MUST demand THESIS_ONLY.
+
+    Reachable failure: the conflict branch of _build_parent_child_context
+    stops stamping required_trade_state, which would let downstream trade
+    gating treat a conflicted graph as promotable.
+    """
     if pc.get("has_conflict"):
+        if pc.get("required_trade_state") != "THESIS_ONLY":
+            return {"code": "parent_child_conflict_blocks_trade_ready", "passed": False, "severity": "fatal",
+                    "detail": "Parent-child conflict present but required_trade_state is "
+                              f"{pc.get('required_trade_state')!r} instead of THESIS_ONLY."}
         return {"code": "parent_child_conflict_blocks_trade_ready", "passed": True, "severity": "info",
                 "detail": "Parent-child conflict present. TRADE_PLAN_READY is blocked; THESIS_ONLY required."}
     return {"code": "parent_child_conflict_blocks_trade_ready", "passed": True, "severity": "info",
@@ -534,18 +639,110 @@ def _body_close_price(item: Mapping[str, Any]) -> float | None:
     return broken + penetration if direction == "bullish" else broken - penetration
 
 
-def _protected_level(item: Mapping[str, Any] | None, kind: str) -> dict[str, Any] | None:
-    if item is None:
+def _protected_levels(
+    payload: Mapping[str, Any], external: Mapping[str, Any] | None,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Resolve each protected side from its own detector swing.
+
+    A broken swing is never copied into both slots. Exact detector state wins;
+    otherwise the latest confirmed external high and low visible at the break
+    are retained as conservative side-specific anchors.
+    """
+    swings = _flatten_swings(payload.get("swings"))
+    by_id = {str(item.get("object_id") or ""): item for item in swings}
+    state = payload.get("structure_state") or {}
+    if not isinstance(state, Mapping):
+        state = {}
+
+    direction = _direction(external)
+    # Only one side is protected in a directional leg. The opposite field in
+    # the track can be stale from the prior regime, so pair the protected side
+    # with the latest confirmed swing on the other side.
+    high_id = state.get("protected_high_id") if direction == "bearish" else state.get("last_confirmed_external_high")
+    low_id = state.get("protected_low_id") if direction == "bullish" else state.get("last_confirmed_external_low")
+    high = _swing_anchor(by_id.get(str(high_id or "")), "high", "detector_structure_state")
+    low = _swing_anchor(by_id.get(str(low_id or "")), "low", "detector_structure_state")
+
+    cutoff = _confirmed_time(external) if external else None
+    if high is None:
+        high = _latest_side_anchor(swings, "high", cutoff)
+    if low is None:
+        low = _latest_side_anchor(swings, "low", cutoff)
+
+    # Compatibility for small synthetic fixtures with no swing pool. Only the
+    # directionally protected side may fall back to break evidence.
+    if external is not None:
+        ev = external.get("evidence") or {}
+        if high is None and direction == "bearish":
+            high = _explicit_or_break_anchor(ev, "high")
+        if low is None and direction == "bullish":
+            low = _explicit_or_break_anchor(ev, "low")
+    return high, low
+
+
+def _flatten_swings(raw: Any) -> list[dict[str, Any]]:
+    groups = raw.values() if isinstance(raw, Mapping) else [raw]
+    out: list[dict[str, Any]] = []
+    for group in groups:
+        for item in group or []:
+            value = item.model_dump(mode="json") if hasattr(item, "model_dump") else item
+            if isinstance(value, Mapping):
+                out.append(dict(value))
+    return out
+
+
+def _latest_side_anchor(
+    swings: list[dict[str, Any]], side: str, cutoff: datetime | None,
+) -> dict[str, Any] | None:
+    expected_direction = "bearish" if side == "high" else "bullish"
+    eligible = []
+    for swing in swings:
+        if _direction(swing) != expected_direction or not _is_external_swing(swing):
+            continue
+        confirmed = _confirmed_time(swing)
+        if cutoff is not None and confirmed is not None and confirmed > cutoff:
+            continue
+        eligible.append(swing)
+    if not eligible:
         return None
-    ev = item.get("evidence") or {}
-    p_key = f"protected_{kind}_price" if kind in ("high", "low") else None
-    if p_key and p_key in ev:
-        return {"price": _float_or_none(ev[p_key]), "source": "evidence_protected_field"}
-    swing_id = ev.get("broken_swing_id")
+    eligible.sort(key=lambda item: str(item.get("confirmed_at") or item.get("pivot_time") or ""))
+    return _swing_anchor(eligible[-1], side, "latest_confirmed_external_swing")
+
+
+def _is_external_swing(swing: Mapping[str, Any]) -> bool:
+    scale = str(swing.get("scale") or (swing.get("evidence") or {}).get("scale_name") or "")
+    return scale in {"external", "raw_pivot_candidate_window_5"} or bool((swing.get("evidence") or {}).get("is_external"))
+
+
+def _swing_anchor(swing: Mapping[str, Any] | None, side: str, source: str) -> dict[str, Any] | None:
+    if not isinstance(swing, Mapping):
+        return None
+    price = _float_or_none(swing.get("price_high" if side == "high" else "price_low"))
+    if price is None:
+        return None
+    return {"price": price, "source": source, "swing_id": str(swing.get("object_id") or "")}
+
+
+def _explicit_or_break_anchor(ev: Mapping[str, Any], side: str) -> dict[str, Any] | None:
+    explicit = _float_or_none(ev.get(f"protected_{side}_price"))
+    if explicit is not None:
+        return {"price": explicit, "source": "evidence_protected_field", "swing_id": str(ev.get(f"protected_{side}_id") or "")}
     price = _float_or_none(ev.get("broken_price"))
-    if swing_id is None and price is None:
+    if price is None:
         return None
-    return {"price": price, "source": "broken_swing", "swing_id": str(swing_id or "")}
+    return {"price": price, "source": "legacy_directional_break_fallback", "swing_id": str(ev.get("broken_swing_id") or "")}
+
+
+def _anchors_collapsed(node: Mapping[str, Any]) -> bool:
+    high = node.get("protected_high")
+    low = node.get("protected_low")
+    if not isinstance(high, Mapping) or not isinstance(low, Mapping):
+        return False
+    high_id, low_id = str(high.get("swing_id") or ""), str(low.get("swing_id") or "")
+    high_price, low_price = _float_or_none(high.get("price")), _float_or_none(low.get("price"))
+    return bool(high_id and low_id and high_id == low_id) or (
+        high_price is not None and low_price is not None and high_price <= low_price
+    )
 
 
 def _float_or_none(value: Any) -> float | None:

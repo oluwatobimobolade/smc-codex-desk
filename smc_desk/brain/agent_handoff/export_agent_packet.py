@@ -3,7 +3,12 @@
 The packet contains everything an external AI agent (Codex, Gemini Antigravity,
 ChatGPT, Kimi, etc.) needs to reason as the SMC trader brain:
 
-  - 00_READ_ME_FIRST.md         — agent instructions
+  - 00_READ_ME_FIRST.md         — packet order and sealed bindings
+  - 00_AI_SEAT_PROFILE.md       — exact proposed AI seat profile
+  - 00_MARKET_STRUCTURE_CONSTITUTION_V2.yaml — exact doctrine snapshot
+  - 00_PERCEPTION_GAUNTLET_PROTOCOL.json — protocol-conformance contract
+  - 00_SEMANTIC_METAMORPHIC_EVIDENCE.json — mechanical mirror evidence
+  - 00_authority_manifest.json  — authority types, statuses, and hashes
   - 01_prompt_bundle.md         — full prompt system
   - 02_evidence_pack.json       — structured evidence
   - 03_chart_manifest.json      — chart file manifest with hashes
@@ -24,8 +29,16 @@ from pathlib import Path
 from typing import Any
 
 from smc_desk.brain.agent_handoff.agent_schemas import (
+    AGENT_PACKET_SCHEMA,
     AGENT_PACKET_FILES,
-    AgentPacketSchema,
+)
+from smc_desk.brain.agent_handoff.ai_seat_contract import (
+    AUTHORITY_MANIFEST_PACKET_NAME,
+    CONSTITUTION_PACKET_NAME,
+    GAUNTLET_PACKET_NAME,
+    METAMORPHIC_PACKET_NAME,
+    PROFILE_PACKET_NAME,
+    build_authority_bundle,
 )
 
 
@@ -37,71 +50,38 @@ def _hash_json(payload: Any) -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
-def _read_instructions() -> str:
-    return """# AI SMC Trader Brain — External Agent Review Packet
+def _read_instructions(authority_manifest: Mapping[str, Any]) -> str:
+    profile = authority_manifest["ai_seat_profile"]
+    constitution = authority_manifest["constitution"]
+    gauntlet = authority_manifest["gauntlet"]
+    return f"""# AI SMC Trader Brain — External Agent Review Packet V2
 
-You are being asked to act as the **AI SMC Trader Brain** for this analysis run.
+This is a hash-sealed, observe-only reasoning packet. Read files in this order:
 
-The system has already done the following:
+1. `{AUTHORITY_MANIFEST_PACKET_NAME}` — verify authority status and hashes.
+2. `{CONSTITUTION_PACKET_NAME}` — semantic doctrine; preserve pending decisions.
+3. `{PROFILE_PACKET_NAME}` — the exact AI Seat Profile governing this packet.
+4. `{GAUNTLET_PACKET_NAME}` — protocol-conformance tests, never self-scored accuracy.
+5. `02_evidence_pack.json` and the clean charts — frozen case evidence.
+6. `{METAMORPHIC_PACKET_NAME}` — mechanically mirrored OHLCV for Station 8.
+7. `09_expected_output_schema.json` — required response and ten-station exam.
 
-1. Fetched live OHLCV data (Binance USD-M, Yahoo FX, or Yahoo XAU).
-2. Built clean candle charts for each timeframe.
-3. Ran the detector pipeline to extract structure breaks, sweeps, order blocks, FVGs, and liquidity levels.
-4. Built an evidence pack with active range authority, parent-child context, and the formal structure graph.
-5. Generated this packet for your review.
+## Sealed authority bindings
 
-## Your job
+- AI Seat Profile SHA-256: `{profile['sha256']}`
+- Constitution V2 SHA-256: `{constitution['sha256']}`
+- Constitution status: `{constitution['status']}`
+- Pending doctrine decisions: `{constitution['pending_count']}`
+- Gauntlet protocol SHA-256: `{gauntlet['protocol_sha256']}`
 
-Think top-down like a disciplined intraday SMC trader:
+## Non-negotiable response contract
 
-- Use **Daily** and **4H** for HTF bias and context.
-- Use **1H** for intermediate structure and displacement quality.
-- Use **15M** for entry confirmation and POI reaction.
-- **5M** is optional refinement only. **1M is forbidden.**
-- Do not force trades. If the evidence does not support a trade-ready setup, return WATCH_ONLY, THESIS_ONLY, or REVIEW_REQUIRED.
-- Return **strict JSON only** in `official_decision_candidate.json`. Use the schema in `09_expected_output_schema.json`.
-- **Semantic anchors first, exact prices second.** Name the structural reason (e.g. "1h supply origin after 4h BSL sweep") before giving exact prices.
-- Do not invent levels. If a level is not in the evidence pack or chart, do not include it.
-- If you need more context, write `REQUEST_MORE_CONTEXT` in `requested_more_context.json`.
-
-## Reasoning order (must follow)
-
-1. daily_context
-2. 4h_context
-3. 1h_context
-4. active_range
-5. premium_discount
-6. obvious_liquidity
-7. swept_liquidity
-8. displacement_quality
-9. active_poi
-10. entry_model
-11. entry_readiness
-12. structural_invalidation
-13. model_completion_liquidity_target
-14. rr_minimum_three
-15. final_state
-
-## Guardrails (non-negotiable)
-
-- **Minimum RR = 3.0**. If RR < 3.0, do not return TRADE_PLAN_READY.
-- **No 1m entry.** 1m is forbidden.
-- **Watch states must not have entry/SL/TP/RR or trade box.**
-- **Trade-ready states must have grounded entry, stop, and target with semantic anchors.**
-- **Parent-child conflict forces direction=mixed and state=THESIS_ONLY or REVIEW_REQUIRED.**
-- **Wick probes are not confirmed breaks.**
-- **Active range must come from protected swing structure, not OHLCV summary extremes.**
-- **Do not claim live/paper execution, capital risk, or leverage.**
-
-## What to write back
-
-1. `official_decision_candidate.json` — strict JSON matching `09_expected_output_schema.json`.
-2. `agent_reasoning_summary.md` — short markdown summary of your reasoning.
-3. `annotation_plan.json` — chart labels and levels for rendering.
-4. `annotation_plan_v2` inside the decision — professional sparse SMC drawing objects: local BOS/CHoCH/IDM segments, bounded POI zones, short liquidity lines, optional dashed path, and trade box only when trade-ready.
-5. `requested_more_context.json` (optional) — if you need more data.
-
-The system will then validate your response, ground your levels in OHLCV, render the chart, and produce the final thesis.
+- Return the wrapper schema in `09_expected_output_schema.json`.
+- Complete every `exam_transcript` station with concise evidence, not private chain-of-thought.
+- A failed, unresolved, missing, ungrounded, or hash-mismatched station forces `REVIEW_REQUIRED` and strips entry/SL/TP/RR/trade annotations.
+- Record detector disagreements in `dissent_records`; never silently replace evidence.
+- Record doctrine-dependent unresolved claims in `doctrine_pending_claims`.
+- The AI seat, self-exam, and gauntlet have no promotion, signal, paper, live, or execution authority.
 """
 
 
@@ -138,9 +118,10 @@ This packet is for an **EXTERNAL_AI_AGENT**. The system does not call an LLM API
 - If 1d/4h conflicts with 1h/15m: direction=mixed, official_state=THESIS_ONLY or REVIEW_REQUIRED.
 - Final thesis must name parent timeframe, child timeframe, both biases, and the pullback/recovery relationship.
 
-## Formal structure graph
+## Formal causal structure authority
 
-- The formal_structure_graph in the evidence pack is the single authoritative source for parent-child context, active range authority, and invariant status.
+- Read formal_causal_episode_graph before formal_structure_graph. The causal episode graph is stricter and can only downgrade the older graph.
+- The formal_structure_graph remains the deterministic source for parent-child context and active-range anchors where the causal graph does not challenge them.
 - Graph invariants: internal_child_cannot_flip_parent, child_body_close_required_for_parent_break, wick_probes_are_not_breaks, active_range_from_swing_structure, ohcl_summary_not_range_source, parent_child_conflict_blocks_trade_ready.
 - If graph invariants are not PASS, the decision must be REVIEW_REQUIRED.
 - If graph says trade_promotion_blocked, TRADE_PLAN_READY is forbidden.
@@ -220,7 +201,30 @@ def export_agent_packet(
     output_dir.mkdir(parents=True, exist_ok=True)
     decision_time = decision_time or datetime.now(timezone.utc).isoformat()
 
-    (output_dir / "00_READ_ME_FIRST.md").write_text(_read_instructions(), encoding="utf-8")
+    authority_bundle = build_authority_bundle(evidence_pack)
+    authority_manifest = authority_bundle["authority_manifest"]
+    if authority_manifest["status"] != "PASS":
+        raise ValueError(
+            "Cannot export an AI agent packet with invalid authority bindings: "
+            + ", ".join(authority_manifest["violations"])
+        )
+    (output_dir / PROFILE_PACKET_NAME).write_text(authority_bundle["profile_text"], encoding="utf-8")
+    (output_dir / CONSTITUTION_PACKET_NAME).write_bytes(authority_bundle["constitution_bytes"])
+    (output_dir / GAUNTLET_PACKET_NAME).write_text(
+        json.dumps(authority_bundle["gauntlet_protocol"], indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    (output_dir / METAMORPHIC_PACKET_NAME).write_text(
+        json.dumps(authority_bundle["metamorphic_evidence"], indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
+    (output_dir / AUTHORITY_MANIFEST_PACKET_NAME).write_text(
+        json.dumps(authority_manifest, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    (output_dir / "00_READ_ME_FIRST.md").write_text(
+        _read_instructions(authority_manifest), encoding="utf-8"
+    )
     (output_dir / "01_prompt_bundle.md").write_text(_read_prompt_bundle(), encoding="utf-8")
     (output_dir / "02_evidence_pack.json").write_text(
         json.dumps(evidence_pack, indent=2, sort_keys=True, default=str), encoding="utf-8"
@@ -242,31 +246,73 @@ def export_agent_packet(
         json.dumps(candidate_levels, indent=2, sort_keys=True, default=str), encoding="utf-8"
     )
 
-    from smc_desk.brain.agent_handoff.agent_schemas import make_agent_response_template
-    (output_dir / "09_expected_output_schema.json").write_text(
-        json.dumps(make_agent_response_template(), indent=2, sort_keys=True, default=str), encoding="utf-8"
-    )
-
     (output_dir / "10_guardrails.md").write_text(_read_guardrails(), encoding="utf-8")
 
-    packet_hash = _hash_json(evidence_pack)
+    evidence_pack_hash = _hash_json(evidence_pack)
+    sealed_input_names = [
+        filename
+        for filename in AGENT_PACKET_FILES
+        if filename not in {"09_expected_output_schema.json", "run_manifest.json"}
+        and (output_dir / filename).exists()
+    ]
+    optional_5m = output_dir / "07b_clean_5m_chart.png"
+    if optional_5m.exists():
+        sealed_input_names.append(optional_5m.name)
+    input_file_hashes = {
+        filename: _hash_file(output_dir / filename)
+        for filename in sorted(set(sealed_input_names))
+    }
+    sealed_input_hash = _hash_json(input_file_hashes)
+
+    from smc_desk.brain.agent_handoff.agent_schemas import make_agent_response_template
+
+    (output_dir / "09_expected_output_schema.json").write_text(
+        json.dumps(
+            make_agent_response_template(
+                authority_manifest=authority_manifest,
+                packet_hash=sealed_input_hash,
+                decision_time=decision_time,
+            ),
+            indent=2,
+            sort_keys=True,
+            default=str,
+        ),
+        encoding="utf-8",
+    )
+
+    actual_files = list(AGENT_PACKET_FILES)
+    if optional_5m.exists():
+        actual_files.append(optional_5m.name)
     file_hashes: dict[str, str] = {}
-    for filename in AGENT_PACKET_FILES:
+    for filename in actual_files:
         path = output_dir / filename
-        if path.exists():
+        if path.exists() and filename != "run_manifest.json":
             file_hashes[filename] = _hash_file(path)
 
     manifest = {
-        "schema": "ai_smc_agent_packet_v1",
-        "packet_type": AgentPacketSchema,
+        "schema": AGENT_PACKET_SCHEMA,
+        "packet_type": AGENT_PACKET_SCHEMA,
         "symbol": symbol,
         "decision_time": decision_time,
         "exported_at": datetime.now(timezone.utc).isoformat(),
-        "files": AGENT_PACKET_FILES,
+        "files": actual_files,
         "file_hashes": file_hashes,
-        "evidence_pack_hash": packet_hash,
+        "input_file_hashes": input_file_hashes,
+        "sealed_input_hash": sealed_input_hash,
+        "evidence_pack_hash": evidence_pack_hash,
+        "authority_manifest_hash": _hash_file(output_dir / AUTHORITY_MANIFEST_PACKET_NAME),
+        "ai_seat_profile_hash": authority_manifest["ai_seat_profile"]["sha256"],
+        "constitution_hash": authority_manifest["constitution"]["sha256"],
+        "gauntlet_protocol_hash": authority_manifest["gauntlet"]["protocol_sha256"],
         "chart_count": len(chart_manifest.get("timeframes", {})),
         "timeframes": list(chart_manifest.get("timeframes", {}).keys()),
+        "authority_contract": {
+            "execution": "disabled",
+            "capital_risk": 0,
+            "observe_only": True,
+            "self_certification_allowed": False,
+            "independent_exam_validation_required": True,
+        },
     }
     (output_dir / "run_manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True, default=str), encoding="utf-8")
     return manifest

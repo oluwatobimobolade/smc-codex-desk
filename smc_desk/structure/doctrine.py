@@ -26,6 +26,10 @@ from smc_desk.data.hashing import file_sha256
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DOCTRINE_PATH = ROOT / "specs" / "MARKET_STRUCTURE_CONSTITUTION_V1.yaml"
 DEFAULT_HASH_PATH = ROOT / "specs" / "MARKET_STRUCTURE_CONSTITUTION_V1.sha256"
+EXPECTED_SCHEMA = "smc_codex_market_structure_constitution_v1"
+EXPECTED_VERSION = "1.0.0"
+PROPOSED_STATUS = "PROPOSED_DOCTRINE_DRAFT_PENDING_HUMAN_APPROVAL"
+APPROVED_STATUS = "APPROVED_MARKET_STRUCTURE_CONSTITUTION_V1"
 
 # Concepts whose definition is a decomposition rather than a structural object
 # with a price-lifecycle. The programme's "every concept" field set
@@ -88,22 +92,37 @@ def load_doctrine(
     hp = Path(hash_path)
     if not p.exists():
         raise FileNotFoundError(f"Market Structure Constitution not found: {p}")
+    if not hp.exists():
+        raise FileNotFoundError(
+            f"Market Structure Constitution hash is required and missing: {hp}"
+        )
     doc = yaml.safe_load(p.read_text(encoding="utf-8"))
+    if not isinstance(doc, Mapping):
+        raise ValueError("Market Structure Constitution must be a YAML mapping.")
     doctrine_hash = file_sha256(p)
-    if hp.exists():
-        recorded = hp.read_text(encoding="utf-8").strip()
-        if recorded and recorded != doctrine_hash:
-            raise ValueError(
-                "Market Structure Constitution hash mismatch: on-disk "
-                f"{recorded[:12]} != recomputed {doctrine_hash[:12]}. "
-                "The doctrine YAML was changed without regenerating its hash "
-                "(run the test fixture to rewrite specs/...sha256)."
-            )
+    recorded = hp.read_text(encoding="utf-8").strip()
+    if not recorded:
+        raise ValueError("Market Structure Constitution hash file is empty.")
+    if recorded != doctrine_hash:
+        raise ValueError(
+            "Market Structure Constitution hash mismatch: on-disk "
+            f"{recorded[:12]} != recomputed {doctrine_hash[:12]}. "
+            "The doctrine YAML was changed without regenerating its hash."
+        )
+    if doc.get("schema") != EXPECTED_SCHEMA:
+        raise ValueError(f"Unexpected doctrine schema: {doc.get('schema')!r}")
+    if doc.get("version") != EXPECTED_VERSION:
+        raise ValueError(f"Unexpected doctrine version: {doc.get('version')!r}")
     ap = doc.get("authority_and_provenance", {})
+    if not isinstance(ap, Mapping):
+        raise ValueError("authority_and_provenance must be a mapping.")
+    status = str(ap.get("status", ""))
+    if status not in {PROPOSED_STATUS, APPROVED_STATUS}:
+        raise ValueError(f"Unknown doctrine authority status: {status!r}")
     return DoctrineLoad(
         schema=doc.get("schema", ""),
         version=doc.get("version", ""),
-        status=ap.get("status", ""),
+        status=status,
         design_principles=tuple(doc.get("design_principles", [])),
         contested_decisions=tuple(
             ContestedDecision(
@@ -130,7 +149,7 @@ def doctrine() -> DoctrineLoad:
 
 
 def is_authoritative(load: DoctrineLoad | None = None) -> bool:
-    """True only when the Constitution is no longer PROPOSED.
+    """True only for the explicit approved status with no pending decisions.
 
     A PROPOSED doctrine may be read but never acted on as authoritative. The
     whole perception system must abstain on CERTIFIED outputs until this is
@@ -138,7 +157,11 @@ def is_authoritative(load: DoctrineLoad | None = None) -> bool:
     """
     if load is None:
         load = doctrine()
-    return load.status not in {"", "PROPOSED_DOCTRINE_DRAFT_PENDING_HUMAN_APPROVAL"}
+    return (
+        load.status == APPROVED_STATUS
+        and bool(load.contested_decisions)
+        and all(d.status == "APPROVED" for d in load.contested_decisions)
+    )
 
 
 def unresolved_contested_decisions(load: DoctrineLoad | None = None) -> list[ContestedDecision]:
@@ -170,6 +193,10 @@ def missing_structural_fields(name: str, load: DoctrineLoad | None = None) -> li
 __all__ = [
     "DEFAULT_DOCTRINE_PATH",
     "DEFAULT_HASH_PATH",
+    "EXPECTED_SCHEMA",
+    "EXPECTED_VERSION",
+    "PROPOSED_STATUS",
+    "APPROVED_STATUS",
     "DECOMPOSITION_CONCEPTS",
     "STRUCTURAL_CONCEPT_FIELDS",
     "ContestedDecision",

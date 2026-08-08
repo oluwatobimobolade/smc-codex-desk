@@ -39,8 +39,11 @@ Thumbs.db
 # Data (large files)
 /data/
 
-# Stress test outputs
-reports/
+# Stress-test scratch output only. The reports corpus itself is versioned:
+# audits, work-package reports and repair records are project memory, and an
+# earlier blanket "reports/" rule silently excluded all of them from git.
+reports/stress/
+reports/scratch/
 
 # Backtest outputs (artifacts)
 backtests/

@@ -70,6 +70,12 @@ def evaluate(
     rationale: str = "",
 ) -> InducementHypothesis:
     """Emit a hypothesis only if all five necessary conditions hold (§9.2)."""
+    if not hypothesis_id or not shallow_object_evidence_id or not deeper_object_evidence_id:
+        raise ValueError("Inducement requires hypothesis, shallow-object, and deeper-object evidence IDs.")
+    if shallow_object_evidence_id == deeper_object_evidence_id:
+        raise ValueError("Inducement shallow and deeper objects must be distinct.")
+    if not rejection_event_definition.strip():
+        raise ValueError("Inducement requires an explicit falsification event.")
     conditions = {
         "deeper_poi": has_deeper_poi,
         "intermediate_visible_liquidity": has_intermediate_visible_liquidity,
@@ -102,24 +108,27 @@ def confirm_consumption(
     intermediate_interacted: bool,
     deeper_reached: bool,
     no_contradicting_event: bool,
+    contradicting_event_observed: bool = False,
 ) -> InducementHypothesis:
     """Transition CANDIDATE -> PATH_ACTIVE -> CONSUMED.
 
     CONSUMED requires the intermediate was interacted with, the deeper POI
     was subsequently reached, and no contradicting event in between (§9.4).
     """
-    if hyp.state == InducementState.NO_HYPOTHESIS.value:
+    if hyp.state in {InducementState.NO_HYPOTHESIS.value, InducementState.CONSUMED.value, InducementState.REJECTED.value}:
         return hyp
     new_state = hyp.state
     lifecycle = tuple(hyp.lifecycle)
-    if intermediate_interacted and hyp.state == InducementState.CANDIDATE.value:
+    if contradicting_event_observed or (deeper_reached and not intermediate_interacted and hyp.state == InducementState.CANDIDATE.value):
+        new_state = InducementState.REJECTED.value
+        lifecycle = lifecycle + (InducementState.REJECTED.value,)
+    elif intermediate_interacted and hyp.state == InducementState.CANDIDATE.value:
         new_state = InducementState.PATH_ACTIVE.value
         lifecycle = lifecycle + (InducementState.PATH_ACTIVE.value,)
-    if deeper_reached and no_contradicting_event and new_state == InducementState.PATH_ACTIVE.value:
+    if deeper_reached and no_contradicting_event and not contradicting_event_observed and new_state == InducementState.PATH_ACTIVE.value:
         new_state = InducementState.CONSUMED.value
         lifecycle = lifecycle + (InducementState.CONSUMED.value,)
-    if not (intermediate_interacted and deeper_reached and no_contradicting_event):
-        # A contradicting event or deeper reached without intermediate -> reject
+    elif new_state == InducementState.PATH_ACTIVE.value and not no_contradicting_event:
         new_state = InducementState.REJECTED.value
         lifecycle = lifecycle + (InducementState.REJECTED.value,)
     return InducementHypothesis(

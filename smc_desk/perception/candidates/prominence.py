@@ -62,7 +62,7 @@ def detect(
                 out.append(
                     _make(
                         df, timeframe, i, float(highs[i]), "high", prom, atr_arr[i],
-                        _survival(closes, highs[i], closes[i:], "high"),
+                        _survival(closes, highs[i], closes[i:], "high"), half,
                     )
                 )
             continue
@@ -76,7 +76,7 @@ def detect(
                 out.append(
                     _make(
                         df, timeframe, i, float(lows[i]), "low", prom, atr_arr[i],
-                        _survival(closes, lows[i], closes[i:], "low"),
+                        _survival(closes, lows[i], closes[i:], "low"), half,
                     )
                 )
     return out
@@ -99,7 +99,8 @@ def _survival(closes: "list", level: float, future_closes: "list", kind: str) ->
     return count
 
 
-def _make(df, timeframe, i, price, pivot_type, prominence_atr_val, atr_at_i, survival):
+def _make(df, timeframe, i, price, pivot_type, prominence_atr_val, atr_at_i, survival, bars_right):
+    confirmed_at = iso_from_index(df, i + bars_right)
     return SwingCandidate(
         candidate_id=candidate_id(GENERATOR_PROMINENCE, timeframe, iso_from_index(df, i), pivot_type),
         timeframe=timeframe,
@@ -107,11 +108,14 @@ def _make(df, timeframe, i, price, pivot_type, prominence_atr_val, atr_at_i, sur
         pivot_time=iso_from_index(df, i),
         pivot_price=float(price),
         generator_source=GENERATOR_PROMINENCE,
+        confirmed_at=confirmed_at,
+        available_at=confirmed_at,
+        generator_sources=(GENERATOR_PROMINENCE,),
         scale="local",
         prominence=float(round(prominence_atr_val, 4)),
         volatility_normalized_move=None,
-        bars_left=5,
-        bars_right=5,
+        bars_left=bars_right,
+        bars_right=bars_right,
         survival_bars=int(survival),
         subordinate_pivot_count=0,  # enriched by atlas after fusion
         lifecycle="CANDIDATE",

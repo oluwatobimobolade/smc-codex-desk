@@ -16,6 +16,7 @@ from smc_desk.brain.annotation_evidence import (
     prices_match,
     zones_match,
 )
+from smc_desk.brain.annotation_geometry import GEOMETRY_FIELDS, geometry_hash
 
 
 @dataclass(frozen=True)
@@ -64,7 +65,7 @@ MAX_V2_OBJECTS = {
     "context_chart": 5,
     "watch_chart": 7,
     "review_chart": 7,
-    "trade_plan_chart": 9,
+    "trade_plan_chart": 8,
     "debug_chart": 99,
 }
 
@@ -92,8 +93,10 @@ def validate_annotation_plan_v2(
     for obj in objects:
         anchors = _anchors_for(obj, evidence_index)
         _check_common_object(obj, evidence_index, decision, issues)
+        _check_evidence_contract_links(obj, evidence_pack, issues)
+        _check_geometry_contract(obj, anchors, issues)
         _check_geometry(obj, decision, evidence_pack, anchors, issues)
-        _check_type_semantics(obj, anchors, decision, issues)
+        _check_type_semantics(obj, anchors, decision, evidence_pack, issues)
         _check_trade_gating(obj, decision, issues)
         _check_parent_child_conflict(obj, decision, has_parent_child_conflict, issues)
 
@@ -136,6 +139,50 @@ def _check_common_object(
             _issue(issues, "annotation_v2_path_without_active_poi", "A path projection requires a certified active POI.")
 
 
+def _check_evidence_contract_links(
+    obj: AnnotationDrawingObject,
+    evidence_pack: Mapping[str, Any],
+    issues: list[AnnotationPlanIssue],
+) -> None:
+    registry = evidence_pack.get("object_evidence_contracts")
+    if not isinstance(registry, Mapping) or (registry.get("authority_contract") or {}).get("enforcement_ready") is not True:
+        return
+    contracts = registry.get("contracts")
+    object_index = registry.get("object_id_index")
+    if not isinstance(contracts, Mapping) or not isinstance(object_index, Mapping):
+        _issue(issues, "annotation_v2_evidence_contract_registry_invalid", "Evidence contract registry is malformed.")
+        return
+    expected = {str(value) for value in obj.evidence_object_ids}
+    linked_tokens = {str(value) for value in obj.evidence_contract_ids}
+    resolved: set[str] = set()
+    for token in linked_tokens:
+        if token in contracts:
+            resolved.add(token)
+            continue
+        candidates = [
+            str(contract_id)
+            for contract_id in object_index.get(token, [])
+            if str((contracts.get(str(contract_id)) or {}).get("timeframe")) in {str(obj.timeframe), "unknown"}
+        ]
+        resolved.update(candidates)
+    resolved_object_ids = {
+        str((contracts.get(contract_id) or {}).get("object_id"))
+        for contract_id in resolved
+    }
+    if not expected.issubset(resolved_object_ids):
+        _issue(issues, "annotation_v2_evidence_contract_links_mismatch", f"{obj.label} evidence contracts do not match evidence objects.")
+    missing = sorted(token for token in linked_tokens if token not in contracts and token not in object_index)
+    if missing:
+        _issue(issues, "annotation_v2_evidence_contract_missing", f"{obj.label} lacks contracts for {missing}.")
+    incomplete = sorted(
+        contract_id
+        for contract_id in resolved
+        if str((contracts[contract_id] or {}).get("contract_status")) != "COMPLETE"
+    )
+    if incomplete:
+        _issue(issues, "annotation_v2_evidence_contract_incomplete", f"{obj.label} references incomplete contracts {incomplete}.")
+
+
 def _check_geometry(
     obj: AnnotationDrawingObject,
     decision: AISMCDecision,
@@ -168,6 +215,112 @@ def _check_geometry(
         _check_trade_box_geometry(obj, decision, issues)
 
 
+def _check_geometry_contract(
+    obj: AnnotationDrawingObject,
+    anchors: list[AnnotationEvidenceAnchor],
+    issues: list[AnnotationPlanIssue],
+) -> None:
+    evidence_model = obj.evidence_geometry
+    display_model = obj.display_geometry
+    if evidence_model is None or display_model is None:
+        _issue(issues, "annotation_v2_geometry_contract_missing", f"{obj.label} lacks evidence/display geometry.")
+        return
+    evidence = evidence_model.model_dump(mode="json")
+    display = display_model.model_dump(mode="json")
+    expected_hash = geometry_hash(evidence)
+    if evidence.get("geometry_hash") != expected_hash:
+        _issue(issues, "annotation_v2_evidence_geometry_hash_mismatch", f"{obj.label} evidence geometry hash is invalid.")
+    if display.get("derived_from_evidence_hash") != expected_hash:
+        _issue(issues, "annotation_v2_display_geometry_not_derived", f"{obj.label} display geometry is not linked to immutable evidence geometry.")
+    if evidence.get("anchor_mode") == "legacy_compatibility" and obj.object_type not in {"trade_box", "path_projection"}:
+        _issue(issues, "annotation_v2_legacy_geometry_uncertified", f"{obj.label} uses compatibility geometry and cannot be certified.")
+    source_ids = {str(value) for value in evidence.get("source_object_ids") or []}
+    object_ids = {str(value) for value in obj.evidence_object_ids}
+    if source_ids != object_ids:
+        _issue(issues, "annotation_v2_geometry_source_ids_mismatch", f"{obj.label} geometry source IDs differ from evidence_object_ids.")
+
+    for key in ("price", "price_low", "price_high"):
+        if not _same_optional_number(evidence.get(key), display.get(key)):
+            _issue(issues, "annotation_v2_display_changed_price", f"{obj.label} display geometry changed evidence {key}.")
+        if not _same_optional_number(getattr(obj, key), display.get(key)):
+            _issue(issues, "annotation_v2_top_level_not_display_geometry", f"{obj.label} top-level {key} does not match display geometry.")
+    for key in ("start_index", "end_index", "start_time", "end_time"):
+        if getattr(obj, key) != display.get(key):
+            _issue(issues, "annotation_v2_top_level_not_display_geometry", f"{obj.label} top-level {key} does not match display geometry.")
+
+    rule = str(display.get("clipping_rule") or "")
+    if rule == "none":
+        if any(evidence.get(key) != display.get(key) for key in GEOMETRY_FIELDS):
+            _issue(issues, "annotation_v2_unreported_geometry_change", f"{obj.label} changed geometry while declaring clipping_rule=none.")
+    elif rule == "confirmation_side_max_18_bars":
+        _check_confirmation_side_clip(obj.label, evidence, display, issues)
+    elif rule == "local_span_max_12_bars":
+        start = display.get("start_index")
+        end = display.get("end_index")
+        if start is None or end is None or not (0 <= int(end) - int(start) <= 12):
+            _issue(issues, "annotation_v2_local_display_span_invalid", f"{obj.label} local display span must be at most 12 bars.")
+    elif rule == "legacy_unverified" and obj.object_type not in {"trade_box", "path_projection"}:
+        _issue(issues, "annotation_v2_legacy_display_geometry", f"{obj.label} has unverified legacy display geometry.")
+
+    if evidence.get("anchor_mode") == "exact_source" and anchors:
+        anchor = anchors[0]
+        _check_evidence_geometry_matches_anchor(obj.label, evidence, anchor, issues)
+
+
+def _check_confirmation_side_clip(
+    label: str,
+    evidence: Mapping[str, Any],
+    display: Mapping[str, Any],
+    issues: list[AnnotationPlanIssue],
+) -> None:
+    if evidence.get("end_index") is not None and display.get("end_index") is not None:
+        source_start = int(evidence["start_index"])
+        source_end = int(evidence["end_index"])
+        display_start = int(display["start_index"])
+        display_end = int(display["end_index"])
+        if display_end != source_end or not (source_start <= display_start <= display_end) or display_end - display_start > 18:
+            _issue(issues, "annotation_v2_invalid_confirmation_side_clip", f"{label} display clip is not a bounded confirmation-side subset.")
+        return
+    if evidence.get("end_time") is not None and display.get("end_time") is not None:
+        if display.get("end_time") != evidence.get("end_time") or display.get("start_time") is None:
+            _issue(issues, "annotation_v2_invalid_confirmation_side_clip", f"{label} timestamp clip must preserve the confirmation anchor.")
+        return
+    _issue(issues, "annotation_v2_invalid_confirmation_side_clip", f"{label} clip cannot be reconstructed from source geometry.")
+
+
+def _check_evidence_geometry_matches_anchor(
+    label: str,
+    evidence: Mapping[str, Any],
+    anchor: AnnotationEvidenceAnchor,
+    issues: list[AnnotationPlanIssue],
+) -> None:
+    index_grounded = (
+        evidence.get("start_index") is not None
+        and evidence.get("end_index") is not None
+        and evidence.get("start_index") == anchor.start_index
+        and evidence.get("end_index") == anchor.end_index
+    )
+    keys = ("start_index", "end_index") if index_grounded else ("start_time", "end_time")
+    for key in keys:
+        expected = getattr(anchor, key)
+        actual = evidence.get(key)
+        if expected is not None and actual != expected:
+            _issue(issues, "annotation_v2_evidence_geometry_anchor_mismatch", f"{label} evidence {key} does not match source anchor.")
+    expected_price = anchor.exact_price
+    if expected_price is not None and not _same_optional_number(evidence.get("price"), expected_price):
+        _issue(issues, "annotation_v2_evidence_geometry_anchor_mismatch", f"{label} evidence price does not match source anchor.")
+    if expected_price is None and anchor.price_low is not None and not _same_optional_number(evidence.get("price_low"), anchor.price_low):
+        _issue(issues, "annotation_v2_evidence_geometry_anchor_mismatch", f"{label} evidence price_low does not match source anchor.")
+    if expected_price is None and anchor.price_high is not None and not _same_optional_number(evidence.get("price_high"), anchor.price_high):
+        _issue(issues, "annotation_v2_evidence_geometry_anchor_mismatch", f"{label} evidence price_high does not match source anchor.")
+
+
+def _same_optional_number(left: Any, right: Any) -> bool:
+    if left is None or right is None:
+        return left is None and right is None
+    return prices_match(float(left), float(right), basis_points=0.01)
+
+
 def _chart_rows(evidence_pack: Mapping[str, Any], timeframe: str) -> int | None:
     windows = evidence_pack.get("ohlcv_windows") or {}
     if isinstance(windows, Mapping) and isinstance(windows.get(timeframe), list):
@@ -183,6 +336,7 @@ def _check_type_semantics(
     obj: AnnotationDrawingObject,
     anchors: list[AnnotationEvidenceAnchor],
     decision: AISMCDecision,
+    evidence_pack: Mapping[str, Any],
     issues: list[AnnotationPlanIssue],
 ) -> None:
     referenced_types = {anchor.evidence_type for anchor in anchors}
@@ -201,9 +355,12 @@ def _check_type_semantics(
         if structure is None:
             _issue(issues, "annotation_v2_structure_requires_structure_evidence", f"{obj.label} has no confirmed structure-break evidence.")
         else:
-            expected_kind = str(structure.kind or "").lower()
+            episode_event_type = _episode_event_type_for_object(evidence_pack, structure.object_id)
+            expected_kind = _expected_structure_kind(episode_event_type, str(structure.kind or "").lower())
             if expected_kind in {"bos", "choch"} and obj.kind != expected_kind:
                 _issue(issues, "annotation_v2_structure_kind_mismatch", f"{obj.label} must match its {expected_kind.upper()} evidence.")
+            if expected_kind == "structure" and obj.kind != "structure":
+                _issue(issues, "annotation_v2_structure_kind_mismatch", f"{obj.label} must use generic structure kind for {episode_event_type}.")
             expected_scope = structure.structure_scope or "external"
             if obj.structure_scope != expected_scope:
                 _issue(issues, "annotation_v2_structure_scope_mismatch", f"{obj.label} must declare structure_scope={expected_scope}.")
@@ -218,6 +375,29 @@ def _check_type_semantics(
                 _issue(issues, "annotation_v2_generic_poi_not_active", f"{obj.label} can use kind=poi only for the certified active POI.")
         elif obj.kind != poi.evidence_type:
             _issue(issues, "annotation_v2_poi_kind_mismatch", f"{obj.label} is {obj.kind}, but evidence is {poi.evidence_type}.")
+
+
+def _episode_event_type_for_object(evidence_pack: Mapping[str, Any], object_id: str) -> str | None:
+    graph = evidence_pack.get("formal_causal_episode_graph") or {}
+    timeframes = graph.get("timeframes") if isinstance(graph, Mapping) else None
+    for node in timeframes.values() if isinstance(timeframes, Mapping) else []:
+        if not isinstance(node, Mapping):
+            continue
+        for episode in node.get("episodes", []) or []:
+            if isinstance(episode, Mapping) and str(episode.get("structure_event_id") or "") == object_id:
+                return str(episode.get("event_type") or "") or None
+    return None
+
+
+def _expected_structure_kind(event_type: str | None, fallback_kind: str) -> str:
+    token = str(event_type or "")
+    if token == "INITIAL_DIRECTION_BREAK" or "MSS" in token:
+        return "structure"
+    if "CHOCH" in token:
+        return "choch"
+    if "BOS" in token:
+        return "bos"
+    return fallback_kind
 
 
 def _check_trade_gating(
@@ -275,7 +455,13 @@ def _check_structure_geometry(
     expected = anchor.exact_price
     if not prices_match(obj.price, expected):
         _issue(issues, "annotation_v2_structure_price_mismatch", f"{obj.label} price does not match the broken swing level.")
-    _check_anchor_span(obj, anchor, "annotation_v2_structure_span_mismatch", issues)
+    _check_anchor_span(
+        obj,
+        anchor,
+        "annotation_v2_structure_span_mismatch",
+        issues,
+        allow_confirmation_side_clip=True,
+    )
 
 
 def _check_poi_geometry(
@@ -308,7 +494,7 @@ def _check_liquidity_geometry(
     anchors: list[AnnotationEvidenceAnchor],
     issues: list[AnnotationPlanIssue],
 ) -> None:
-    anchor = _first_anchor(anchors, "liquidity", "active_range")
+    anchor = _first_anchor(anchors, "liquidity", "active_range", "inducement", "sweep")
     if anchor is None:
         _issue(issues, "annotation_v2_liquidity_requires_liquidity_evidence", f"{obj.label} has no liquidity or active-range evidence.")
         return
@@ -343,12 +529,20 @@ def _check_anchor_span(
     issues: list[AnnotationPlanIssue],
     *,
     allow_unindexed: bool = False,
+    allow_confirmation_side_clip: bool = False,
 ) -> None:
-    if obj.start_index is None or obj.end_index is None:
+    geometry = obj.evidence_geometry
+    if geometry is not None and geometry.anchor_mode == "exact_source":
+        start_index = geometry.start_index
+        end_index = geometry.end_index
+    else:
+        start_index = obj.start_index
+        end_index = obj.end_index
+    if start_index is None or end_index is None:
         return
     if anchor.start_index is None or anchor.end_index is None:
         if not allow_unindexed:
             _issue(issues, code, f"{obj.label} cannot be anchored to a visible source candle.")
         return
-    if abs(obj.start_index - anchor.start_index) > 2 or abs(obj.end_index - anchor.end_index) > 2:
+    if abs(start_index - anchor.start_index) > 2 or abs(end_index - anchor.end_index) > 2:
         _issue(issues, code, f"{obj.label} span is not anchored to the source object’s pivot and confirmation candles.")
