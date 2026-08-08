@@ -1,0 +1,19 @@
+ M governance/CORE_MEMORY.md
+ M governance/CURRENT_STATE.yaml
+ M governance/NEXT_ACTIONS.yaml
+ M governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json
+ M governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/final_report.md
+ M smc_desk/brain/ai_smc_consistency_validator.py
+ M smc_desk/brain/annotation_candidate_composer.py
+ M smc_desk/brain/annotation_evidence.py
+ M smc_desk/brain/annotation_plan_validator.py
+ M smc_desk/brain/annotation_visual_critic.py
+ M smc_desk/colleague/orchestrator_v3.py
+ M smc_desk/rendering/smc_trader_annotation_renderer.py
+ M tests/test_wp0041_professional_annotation_planner.py
+ M tests/test_wp0041a_annotation_integrity_repair.py
+ M tools/run_live_ai_smc_full_system.py
+?? foundation_programme/
+?? tests/test_offline_full_system_xauusd.py
+?? tests/test_wp0024_partial_htf_rejection.py
+?? tools/run_offline_full_system_xauusd.py

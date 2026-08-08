@@ -52,7 +52,7 @@ calibration.
 - Upgraded critic to graph challenger: reads graph first, can ONLY downgrade, NEVER promote.
 - 2026-07-07 audit repair: graph `signal_allowed` is always false; `invariant_passed` carries graph health without implying execution permission. Child parent-break logic now requires body close beyond parent protected level, stale child breaks are ignored, wick probes remain informational unless promoted, and structure-map headers no longer overlap.
 - 20 WP-0040 tests, all green. Fresh observe-only smoke on BTCUSDT + SUIUSDT passed (THESIS_ONLY, graph conflict, invariants PASS, trade promotion blocked).
-- Test suite: 735 passed, 1 skipped.
+- Historical WP-0040 completion validation: 735 passed, 1 skipped. The current repository count is recorded under WP-0041A below.
 
 **WP-0041 Professional AI SMC Annotation Planner (2026-07-09):** AI-directed professional markup under graph authority.
 - Added `annotation_plan_v2` as the professional SMC drawing instruction layer beside legacy labels/levels.
@@ -72,7 +72,10 @@ calibration.
 - Live runner wired to `compose_local_annotation_plan_v2` so live path produces evidence-grounded V2 markup instead of generic range decoration.
 - V2 `trade_box` geometry verified against validated entry/stop/target plans within tolerance; legacy text is suppressed.
 - Adversarial tests cover: moved-BOS price/span mismatch, internal-as-external relabel, path-without-active-POI, native V2 trade box, and visual-critic overlap cleanup.
-- Validation: 6 WP-0041A focused tests passed, WP-0041+WP-0041A combined 10 passed, affected suite 85 passed, full suite 745 passed / 1 skipped (baseline 740 + 5 new adversarial tests).
+- 2026-07-10 re-audit added confirmation/lifecycle anchors, wick-probe rejection, evidence-grounded active-POI selection, critic-enforced official downgrade, empty-V2 legacy suppression, bounded one-candle POI display, and decision-time-correct offline XAU replay.
+- A final coordinate audit found that evidence indices used 120 candles while the official chart used 240. Official rendering now uses the evidence-window length, timestamp geometry overrides raw indices, and out-of-window evidence cannot snap to an edge. POI lifecycle is independently replayed from subsequent candles because order-block detector lifecycle is incomplete.
+- The final live deterministic GBPUSD smoke mapped a fresh watch-only 15m OB at its true July 10 origin, explicitly recorded the bullish-HTF/bearish-active-range conflict, rendered only a bounded OB plus local BOS/BSL, and kept entry/SL/TP/trade box absent. The visual critic passed.
+- Validation after re-audit: 12 WP-0041A tests passed, WP-0041+WP-0041A combined 17 passed, affected integrity suite 126 passed, and the full repository suite passed 760 / skipped 1.
 
 **Pipeline:** Live/Historical OHLCV → PEV2 (15m/1H/4H/1D) → Event Ledger → MTF Graph & Parent-Child Guard → Formal Structure Graph (AUTHORITATIVE) → Strategy-State Engine & POI Refinement → Evidence Graph → Decision.
 

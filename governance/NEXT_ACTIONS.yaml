@@ -310,8 +310,8 @@ next_actions:
     priority: 41
     title: Annotation integrity repair — evidence anchoring, real visual critic, sparse renderer, V2 trade-box ownership
     owner: Market Colleague Architect
-    status: COMPLETE_ACCEPTED_FULL_SYSTEM_VALIDATED
-    gate: 745_tests_passing_adversarial_evidence_anchor_visual_critic_validated
+    status: COMPLETE_ACCEPTED_REAUDITED_20260710
+    gate: 760_tests_passing_annotation_integrity_coordinate_and_decision_time_truth_validated
     evidence_required:
       - governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/final_report.md
       - governance/WORK_PACKAGES/WP-0041A-ANNOTATION-INTEGRITY-REPAIR/TEST_REPORT.json
@@ -320,12 +320,25 @@ next_actions:
       - smc_desk/brain/annotation_candidate_composer.py (evidence-grounded selector)
       - smc_desk/brain/annotation_visual_critic.py (downgrade-only critic)
       - tests/test_wp0041a_annotation_integrity_repair.py (adversarial cases)
+      - tests/test_wp0024_partial_htf_rejection.py (forming HTF candle exclusion)
+      - tests/test_offline_full_system_xauusd.py (offline cutoff and OHLC truth contract)
+      - analysis_runs/WP0041A_REAUDIT_20260710/LIVE_FINAL_VERIFIED/LIVE_FULL_SYSTEM_AI_SMC_V3_20260710_082247/GBPUSD/
+      - analysis_runs/WP0041A_REAUDIT_20260710/OFFLINE_FULL_SYSTEM_XAUUSD_STALE_20260710_082328/
     completed_scope:
       - drawn price/span/scope/kind/type mechanically verified against detector + graph anchors
       - static self-review replaced with downgrade-only visual critic saved as annotation_visual_review.json
       - renderer suppresses generic banners/footer/explanatory text when level_source=annotation_plan_v2
       - live planner wired to evidence-grounded candidate composer
       - V2 trade_box geometry verified against validated entry/stop/target plans
+      - wick-only and unconfirmed structure cannot be drawn as BOS or CHoCH
+      - unconfirmed, terminal, invalidated, or fully mitigated POIs cannot be rendered as active zones
+      - visual critic REVIEW_REQUIRED is an official hard downgrade that strips trade levels
+      - active watch POI selection is evidence-grounded and cannot create entry, stop, target, or execution authority
+      - empty V2 plans suppress legacy labels, levels, banners, and generic path clutter
+      - stale offline XAU replay trims canonical 15m at decision time and derives completed HTFs only
+      - official chart length equals the evidence window and timestamp geometry overrides raw indices
+      - out-of-window evidence cannot snap to a chart edge or pass validation
+      - subsequent candles independently reconstruct POI freshness, partial mitigation, consumption, and invalidation
     prohibited_claims:
       - WP-0041A creates no trading edge, execution authority, or live readiness
       - passing tests means code behaved as specified; it does not prove market correctness

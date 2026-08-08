@@ -212,25 +212,40 @@ def run_ai_smc_orchestrator_v3(
     chart_manifest: dict[str, Any] = {"status": "disabled"}
     if render_charts:
         official_chart_path = root / "14_clean_annotation_render" / f"{symbol}_official_ai_annotation.png"
+        evidence_rows = len((evidence_pack.get("ohlcv_windows") or {}).get("15m") or []) or None
+        official_chart_df = _chart_df(timeframe_dfs, tail_rows=evidence_rows)
         scene = render_smc_trader_annotation_chart(
-            _chart_df(timeframe_dfs),
+            official_chart_df,
             validation_result,
             official_chart_path,
             timeframe="15m",
         )
-        chart_manifest = {
-            "status": "PASS",
-            "chart_path": str(official_chart_path),
-            "scene": scene,
-            "source": "validated_ai_annotation_plan",
-        }
-        _write_json(root / "14_clean_annotation_render" / "annotation_manifest.json", chart_manifest)
         visual_review = scene.get("visual_critic") or {
             "schema": "professional_smc_annotation_visual_review_v1",
             "status": "NOT_AVAILABLE",
             "critic_authority": "downgrade_or_cleanup_only",
             "issues": [],
         }
+        reviewed_result = apply_visual_critic_authority(validation_result, visual_review)
+        if reviewed_result.status != validation_result.status:
+            validation_result = reviewed_result
+            official_decision = validation_result.official_decision
+            _write_json(root / "12_ai_consistency_validation" / "validation_result.json", validation_result.model_dump(mode="json", by_alias=True))
+            _write_json(root / "13_official_ai_decision" / "official_decision.json", official_decision)
+            scene = render_smc_trader_annotation_chart(
+                official_chart_df,
+                validation_result,
+                official_chart_path,
+                timeframe="15m",
+            )
+            visual_review = scene.get("visual_critic") or visual_review
+        chart_manifest = {
+            "status": "PASS" if visual_review.get("status") != "REVIEW_REQUIRED" else "REVIEW_REQUIRED",
+            "chart_path": str(official_chart_path),
+            "scene": scene,
+            "source": "validated_ai_annotation_plan",
+        }
+        _write_json(root / "14_clean_annotation_render" / "annotation_manifest.json", chart_manifest)
         _write_json(root / "14_clean_annotation_render" / "annotation_visual_review.json", visual_review)
         annotation_validation = validate_annotation_plan_v2(validation_result.decision, evidence_pack)
         annotation_validation_payload = annotation_validation_to_dict(annotation_validation)
@@ -489,11 +504,11 @@ def _status(*, provider_result: LLMCompletionResult, validation_result: Validati
     return f"{workflow}:{analysis}"
 
 
-def _chart_df(timeframe_dfs: Mapping[str, pd.DataFrame]) -> pd.DataFrame:
+def _chart_df(timeframe_dfs: Mapping[str, pd.DataFrame], *, tail_rows: int | None = None) -> pd.DataFrame:
     for tf in ("15m", "5m", "1h", "4h", "1d"):
         df = timeframe_dfs.get(tf)
         if df is not None:
-            return df.tail(240).copy()
+            return df.tail(tail_rows or 240).copy()
     raise ValueError("No dataframe available for official chart rendering.")
 
 
@@ -560,6 +575,35 @@ def _annotation_self_review_markdown(
         for issue in critic_issues:
             lines.append(f"- `{issue.get('code')}`: {issue.get('message')}")
     return "\n".join(lines) + "\n"
+
+
+def apply_visual_critic_authority(
+    validation_result: ValidationResult,
+    visual_review: Mapping[str, Any],
+) -> ValidationResult:
+    """Enforce the critic's one-way authority: keep state or downgrade only."""
+    if visual_review.get("status") != "REVIEW_REQUIRED" or validation_result.status == "REVIEW_REQUIRED":
+        return validation_result
+    messages = [
+        str(issue.get("message"))
+        for issue in visual_review.get("issues", []) or []
+        if isinstance(issue, Mapping) and issue.get("message")
+    ]
+    issue = ValidationIssue(
+        code="annotation_visual_critic_veto",
+        severity="hard",
+        message="; ".join(messages) or "The downgrade-only annotation visual critic rejected the official scene.",
+    )
+    issues = [*validation_result.issues, issue]
+    official = strip_trade_plan_for_review(validation_result.official_decision, issues)
+    return ValidationResult(
+        status="REVIEW_REQUIRED",
+        decision=validation_result.decision,
+        official_decision=official,
+        issues=issues,
+        smc_model_validity=validation_result.smc_model_validity,
+        trade_plan_validity="failed",
+    )
 
 
 def _report_markdown(report: Mapping[str, Any]) -> str:

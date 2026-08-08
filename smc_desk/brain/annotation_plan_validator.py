@@ -12,6 +12,7 @@ from smc_desk.brain.ai_smc_trader_brain import AISMCDecision, AnnotationDrawingO
 from smc_desk.brain.annotation_evidence import (
     AnnotationEvidenceAnchor,
     build_annotation_evidence_index,
+    observed_poi_state,
     prices_match,
     zones_match,
 )
@@ -160,7 +161,7 @@ def _check_geometry(
     if obj.object_type == "structure_segment":
         _check_structure_geometry(obj, anchors, issues)
     elif obj.object_type == "poi_zone":
-        _check_poi_geometry(obj, anchors, issues)
+        _check_poi_geometry(obj, anchors, evidence_pack, issues)
     elif obj.object_type == "liquidity_line":
         _check_liquidity_geometry(obj, anchors, issues)
     elif obj.object_type == "trade_box":
@@ -267,6 +268,10 @@ def _check_structure_geometry(
     anchor = _first_anchor(anchors, "structure")
     if anchor is None:
         return
+    if anchor.start_index is None or anchor.end_index is None:
+        _issue(issues, "annotation_v2_evidence_outside_visible_window", f"{obj.label} structure evidence is outside the chart evidence window.")
+    if anchor.confirmation_status != "confirmed" or anchor.is_wick_only_probe:
+        _issue(issues, "annotation_v2_structure_not_confirmed", f"{obj.label} references a wick probe or unconfirmed structure candidate.")
     expected = anchor.exact_price
     if not prices_match(obj.price, expected):
         _issue(issues, "annotation_v2_structure_price_mismatch", f"{obj.label} price does not match the broken swing level.")
@@ -276,11 +281,23 @@ def _check_structure_geometry(
 def _check_poi_geometry(
     obj: AnnotationDrawingObject,
     anchors: list[AnnotationEvidenceAnchor],
+    evidence_pack: Mapping[str, Any],
     issues: list[AnnotationPlanIssue],
 ) -> None:
     anchor = _first_anchor(anchors, "order_block", "fvg")
     if anchor is None:
         return
+    if anchor.start_index is None or anchor.end_index is None:
+        _issue(issues, "annotation_v2_evidence_outside_visible_window", f"{obj.label} POI evidence is outside the chart evidence window.")
+    if anchor.confirmation_status != "confirmed":
+        _issue(issues, "annotation_v2_poi_not_confirmed", f"{obj.label} references an unconfirmed POI candidate.")
+    if anchor.activity_status == "terminal" or anchor.mitigation_status in {"full", "invalidated"}:
+        _issue(issues, "annotation_v2_poi_not_active", f"{obj.label} references a consumed or invalidated POI.")
+    observed_state = observed_poi_state(anchor, evidence_pack)
+    if observed_state in {"consumed", "invalidated"}:
+        _issue(issues, "annotation_v2_poi_observed_consumed", f"{obj.label} was {observed_state} by subsequent visible candles.")
+    elif observed_state == "unverifiable":
+        _issue(issues, "annotation_v2_poi_lifecycle_unverifiable", f"{obj.label} lifecycle cannot be reconstructed inside the visible evidence window.")
     if not zones_match(obj.price_low, obj.price_high, anchor.price_low, anchor.price_high):
         _issue(issues, "annotation_v2_poi_price_mismatch", f"{obj.label} zone does not match the certified POI bounds.")
     _check_anchor_span(obj, anchor, "annotation_v2_poi_span_mismatch", issues)

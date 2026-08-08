@@ -59,11 +59,12 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
         raise ValueError("trade_plan_chart requires TRADE_PLAN_READY.")
     legacy_levels = list(annotation.get("levels") or [])
     annotation_plan_v2 = decision.get("annotation_plan_v2") or {}
-    drawing_objects = list(annotation_plan_v2.get("objects") or []) if isinstance(annotation_plan_v2, Mapping) else []
-    if drawing_objects:
+    v2_present = isinstance(annotation_plan_v2, Mapping) and annotation_plan_v2.get("schema") == "professional_smc_annotation_plan_v2"
+    drawing_objects = list(annotation_plan_v2.get("objects") or []) if v2_present else []
+    if v2_present:
         labels = []
     visible_drawing_objects = _select_visible_drawing_objects(drawing_objects, chart_template)
-    levels = _drawing_objects_to_levels(visible_drawing_objects) if drawing_objects else legacy_levels
+    levels = _drawing_objects_to_levels(visible_drawing_objects) if v2_present else legacy_levels
     visible_labels = _select_visible_labels(labels, chart_template)
     visible_levels = _select_visible_levels(levels, chart_template)
     return {
@@ -78,19 +79,19 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
         "legacy_labels": legacy_labels,
         "levels": levels,
         "legacy_levels": legacy_levels,
-        "annotation_plan_v2": annotation_plan_v2 if drawing_objects else None,
+        "annotation_plan_v2": annotation_plan_v2 if v2_present else None,
         "drawing_objects": drawing_objects,
         "visible_drawing_objects": visible_drawing_objects,
         "drawing_object_count": len(drawing_objects),
         "visible_drawing_object_count": len(visible_drawing_objects),
-        "level_source": "annotation_plan_v2" if drawing_objects else "annotation_plan",
+        "level_source": "annotation_plan_v2" if v2_present else "annotation_plan",
         "visible_labels": visible_labels,
         "visible_levels": visible_levels,
         "label_count": len(labels),
         "label_limit": label_limit,
         "visible_label_count": len(visible_labels),
         "hidden_label_count": max(0, len(labels) - len(visible_labels)),
-        "legacy_labels_suppressed": bool(drawing_objects and legacy_labels),
+        "legacy_labels_suppressed": bool(v2_present and legacy_labels),
         "visible_level_count": len(visible_levels),
         "hidden_level_count": max(0, len(levels) - len(visible_levels)),
         "display_contract": "trader_markup_sparse",
@@ -176,7 +177,7 @@ def render_smc_trader_annotation_chart(
             _draw_trade_projection(ax, scene, levels, n)
     if scene.get("visible_drawing_objects"):
         _draw_v2_path_objects(ax, scene["visible_drawing_objects"], n)
-    elif scene["chart_template"] == "watch_chart":
+    elif scene["level_source"] != "annotation_plan_v2" and scene["chart_template"] == "watch_chart":
         # Draw path arrows for watch thesis
         direction = decision.get("direction")
         active_range = decision.get("active_range") or {}
@@ -341,9 +342,9 @@ def _resolve_scene_time_geometry(scene: Mapping[str, Any], df: pd.DataFrame) -> 
             if not isinstance(raw, Mapping):
                 continue
             item = dict(raw)
-            if item.get("start_index") is None and item.get("start_time"):
+            if item.get("start_time"):
                 item["start_index"] = _timestamp_index(stamps, item.get("start_time"))
-            if item.get("end_index") is None and item.get("end_time"):
+            if item.get("end_time"):
                 item["end_index"] = _timestamp_index(stamps, item.get("end_time"))
             resolved.append(item)
         out[key] = resolved
@@ -362,7 +363,10 @@ def _timestamp_index(stamps: pd.Series, value: Any) -> int | None:
     valid = stamps.notna()
     if not valid.any():
         return None
-    deltas = (stamps[valid] - target).abs()
+    visible = stamps[valid]
+    if target < visible.min() or target > visible.max():
+        return None
+    deltas = (visible - target).abs()
     return int(deltas.idxmin())
 
 
@@ -563,6 +567,11 @@ def _level_x_span(level: Mapping[str, Any], n: int, chart_template: str) -> tupl
     if start is not None and end is not None:
         left = max(-0.5, min(float(start), n + 6.0))
         right = max(left + 1.0, min(float(end), n + 6.0))
+        if _is_zone_kind(str(level.get("kind") or "")) and right - left < 4.0:
+            # Preserve the certified origin while giving a one-candle POI enough
+            # local width to be legible. The cap keeps it far from a full-width ray.
+            local_width = max(6.0, min(12.0, n * 0.10))
+            right = min(n - 0.5, left + local_width)
         return left, right
     if _is_zone_kind(str(level.get("kind") or "")):
         width = max(6.0, min(24.0, n * 0.18))

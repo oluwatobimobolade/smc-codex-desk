@@ -3,8 +3,8 @@ project:
   product: Dual-Lens Market Colleague
   release: colleague-core-rc0
   status: research_foundation
-  current_date: "2026-07-05"
-  last_updated: "2026-07-05"
+  current_date: "2026-07-10"
+  last_updated: "2026-07-10"
 
 scope:
   certified_initial_scope:
@@ -57,6 +57,11 @@ authority:
   smc_detector_rebuild: implemented_wp0022_stage_ab_internal_external_liquidity_sweep_ob_inducement
   decision_quality_diagram_repair: passed_wp0027_protected_poi_inducement_story_chart_repair
   smc_narrative_authority: passed_wp0029_single_official_model_watch_chart_trade_box_gating
+  formal_mtf_structure_graph: implemented_wp0040_deterministic_graph_authority_observe_only
+  professional_ai_smc_annotation: reaudited_wp0041a_evidence_anchored_sparse_and_critic_guarded
+  annotation_visual_critic: downgrade_or_cleanup_only_hard_veto_wired
+  closed_candle_partial_htf_guard: verified_wp0024_exact_decision_time_boundary
+  offline_xau_replay: verified_stale_demo_canonical_15m_completed_htf_only_not_live
   prediction: research_only
   paper_execution: disabled
   live_execution: disabled

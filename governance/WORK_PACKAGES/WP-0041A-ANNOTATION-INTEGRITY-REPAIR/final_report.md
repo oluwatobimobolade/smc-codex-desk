@@ -1,6 +1,6 @@
 # WP-0041A Annotation Integrity Repair - Final Report
 
-## Status: COMPLETE / PASS
+## Status: COMPLETE / PASS / RE-AUDITED 2026-07-10
 
 WP-0041A is the integrity repair for the WP-0041 professional AI SMC annotation planner. Where WP-0041 delivered the V2 schema, validator, renderer preference, and artifacts, WP-0041A enforces that every drawn mark is mechanically true, the chart stops narrating at the viewer, and a real downgrade-only critic audits the actual rendered scene before it is accepted.
 
@@ -48,7 +48,23 @@ It was gated correctly but did not yet model and render a coherent V2 entry/SL/T
 
 ### P2: Test coverage was narrower than the written plan
 
-**Repair.** Five new focused WP-0041A tests extend coverage to coordinate-to-evidence matching, scope/label mismatch, path-without-POI, native V2 trade box, and visual-critic cleanup.
+**Repair.** Twelve focused WP-0041A tests now cover coordinate-to-evidence matching, scope/label mismatch, path-without-POI, native V2 trade box, visual-critic cleanup, wick-probe rejection, active watch-POI selection, critic-enforced hard downgrade, empty-V2 legacy suppression, bounded one-candle POI display, off-window evidence rejection, and candle-replayed POI consumption.
+
+## 2026-07-10 Re-Audit Repairs
+
+The first WP-0041A report correctly described the architecture but overstated several guarantees. A fresh live smoke and source audit found the following remaining defects and repaired them.
+
+- Evidence anchors did not carry confirmation, activity, mitigation, or wick-probe state. These fields are now indexed and enforced. Candidate or wick-only structure cannot become BOS/CHoCH; unconfirmed or terminal POIs cannot become active zones.
+- The local runner passed `active_poi=None`, so the composer could not emit a real OB/FVG even when one existed. It now selects a confirmed, visible, non-terminal 15m watch POI inside the certified active range. The selection creates no execution authority.
+- A visual-critic `REVIEW_REQUIRED` result was written but did not change the official decision. It now hard-downgrades the official state and strips entry, stop, targets, and trade-box authority.
+- Cleanup retained the pre-cleanup verdict. The critic now reruns after cleanup and records both the initial and final verdict.
+- An empty V2 plan fell back to legacy clutter. Presence of the V2 schema now suppresses legacy labels, levels, banners, and generic paths even when no V2 objects are selected.
+- One-candle POIs at the left chart edge rendered as unreadable slivers. The renderer preserves exact evidence geometry but gives the displayed zone a capped 6-12 candle local width. It never becomes a full-width ray.
+- The offline XAU helper accepted future candles relative to its stale cutoff and could combine inconsistent native HTFs. It now treats 15m as canonical, trims by closed-candle decision time, derives completed HTFs only, validates OHLC geometry, and labels the run `OFFLINE_STALE_DEMO`, never live.
+- Thesis wording previously said no POI was available after the selector found one. The live provider now distinguishes a mapped watch POI from absent entry confirmation and explicitly explains active-range direction conflicts.
+- Evidence indices were calculated on a 120-candle pack while the official chart rendered 240 candles, shifting valid marks left. Official chart rendering now uses the exact evidence-window length, and timestamp geometry always overrides raw indices.
+- `index_for_time` previously snapped timestamps outside the evidence window to index 0 or the last candle. Out-of-window evidence now has no chart index and is rejected by both the selector and validator.
+- Order-block lifecycle fields remain incomplete in the detector. The annotation authority now independently replays all subsequent visible candles and rejects POIs that were consumed or invalidated; partial touches are labeled honestly.
 
 ## Pipeline Wiring
 
@@ -60,11 +76,15 @@ The repair is fully wired end-to-end.
 
 ## Validation
 
-- Focused WP-0041A tests: `6 passed` (5 in `test_wp0041a_annotation_integrity_repair.py` plus the 1 trade-box scene assertion).
-- WP-0041 + WP-0041A combined: `10 passed`.
-- Affected AI/renderer/formal-graph/agent tests: `85 passed`.
+- Focused WP-0041A tests: `12 passed`.
+- WP-0041 + WP-0041A combined: `17 passed`.
+- Extended annotation, graph, POI, MTF, decision-time, and offline-replay suite: `126 passed`.
+- Focused integrity plus decision-time tests: `25 passed`.
 - Compileall: `passed`.
-- Full pytest: `745 passed, 1 skipped` (baseline 740 plus 5 new WP-0041A tests).
+- `git diff --check`: `passed`.
+- Full pytest: `760 passed, 1 skipped` in `132.44s`.
+- Offline XAU smoke: validated `OFFLINE_STALE_DEMO`; canonical 15m was trimmed at the decision cutoff and only completed HTFs were derived.
+- Fresh GBPUSD smoke: `VALIDATED / WATCH_ONLY`; fresh 15m OB mapped at its true July 10 origin without entry/SL/TP, range-direction conflict disclosed, sparse chart passed visual critic.
 
 ## Evidence
 
@@ -77,6 +97,8 @@ The repair is fully wired end-to-end.
 - Renderer cleanup integration: `smc_desk/rendering/smc_trader_annotation_renderer.py` (`apply_visual_cleanup`, `legacy_labels_suppressed`)
 - Orchestrator wiring: `smc_desk/colleague/orchestrator_v3.py` (`annotation_visual_review.json`, `annotation_self_review.md`)
 - Live runner wiring: `tools/run_live_ai_smc_full_system.py` (`compose_local_annotation_plan_v2`)
+- Re-audit report: `reports/current/WP0041A_ANNOTATION_INTEGRITY_REAUDIT_20260710.md`
+- Fresh GBPUSD chart: `analysis_runs/WP0041A_REAUDIT_20260710/LIVE_FINAL_VERIFIED/LIVE_FULL_SYSTEM_AI_SMC_V3_20260710_082247/GBPUSD/14_clean_annotation_render/GBPUSD_official_ai_annotation.png`
 
 ## Final Truth
 

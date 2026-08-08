@@ -8,7 +8,69 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from smc_desk.brain.annotation_evidence import AnnotationEvidenceAnchor, build_annotation_evidence_index
+from smc_desk.brain.annotation_evidence import AnnotationEvidenceAnchor, build_annotation_evidence_index, observed_poi_state
+
+
+def select_local_active_poi(
+    *,
+    evidence_pack: Mapping[str, Any],
+    direction: str,
+    active_range: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """Choose a confirmed untouched watch POI without creating trade readiness."""
+    if direction not in {"bullish", "bearish"}:
+        return None
+    index = build_annotation_evidence_index(evidence_pack)
+    windows = evidence_pack.get("ohlcv_windows") or {}
+    candles = windows.get("15m") if isinstance(windows, Mapping) else None
+    if not isinstance(candles, list) or not candles:
+        return None
+    current_price = _float((candles[-1] or {}).get("close")) if isinstance(candles[-1], Mapping) else None
+    if current_price is None:
+        return None
+    row_count = len(candles)
+    range_low = _float(active_range.get("low"))
+    range_high = _float(active_range.get("high"))
+    candidates: list[tuple[AnnotationEvidenceAnchor, str]] = []
+    for anchor in index.values():
+        if not (
+            anchor.evidence_type in {"order_block", "fvg"}
+            and anchor.timeframe == "15m"
+            and anchor.direction == direction
+            and anchor.confirmation_status == "confirmed"
+            and not anchor.is_wick_only_probe
+            and anchor.activity_status != "terminal"
+            and anchor.mitigation_status not in {"full", "invalidated"}
+            and _visible(anchor, row_count)
+            and _on_retrace_side(anchor, current_price, direction)
+            and _inside_range(anchor, range_low, range_high)
+        ):
+            continue
+        observed_state = observed_poi_state(anchor, evidence_pack)
+        if observed_state in {"consumed", "invalidated", "unverifiable"}:
+            continue
+        candidates.append((anchor, observed_state))
+    if not candidates:
+        return None
+    selected, observed_state = min(candidates, key=lambda item: _poi_rank(item[0], current_price, direction))
+    label = "demand order block" if direction == "bullish" else "supply order block"
+    if selected.evidence_type == "fvg":
+        label = f"{direction} FVG"
+    freshness = "partially_mitigated" if observed_state == "partial" or selected.mitigation_status == "partial" else "fresh"
+    return {
+        "poi_id": selected.object_id,
+        "timeframe": selected.timeframe,
+        "kind": label.replace(" ", "_"),
+        "direction": direction,
+        "price_low": selected.price_low,
+        "price_high": selected.price_high,
+        "freshness": freshness,
+        "evidence_object_ids": [selected.object_id],
+        "summary": (
+            f"Observe-only {selected.timeframe} {label} selected from confirmed, non-terminal evidence; observed lifecycle={freshness}. "
+            "It is a watch POI only; no entry, stop, target, or execution authority is created."
+        ),
+    }
 
 
 def compose_local_annotation_plan_v2(
@@ -24,7 +86,7 @@ def compose_local_annotation_plan_v2(
     windows = evidence_pack.get("ohlcv_windows") or {}
     candles = windows.get("15m") if isinstance(windows, Mapping) else None
     row_count = len(candles) if isinstance(candles, list) else 0
-    recent_start = max(0, row_count - 56)
+    recent_start = max(0, row_count - 28)
     recent_end = max(recent_start + 4, row_count - 2)
     objects: list[dict[str, Any]] = []
 
@@ -112,6 +174,8 @@ def _latest_visible_external_structure(
         if anchor.evidence_type == "structure"
         and anchor.timeframe == "15m"
         and anchor.structure_scope == "external"
+        and anchor.confirmation_status == "confirmed"
+        and not anchor.is_wick_only_probe
         and _visible(anchor, row_count)
     ]
     return max(candidates, key=lambda anchor: anchor.end_index or -1, default=None)
@@ -125,6 +189,10 @@ def _active_poi_anchor(
     poi_id = active_poi.get("poi_id")
     anchor = index.get(str(poi_id)) if poi_id else None
     if anchor is None or anchor.evidence_type not in {"order_block", "fvg"}:
+        return None
+    if anchor.confirmation_status != "confirmed" or anchor.activity_status == "terminal":
+        return None
+    if anchor.mitigation_status in {"full", "invalidated"}:
         return None
     return anchor
 
@@ -190,3 +258,37 @@ def _midpoint(low: float | None, high: float | None) -> float | None:
     if low is None or high is None:
         return None
     return (float(low) + float(high)) / 2.0
+
+
+def _on_retrace_side(anchor: AnnotationEvidenceAnchor, current_price: float, direction: str) -> bool:
+    if anchor.price_low is None or anchor.price_high is None:
+        return False
+    tolerance = abs(current_price) * 0.001
+    if direction == "bullish":
+        return anchor.price_low <= current_price + tolerance
+    return anchor.price_high >= current_price - tolerance
+
+
+def _inside_range(anchor: AnnotationEvidenceAnchor, range_low: float | None, range_high: float | None) -> bool:
+    if range_low is None or range_high is None or anchor.price_low is None or anchor.price_high is None:
+        return True
+    return anchor.price_low >= range_low and anchor.price_high <= range_high
+
+
+def _poi_rank(anchor: AnnotationEvidenceAnchor, current_price: float, direction: str) -> tuple[float, ...]:
+    midpoint = _midpoint(anchor.price_low, anchor.price_high) or current_price
+    kind_rank = 0.0 if anchor.evidence_type == "order_block" else 1.0
+    freshness_rank = 0.0 if anchor.mitigation_status in {None, "untouched"} else 1.0
+    confidence_rank = -float(anchor.confidence or 0.0)
+    # Within the same quality tier, preserve deeper-OB priority before distance.
+    depth_rank = midpoint if direction == "bullish" else -midpoint
+    distance_rank = abs(current_price - midpoint)
+    recency_rank = -float(anchor.end_index or 0)
+    return kind_rank, freshness_rank, confidence_rank, depth_rank, distance_rank, recency_rank
+
+
+def _float(value: Any) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
