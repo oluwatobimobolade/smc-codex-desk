@@ -54,14 +54,36 @@ def build_mtf_structure_graph(
         # this answers "what story do they tell, and where is price drawn?".
         # Additive and observe-only: it cannot promote, and every existing
         # consumer of parent_child_context is untouched.
-        "narrative_context": _build_narrative_context(timeframes, ar, detector_candidates),
+        "narrative_context": _build_narrative_context(
+            timeframes, ar, detector_candidates, timeframe_dfs
+        ),
     }
+
+
+def _current_price(timeframe_dfs: Mapping[str, Any] | None) -> float | None:
+    """Last close of the fastest available timeframe.
+
+    The narrative needs to know where price actually is to rank liquidity
+    above and below it; the active-range node carries the range but not the
+    current price.
+    """
+    if not timeframe_dfs:
+        return None
+    for tf in ("5m", "15m", "1h", "4h", "12h", "1d"):
+        frame = timeframe_dfs.get(tf)
+        if frame is None or not hasattr(frame, "empty") or frame.empty:
+            continue
+        for column in ("close", "Close"):
+            if column in frame.columns:
+                return _float_or_none(frame[column].iloc[-1])
+    return None
 
 
 def _build_narrative_context(
     timeframes: Mapping[str, Any],
     active_range: Mapping[str, Any],
     detector_candidates: Mapping[str, Any],
+    timeframe_dfs: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Attach the hierarchical narrative read. Never raises into the hot path."""
     from smc_desk.perception.narrative_hierarchy import read_narrative
@@ -75,7 +97,10 @@ def _build_narrative_context(
                 levels = payload.get("liquidity_levels")
                 if isinstance(levels, Sequence) and not isinstance(levels, (str, bytes)):
                     liquidity.extend(x for x in levels if isinstance(x, Mapping))
-        current_price = _float_or_none((active_range or {}).get("current_price"))
+        current_price = (
+            _float_or_none((active_range or {}).get("current_price"))
+            or _current_price(timeframe_dfs)
+        )
         return read_narrative(
             timeframes=timeframes,
             active_range=active_range,

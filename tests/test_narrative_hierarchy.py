@@ -75,9 +75,15 @@ def test_the_20260717_btcusdt_case_is_no_longer_mixed():
     active_range = {"high": 65589.7, "low": 61806.0, "equilibrium": 63697.85,
                     "price_location": "premium", "range_id": "4h:dr"}
     liquidity = [
-        {"object_id": "liq_sell_61806", "price": 61806.0, "activity_status": "active"},
-        {"object_id": "liq_buy_65589", "price": 65589.7, "activity_status": "consumed"},
-        {"object_id": "liq_eql_63000", "price": 63000.0, "activity_status": "active"},
+        # Range low: external scope, but only a 1h reference.
+        {"object_id": "liq_sell_61806", "price": 61806.0, "timeframe": "1h",
+         "kind": "equal_lows", "touch_count": 2, "activity_status": "active"},
+        # Already taken, so it cannot be a draw however important it looks.
+        {"object_id": "liq_buy_65589", "price": 65589.7, "timeframe": "1d",
+         "kind": "prior_day_high", "activity_status": "consumed"},
+        # The strongest live sell-side pool: daily timeframe, inside the range.
+        {"object_id": "liq_pdl_63000", "price": 63000.0, "timeframe": "1d",
+         "kind": "prior_day_low", "touch_count": 2, "activity_status": "active"},
     ]
 
     read = read_narrative(timeframes=timeframes, active_range=active_range,
@@ -89,13 +95,35 @@ def test_the_20260717_btcusdt_case_is_no_longer_mixed():
     assert "4h" in read.retracing_timeframes
     assert "1h" in read.confirming_timeframes
     assert read.price_location == "premium"
-    # It must answer 'where is price going?' -- the old thesis never did.
+    # It must answer 'where is price going?' -- the old thesis never did --
+    # and it must name WHAT it is targeting, not just "some liquidity".
     assert read.draw.direction == "bearish"
     assert read.draw.target_price == 63000.0
-    assert read.draw.target_kind == "unswept_liquidity"
+    assert read.draw.target_kind == "prior_day_low"
+    assert read.draw.target_object_id == "liq_pdl_63000"
     # Consumed liquidity is spent and cannot be a draw.
     assert read.draw.target_object_id != "liq_buy_65589"
     assert read.invalidation_note and "67000" in read.invalidation_note
+
+
+def test_the_draw_prefers_importance_over_proximity():
+    """A daily pool further away beats a 15m pool sitting closer to price."""
+    read = read_narrative(
+        timeframes={
+            "1d": _node("bearish", protected_high=67000.0),
+            "4h": _node("bullish", break_id="4h", body_close=64800.0),
+        },
+        active_range={"high": 66000.0, "low": 62000.0, "price_location": "premium"},
+        current_price=64000.0,
+        liquidity_levels=[
+            {"object_id": "near_15m", "price": 63800.0, "timeframe": "15m",
+             "kind": "equal_lows", "activity_status": "active"},
+            {"object_id": "far_daily", "price": 62200.0, "timeframe": "1d",
+             "kind": "prior_day_low", "touch_count": 2, "activity_status": "active"},
+        ],
+    )
+    assert read.draw.target_object_id == "far_daily"
+    assert "importance" in read.draw.rationale
 
 
 def test_that_case_picks_one_primary_poi_instead_of_hedging():

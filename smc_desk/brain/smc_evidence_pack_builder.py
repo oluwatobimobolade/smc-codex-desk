@@ -142,6 +142,12 @@ def build_smc_evidence_pack(
         "formal_causal_episode_graph": formal_causal_episode_graph,
         "causal_poi_authority": causal_poi_authority,
         "object_evidence_contracts": object_evidence_contracts,
+        # Which detected objects are structurally significant, and why. The
+        # detector legitimately emits thousands of geometric matches; this
+        # tells a reader (and the annotation planner) which of them a trader
+        # would actually mark. Descriptive only -- no candidate is removed
+        # from detector_candidates, and nothing here promotes anything.
+        "structural_significance": _significance_report(candidate_manifest, ohlcv_windows),
         "provenance": {
             "dataframe_hashes": dataframe_hashes,
             "pack_hash": None,
@@ -161,8 +167,103 @@ def build_smc_evidence_pack(
             "paper_execution": "disabled",
         },
     }
+    # Derived last so it can read the assembled graph, significance report and
+    # POI authority in one place. Observe-only: it describes where the setup
+    # has got to and what is still missing, and grants no execution authority.
+    pack["market_state"] = _market_state(pack)
+
     pack["provenance"]["pack_hash"] = _stable_hash(pack)
     return pack
+
+
+def _market_state(pack: Mapping[str, Any]) -> dict[str, Any]:
+    """Run the trader confirmation sequence over the assembled evidence."""
+    try:
+        from smc_desk.perception.market_state import build_market_state
+        from smc_desk.perception.narrative_hierarchy import select_primary_poi, read_narrative
+
+        graph = pack.get("formal_structure_graph") or {}
+        narrative_payload = graph.get("narrative_context") or {}
+
+        # Collect POI candidates from the causal authority, which already
+        # assigns structural roles. Both scenarios are offered; the narrative
+        # picks the one aligned with context.
+        candidates: list[Mapping[str, Any]] = []
+        scenarios = (pack.get("causal_poi_authority") or {}).get("scenarios")
+        if isinstance(scenarios, Mapping):
+            for direction, scenario in scenarios.items():
+                if not isinstance(scenario, Mapping):
+                    continue
+                primary = scenario.get("primary_causal_poi")
+                if isinstance(primary, Mapping) and primary.get("object_id"):
+                    candidates.append({**primary, "direction": primary.get("direction") or direction})
+
+        primary_poi = None
+        if candidates and narrative_payload.get("is_coherent"):
+            narrative = read_narrative(
+                timeframes=graph.get("timeframes") or {},
+                active_range=graph.get("active_range") or {},
+                current_price=(graph.get("active_range") or {}).get("current_price"),
+            )
+            primary_poi = select_primary_poi(narrative=narrative, poi_candidates=candidates)
+
+        return build_market_state(evidence_pack=pack, primary_poi=primary_poi).to_dict()
+    except Exception as exc:  # noqa: BLE001 -- descriptive layer, never fatal
+        return {
+            "schema": "market_state_v1",
+            "state": "NO_CONTEXT",
+            "error": f"{type(exc).__name__}: {str(exc)[:160]}",
+            "authority": "observe_only_market_state",
+            "signal_allowed": False,
+        }
+
+
+def _significance_report(
+    candidate_manifest: Mapping[str, Any],
+    ohlcv_windows: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Grade each timeframe's swings and confirmed breaks by significance.
+
+    Never raises into the pack build: an ungradeable timeframe is reported as
+    such rather than silently dropped, and grading failure must not be able to
+    take down evidence assembly.
+    """
+    from smc_desk.perception.significance import grade_timeframe
+
+    report: dict[str, Any] = {
+        "schema": "structural_significance_report_v1",
+        "authority": "descriptive_only_no_promotion",
+        "timeframes": {},
+    }
+    for timeframe, payload in (candidate_manifest or {}).items():
+        if not isinstance(payload, Mapping):
+            continue
+        candles = ohlcv_windows.get(timeframe)
+        if not isinstance(candles, list) or not candles:
+            report["timeframes"][timeframe] = {"error": "no candle window available"}
+            continue
+        try:
+            swings = payload.get("swings") or []
+            breaks = [
+                b for b in (payload.get("structure_breaks") or [])
+                if isinstance(b, Mapping) and b.get("confirmed_at")
+                and not ((b.get("evidence") or {}).get("is_unconfirmed_probe"))
+            ]
+            summary = grade_timeframe(
+                candles=candles,
+                swings=[s for s in swings if isinstance(s, Mapping)],
+                structure_breaks=breaks,
+            )
+            report["timeframes"][timeframe] = {
+                "atr": round(summary.atr, 8),
+                "counts": summary.counts,
+                "raw_object_count": len(swings) + len(breaks),
+                "tradeable_object_ids": [s.object_id for s in summary.tradeable],
+                "major_object_ids": [s.object_id for s in summary.by_grade("major")],
+            }
+        except Exception as exc:  # noqa: BLE001 -- descriptive layer, never fatal
+            report["timeframes"][timeframe] = {"error": f"{type(exc).__name__}: {str(exc)[:120]}"}
+    return report
 
 
 def _latest_closed_decision_time(summaries: Mapping[str, Mapping[str, Any]]) -> str:

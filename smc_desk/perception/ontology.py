@@ -73,6 +73,22 @@ class StructureBreakEvidence(SMCObjectEvidence):
     broke_protected_swing: bool = False
     valid_choch: bool = False
 
+    # -- break-candle lineage (WP-SMC-11, audit F2) --------------------------
+    # A break can be probed by one candle and confirmed by a later one. The
+    # fields above (candle_body_ratio, price_low/high on the object) describe
+    # the PROBE candle, because that is when the object is created. Scoring
+    # displacement from those while reading body_close_penetration from the
+    # confirming candle mixes two different candles into one measurement --
+    # 35 of 178 BTCUSDT breaks and 41 of 144 SOLUSDT breaks take that path.
+    # These fields keep the two candles distinct so a consumer can score the
+    # confirming impulse on its own geometry.
+    probe_candle_id: Optional[str] = None
+    body_close_candle_id: Optional[str] = None
+    is_delayed_confirmation: bool = False
+    confirmation_candle_body_ratio: Optional[float] = None
+    confirmation_candle_range: Optional[Decimal] = None
+    confirmation_body_size: Optional[Decimal] = None
+
 
 class FairValueGapEvidence(SMCObjectEvidence):
     gap_size_ticks: int

@@ -211,6 +211,10 @@ class StructureDetector:
             last_bos_swing_id=track.last_bos_swing_id,
             broke_protected_swing=broke_protected,
             valid_choch=(break_type == "CHOCH" and (track.scope == "internal" or broke_protected)),
+            # The candle that first crossed the level with a wick. Everything
+            # else on this evidence object describes THIS candle until
+            # _confirm_break records the confirming one separately.
+            probe_candle_id=f"c_{candle.open_time.timestamp()}",
         )
 
         scope_token = "" if track.scope == "external" else "_internal"
@@ -268,7 +272,26 @@ class StructureDetector:
             if brk.direction == Direction.BULLISH
             else brk.evidence.broken_price - candle.close
         )
-        brk.source_candle_ids.append(f"c_{candle.open_time.timestamp()}")
+
+        # WP-SMC-11 (audit F2): record the confirming candle's OWN geometry.
+        # candle_body_ratio and the object's price_low/high belong to the probe
+        # candle; without these fields a delayed confirmation would be scored
+        # from two different candles at once.
+        confirmation_id = f"c_{candle.open_time.timestamp()}"
+        confirmation_range = candle.high - candle.low
+        confirmation_body = abs(candle.close - candle.open)
+        brk.evidence.body_close_candle_id = confirmation_id
+        brk.evidence.is_delayed_confirmation = (
+            brk.evidence.probe_candle_id is not None
+            and brk.evidence.probe_candle_id != confirmation_id
+        )
+        brk.evidence.confirmation_candle_range = confirmation_range
+        brk.evidence.confirmation_body_size = confirmation_body
+        brk.evidence.confirmation_candle_body_ratio = (
+            float(confirmation_body / confirmation_range) if confirmation_range > 0 else 0.0
+        )
+
+        brk.source_candle_ids.append(confirmation_id)
         brk.confirmation_status = ConfirmationStatus.CONFIRMED
         brk.confirmed_at = candle.close_time
         apply_event(
@@ -317,6 +340,8 @@ class StructureDetector:
                     chosen = protected_point_selection.get("selected") or {}
                     matched = _match_candidate_to_swing(
                         chosen, swings, brk.direction,
+                        scope=str(getattr(brk, "structure_scope", "external") or "external"),
+                        timeframe=brk.timeframe,
                     )
                     if matched is not None:
                         chosen_protected = matched
@@ -324,6 +349,8 @@ class StructureDetector:
                             **protected_point_selection,
                             "applied_override": True,
                             "matched_swing_id": matched.object_id,
+                            "matched_scope": _scope_for_swing(matched),
+                            "matched_timeframe": matched.timeframe,
                         }
                     else:
                         protected_point_selection = {
@@ -393,13 +420,28 @@ def _run_causal_protected_point_selection(
     required_pivot_type = "low" if direction == "bullish" else "high"
 
     # Adapter: SwingObject -> programme_schema mapping the algorithm reads.
+    #
+    # WP-SMC-11 (audit F1): the pool is SCOPE-LOCKED. Previously every swing
+    # scale was flattened into one pool with structure scope discarded, so a
+    # local or internal pivot could be selected as an external break's
+    # protected point purely because it sat at a similar price -- 34 such
+    # substitutions on 1,500 BTCUSDT candles, 19 on SOLUSDT. Doctrine is
+    # explicit that local structure may refine an origin but never replace it,
+    # so an external break may only consider external candidates on its own
+    # owning timeframe.
+    break_scope = str(getattr(brk, "structure_scope", "external") or "external")
     pool: list[Mapping[str, Any]] = []
     for s in swings:
+        if _scope_for_swing(s) != break_scope:
+            continue
+        if s.timeframe != brk.timeframe:
+            continue
         is_high = getattr(s.direction, "value", s.direction) == "BEARISH" or s.direction == Direction.BEARISH
         pivot_type = "high" if is_high else "low"
         pool.append({
             "object_id": s.object_id,
             "timeframe": s.timeframe,
+            "structure_scope": _scope_for_swing(s),
             "pivot_type": pivot_type,
             "pivot_price": float(s.price_high if is_high else s.price_low),
             "price_low": float(s.price_low),
@@ -408,6 +450,8 @@ def _run_causal_protected_point_selection(
             "pivot_time": s.pivot_time.isoformat() if s.pivot_time else "",
             "confirmed_at": (s.confirmed_at.isoformat() if s.confirmed_at else None),
         })
+    if not pool:
+        return None
 
     accepted_break = {
         "object_id": brk.object_id,
@@ -463,15 +507,57 @@ def _match_candidate_to_swing(
     candidate: Mapping[str, Any],
     swings: List[SwingObject],
     direction: Direction,
+    *,
+    scope: str = "external",
+    timeframe: str | None = None,
 ) -> Optional[SwingObject]:
-    """Match a protected_point candidate's pivot_price to a registered SwingObject.
+    """Resolve a protected-point candidate back to its registered SwingObject.
 
-    The causal algorithm may select a cluster/candle origin that is NOT a swing
-    (candidate_id like 'cluster#...'); those cannot replace track.protected_*,
-    which must hold a SwingObject. We override only when the selected price
-    matches an actual swing within a 1bp tolerance. Returns the matched swing or
-    None (caller falls back to the legacy recency assignment).
+    WP-SMC-11 (audit F1). Identity first, geometry second:
+
+    1. Match on the candidate's own evidence id. The causal algorithm suffixes
+       ids (``<swing_id>#internal``), so the base id is recovered and looked up
+       directly. This is the only path that can establish identity.
+    2. Only if no id is carried -- e.g. a cluster origin that is not a swing at
+       all -- fall back to price, and then only within the same structure scope
+       and timeframe.
+
+    The previous implementation matched on price within 5bps and direction
+    alone. Equal or nearby prices are common across scales, so a local pivot
+    could silently become an external protected point. Doctrine forbids that:
+    equal prices never make two swing ids interchangeable.
     """
+    is_bullish = getattr(direction, "value", direction) == "BULLISH" or direction == Direction.BULLISH
+
+    def _protects(swing: SwingObject) -> bool:
+        """A bullish break protects a LOW; a bearish break protects a HIGH."""
+        is_high = (
+            getattr(swing.direction, "value", swing.direction) == "BEARISH"
+            or swing.direction == Direction.BEARISH
+        )
+        return is_high != is_bullish
+
+    eligible = [
+        s for s in swings
+        if _scope_for_swing(s) == scope
+        and (timeframe is None or s.timeframe == timeframe)
+        and _protects(s)
+    ]
+
+    # 1. Identity. Scope, timeframe and side are all pre-filtered above, so a
+    # candidate naming a swing on the wrong side of the market resolves to
+    # nothing rather than being adopted on the strength of its id alone.
+    raw_id = str(candidate.get("internal_pivot_id") or candidate.get("candidate_id") or "")
+    base_id = raw_id.split("#", 1)[0] if raw_id else ""
+    if base_id:
+        for s in eligible:
+            if s.object_id == base_id:
+                return s
+        # An id was carried but names nothing eligible: refuse rather than
+        # silently sliding to a same-priced neighbour.
+        return None
+
+    # 2. Geometry, scope-bounded, for non-swing origins only.
     price = candidate.get("pivot_price") or candidate.get("extreme_price")
     if price is None:
         return None
@@ -481,17 +567,12 @@ def _match_candidate_to_swing(
         return None
     if price_f <= 0:
         return None
-    is_bullish = getattr(direction, "value", direction) == "BULLISH" or direction == Direction.BULLISH
-    # tolerance: 5bps of the candidate price
     tol = max(price_f * 5e-4, 1e-9)
     best: Optional[SwingObject] = None
     best_dist = float("inf")
-    for s in swings:
+    for s in eligible:
         is_high = getattr(s.direction, "value", s.direction) == "BEARISH" or s.direction == Direction.BEARISH
-        # a bullish break protects a low; a bearish break protects a high
         swing_price = float(s.price_high) if is_high else float(s.price_low)
-        if is_high != (not is_bullish):
-            continue
         dist = abs(swing_price - price_f)
         if dist <= tol and dist < best_dist:
             best = s

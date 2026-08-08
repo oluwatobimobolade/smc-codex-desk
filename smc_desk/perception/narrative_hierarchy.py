@@ -215,6 +215,18 @@ def resolve_liquidity_draw(
         return LiquidityDraw(rationale="No directional context; no draw can be named.")
 
     seeking_high = context_bias == "bullish"
+
+    # Prefer the ranked liquidity model: it weighs what KIND of level this is
+    # and which timeframe drew it, so a prior daily high outranks a 15m equal
+    # high sitting closer to price. Proximity alone is only a tie-break.
+    ranked = _ranked_draw(
+        context_bias=context_bias,
+        active_range=active_range,
+        current_price=current_price,
+        liquidity_levels=liquidity_levels,
+    )
+    if ranked is not None:
+        return ranked
     candidates: list[tuple[float, str, str]] = []
     for level in liquidity_levels or ():
         if not isinstance(level, Mapping):
@@ -267,6 +279,44 @@ def resolve_liquidity_draw(
     return LiquidityDraw(
         direction=context_bias,
         rationale="Context bias is known but no unswept pool or range extreme is available to name a draw.",
+    )
+
+
+def _ranked_draw(
+    *,
+    context_bias: str,
+    active_range: Mapping[str, Any] | None,
+    current_price: float | None,
+    liquidity_levels: Sequence[Mapping[str, Any]],
+) -> LiquidityDraw | None:
+    """Resolve the draw through the ranked liquidity model, or None."""
+    if not liquidity_levels or current_price is None:
+        return None
+    try:
+        from smc_desk.perception.liquidity_model import build_liquidity_map, resolve_draw
+
+        liquidity_map = build_liquidity_map(
+            liquidity_levels=liquidity_levels,
+            current_price=current_price,
+            range_high=_f((active_range or {}).get("high")),
+            range_low=_f((active_range or {}).get("low")),
+        )
+        pool = resolve_draw(liquidity_map, context_bias=context_bias)
+    except Exception:  # noqa: BLE001 -- fall back to the simple rule below
+        return None
+    if pool is None:
+        return None
+    return LiquidityDraw(
+        direction=context_bias,
+        target_price=pool.price,
+        target_kind=pool.kind,
+        target_object_id=pool.object_id or None,
+        distance=pool.distance,
+        rationale=(
+            f"Highest-ranked unswept {'buy-side' if context_bias == 'bullish' else 'sell-side'} "
+            f"liquidity: {pool.kind} on {pool.timeframe} ({pool.scope} scope, "
+            f"importance {pool.importance:.2f})."
+        ),
     )
 
 

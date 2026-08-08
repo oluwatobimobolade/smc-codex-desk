@@ -377,6 +377,35 @@ def grade_timeframe(
     return SignificanceSummary(scores=tuple(scores), atr=atr, range_size=range_size)
 
 
+def rank_by_significance(
+    scores: Iterable[SignificanceScore],
+    *,
+    limit: int | None = None,
+    minimum_grade: str = "intermediate",
+) -> list[SignificanceScore]:
+    """Rank graded objects strongest-first, optionally capping the count.
+
+    Grading answers "is this object significant?" one object at a time. A
+    chart asks a different question: "which are the *most* significant here?".
+    Over a long window many objects legitimately clear the volatility floor,
+    so a threshold alone still yields more marks than a trader would make.
+    Ranking supplies the missing selection step.
+
+    Ties break on object_id so the ordering is deterministic and reproducible
+    across runs, which the evidence-hash contract requires.
+    """
+    if minimum_grade not in _GRADE_RANK:
+        raise ValueError(f"Unknown grade: {minimum_grade!r}")
+    ceiling = _GRADE_RANK[minimum_grade]
+    eligible = [s for s in scores if _GRADE_RANK[s.grade] <= ceiling]
+    eligible.sort(key=lambda s: (_GRADE_RANK[s.grade], -s.atr_multiple, s.object_id))
+    if limit is not None:
+        if limit < 0:
+            raise ValueError("limit cannot be negative")
+        return eligible[:limit]
+    return eligible
+
+
 def filter_to_significant(
     objects: Sequence[Any],
     scores: Mapping[str, SignificanceScore],
@@ -420,4 +449,5 @@ __all__ = [
     "grade_structure_break",
     "grade_swing",
     "grade_timeframe",
+    "rank_by_significance",
 ]

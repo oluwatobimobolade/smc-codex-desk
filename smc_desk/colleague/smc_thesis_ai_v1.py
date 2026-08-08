@@ -31,8 +31,14 @@ def build_smc_thesis_ai_v1(
     evidence_pack: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     official = validation_result.official_decision
-    claims = [_claim(claim_id, official, evidence_pack or {}) for claim_id in THESIS_SEQUENCE]
+    narrative = _narrative_context(evidence_pack or {})
+    claims = [_claim(claim_id, official, evidence_pack or {}, narrative) for claim_id in THESIS_SEQUENCE]
     payload = {
+        # Hierarchical market read from the formal graph. Present alongside the
+        # decision claims so a reader sees the story the timeframes tell, not
+        # just whether they happened to agree. Observe-only: it cannot change
+        # validation status, trade-box permission, or official state.
+        "market_narrative": narrative,
         "schema": "smc_thesis_ai_v1",
         "source": "ValidatedAISMCDecision" if validation_result.status == "VALIDATED" else "ReviewRequiredAISMCDecision",
         "validation_status": validation_result.status,
@@ -69,6 +75,38 @@ def render_smc_thesis_ai_v1_markdown(payload: Mapping[str, Any]) -> str:
     if payload.get("evidence_pack_hash"):
         lines.append(f"Evidence pack hash: `{payload.get('evidence_pack_hash')}`")
     lines.append("")
+    narrative = payload.get("market_narrative")
+    if isinstance(narrative, Mapping) and narrative.get("state"):
+        lines.append("## Market Narrative")
+        lines.append("")
+        lines.append(f"State: `{narrative.get('state')}`")
+        context_tf = narrative.get("context_timeframe")
+        if context_tf:
+            lines.append(f"Context: **{context_tf} {narrative.get('context_bias')}**")
+        if narrative.get("retracing_timeframes"):
+            lines.append(f"Retracing inside that context: {', '.join(narrative['retracing_timeframes'])}")
+        if narrative.get("confirming_timeframes"):
+            lines.append(f"Confirming the context: {', '.join(narrative['confirming_timeframes'])}")
+        if narrative.get("invalidating_timeframes"):
+            lines.append(f"Challenging the context: {', '.join(narrative['invalidating_timeframes'])}")
+        draw = narrative.get("draw") or {}
+        if isinstance(draw, Mapping) and draw.get("target_price") is not None:
+            lines.append(
+                f"Draw on liquidity: **{draw.get('direction')} toward {draw.get('target_price')}** "
+                f"({draw.get('target_kind')})"
+            )
+        if narrative.get("sentence"):
+            lines.append("")
+            lines.append(str(narrative["sentence"]))
+        if narrative.get("expectation"):
+            lines.append("")
+            lines.append(str(narrative["expectation"]))
+        if narrative.get("invalidation_note"):
+            lines.append("")
+            lines.append(f"*{narrative['invalidation_note']}*")
+        lines.append("")
+        lines.append("_Observe-only hierarchical read. It carries no signal authority._")
+        lines.append("")
     for index, claim in enumerate(payload.get("claims", []) or [], start=1):
         lines.append(f"## {index}. {claim['title']}")
         lines.append("")
@@ -96,21 +134,43 @@ def assert_smc_thesis_ai_v1_contract(payload: Mapping[str, Any]) -> None:
         raise AssertionError("Only trade_plan_chart may show a trade box.")
 
 
+def _narrative_context(evidence_pack: Mapping[str, Any]) -> dict[str, Any] | None:
+    """Pull the hierarchical read off the formal graph, if the graph carries one."""
+    graph = evidence_pack.get("formal_structure_graph")
+    if not isinstance(graph, Mapping):
+        return None
+    narrative = graph.get("narrative_context")
+    return dict(narrative) if isinstance(narrative, Mapping) else None
+
+
 def _claim(
     claim_id: str,
     official: Mapping[str, Any],
     evidence_pack: Mapping[str, Any],
+    narrative: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     title = claim_id.replace("_", " ").title()
     if claim_id == "bias_summary":
         bias = official.get("bias_summary") or {}
         text = f"Daily={bias.get('daily')}; 4H={bias.get('4h')}; 1H={bias.get('1h')}; final bias={bias.get('final_bias')}."
+        # A "mixed" vote describes the tally, not the market. When the graph
+        # resolved a coherent hierarchical story, state it -- disagreement
+        # between timeframes is what a retracement IS.
+        if isinstance(narrative, Mapping) and narrative.get("is_coherent"):
+            text += f" Hierarchical read: {narrative.get('sentence')}"
     elif claim_id == "active_range":
         active_range = official.get("active_range") or {}
         text = f"{active_range.get('timeframe')} range {active_range.get('low')} to {active_range.get('high')}; location={active_range.get('price_location')}."
     elif claim_id == "liquidity_story":
         story = official.get("liquidity_story") or {}
         text = str(story.get("narrative") or "No liquidity story supplied.")
+        draw = (narrative or {}).get("draw") if isinstance(narrative, Mapping) else None
+        if isinstance(draw, Mapping) and draw.get("target_price") is not None:
+            text += (
+                f" Draw on liquidity: {draw.get('direction')} toward "
+                f"{draw.get('target_price')} ({draw.get('target_kind')}). "
+                f"{draw.get('rationale')}"
+            )
     elif claim_id == "displacement_assessment":
         displacement = official.get("displacement_assessment") or {}
         text = _format_displacement(displacement)

@@ -50,14 +50,32 @@ def score_break_displacement(
     evidence = _as_mapping(payload.get("evidence", {}))
     direction = str(payload.get("direction", "")).lower()
 
-    body_to_range_ratio = abs(_float(evidence.get("candle_body_ratio"), 0.0))
+    # WP-SMC-11 (audit F2): score the CONFIRMING candle, not the probe.
+    #
+    # ``candle_body_ratio`` and the object's price_low/price_high are recorded
+    # when the break object is created -- i.e. from the wick-probe candle. When
+    # confirmation arrives on a later candle, reading the body ratio from the
+    # probe while reading penetration from the confirmation mixes two candles
+    # into one measurement. On real BTCUSDT data that mislabelled a 0.82
+    # body-ratio impulse as -0.17. Where the confirming candle's own geometry
+    # was recorded, it wins.
+    confirmation_ratio = evidence.get("confirmation_candle_body_ratio")
+    if confirmation_ratio is not None:
+        body_to_range_ratio = abs(_float(confirmation_ratio, 0.0))
+    else:
+        body_to_range_ratio = abs(_float(evidence.get("candle_body_ratio"), 0.0))
+
     body_close_pen = max(_float(evidence.get("body_close_penetration"), 0.0), 0.0)
     broken_price = max(_float(evidence.get("broken_price"), 0.0), 1e-9)
     close_beyond_structure_bps = body_close_pen / broken_price * 10_000
 
-    price_low = _float(payload.get("price_low"), 0.0)
-    price_high = _float(payload.get("price_high"), 0.0)
-    candle_range = max(price_high - price_low, 1e-9)
+    confirmation_range = evidence.get("confirmation_candle_range")
+    if confirmation_range is not None:
+        candle_range = max(_float(confirmation_range, 0.0), 1e-9)
+    else:
+        price_low = _float(payload.get("price_low"), 0.0)
+        price_high = _float(payload.get("price_high"), 0.0)
+        candle_range = max(price_high - price_low, 1e-9)
     body_to_atr_ratio = body_close_pen / max(_float(atr, candle_range), 1e-9)
 
     wick_pen = max(_float(evidence.get("wick_penetration"), 0.0), 0.0)

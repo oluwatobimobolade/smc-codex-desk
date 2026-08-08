@@ -170,6 +170,76 @@ decorative; these were checked against the pre-repair behaviour.
 - No promotion of any layer to trade authority. `signal_allowed` remains
   `False` throughout.
 
+## Phase 2 — reasoning layer (added after the architecture audit)
+
+The audit against the trader-brain vision found the reasoning half largely
+unbuilt. Four further modules close the named gaps. All are additive and
+observe-only; `signal_allowed` remains false throughout.
+
+### Structural repairs from the 2026-07-14 audit
+
+* **F1 — cross-scope protected points.** `_run_causal_protected_point_selection`
+  pooled every swing scale with structure scope discarded, and
+  `_match_candidate_to_swing` matched on price ±5bps and direction alone. A
+  local pivot could become an external break's protected point. The pool is
+  now scope- and timeframe-locked, and matching resolves **by exact evidence
+  id first**, with price only used for non-swing cluster origins. Side is
+  pre-filtered, so a bullish break can never adopt a swing high even by id.
+  Measured on 1,500 BTCUSDT candles: **34 cross-scope substitutions → 0**,
+  with 41 legitimate overrides still applying.
+
+* **F2 — mixed-candle displacement.** A break object is created on the probe
+  candle, so its body ratio and price bounds describe that candle; only
+  penetration was updated on confirmation. Evidence now records
+  `probe_candle_id`, `body_close_candle_id`, `is_delayed_confirmation` and the
+  confirming candle's own body ratio, range and body size, and
+  `score_break_displacement` prefers them. On real data one break scored
+  **-0.17 body ratio from the probe where the confirming candle was 0.82** —
+  a strong impulse read as weak. 18 of 70 external breaks took that path.
+
+### `smc_desk/perception/liquidity_model.py` (new)
+
+Liquidity was detected but never ranked, so every pool arrived with equal
+standing and the draw defaulted to "nearest unswept". The model classifies
+kind (prior week/day high-low, equal highs/lows, session levels, inducement),
+scope (external beyond the dealing range vs internal inside it) and state
+(swept liquidity is spent and can never be a draw), then scores importance
+deterministically. Kind and timeframe dominate; touch count refines but does
+not decide, so a triple-tapped 15m level still loses to a prior daily high.
+
+Verified on live data: the draw stepped **past** the range extreme at 66,419
+to target external equal-highs at 67,255 — correct, because external
+liquidity beyond the range is what a completed leg reaches for.
+
+### `smc_desk/perception/market_state.py` (new)
+
+The system had no memory and answered in one shot. It now carries a running
+picture — bias, range, protected levels, draw, swept and unswept liquidity,
+primary POI and its alternates — and moves through the trader sequence:
+
+    MAP_CONTEXT -> LIQUIDITY_EVENT_IDENTIFIED -> ACCEPTED_DISPLACEMENT
+      -> POI_MAPPED -> PRICE_APPROACHING_POI -> PRICE_AT_POI
+      -> LTF_CONFIRMATION_PENDING -> TRADE_PLAN_READY | INVALIDATED
+
+Every state names **what it is waiting for** and **what would invalidate the
+idea**; a state that cannot answer both is not one a trader would sit in.
+`diff_states` supplies the memory: which liquidity was taken since the last
+look, whether bias flipped, whether the POI moved, whether the setup advanced
+or regressed. Arrival is required before confirmation is even considered.
+
+On live BTCUSDT the pipeline reports `ACCEPTED_DISPLACEMENT`, waiting for a
+causally-owned POI — with context, draw and displacement each recorded as the
+reason it got that far.
+
+### `smc_desk/brain/narrative_annotation_planner.py` (new)
+
+Selects what to draw in a trader's order: range first for location, then the
+ranked structure that built the context. Emits **evidence ids only** — a test
+asserts the planner cannot leak a price or timestamp. Two rules came directly
+from rendering real data: an internal break sharing a price with its external
+twin is dropped (it stacked two labels on one line and hid the more important
+one), and marks closer than 0.35 ATR are dropped as visually identical.
+
 ## Required next work
 
 1. Score the graded output against a human markup on 10–15 charts. Until that
