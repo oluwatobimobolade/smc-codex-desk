@@ -81,5 +81,12 @@ tests/vision/cases/
 evaluation/pilot_rc1/
 evaluation/calibration_set/
 pilot_v1/reviewer_packs/
-review_queues/
+# Contents ignored, not the directory itself: git cannot re-include a file
+# whose parent directory is excluded, and markup cohorts must be versioned.
+review_queues/*
+# A completed markup.json is expert human judgement about real charts -- the
+# scarcest asset in this project and the only thing that turns perception
+# thresholds from guesses into measurements. It does not live in an ignored
+# directory.
+!review_queues/markup_cohort_*/
 perception_pilot_reviewer_pack.zip

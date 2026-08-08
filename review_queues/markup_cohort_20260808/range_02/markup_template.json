@@ -1,0 +1,66 @@
+{
+  "case_id": "range_02",
+  "reviewer_id": "founder",
+  "instrument": "BTCUSDT",
+  "decision_time": "2026-06-07T12:00:00Z",
+  "instructions": [
+    "Mark this chart as you would for a client, at the decision time only.",
+    "You cannot see future candles and neither could the system.",
+    "Leave a field empty if the market genuinely does not show it.",
+    "Ambiguity is a valid answer: set is_ambiguous and say why."
+  ],
+  "htf_bias": "",
+  "context_timeframe": "",
+  "bias_reasoning": "",
+  "dealing_range": {
+    "high": null,
+    "low": null,
+    "timeframe": "",
+    "price_location": ""
+  },
+  "annotations": [
+    {
+      "primitive": "",
+      "direction": "",
+      "scope": "external",
+      "timeframe": "",
+      "timestamp": "",
+      "price": null,
+      "confidence": 1.0,
+      "is_ambiguous": false,
+      "notes": ""
+    }
+  ],
+  "liquidity": {
+    "swept": [
+      {
+        "price": null,
+        "side": "",
+        "notes": ""
+      }
+    ],
+    "unswept": [
+      {
+        "price": null,
+        "side": "",
+        "notes": ""
+      }
+    ],
+    "expected_draw": {
+      "price": null,
+      "direction": "",
+      "why": ""
+    }
+  },
+  "primary_poi": {
+    "price_low": null,
+    "price_high": null,
+    "timeframe": "",
+    "kind": "",
+    "why_this_one": ""
+  },
+  "what_are_you_waiting_for": "",
+  "what_would_invalidate_this": "",
+  "would_you_trade_this": "",
+  "reviewer_notes": ""
+}

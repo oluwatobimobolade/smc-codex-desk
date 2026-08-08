@@ -1,0 +1,28 @@
+{
+  "schema": "markup_score_report_v1",
+  "cohort": "/Users/tobimobolade/smc-codex-desk/review_queues/markup_cohort_20260808",
+  "cases_found": 0,
+  "cases_scored": 0,
+  "cases_incomplete": [],
+  "summary": {
+    "bias_agreement": null,
+    "range_high_agreement": null,
+    "range_low_agreement": null,
+    "draw_agreement": null,
+    "poi_overlap": null,
+    "structure": {
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": null,
+      "recall": null,
+      "f1": null
+    }
+  },
+  "honest_limits": [
+    "One reviewer is not adjudicated truth; it is one expert opinion.",
+    "Agreement is not profitability and must never be reported as edge.",
+    "Cases marked after seeing the system's answer are contaminated and invalid."
+  ],
+  "cases": []
+}

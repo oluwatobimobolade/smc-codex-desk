@@ -1,0 +1,271 @@
+{
+  "schema": "markup_cohort_v1",
+  "gold_set": "/Users/tobimobolade/smc-codex-desk/data/gold_sets/definition_set_20",
+  "source": "data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv",
+  "reviewer_id": "founder",
+  "case_count": 20,
+  "ready_count": 20,
+  "blinding": "System answers are sealed per case and must not be opened before markup.",
+  "cases": [
+    {
+      "case_id": "ambiguous_01",
+      "status": "READY",
+      "regime": "ambiguous",
+      "decision_time": "2026-06-16 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "ambiguous_02",
+      "status": "READY",
+      "regime": "ambiguous",
+      "decision_time": "2026-06-17 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "ambiguous_03",
+      "status": "READY",
+      "regime": "ambiguous",
+      "decision_time": "2026-06-18 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "ambiguous_04",
+      "status": "READY",
+      "regime": "ambiguous",
+      "decision_time": "2026-06-19 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "ambiguous_05",
+      "status": "READY",
+      "regime": "ambiguous",
+      "decision_time": "2026-06-20 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "range_01",
+      "status": "READY",
+      "regime": "range",
+      "decision_time": "2026-06-06 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "range_02",
+      "status": "READY",
+      "regime": "range",
+      "decision_time": "2026-06-07 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "range_03",
+      "status": "READY",
+      "regime": "range",
+      "decision_time": "2026-06-08 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "range_04",
+      "status": "READY",
+      "regime": "range",
+      "decision_time": "2026-06-09 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "range_05",
+      "status": "READY",
+      "regime": "range",
+      "decision_time": "2026-06-10 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "transition_01",
+      "status": "READY",
+      "regime": "transition",
+      "decision_time": "2026-06-11 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "transition_02",
+      "status": "READY",
+      "regime": "transition",
+      "decision_time": "2026-06-12 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "transition_03",
+      "status": "READY",
+      "regime": "transition",
+      "decision_time": "2026-06-13 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "transition_04",
+      "status": "READY",
+      "regime": "transition",
+      "decision_time": "2026-06-14 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "transition_05",
+      "status": "READY",
+      "regime": "transition",
+      "decision_time": "2026-06-15 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "trend_01",
+      "status": "READY",
+      "regime": "trend",
+      "decision_time": "2026-06-01 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bullish"
+    },
+    {
+      "case_id": "trend_02",
+      "status": "READY",
+      "regime": "trend",
+      "decision_time": "2026-06-02 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bullish"
+    },
+    {
+      "case_id": "trend_03",
+      "status": "READY",
+      "regime": "trend",
+      "decision_time": "2026-06-03 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bullish"
+    },
+    {
+      "case_id": "trend_04",
+      "status": "READY",
+      "regime": "trend",
+      "decision_time": "2026-06-04 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    },
+    {
+      "case_id": "trend_05",
+      "status": "READY",
+      "regime": "trend",
+      "decision_time": "2026-06-05 12:00:00+00:00",
+      "charts": [
+        "BTCUSDT_15m_clean.png",
+        "BTCUSDT_1h_clean.png",
+        "BTCUSDT_4h_clean.png"
+      ],
+      "system_state": "ACCEPTED_DISPLACEMENT",
+      "system_bias": "bearish"
+    }
+  ]
+}
