@@ -41,15 +41,24 @@ def test_compiles_muted_native_zone_ray_and_path():
         },
     ])
     assert plan["watch_only"] is True
+    # The MCP server implements only horizontal_line, trend_line, rectangle
+    # and text. A liquidity level is a horizontal_line (there is no ray), and
+    # a conditional path has no native shape so it compiles to a composite of
+    # trend-line segments.
     assert [item["shape"] for item in plan["drawings"]] == [
-        "rectangle", "horizontal_ray", "path"
+        "rectangle", "horizontal_line", "composite"
     ]
     zone = plan["drawings"][0]
     assert zone["overrides"]["backgroundColor"] == PALETTE["order_block"]
     assert zone["overrides"]["transparency"] >= 80
     assert zone["overrides"]["linewidth"] == 1
     assert plan["drawings"][1]["overrides"]["linewidth"] == 1
-    assert plan["drawings"][2]["overrides"]["lineWidth"] == 1
+    # A conditional path has no native shape, so it compiles to connected
+    # dashed trend-line segments rather than a shape the server cannot draw.
+    path = plan["drawings"][2]
+    assert path["native_support"] is False
+    assert path["parts"] and all(part["shape"] == "trend_line" for part in path["parts"])
+    assert all(part["overrides"]["linewidth"] == 1 for part in path["parts"])
 
 
 def test_watch_chart_rejects_entry_stop_target_and_position_tools():
