@@ -15,6 +15,7 @@ from PIL import Image, ImageChops, ImageStat
 
 from smc_desk.brain.structure_lab.annotation_bridge import resolve_semantic_annotation_plan
 from smc_desk.data.hashing import file_sha256, object_sha256
+from smc_desk.rendering import smc_visual_grammar as grammar
 
 
 ANNOTATION_COLORS = {
@@ -237,39 +238,54 @@ def _draw_object(ax: Any, obj: Mapping[str, Any], n: int, span: float) -> bool:
     if end <= start:
         end = min(n - 1, start + 1)
     direction = str(obj.get("direction") or "unknown")
-    color = ANNOTATION_COLORS.get(direction, ANNOTATION_COLORS["unknown"])
+    color = grammar.direction_colour(direction)
     label = str(obj.get("label") or "")
-    linestyle = {"solid": "-", "dashed": (0, (5, 4)), "dotted": (0, (2, 3))}.get(str(obj.get("line_style") or "solid"), "-")
-    if object_type in {"structure_segment", "liquidity_line"}:
+    linestyle = grammar.LINE_STYLES.get(str(obj.get("line_style") or "solid"), "-")
+
+    if object_type == "structure_segment":
+        # Scope drives the grammar: internal structure dashed and light, swing
+        # structure solid and heavy. This is the distinction an SMC reader
+        # needs before any label is read.
         price = _float(obj.get("price"))
         if price is None:
             return False
-        width = 2.0 if object_type == "structure_segment" else 1.35
-        ax.plot([start, end], [price, price], color=color, linewidth=width, linestyle=linestyle, zorder=7)
-        if object_type == "structure_segment":
-            ax.scatter([start, end], [price, price], s=[14, 22], color=color, zorder=8)
-        _small_label(ax, min(n + 4, end + 0.7), price, label, color, span)
+        style = grammar.structure_style(obj.get("structure_scope"), obj.get("kind"))
+        ax.plot([start, end], [price, price], color=color,
+                linewidth=style["linewidth"], linestyle=style["linestyle"], zorder=7)
+        ax.scatter([start, end], [price, price], s=[14, 24], color=color, zorder=8)
+        _small_label(ax, min(n + 4, end + 0.7), price, label, color, span,
+                     fontsize=style["fontsize"])
         return True
+
+    if object_type == "liquidity_line":
+        price = _float(obj.get("price"))
+        if price is None:
+            return False
+        ax.plot([start, end], [price, price], color=grammar.PALETTE["liquidity"],
+                linewidth=1.2, linestyle=linestyle, zorder=6)
+        _small_label(ax, min(n + 4, end + 0.7), price, label,
+                     grammar.PALETTE["liquidity"], span)
+        return True
+
     if object_type == "poi_zone":
         price_low = _float(obj.get("price_low"))
         price_high = _float(obj.get("price_high"))
         if price_low is None or price_high is None:
             return False
         lower, upper = sorted((price_low, price_high))
-        zone_color = "#65a7e8" if direction == "bullish" else "#d99090"
+        # A POI is a level price may return to, so the box extends rightward
+        # to the review edge rather than stopping at its origin candles.
+        box_start, box_end = grammar.zone_span(start, end, n)
         ax.add_patch(
             Rectangle(
-                (start, lower),
-                max(1, end - start),
-                upper - lower,
-                facecolor=zone_color,
-                edgecolor=color,
-                alpha=0.20,
-                linewidth=1.1,
-                zorder=1,
+                (box_start, lower), max(1, box_end - box_start), upper - lower,
+                facecolor=color, edgecolor=color, alpha=grammar.ZONE_ALPHA,
+                linewidth=1.0, zorder=1,
             )
         )
-        _small_label(ax, (start + end) / 2, upper, label, color, span)
+        # Label inside the box at its left edge, the way a hand-drawn zone is
+        # annotated, rather than floating above it.
+        _small_label(ax, box_start + 0.6, upper, label, color, span)
         return True
     if object_type == "range_zone":
         price_low = _float(obj.get("price_low"))
@@ -340,13 +356,16 @@ def _draw_object(ax: Any, obj: Mapping[str, Any], n: int, span: float) -> bool:
     return False
 
 
-def _small_label(ax: Any, x: float, y: float, text: str, color: str, span: float) -> None:
+def _small_label(
+    ax: Any, x: float, y: float, text: str, color: str, span: float,
+    *, fontsize: float = 7.5,
+) -> None:
     ax.text(
         x,
         y + span * 0.006,
         text,
         color=color,
-        fontsize=7.5,
+        fontsize=fontsize,
         fontweight="semibold",
         ha="left",
         va="bottom",

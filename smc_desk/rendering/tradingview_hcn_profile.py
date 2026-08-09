@@ -23,8 +23,12 @@ MAX_STRUCTURE_RAYS = 3
 MAX_PATH_POINTS = 6
 MAX_LABEL_CHARS = 32
 
-ZONE_KINDS = {"htf_zone", "order_block", "fvg"}
+ZONE_KINDS = {"htf_zone", "order_block", "fvg", "dealing_range"}
 LINE_KINDS = {"structure", "liquidity"}
+# Structure that travelled between two points in time is a trend line, not a
+# ray: a BOS runs from the swing it broke to the candle that broke it.
+SEGMENT_KINDS = {"structure_segment"}
+POSITION_KINDS = {"long_position", "short_position"}
 FORBIDDEN_WATCH_KINDS = {
     "entry",
     "stop",
@@ -34,12 +38,35 @@ FORBIDDEN_WATCH_KINDS = {
     "short_position",
 }
 
+# Native TradingView tool for each SMC concept. Using the platform's own
+# drawing objects rather than approximating them means the markup is editable
+# by hand after it lands, reads as a normal chart to another trader, and
+# carries TradingView's own semantics -- a position tool computes its own
+# risk/reward, which no rectangle can.
+NATIVE_TOOL_MAP = {
+    "order_block": "rectangle",
+    "fvg": "rectangle",
+    "htf_zone": "rectangle",
+    "dealing_range": "rectangle",
+    "liquidity": "horizontal_ray",
+    "structure": "horizontal_ray",
+    "structure_segment": "trend_line",
+    "conditional_path": "path",
+    "note": "text",
+    "long_position": "long_position",
+    "short_position": "short_position",
+}
+
 PALETTE = {
     "ink": "#111827",
     "muted_ink": "#6B7280",
     "order_block": "#9CA3AF",
     "fvg": "#F4C2C2",
     "htf_zone": "#BFE8F2",
+    # The dealing range is context, not a POI: it sits furthest back and
+    # lightest so premium/discount location reads without competing with the
+    # zones inside it.
+    "dealing_range": "#D8DEE4",
 }
 
 
@@ -59,8 +86,11 @@ def compile_hcn_native_markup(
     kinds = Counter(str(mark.get("kind") or "") for mark in mark_list)
     if sum(kinds[kind] for kind in ZONE_KINDS) > MAX_ZONES:
         raise ValueError(f"markup may contain at most {MAX_ZONES} active zones")
-    if kinds["structure"] > MAX_STRUCTURE_RAYS:
-        raise ValueError(f"markup may contain at most {MAX_STRUCTURE_RAYS} structure rays")
+    structure_marks = kinds["structure"] + sum(kinds[kind] for kind in SEGMENT_KINDS)
+    if structure_marks > MAX_STRUCTURE_RAYS:
+        raise ValueError(f"markup may contain at most {MAX_STRUCTURE_RAYS} structure marks")
+    if sum(kinds[kind] for kind in POSITION_KINDS) > 1:
+        raise ValueError("markup may contain at most one position")
     if kinds["conditional_path"] > 1:
         raise ValueError("markup may contain at most one conditional path")
     if watch_only and FORBIDDEN_WATCH_KINDS.intersection(kinds):
@@ -79,9 +109,11 @@ def compile_hcn_native_markup(
             "zones_max": MAX_ZONES,
             "structure_rays_max": MAX_STRUCTURE_RAYS,
             "conditional_paths_max": 1,
+            "positions_max": 0 if watch_only else 1,
             "giant_directional_arrows": False,
             "trade_box_authorized": not watch_only,
         },
+        "native_tool_map": dict(NATIVE_TOOL_MAP),
     }
 
 
@@ -136,6 +168,68 @@ def _compile_mark(mark: Mapping[str, Any]) -> dict[str, Any]:
                 "showPrice": True,
                 "textcolor": color,
                 "vertLabelsAlign": "top",
+            },
+            "options": _native_options(),
+            "semantic_kind": kind,
+        }
+
+    if kind in SEGMENT_KINDS:
+        # A BOS or CHoCH travelled from the swing it broke to the candle that
+        # broke it. TradingView's trend line is the tool for that; a ray would
+        # imply the level extends forever, which is a different claim.
+        start_time = _time(mark.get("time_start"), "time_start")
+        end_time = _time(mark.get("time_end"), "time_end")
+        price = _price(mark.get("price"), "price")
+        if end_time <= start_time:
+            raise ValueError("structure_segment time_end must be after time_start")
+        scope = str(mark.get("scope") or "external").lower()
+        internal = scope == "internal"
+        return {
+            "shape": "trend_line",
+            "point": {"time": start_time, "price": price},
+            "point2": {"time": end_time, "price": price},
+            "text": label,
+            "overrides": {
+                "bold": False,
+                "fontsize": 9 if internal else 11,
+                "linecolor": PALETTE["muted_ink"] if internal else PALETTE["ink"],
+                # Internal structure dashed, swing structure solid: the single
+                # most important visual distinction on an SMC chart.
+                "linestyle": 2 if internal else 0,
+                "linewidth": 1 if internal else 2,
+                "showLabel": True,
+                "textcolor": PALETTE["muted_ink"] if internal else PALETTE["ink"],
+            },
+            "options": _native_options(),
+            "semantic_kind": kind,
+            "structure_scope": scope,
+        }
+
+    if kind in POSITION_KINDS:
+        # TradingView's forecasting tools. They own the risk/reward arithmetic
+        # and render entry, stop and target as one object, which is how a
+        # trader actually draws a setup. Only reachable when the caller has
+        # already left watch-only.
+        entry = _price(mark.get("entry_price"), "entry_price")
+        stop = _price(mark.get("stop_price"), "stop_price")
+        targets = mark.get("target_prices")
+        if not isinstance(targets, list) or not targets:
+            raise ValueError(f"{kind} requires at least one target price")
+        target = _price(targets[0], "target_prices[0]")
+        if kind == "long_position" and not (stop < entry < target):
+            raise ValueError("long_position requires stop < entry < target")
+        if kind == "short_position" and not (target < entry < stop):
+            raise ValueError("short_position requires target < entry < stop")
+        return {
+            "shape": kind,
+            "point": {"time": _time(mark.get("time"), "time"), "price": entry},
+            "text": label,
+            "overrides": {
+                "entryPrice": entry,
+                "stopPrice": stop,
+                "targetPrice": target,
+                "linewidth": 1,
+                "fontsize": 10,
             },
             "options": _native_options(),
             "semantic_kind": kind,
