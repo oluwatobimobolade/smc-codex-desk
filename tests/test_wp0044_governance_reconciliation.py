@@ -7,7 +7,11 @@ from pathlib import Path
 import pytest
 import yaml
 
-from tools.check_governance_consistency import ROOT, check_consistency
+from tools.check_governance_consistency import (
+    ROOT,
+    check_consistency,
+    check_source_manifest_contents,
+)
 from tools.run_validation_registry import append_validation_record, load_registry
 
 
@@ -28,6 +32,34 @@ def test_wp0044_validation_registry_is_append_only_and_source_bound() -> None:
     assert len(ids) == len(set(ids))
     assert registry["current_gate"]["record_id"] in ids
     assert all(item["source"]["git_head"] and item["source"]["source_state"] for item in records)
+
+
+def test_source_manifest_verifies_the_files_it_binds(tmp_path: Path) -> None:
+    bound = tmp_path / "bound.py"
+    bound.write_text("original\n", encoding="utf-8")
+    manifest = tmp_path / "SOURCE_MANIFEST.tsv"
+    manifest.write_text(
+        "state\tsha256\tsize_bytes\tpath\n"
+        f"worktree\t{hashlib.sha256(bound.read_bytes()).hexdigest()}\t{bound.stat().st_size}\tbound.py\n",
+        encoding="utf-8",
+    )
+
+    assert check_source_manifest_contents(manifest, tmp_path) == []
+
+    bound.write_text("drifted\n", encoding="utf-8")
+    issues = check_source_manifest_contents(manifest, tmp_path)
+    assert any("mismatch" in issue for issue in issues)
+
+
+def test_source_manifest_rejects_paths_outside_the_repository(tmp_path: Path) -> None:
+    manifest = tmp_path / "SOURCE_MANIFEST.tsv"
+    manifest.write_text(
+        "state\tsha256\tsize_bytes\tpath\n"
+        f"worktree\t{'0' * 64}\t0\t../outside.py\n",
+        encoding="utf-8",
+    )
+
+    assert any("escapes" in issue for issue in check_source_manifest_contents(manifest, tmp_path))
 
 
 def test_wp0044_registry_append_preserves_history_and_rejects_duplicate() -> None:

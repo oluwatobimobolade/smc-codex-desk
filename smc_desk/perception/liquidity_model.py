@@ -158,9 +158,49 @@ def _f(value: Any) -> float | None:
         return None
 
 
+def _evidence(record: Mapping[str, Any]) -> Mapping[str, Any]:
+    value = record.get("evidence")
+    return value if isinstance(value, Mapping) else {}
+
+
+def collect_liquidity_evidence(
+    detector_candidates: Mapping[str, Any],
+) -> tuple[list[Mapping[str, Any]], tuple[str, ...]]:
+    """Collect levels and the level ids consumed by real sweep objects.
+
+    The detector deliberately emits sweeps as separate objects. Consumers must
+    join ``sweep.evidence.swept_level_id`` back to the referenced level rather
+    than waiting for the level's lifecycle field to be mutated.
+    """
+    levels: list[Mapping[str, Any]] = []
+    swept_ids: list[str] = []
+    for payload in (detector_candidates or {}).values():
+        if not isinstance(payload, Mapping):
+            continue
+        found = payload.get("liquidity_levels")
+        if isinstance(found, Sequence) and not isinstance(found, (str, bytes)):
+            levels.extend(value for value in found if isinstance(value, Mapping))
+        sweeps = payload.get("sweeps")
+        if not isinstance(sweeps, Sequence) or isinstance(sweeps, (str, bytes)):
+            continue
+        for sweep in sweeps:
+            if not isinstance(sweep, Mapping):
+                continue
+            swept_id = sweep.get("swept_level_id") or _evidence(sweep).get("swept_level_id")
+            if swept_id is not None and str(swept_id) not in swept_ids:
+                swept_ids.append(str(swept_id))
+    return levels, tuple(swept_ids)
+
+
 def classify_kind(record: Mapping[str, Any]) -> str:
     """Name the liquidity type from whatever the detector recorded."""
-    explicit = str(record.get("kind") or record.get("liquidity_kind") or "").lower()
+    evidence = _evidence(record)
+    explicit = str(
+        record.get("kind")
+        or record.get("liquidity_kind")
+        or evidence.get("level_kind")
+        or ""
+    ).lower()
     if explicit in KIND_WEIGHTS:
         return explicit
     # Labels arrive human-written ("Prior Week High") and ids machine-written
@@ -173,9 +213,10 @@ def classify_kind(record: Mapping[str, Any]) -> str:
     ):
         if candidate in label:
             return candidate
-    touches = int(record.get("touch_count") or len(record.get("constituent_swing_ids") or []) or 0)
+    constituents = record.get("constituent_swing_ids") or evidence.get("constituent_swing_ids") or []
+    touches = int(record.get("touch_count") or evidence.get("touch_count") or len(constituents) or 0)
     if touches >= 2:
-        side = str(record.get("side") or "").lower()
+        side = str(record.get("side") or evidence.get("side") or "").lower()
         return "equal_highs" if "buy" in side or "high" in label else "equal_lows"
     return "unknown"
 
@@ -248,10 +289,16 @@ def build_liquidity_map(
         if price is None:
             continue
 
-        status = str(record.get("activity_status") or record.get("lifecycle") or "active").lower()
+        evidence = _evidence(record)
+        status = str(
+            record.get("activity_status")
+            or record.get("lifecycle")
+            or evidence.get("activity_status")
+            or "active"
+        ).lower()
         swept = status in SWEPT_STATES or object_id in swept_ids
 
-        side = str(record.get("side") or "").lower()
+        side = str(record.get("side") or evidence.get("side") or "").lower()
         if side not in {"buy_side", "sell_side"}:
             side = "buy_side" if (current_price is not None and price > current_price) else "sell_side"
 
@@ -259,7 +306,8 @@ def build_liquidity_map(
         scope = classify_scope(price, range_high, range_low)
         touches = int(
             record.get("touch_count")
-            or len(record.get("constituent_swing_ids") or [])
+            or evidence.get("touch_count")
+            or len(record.get("constituent_swing_ids") or evidence.get("constituent_swing_ids") or [])
             or 1
         )
         timeframe = str(record.get("timeframe") or "unknown")
@@ -315,6 +363,7 @@ __all__ = [
     "build_liquidity_map",
     "classify_kind",
     "classify_scope",
+    "collect_liquidity_evidence",
     "resolve_draw",
     "score_importance",
 ]

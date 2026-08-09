@@ -1,15 +1,19 @@
 import os
 import json
-from datetime import datetime, timezone
+from pathlib import Path
+
+from smc_desk.evaluation.cohort_integrity import (
+    case_ids_sha256,
+    definition_case_set_sha256,
+)
 
 def main():
     print("Building the 20-chart Definition Set for BTCUSDT 15m...")
     base_dir = "data/gold_sets/definition_set_20"
     os.makedirs(base_dir, exist_ok=True)
-    
+
     # We define 20 specific timestamps to act as the "decision_time" for these cases.
-    # In a real environment, an analyst would select exact timestamps that represent
-    # these regimes. We use placeholders for the framework.
+    # An analyst must replace and verify these before any evaluation use.
     
     cases = [
         # 5 Trends
@@ -66,6 +70,32 @@ def main():
         for reviewer in ["reviewer_A", "reviewer_B"]:
             with open(os.path.join(case_dir, f"{reviewer}.json"), "w") as f:
                 json.dump(template, f, indent=4)
+
+    # Machine-readable provenance. These cases are scaffolding for the review
+    # workflow, not analyst-selected truth, and downstream tools must refuse to
+    # turn them into accuracy metrics by default. The metadata hash prevents a
+    # later timestamp/label edit from inheriting an earlier review claim.
+    case_ids = [case["case_id"] for case in cases]
+    base_path = Path(base_dir)
+    with open(os.path.join(base_dir, "definition_set_status.json"), "w") as f:
+        json.dump({
+            "schema": "definition_set_status_v2",
+            "selection_status": "PLACEHOLDER_NOT_ANALYST_REVIEWED",
+            "analyst_id": None,
+            "reviewed_at": None,
+            "selection_rationale": "Sequential diagnostic scaffolding; not independently selected.",
+            "created_by": "tools/build_definition_set.py",
+            "known_limitations": [
+                "Decision times are sequential framework placeholders.",
+                "Regime labels are date-block labels and were not chart-verified.",
+                "This output must not be described as a gold set or scored as perception accuracy."
+            ],
+            "allowed_use": "tooling diagnostics only",
+            "scoreable": False,
+            "case_count": len(case_ids),
+            "case_ids_sha256": case_ids_sha256(case_ids),
+            "case_set_sha256": definition_case_set_sha256(base_path, case_ids),
+        }, f, indent=4)
                 
     print(f"Successfully generated 20 case shells in {base_dir}")
 

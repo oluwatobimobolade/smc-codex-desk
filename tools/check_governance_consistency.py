@@ -9,6 +9,7 @@ Exit non-zero on any inconsistency.
 """
 from __future__ import annotations
 
+import csv
 import json
 import hashlib
 import sys
@@ -40,6 +41,62 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def check_source_manifest_contents(manifest_path: Path, root: Path = ROOT) -> list[str]:
+    """Verify every path bound by a validation source manifest."""
+    issues: list[str] = []
+    try:
+        with manifest_path.open(newline="", encoding="utf-8") as handle:
+            reader = csv.DictReader(handle, delimiter="\t")
+            required = {"state", "sha256", "size_bytes", "path"}
+            if not reader.fieldnames or not required.issubset(reader.fieldnames):
+                return [f"Source manifest has invalid columns: {manifest_path}"]
+            rows = list(reader)
+    except (OSError, csv.Error) as exc:
+        return [f"Source manifest could not be read: {manifest_path}: {exc}"]
+    if not rows:
+        return [f"Source manifest contains no records: {manifest_path}"]
+
+    root = root.resolve()
+    seen: set[str] = set()
+    for line_number, row in enumerate(rows, start=2):
+        relative = str(row.get("path") or "")
+        if not relative or relative in seen:
+            issues.append(
+                f"Source manifest line {line_number} has a missing or duplicate path: {relative!r}"
+            )
+            continue
+        seen.add(relative)
+        if Path(relative).is_absolute():
+            issues.append(f"Source manifest path must be relative: {relative}")
+            continue
+        target = (root / relative).resolve()
+        try:
+            target.relative_to(root)
+        except ValueError:
+            issues.append(f"Source manifest path escapes repository root: {relative}")
+            continue
+
+        state = str(row.get("state") or "")
+        if state == "deleted":
+            if target.exists():
+                issues.append(f"Source manifest expected deleted path still exists: {relative}")
+            continue
+        if not target.is_file():
+            issues.append(f"Source manifest path is missing or not a file: {relative}")
+            continue
+        try:
+            expected_size = int(str(row.get("size_bytes") or ""))
+        except ValueError:
+            issues.append(f"Source manifest has invalid size at line {line_number}: {relative}")
+            continue
+        if target.stat().st_size != expected_size:
+            issues.append(f"Source manifest size mismatch: {relative}")
+        expected_hash = str(row.get("sha256") or "")
+        if len(expected_hash) != 64 or sha256_file(target) != expected_hash:
+            issues.append(f"Source manifest hash mismatch: {relative}")
+    return issues
 
 
 def check_consistency() -> tuple[bool, list[str]]:
@@ -154,6 +211,21 @@ def check_consistency() -> tuple[bool, list[str]]:
             issues.append(f"Validation record {item.get('record_id')} report does not exist: {report}")
     current_payload = next((item for item in records if item.get("record_id") == current_record), None)
     if isinstance(current_payload, dict):
+        state_gate = current_state.get("current_gate") or {}
+        registry_gate = validation_registry.get("current_gate") or {}
+        if state_gate.get("id") != registry_gate.get("gate"):
+            issues.append(
+                "CURRENT_STATE.current_gate.id must match VALIDATION_REGISTRY current gate"
+            )
+        if state_gate.get("work_package") != registry_gate.get("work_package"):
+            issues.append(
+                "CURRENT_STATE.current_gate.work_package must match VALIDATION_REGISTRY current gate"
+            )
+        last_updated = str((current_state.get("project") or {}).get("last_updated") or "")
+        if last_updated != str(current_payload.get("date") or ""):
+            issues.append(
+                "CURRENT_STATE.project.last_updated must match the current validation record date"
+            )
         source = current_payload.get("source") or {}
         manifest_value = source.get("source_manifest")
         manifest_hash = source.get("source_manifest_sha256")
@@ -163,6 +235,8 @@ def check_consistency() -> tuple[bool, list[str]]:
                 issues.append(f"Current validation source manifest does not exist: {manifest_value}")
             elif sha256_file(manifest_path) != manifest_hash:
                 issues.append("Current validation source manifest hash does not match registry")
+            else:
+                issues.extend(check_source_manifest_contents(manifest_path))
 
     # 9. Registered controlling documents must match their recorded bytes.
     if source_register.get("schema") != "smc_codex_source_document_register_v1":

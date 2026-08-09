@@ -225,6 +225,26 @@ def test_newly_swept_liquidity_is_remembered():
     assert any("liquidity taken" in n for n in transition.notes)
 
 
+def test_real_sweep_objects_mark_the_referenced_level_as_spent():
+    pack = _pack(liquidity=[
+        {
+            "object_id": "pool_a",
+            "price_low": 63990.0,
+            "price_high": 64010.0,
+            "timeframe": "4h",
+            "evidence": {"level_kind": "equal_highs", "side": "buy_side", "touch_count": 2},
+        }
+    ])
+    pack["detector_candidates"]["4h"]["sweeps"] = [
+        {"object_id": "sweep_1", "evidence": {"swept_level_id": "pool_a"}}
+    ]
+
+    state = build_market_state(evidence_pack=pack)
+
+    assert "pool_a" in state.swept_liquidity_ids
+    assert "pool_a" not in state.unswept_liquidity_ids
+
+
 def test_bias_flip_is_reported():
     before = build_market_state(evidence_pack=_pack(bias="bullish"))
     after = build_market_state(evidence_pack=_pack(bias="bearish"))

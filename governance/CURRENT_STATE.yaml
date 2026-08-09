@@ -2,9 +2,9 @@ project:
   name: SMC Codex Desk
   product: Dual-Lens Market Colleague
   release: colleague-core-rc0
-  status: perception_interrogation_implementation_complete_empirical_certification_closed
-  current_date: "2026-07-13"
-  last_updated: "2026-07-13"
+  status: evaluation_truth_boundary_repaired_empirical_certification_open
+  current_date: "2026-08-09"
+  last_updated: "2026-08-09"
 
 scope:
   certified_initial_scope:
@@ -76,6 +76,11 @@ authority:
   governed_ai_structure_lab: validated_wp0041b_six_role_render_before_visual_critic_pixel_verified
   ai_doctrine_panel: validated_br006_local_source_grounded_consensus_certification_pending
   perception_bridge_validation: current_984_passed_1_skipped_scenario_poi_mapping_repair
+  current_repository_validation: 1239_passed_1_skipped_wp_smc_12
+  evaluation_truth_boundary: repaired_wp_smc_12_closed_candle_cutoff_1d_evidence_parity_atr_and_object_index
+  placeholder_markup_cohort: quarantined_invalid_do_not_mark_or_score
+  liquidity_reasoning_adapter: repaired_real_nested_evidence_and_separate_sweep_join
+  canonical_market_state_price: repaired_latest_closed_price_carried_in_formal_graph
   perception_programme_integrity: validated_local_experimental_observe_only_941_passed_1_skipped
   perception_programme_doctrine: proposed_non_authoritative_14_decisions_unresolved
   perception_programme_tool_loop: anchor_context_only_unimplemented_tools_not_advertised
@@ -120,10 +125,19 @@ active_contracts:
   ai_structure_reasoning: AI_CENTERED_STRUCTURE_REASONING_V1
 
 current_gate:
-  id: GATE-SMC-PERCEPTION-INTERROGATION-001
-  work_package: WP-SMC-05-08-PERCEPTION-INTERROGATION-HARDENING
-  status: signed_chain_and_cohort_complete_trust_provisioning_and_empirical_reviews_pending
-  next_programme: provision_external_keys_then_two_reviews_blind_adjudication_and_visual_responses
+  id: GATE-WP-SMC-12-EVALUATION-TRUTH-001
+  work_package: WP-SMC-12-EVALUATION-TRUTH-AND-ADAPTER-REPAIR
+  status: passed_local_observe_only_empirical_certification_unchanged
+  next_programme: analyst_select_development_cases_then_blind_markup_before_threshold_tuning
+
+evaluation_truth_boundary_gate:
+  id: GATE-WP-SMC-12-EVALUATION-TRUTH-001
+  description: Evaluation candles are fully closed at decision time; reviewer, system, source slices, and definition provenance are immutably hash-bound; failed or incomplete cases cannot score; and production detector objects retain their liquidity, sweep, swing, and timeframe semantics.
+  status: passed_local_observe_only_empirical_certification_unchanged
+  evidence:
+    - governance/WORK_PACKAGES/WP-SMC-12-EVALUATION-TRUTH-AND-ADAPTER-REPAIR/TEST_REPORT.json
+    - governance/WORK_PACKAGES/WP-SMC-12-EVALUATION-TRUTH-AND-ADAPTER-REPAIR/final_report.md
+    - review_queues/markup_cohort_20260808/cohort_manifest.json
 
 perception_interrogation_gate:
   id: GATE-SMC-PERCEPTION-INTERROGATION-001

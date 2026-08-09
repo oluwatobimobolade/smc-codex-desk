@@ -1,5 +1,9 @@
 {
   "schema": "markup_score_report_v1",
+  "validation_status": "INVALID_DO_NOT_USE",
+  "invalid_reasons": [
+    "This report belongs to a quarantined cohort and cannot support accuracy claims."
+  ],
   "cohort": "/Users/tobimobolade/smc-codex-desk/review_queues/markup_cohort_20260808",
   "cases_found": 0,
   "cases_scored": 0,

@@ -180,6 +180,7 @@ def _market_state(pack: Mapping[str, Any]) -> dict[str, Any]:
     """Run the trader confirmation sequence over the assembled evidence."""
     try:
         from smc_desk.perception.market_state import build_market_state
+        from smc_desk.perception.liquidity_model import collect_liquidity_evidence
         from smc_desk.perception.narrative_hierarchy import select_primary_poi, read_narrative
 
         graph = pack.get("formal_structure_graph") or {}
@@ -200,10 +201,15 @@ def _market_state(pack: Mapping[str, Any]) -> dict[str, Any]:
 
         primary_poi = None
         if candidates and narrative_payload.get("is_coherent"):
+            liquidity, swept_ids = collect_liquidity_evidence(
+                pack.get("detector_candidates") or {}
+            )
             narrative = read_narrative(
                 timeframes=graph.get("timeframes") or {},
                 active_range=graph.get("active_range") or {},
                 current_price=(graph.get("active_range") or {}).get("current_price"),
+                liquidity_levels=liquidity,
+                swept_object_ids=swept_ids,
             )
             primary_poi = select_primary_poi(narrative=narrative, poi_candidates=candidates)
 

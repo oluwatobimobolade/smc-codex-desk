@@ -384,19 +384,20 @@ def _liquidity_map(
     current_price: float | None,
 ):
     try:
-        from smc_desk.perception.liquidity_model import build_liquidity_map
+        from smc_desk.perception.liquidity_model import (
+            build_liquidity_map,
+            collect_liquidity_evidence,
+        )
 
-        levels: list[Mapping[str, Any]] = []
-        for payload in (evidence_pack.get("detector_candidates") or {}).values():
-            if isinstance(payload, Mapping):
-                found = payload.get("liquidity_levels")
-                if isinstance(found, Sequence) and not isinstance(found, (str, bytes)):
-                    levels.extend(x for x in found if isinstance(x, Mapping))
+        levels, swept_ids = collect_liquidity_evidence(
+            evidence_pack.get("detector_candidates") or {}
+        )
         if not levels:
             return None
         return build_liquidity_map(
             liquidity_levels=levels, current_price=current_price,
             range_high=_f(active_range.get("high")), range_low=_f(active_range.get("low")),
+            swept_object_ids=swept_ids,
         )
     except Exception:  # noqa: BLE001 -- descriptive layer, never fatal
         return None

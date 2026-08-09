@@ -135,6 +135,34 @@ def test_sides_are_inferred_from_price_when_absent():
     assert by_id["eql_below"].side == "sell_side"
 
 
+def test_real_detector_evidence_shape_is_not_flattened_or_reinterpreted():
+    """Production objects keep kind, side and touches inside ``evidence``."""
+    m = build_liquidity_map(
+        liquidity_levels=[
+            {
+                "object_id": "liq_equal_lows_real",
+                "price_low": 104.0,
+                "price_high": 106.0,
+                "timeframe": "4h",
+                "evidence": {
+                    "level_kind": "equal_lows",
+                    "side": "sell_side",
+                    "touch_count": 3,
+                    "constituent_swing_ids": ["a", "b", "c"],
+                },
+            }
+        ],
+        # Deliberately below the level: positional inference would call this
+        # buy-side, contradicting the detector's certified side.
+        current_price=100.0,
+    )
+
+    pool = m.pools[0]
+    assert pool.kind == "equal_lows"
+    assert pool.side == "sell_side"
+    assert pool.touch_count == 3
+
+
 def test_map_is_serialisable_and_observe_only():
     payload = _map().to_dict()
     assert payload["schema"] == "liquidity_map_v1"

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+import pandas as pd
+
 from smc_desk.brain.ai_smc_consistency_validator import validate_ai_smc_decision
 from smc_desk.brain.ai_smc_trader_brain import REASONING_ORDER, parse_ai_smc_decision
 from smc_desk.perception.formal_structure_graph import (
@@ -187,6 +189,29 @@ def test_graph_produces_thesis_sentence() -> None:
     assert "bearish" in sentence
     assert "4h" in sentence
     assert "bullish" in sentence
+
+
+def test_graph_carries_the_latest_closed_price_into_canonical_state() -> None:
+    frame = pd.DataFrame(
+        {
+            "timestamp": pd.to_datetime(["2026-07-03T11:30:00Z", "2026-07-03T11:45:00Z"]),
+            "open": [100.0, 101.0],
+            "high": [102.0, 104.0],
+            "low": [99.0, 100.0],
+            "close": [101.0, 103.0],
+            "volume": [1.0, 1.0],
+        }
+    )
+
+    graph = build_mtf_structure_graph(
+        symbol="BTCUSDT",
+        detector_candidates=_default_detector_candidates(),
+        active_range_authority=_default_active_range(),
+        timeframe_dfs={"15m": frame},
+        decision_time="2026-07-03T12:00:00Z",
+    )
+
+    assert graph["active_range"]["current_price"] == 103.0
 
 
 def test_graph_with_no_conflict_is_aligned() -> None:

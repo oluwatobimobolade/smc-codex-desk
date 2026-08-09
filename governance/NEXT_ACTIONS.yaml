@@ -1,4 +1,43 @@
 next_actions:
+  - id: WP-SMC-12
+    priority: 0
+    title: Repair evaluation truth boundary and production detector adapters
+    owner: Perception Validation Engineer
+    status: VALIDATED_LOCAL_OBSERVE_ONLY
+    gate: GATE-WP-SMC-12-EVALUATION-TRUTH-001
+    completed_scope:
+      - closed-candle decision cutoff for every markup timeframe
+      - reviewer and system evidence parity across 1d 4h 1h and 15m
+      - sealed ATR object-price and object-metadata scoring inputs
+      - atomic no-overwrite markup_cohort_v2 build with source slice chart metadata template and answer hashes
+      - definition_set_status_v2 binding analyst identity rationale case IDs and exact case metadata
+      - markup_annotation_v2 explicit completion and post-decision annotation refusal
+      - per-timeframe ATR structure matching dimension-specific denominators zero-F1 arithmetic and explicit decision agreement
+      - fail-closed detector and POI lifecycle generation status
+      - governance verification of every current source-manifest entry
+      - real nested liquidity evidence normalization and sweep-level join
+      - canonical current-price propagation into formal graph and market state
+      - explicit quarantine and scoring refusal for the invalid placeholder cohort
+    prohibited_claims:
+      - implementation correctness is not human perception accuracy
+      - the quarantined 20-case cohort is not gold and must not be marked
+      - no predictive edge signal paper live or execution authority was created
+  - id: WP-SMC-13
+    priority: 1
+    title: Build and mark an analyst-selected development cohort
+    owner: Independent SMC Reviewer and Perception Validation Engineer
+    status: NEXT_GATED_EMPIRICAL
+    depends_on: GATE-WP-SMC-12-EVALUATION-TRUTH-001
+    required_scope:
+      - select 12 to 15 cases from charts without inspecting system answers
+      - record why each case belongs and avoid regime labels until chart-verified
+      - freeze the source status as ANALYST_REVIEWED before cohort generation
+      - complete one expert markup pass before changing any threshold
+      - score disagreements and classify whether each error belongs to detector significance liquidity POI or annotation authority
+    prohibited_scope:
+      - do not use the quarantined placeholder cohort
+      - do not tune on the sealed 30-case blind certification cohort
+      - do not begin P6 provider orchestration before the development error signal exists
   - id: WP-0012A
     priority: 1
     title: Eliminate hidden legacy authority from active pipeline

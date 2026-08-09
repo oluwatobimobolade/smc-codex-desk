@@ -201,6 +201,7 @@ def resolve_liquidity_draw(
     active_range: Mapping[str, Any] | None,
     current_price: float | None,
     liquidity_levels: Sequence[Mapping[str, Any]] = (),
+    swept_object_ids: Sequence[str] = (),
 ) -> LiquidityDraw:
     """Answer 'where is price being drawn to?'.
 
@@ -224,15 +225,18 @@ def resolve_liquidity_draw(
         active_range=active_range,
         current_price=current_price,
         liquidity_levels=liquidity_levels,
+        swept_object_ids=swept_object_ids,
     )
     if ranked is not None:
         return ranked
     candidates: list[tuple[float, str, str]] = []
+    swept_ids = {str(value) for value in swept_object_ids}
     for level in liquidity_levels or ():
         if not isinstance(level, Mapping):
             continue
         status = str(level.get("activity_status") or level.get("lifecycle") or "active").lower()
-        if status in {"consumed", "swept", "terminal", "mitigated"}:
+        object_id = str(level.get("object_id") or level.get("liquidity_id") or "")
+        if status in {"consumed", "swept", "terminal", "mitigated"} or object_id in swept_ids:
             continue
         price = _f(level.get("price")) or _f(level.get("price_high") if seeking_high else level.get("price_low"))
         if price is None or current_price is None:
@@ -241,7 +245,6 @@ def resolve_liquidity_draw(
             continue
         if not seeking_high and price >= current_price:
             continue
-        object_id = str(level.get("object_id") or level.get("liquidity_id") or "")
         candidates.append((abs(price - current_price), object_id, str(price)))
 
     if candidates:
@@ -288,6 +291,7 @@ def _ranked_draw(
     active_range: Mapping[str, Any] | None,
     current_price: float | None,
     liquidity_levels: Sequence[Mapping[str, Any]],
+    swept_object_ids: Sequence[str] = (),
 ) -> LiquidityDraw | None:
     """Resolve the draw through the ranked liquidity model, or None."""
     if not liquidity_levels or current_price is None:
@@ -300,6 +304,7 @@ def _ranked_draw(
             current_price=current_price,
             range_high=_f((active_range or {}).get("high")),
             range_low=_f((active_range or {}).get("low")),
+            swept_object_ids=swept_object_ids,
         )
         pool = resolve_draw(liquidity_map, context_bias=context_bias)
     except Exception:  # noqa: BLE001 -- fall back to the simple rule below
@@ -326,6 +331,7 @@ def read_narrative(
     active_range: Mapping[str, Any] | None = None,
     current_price: float | None = None,
     liquidity_levels: Sequence[Mapping[str, Any]] = (),
+    swept_object_ids: Sequence[str] = (),
 ) -> NarrativeRead:
     """Build the hierarchical read. Never returns 'mixed'.
 
@@ -401,6 +407,7 @@ def read_narrative(
         active_range=active_range,
         current_price=current_price,
         liquidity_levels=liquidity_levels,
+        swept_object_ids=swept_object_ids,
     )
 
     # State resolution, in trader priority order.

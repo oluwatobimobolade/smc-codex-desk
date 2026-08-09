@@ -36,7 +36,8 @@ def build_mtf_structure_graph(
 
     timeframes = _build_timeframe_nodes(detector_candidates)
     pc = _build_parent_child_context(timeframes)
-    ar = _build_active_range_node(active_range_authority)
+    current_price = _current_price(timeframe_dfs)
+    ar = _build_active_range_node(active_range_authority, current_price=current_price)
     invariants = _check_invariants(timeframes, pc, ar)
     contract = _authority_contract(invariants, pc)
 
@@ -63,9 +64,8 @@ def build_mtf_structure_graph(
 def _current_price(timeframe_dfs: Mapping[str, Any] | None) -> float | None:
     """Last close of the fastest available timeframe.
 
-    The narrative needs to know where price actually is to rank liquidity
-    above and below it; the active-range node carries the range but not the
-    current price.
+    The graph carries this value into its active-range node so every downstream
+    reader reasons from the same market location.
     """
     if not timeframe_dfs:
         return None
@@ -89,23 +89,18 @@ def _build_narrative_context(
     from smc_desk.perception.narrative_hierarchy import read_narrative
 
     try:
-        liquidity: list[Mapping[str, Any]] = []
-        if isinstance(detector_candidates, Mapping):
-            for payload in detector_candidates.values():
-                if not isinstance(payload, Mapping):
-                    continue
-                levels = payload.get("liquidity_levels")
-                if isinstance(levels, Sequence) and not isinstance(levels, (str, bytes)):
-                    liquidity.extend(x for x in levels if isinstance(x, Mapping))
-        current_price = (
-            _float_or_none((active_range or {}).get("current_price"))
-            or _current_price(timeframe_dfs)
-        )
+        from smc_desk.perception.liquidity_model import collect_liquidity_evidence
+
+        liquidity, swept_ids = collect_liquidity_evidence(detector_candidates)
+        current_price = _float_or_none((active_range or {}).get("current_price"))
+        if current_price is None:
+            current_price = _current_price(timeframe_dfs)
         return read_narrative(
             timeframes=timeframes,
             active_range=active_range,
             current_price=current_price,
             liquidity_levels=liquidity,
+            swept_object_ids=swept_ids,
         ).to_dict()
     except Exception as exc:  # noqa: BLE001 -- observe-only layer must never break the graph
         return {
@@ -369,7 +364,11 @@ def _protected_low_from_node(node: Mapping[str, Any]) -> float | None:
 # ── Active Range Node ───────────────────────────────────────────────────
 
 
-def _build_active_range_node(authority: Mapping[str, Any]) -> dict[str, Any]:
+def _build_active_range_node(
+    authority: Mapping[str, Any],
+    *,
+    current_price: float | None = None,
+) -> dict[str, Any]:
     selected = authority.get("selected_range") if isinstance(authority, Mapping) else None
     if not isinstance(selected, Mapping) or selected.get("status") != "RESOLVED_ACTIVE_RANGE":
         return {
@@ -380,6 +379,7 @@ def _build_active_range_node(authority: Mapping[str, Any]) -> dict[str, Any]:
             "low": None,
             "equilibrium": None,
             "price_location": "unknown",
+            "current_price": current_price,
             "source": "unresolved",
             "evidence": ["Active range authority did not certify a protected swing pair."],
         }
@@ -391,6 +391,7 @@ def _build_active_range_node(authority: Mapping[str, Any]) -> dict[str, Any]:
         "low": _float_or_none(selected.get("range_low")),
         "equilibrium": _float_or_none(selected.get("equilibrium")),
         "price_location": str(selected.get("price_location", "unknown")),
+        "current_price": current_price,
         "source": "protected_swing_pair",
         "range_id": str(selected.get("range_id", "")),
         "width_atr": _float_or_none(selected.get("width_atr")),

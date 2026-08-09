@@ -126,6 +126,31 @@ def test_the_draw_prefers_importance_over_proximity():
     assert "importance" in read.draw.rationale
 
 
+def test_separate_sweep_object_prevents_retargeting_spent_liquidity():
+    read = read_narrative(
+        timeframes={"1d": _node("bullish")},
+        active_range={"high": 120.0, "low": 80.0, "price_location": "discount"},
+        current_price=100.0,
+        liquidity_levels=[
+            {
+                "object_id": "spent_pool",
+                "price_low": 109.0,
+                "price_high": 111.0,
+                "timeframe": "1d",
+                "evidence": {
+                    "level_kind": "equal_highs",
+                    "side": "buy_side",
+                    "touch_count": 2,
+                },
+            }
+        ],
+        swept_object_ids=["spent_pool"],
+    )
+
+    assert read.draw.target_object_id != "spent_pool"
+    assert read.draw.target_kind == "range_extreme"
+
+
 def test_that_case_picks_one_primary_poi_instead_of_hedging():
     """The recorded run offered a bullish AND a bearish POI. Choose one."""
     timeframes = {

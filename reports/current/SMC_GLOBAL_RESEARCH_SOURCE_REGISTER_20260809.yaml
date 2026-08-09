@@ -1,0 +1,465 @@
+schema_version: smc_global_research_source_register_v1
+created_at: "2026-08-09"
+status: research_only_no_runtime_or_governance_authority
+purpose: >-
+  Primary-source register supporting the global capability-gap review of SMC
+  Codex Desk. Inclusion records relevance, not endorsement. Results are bounded
+  by the source market, period, data, and method.
+
+review_questions:
+  - Which parts of SMC chart language correspond to measurable market mechanisms?
+  - Which observables are required before the Desk can make mechanism-level claims?
+  - Which market-design differences prevent naive transfer across venues?
+  - Which evaluation methods are required before predictive or execution authority?
+
+search_result_boundary:
+  statement: >-
+    This review did not locate a primary empirical study validating the branded
+    SMC/ICT ontology as a unified causal or profitable trading method. This is a
+    bounded search result, not proof that no such study exists.
+  consequence: >-
+    Individual SMC labels must be translated into testable geometric, order-flow,
+    liquidity, auction, and outcome hypotheses rather than inherited as facts.
+
+sources:
+  - id: US-TA-01
+    geography: United_States
+    domain: chart_pattern_formalization
+    title: "Foundations of Technical Analysis: Computational Algorithms, Statistical Inference, and Empirical Implementation"
+    authors: Andrew_W_Lo_Harry_Mamaysky_Jiang_Wang
+    year: 2000
+    type: primary_research_working_paper
+    url: https://www.nber.org/papers/w7613
+    result: Subjective chart patterns can be formalized computationally and some contained conditional return information in the studied U.S. equities sample.
+    desk_implication: Formal definitions and blind out-of-sample tests are possible; this does not validate SMC terminology or causal stories.
+    limitation: Historical U.S. equities and specific pattern definitions.
+
+  - id: US-OFI-01
+    geography: United_States
+    domain: order_flow_imbalance
+    title: The Price Impact of Order Book Events
+    authors: Rama_Cont_Arseniy_Kukanov_Sasha_Stoikov
+    year: 2014
+    type: peer_reviewed_primary_research
+    url: https://academic.oup.com/jfec/article-abstract/12/1/47/816163
+    result: Short-interval price changes were strongly related to order-flow imbalance, with impact inversely related to market depth.
+    desk_implication: A displacement candle is not itself order flow; mechanism claims require order-book events and depth.
+    limitation: Fifty U.S. stocks and the source study's sampling design.
+
+  - id: US-LOB-01
+    geography: United_States
+    domain: limit_order_book_prediction
+    title: Universal Features of Price Formation in Financial Markets
+    authors: Justin_Sirignano_Rama_Cont
+    year: 2019
+    type: peer_reviewed_primary_research_preprint_record
+    url: https://arxiv.org/abs/1803.06917
+    result: Models trained on billions of NASDAQ order-book events found predictive information in book state and history that generalized across instruments.
+    desk_implication: Quote, order, and cancellation state are a distinct evidence layer missing from the canonical OHLCV runtime.
+    limitation: Short-horizon U.S. equity microstructure; model accuracy is not trading profitability.
+
+  - id: INT-LIQ-01
+    geography: International
+    domain: liquidity_gaps
+    title: What Really Causes Large Price Changes?
+    authors: J_Doyne_Farmer_Laszlo_Gillemot_Fabrizio_Lillo_Szabolcs_Mike_Anindya_Sen
+    year: 2004
+    type: primary_research_preprint
+    url: https://arxiv.org/abs/cond-mat/0312703
+    result: In the studied order book, large price changes were associated more with liquidity gaps than unusually large market-order size.
+    desk_implication: Candle displacement can arise from limited depth or liquidity withdrawal, not only aggressive institutional volume.
+    limitation: Specific market and period; not a universal decomposition of every large move.
+
+  - id: US-STOP-01
+    geography: United_States_FX_research
+    domain: stop_loss_clustering
+    title: Stop-Loss Orders and Price Cascades in Currency Markets
+    authors: Carol_L_Osler
+    year: 2005
+    type: peer_reviewed_primary_research
+    url: https://www.sciencedirect.com/science/article/abs/pii/S0261560604001147
+    supporting_url: https://www.newyorkfed.org/medialibrary/media/research/staff_reports/sr150.pdf
+    result: Stop-loss orders clustered near round numbers in the studied FX data and were associated with faster, larger, more persistent price moves after trigger regions.
+    desk_implication: Liquidity cascades are empirically plausible, but a wick alone cannot identify whose stops fired or whether manipulation occurred.
+    limitation: Historical interbank FX; clusters and cascades are not proof of deliberate stop hunting.
+
+  - id: US-VOLUME-01
+    geography: United_States
+    domain: price_volume_information
+    title: "Market Statistics and Technical Analysis: The Role of Volume"
+    authors: Lawrence_Blume_David_Easley_Maureen_OHara
+    year: 1994
+    type: peer_reviewed_primary_research
+    url: https://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.1994.tb04424.x
+    result: Volume can contain information not present in price alone under the paper's model and empirical analysis.
+    desk_implication: Price-only geometry should not be described as complete market evidence.
+    limitation: Model assumptions and studied data do not imply every volume feature is useful.
+
+  - id: US-MICRO-01
+    geography: United_States
+    domain: informed_trading_and_price_impact
+    title: Continuous Auctions and Insider Trading
+    authors: Albert_S_Kyle
+    year: 1985
+    type: peer_reviewed_theoretical_research
+    url: https://econpapers.repec.org/article/ecmemetrp/v_3a53_3ay_3a1985_3ai_3a6_3ap_3a1315-35.htm
+    result: Provides a formal model connecting informed trading, liquidity trading, market-maker inference, and price impact.
+    desk_implication: Institutional activity is latent and must be inferred under an explicit model; it is not visually observed from a candle.
+    limitation: Stylized theoretical market.
+
+  - id: US-DS-01
+    geography: United_States
+    domain: data_snooping
+    title: Data-Snooping, Technical Trading Rule Performance, and the Bootstrap
+    authors: Ryan_Sullivan_Allan_Timmermann_Halbert_White
+    year: 1999
+    type: peer_reviewed_primary_research
+    url: https://doi.org/10.1111/0022-1082.00163
+    result: Adjusting for specification search materially changes how technical-rule results should be interpreted.
+    desk_implication: Detector, feature, threshold, and exit searches require a trial ledger and multiple-testing control.
+    limitation: Method must be adapted correctly to the Desk's dependent time-series trials.
+
+  - id: US-RC-01
+    geography: United_States
+    domain: multiple_testing
+    title: A Reality Check for Data Snooping
+    authors: Halbert_White
+    year: 2000
+    type: peer_reviewed_methodology
+    url: https://doi.org/10.1111/1468-0262.00152
+    result: Introduces a test of whether the best model found through specification search genuinely outperforms a benchmark.
+    desk_implication: The best backtest cannot be interpreted without accounting for all attempted alternatives.
+    limitation: Requires a well-defined benchmark and recorded candidate universe.
+
+  - id: INT-PBO-01
+    geography: International
+    domain: backtest_overfitting
+    title: The Probability of Backtest Overfitting
+    authors: David_H_Bailey_Jonathan_M_Borwein_Marcos_Lopez_de_Prado_Qiji_Jim_Zhu
+    year: 2017
+    type: peer_reviewed_methodology_record
+    url: https://scholarworks.wmich.edu/math_pubs/42/
+    result: Provides a framework for estimating the probability that optimization selected an overfit strategy.
+    desk_implication: Walk-forward performance alone is insufficient after a large research search.
+    limitation: Needs enough strategy variants and appropriate combinatorial partitions.
+
+  - id: INT-DSR-01
+    geography: International
+    domain: performance_selection_bias
+    title: The Deflated Sharpe Ratio
+    authors: David_H_Bailey_Marcos_Lopez_de_Prado
+    year: 2014
+    type: primary_methodology_paper
+    url: https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf
+    result: Adjusts observed Sharpe ratios for non-normal returns and selection over multiple trials.
+    desk_implication: Economic promotion should use selection-adjusted evidence, not a raw winning Sharpe ratio.
+    limitation: Does not repair bad data, leakage, unrealistic costs, or nonstationarity by itself.
+
+  - id: US-MKT-01
+    geography: United_States
+    domain: fragmented_market_structure
+    title: U.S. Equity Market Structure
+    author: US_Securities_and_Exchange_Commission
+    type: official_market_structure_statement
+    url: https://www.sec.gov/newsroom/speeches-statements/us-equity-market-structure
+    result: U.S. equity trading is distributed across exchanges, alternative systems, wholesalers, and other execution arrangements.
+    desk_implication: A single-venue candle cannot represent consolidated liquidity or execution conditions in fragmented markets.
+    limitation: Policy overview, not a predictive empirical study.
+
+  - id: CN-SSE-01
+    geography: China
+    domain: official_trading_mechanism
+    title: Trading Mechanism
+    author: Shanghai_Stock_Exchange
+    type: official_exchange_rules_overview
+    url: https://english.sse.com.cn/start/trading/mechanism/
+    result: Documents price-time priority, call and continuous auction mechanisms, tick rules, and board-specific daily price limits.
+    desk_implication: China research needs explicit auction, limit-state, tick, and board metadata; Binance candle semantics do not transfer directly.
+    limitation: Rules overview; detailed instruments and periods require current rulebooks.
+
+  - id: CN-OFI-01
+    geography: China
+    domain: multi_level_order_flow_imbalance
+    title: Multi-level Order Flow Imbalance and Price Formation in China's Stock Market
+    type: peer_reviewed_primary_research
+    url: https://www.zgglkx.com/CN/10.16381/j.cnki.issn1003-207x.2022.2771
+    result: Reconstructed tick order-book data and reported that multi-level imbalance improved explanation of short-horizon price formation.
+    desk_implication: Best-level or candle aggregates can omit material depth information.
+    limitation: Chinese equity data and the article's reconstruction and model choices.
+
+  - id: CN-LOB-01
+    geography: China
+    domain: limit_order_book_state
+    title: Research on Limit Order Book Characteristics in China's Stock Market
+    type: primary_research_article_record
+    url: https://ccj.pku.edu.cn/article/info?id=301278024
+    result: Studies spread, depth, slope, intraday behavior, and discrete-price characteristics in Chinese order books.
+    desk_implication: Venue-specific book shape and intraday state belong in any China transfer ontology.
+    limitation: The conclusions are bounded to the study period and market design.
+
+  - id: CN-ORDER-01
+    geography: China
+    domain: order_placement
+    title: Empirical Regularities of Order Placement in the Chinese Stock Market
+    authors: Gu_Chen_Zhou
+    year: 2008
+    type: primary_research_preprint
+    url: https://arxiv.org/abs/0712.0912
+    result: Finds order-placement regularities and buy-sell asymmetries using ultra-high-frequency Shenzhen data across auction phases.
+    desk_implication: Participant and phase asymmetries can be hidden by symmetric OHLCV rules.
+    limitation: Twenty-three Shenzhen stocks in a historical period.
+
+  - id: CN-EXTREME-01
+    geography: China
+    domain: extreme_price_changes
+    title: Statistical Properties of Extreme Price Changes in the Chinese Stock Market
+    authors: Mu_Chen_Kertész_Zhou
+    year: 2010
+    type: primary_research_preprint
+    url: https://arxiv.org/abs/1003.0168
+    result: Examines order flow, imbalance, volatility, spread, and participant behavior around extreme intraday price changes.
+    desk_implication: Extreme bars should be decomposed into liquidity, order-flow, spread, and participant-state hypotheses.
+    limitation: Shenzhen sample and historical market rules.
+
+  - id: CN-RESILIENCY-01
+    geography: China
+    domain: order_book_resiliency
+    title: Resiliency of the Chinese Stock Market
+    year: 2016
+    type: primary_research_preprint
+    url: https://arxiv.org/abs/1602.00731
+    result: Measures spread, depth, and order-intensity recovery after effective market orders.
+    desk_implication: A sweep/reclaim hypothesis should include recovery path and replenishment, not only candle closure.
+    limitation: Market-specific event definition and historical period.
+
+  - id: CN-CANDLE-01
+    geography: China
+    domain: candlestick_pattern_testing
+    title: Are Candlestick Trading Strategies Effective in Certain Stocks with Distinct Features?
+    year: 2016
+    type: peer_reviewed_primary_research_record
+    url: https://ideas.repec.org/a/eee/phsmap/v457y2016icp148-165.html
+    result: Quantitatively defines and tests candlestick rules in Chinese equities, illustrating that visual language can be made falsifiable.
+    desk_implication: Every pattern label needs executable geometry, a frozen outcome, and subgroup controls.
+    limitation: Tested candlestick rules are not SMC and results are sample dependent.
+
+  - id: JP-JPX-01
+    geography: Japan
+    domain: official_trading_rules
+    title: Domestic Stocks Trading Rules
+    author: Japan_Exchange_Group
+    type: official_exchange_rules_overview
+    url: https://www.jpx.co.jp/english/equities/trading/domestic/index.html
+    result: Documents the Tokyo market's trading hours, daily limits, tick sizes, and trading framework.
+    desk_implication: Japan transfer requires explicit rule-state metadata rather than only UTC candle geometry.
+    limitation: Overview; product-specific rules need separate confirmation.
+
+  - id: JP-AUCTION-01
+    geography: Japan
+    domain: auction_mechanisms
+    title: Transaction Methods
+    author: Japan_Exchange_Group
+    type: official_exchange_rules
+    url: https://www.jpx.co.jp/english/equities/trading/domestic/04.html
+    result: Describes Itayose call-auction and Zaraba continuous-auction methods and market-order treatment.
+    desk_implication: An auction print or limit-state move must not be classified as if generated by an always-continuous book.
+    limitation: Exchange mechanics, not forecast evidence.
+
+  - id: JP-ARROW-01
+    geography: Japan
+    domain: exchange_system
+    title: arrowhead Equity Trading System
+    author: Japan_Exchange_Group
+    type: official_system_description
+    url: https://www.jpx.co.jp/english/systems/equities-trading/01.html
+    result: Describes arrowhead architecture, order response and information dissemination, and closing-auction support.
+    desk_implication: Data latency, auction state, and event ordering matter in a Japan microstructure study.
+    limitation: System description, not a strategy evaluation.
+
+  - id: JP-PAUSE-01
+    geography: Japan
+    domain: trading_pauses_and_liquidity
+    title: Empirical Analysis of Trading Pauses Using Tick-by-Tick TSE Order Book Data
+    author: Japan_Exchange_Group_research
+    type: official_working_paper
+    url: https://www.jpx.co.jp/english/corporate/research-study/working-paper/JPXWP_Vol52e.pdf
+    result: Uses Tokyo tick-by-tick order-book data to study trading-pause effects and order behavior.
+    desk_implication: Quote and pause states can generate price paths whose causal interpretation differs from ordinary continuous trading.
+    limitation: Working paper and event-specific design.
+
+  - id: JP-TA-01
+    geography: Japan
+    domain: intraday_technical_rules
+    title: Technical Analysis and Discrete False Discovery Rate in the Japanese Stock Market
+    year: 2013
+    type: peer_reviewed_primary_research
+    url: https://www.sciencedirect.com/science/article/abs/pii/S0378426612001756
+    result: In the reported test of 7,846 intraday rules, none beat the market after data-snooping adjustment.
+    desk_implication: Rich rule search can manufacture apparent winners; Japan evidence reinforces strict multiplicity controls.
+    limitation: Specific TSE sample, rule family, costs, and statistical procedure.
+
+  - id: JP-MANIP-01
+    geography: Japan
+    domain: visible_book_manipulation
+    title: Preventing Market Manipulation
+    author: Japan_Exchange_Group
+    type: official_regulatory_guidance
+    url: https://www.jpx.co.jp/english/regulation/preventing/manipulation/
+    result: Explains that orders can create a misleading appearance of supply or demand.
+    desk_implication: Even visible depth is evidence to be interpreted, not unquestioned ground truth about intent.
+    limitation: Regulatory explanation, not a prevalence estimate.
+
+  - id: CRYPTO-PERP-01
+    geography: Global_crypto
+    domain: perpetual_futures_microstructure
+    title: Arbitrage, Contract Design, and Market Structure in Bitcoin Futures Markets
+    authors: Riccardo_De_Blasis_Alexander_Webb
+    year: 2022
+    type: peer_reviewed_primary_research
+    url: https://onlinelibrary.wiley.com/doi/10.1002/fut.22305
+    result: Studies perpetual and quarterly futures microstructure, intraday patterns, and spillovers in continuously traded cryptocurrency markets.
+    desk_implication: Twenty-four-hour trading does not eliminate seasonality, contract-specific state, or cross-market spillovers.
+    limitation: Findings depend on exchanges, contracts, and study period.
+
+  - id: CRYPTO-FRAG-01
+    geography: Global_crypto
+    domain: exchange_fragmentation
+    title: Liquidity and Market Efficiency in Cryptocurrencies
+    type: peer_reviewed_primary_research
+    url: https://www.sciencedirect.com/science/article/abs/pii/S1544612320301136
+    result: Examines liquidity across multiple Bitcoin order books and the effects of fragmented depth.
+    desk_implication: Binance-only evidence is valid for the certified venue but cannot be called the entire Bitcoin market.
+    limitation: Exchange set and period may not match current BTCUSDT perpetual conditions.
+
+  - id: CRYPTO-XMKT-01
+    geography: Global_crypto
+    domain: cross_market_price_formation
+    title: Cross-Market Prediction for Bitcoin
+    year: 2021
+    type: primary_research_preprint
+    url: https://arxiv.org/abs/2108.09750
+    result: Uses granular books and trades across markets to measure lead-lag and short-horizon cross-market predictability.
+    desk_implication: Venue-local structure should be paired with cross-market context before claiming global price formation.
+    limitation: Preprint, short horizons, market and period dependence.
+
+  - id: CRYPTO-LIQUIDATION-01
+    geography: Global_crypto
+    domain: forced_liquidations
+    title: Bitcoin Flash Crashes and Liquidations
+    year: 2021
+    type: primary_research_preprint
+    url: https://arxiv.org/abs/2102.04591
+    result: Studies the role of leveraged forced liquidations in large Bitcoin price moves.
+    desk_implication: A displacement or cascade in perpetual futures needs liquidation, leverage, and derivative-state hypotheses.
+    limitation: Preprint and episode-specific evidence.
+
+  - id: REGIME-01
+    geography: United_States
+    domain: regime_switching
+    title: A New Approach to the Economic Analysis of Nonstationary Time Series and the Business Cycle
+    authors: James_D_Hamilton
+    year: 1989
+    type: peer_reviewed_methodology
+    url: https://ideas.repec.org/a/ecm/emetrp/v57y1989i2p357-84.html
+    result: Formalizes time-series behavior that changes across latent discrete regimes.
+    desk_implication: A single pooled calibration can hide materially different behavior across market states.
+    limitation: Model structure and regime count must be justified rather than assumed.
+
+  - id: REGIME-02
+    geography: International
+    domain: online_change_point_detection
+    title: Bayesian Online Changepoint Detection
+    authors: Ryan_Prescott_Adams_David_J_C_MacKay
+    year: 2007
+    type: primary_methodology_preprint
+    url: https://arxiv.org/abs/0710.3742
+    result: Provides online posterior inference for the current run length since a change point.
+    desk_implication: Drift and regime transitions can be represented probabilistically instead of hard-coded after the fact.
+    limitation: Hazard model and observation likelihood require validation.
+
+  - id: CAL-01
+    geography: International
+    domain: probabilistic_forecast_evaluation
+    title: Strictly Proper Scoring Rules, Prediction, and Estimation
+    authors: Tilmann_Gneiting_Adrian_E_Raftery
+    year: 2007
+    type: peer_reviewed_methodology
+    url: https://doi.org/10.1198/016214506000001437
+    result: Develops proper scoring rules that reward honest probabilistic forecasts.
+    desk_implication: Calibration promotion must use proper scores and reliability diagnostics, not accuracy or ECE alone.
+    limitation: A scoring rule does not define the operational cost of a false decision.
+
+  - id: CAL-02
+    geography: International
+    domain: probabilistic_forecasting
+    title: Probabilistic Forecasting
+    authors: Tilmann_Gneiting_Matthias_Katzfuss
+    year: 2014
+    type: peer_reviewed_review_and_framework_record
+    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2405902
+    result: Frames forecast quality around calibration and sharpness, evaluated by proper scoring rules.
+    desk_implication: Desk confidence should mean an empirically checked predictive distribution, not rhetorical certainty.
+    limitation: General framework; Desk outcomes and decision costs still need definition.
+
+  - id: HAI-01
+    geography: United_States
+    domain: human_ai_reliance
+    title: Does the Whole Exceed its Parts? The Effect of AI Explanations on Complementary Team Performance
+    authors: Bansal_et_al
+    year: 2021
+    type: peer_reviewed_primary_research_preprint_record
+    url: https://arxiv.org/abs/2006.14779
+    result: Explanations could increase acceptance of AI advice without reliably improving complementary team performance.
+    desk_implication: A persuasive narrative is not evidence that the trader-plus-Desk team is better.
+    limitation: Studied tasks and participants differ from discretionary market analysis.
+
+  - id: HAI-02
+    geography: United_States
+    domain: confidence_and_trust_calibration
+    title: Effect of Confidence and Explanation on Accuracy and Trust Calibration in AI-Assisted Decision Making
+    authors: Zhang_Liao_Bellamy
+    year: 2020
+    type: primary_research_preprint
+    url: https://arxiv.org/abs/2001.02114
+    result: Confidence information affected trust calibration, but calibrated trust did not automatically yield better team performance.
+    desk_implication: Measure appropriate reliance, overrides, and team outcomes separately from model calibration.
+    limitation: Experimental task and interface differ from SMC analysis.
+
+  - id: HAI-03
+    geography: United_States
+    domain: ai_risk_management
+    title: Artificial Intelligence Risk Management Framework 1.0
+    author: US_National_Institute_of_Standards_and_Technology
+    year: 2023
+    type: official_framework
+    url: https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf
+    result: Requires contextual validity, measured risks, defined human roles, monitoring, and governance across the AI lifecycle.
+    desk_implication: Human-AI role boundaries and deployment context are part of validity, not documentation afterthoughts.
+    limitation: General framework rather than market-specific acceptance thresholds.
+
+  - id: VISION-01
+    geography: International
+    domain: chart_visual_grounding
+    title: "RefChartQA: Grounding Visual Question Answering in Charts"
+    year: 2025
+    type: primary_research_preprint
+    url: https://arxiv.org/abs/2503.23131
+    result: Evaluates grounded chart question answering and reports benefits from explicit visual references.
+    desk_implication: Vision outputs need object grounding and perturbation checks before they can audit deterministic chart facts.
+    limitation: Generic chart QA does not certify candlestick or SMC expertise.
+
+  - id: VISION-02
+    geography: International
+    domain: chart_question_answering
+    title: "ChartQA: A Benchmark for Question Answering about Charts with Visual and Logical Reasoning"
+    year: 2022
+    type: primary_research_preprint
+    url: https://arxiv.org/abs/2203.10244
+    result: Provides a benchmark exposing the combined visual extraction and reasoning demands of chart question answering.
+    desk_implication: Perception and reasoning errors should be scored separately.
+    limitation: Benchmark charts and questions are not financial-market ground truth.
+
+excluded_as_authority:
+  - Commercial trading education, vendor blogs, influencer videos, and doctrine-frequency counts may help discover terminology but do not establish empirical validity.
+  - Current preprints may motivate experiments but cannot independently promote runtime, predictive, or execution authority.
+  - Official exchange rules establish mechanics, not forecast skill or profitability.

@@ -1,5 +1,12 @@
 {
   "schema": "markup_cohort_v1",
+  "validation_status": "INVALID_DO_NOT_MARK",
+  "invalid_reasons": [
+    "The 15m chart slice included the candle opening at the decision time before that candle had closed.",
+    "The source decision times and regime labels were framework placeholders, not analyst-selected truth.",
+    "The system answer omitted ATR and object-price fields required by the scorer.",
+    "The system used 1d context while the reviewer was shown only 4h, 1h, and 15m charts."
+  ],
   "gold_set": "/Users/tobimobolade/smc-codex-desk/data/gold_sets/definition_set_20",
   "source": "data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv",
   "reviewer_id": "founder",

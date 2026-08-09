@@ -1,13 +1,19 @@
 # Chart markup — how to do this
 
-This is the error signal the project has never had. Until you mark these
-charts, every perception threshold in the system — swing significance, break
-displacement floors, liquidity importance weights, the label separation floor,
-the POI approach zone — is a **reasoned default with no measurement behind
-it**. Your markup is what turns those from judgement into calibration.
+> **STOP — THIS COHORT IS QUARANTINED. DO NOT MARK OR SCORE IT.**
+>
+> A post-build audit found a future-candle boundary error, placeholder regime
+> labels, and a mismatch between the 1d evidence used by the system and the
+> charts shown to the reviewer. The files are preserved as an audit artifact,
+> not as an evaluation set. See `cohort_manifest.json` for the exact reasons.
 
-20 cases. BTCUSDT 15m, balanced across four regimes: 5 trend, 5 range, 5
-transition, 5 ambiguous. Roughly 15–20 minutes each.
+The text below is retained as the original marking brief for audit history. Do
+not follow it for this folder. A separately selected and validated development
+cohort will receive new instructions.
+
+This folder originally claimed 20 BTCUSDT cases balanced across four regimes.
+The audit found that those labels were assigned by date blocks rather than
+verified from the charts, so that balance claim is invalid.
 
 ## The one rule that matters
 

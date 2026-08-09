@@ -1,0 +1,61 @@
+{
+  "schema": "smc_work_package_test_report_v1",
+  "work_package": "WP-SMC-12-EVALUATION-TRUTH-AND-ADAPTER-REPAIR",
+  "date": "2026-08-09",
+  "status": "PASS_LOCAL_OBSERVE_ONLY",
+  "focused_validation": {
+    "command": ".venv/bin/python -m pytest -q tests/test_markup_cohort_builder.py tests/test_markup_scoring.py tests/test_liquidity_model.py tests/test_narrative_hierarchy.py tests/test_market_state.py tests/test_wp0040_formal_structure_graph.py tests/test_wp0044_governance_reconciliation.py",
+    "passed": 139,
+    "failed": 0,
+    "seconds": 3.81
+  },
+  "full_validation": {
+    "command": ".venv/bin/python -m pytest -q",
+    "passed": 1251,
+    "skipped": 1,
+    "failed": 0,
+    "seconds": 438.30
+  },
+  "real_case_smoke": {
+    "status": "PASS_DIAGNOSTIC_OUTPUT_QUARANTINED_AND_REMOVED",
+    "requested_decision_time": "2026-06-16T12:00:00Z",
+    "sealed_decision_time": "2026-06-16T12:00:00Z",
+    "rendered_timeframes": ["1d", "4h", "1h", "15m"],
+    "atr_timeframes": ["1d", "4h", "1h", "15m"],
+    "indexed_detector_objects": 1937,
+    "missing_significant_object_prices": 0,
+    "missing_significant_object_metadata": 0,
+    "market_state_current_price": 66456.0,
+    "system_decision_classification": "watch",
+    "cohort_schema": "markup_cohort_v2",
+    "cohort_validation_status": "INVALID_DO_NOT_MARK",
+    "scorer_refusal": "PASS"
+  },
+  "integrity_contract": {
+    "atomic_immutable_cohort_build": "PASS",
+    "artifact_and_source_slice_hash_binding": "PASS",
+    "source_and_definition_drift_refusal": "PASS",
+    "failed_generation_never_ready": "PASS",
+    "explicit_review_completion": "PASS",
+    "per_timeframe_atr_structure_matching": "PASS",
+    "dimension_specific_denominators": "PASS",
+    "zero_f1_arithmetic": "PASS",
+    "decision_agreement": "PASS",
+    "source_manifest_content_verification": "PASS"
+  },
+  "source_manifest": {
+    "records": 20,
+    "content_mismatches": 0,
+    "sha256": "11a728d5911c732205f921a4f04fbedd00e3a68bfe648833b95a57ea26494c03"
+  },
+  "compileall": "PASS",
+  "git_diff_check": "PASS",
+  "authority_boundary": "PASS",
+  "governance_consistency": "PASS",
+  "authority_contract": {
+    "signal_allowed": false,
+    "paper_execution_allowed": false,
+    "live_execution_allowed": false,
+    "empirical_perception_certified": false
+  }
+}
