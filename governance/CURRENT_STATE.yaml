@@ -125,8 +125,8 @@ active_contracts:
   ai_structure_reasoning: AI_CENTERED_STRUCTURE_REASONING_V1
 
 current_gate:
-  id: GATE-WP-SMC-12-EVALUATION-TRUTH-001
-  work_package: WP-SMC-12-EVALUATION-TRUTH-AND-ADAPTER-REPAIR
+  id: GATE-WP-SMC-13-POI-VISIBILITY-001
+  work_package: WP-SMC-13-POI-VISIBILITY-AND-RANKING
   status: passed_local_observe_only_empirical_certification_unchanged
   next_programme: analyst_select_development_cases_then_blind_markup_before_threshold_tuning
 

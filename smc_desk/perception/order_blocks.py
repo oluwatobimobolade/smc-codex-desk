@@ -36,6 +36,10 @@ class OrderBlockDetector:
         by_open = {c.open_time: idx for idx, c in enumerate(candles)}
         fvg_list = list(fvgs)
         order_blocks: list[OrderBlockObject] = []
+        # One move produces both an internal and an external break, and both
+        # trace back to the same opposing base. The zone is the same zone; only
+        # the strongest-scoped emission is kept.
+        seen_clusters: dict[tuple, int] = {}
         for brk in structure_breaks:
             if not brk.confirmed_at or brk.confirmed_at > current_time:
                 continue
@@ -53,8 +57,18 @@ class OrderBlockDetector:
             cluster = candles[cluster_start : cluster_end + 1]
             source = cluster[-1]
             body_ratio = max((_body_ratio(candle) for candle in cluster), default=0.0)
-            if body_ratio < self.min_body_ratio:
-                continue
+            # Body size is a FACT about the candle, not a verdict on the order
+            # block. Dropping thin-bodied clusters here destroyed information
+            # nothing downstream could recover -- and it destroyed exactly the
+            # ones that matter, because a turning-point candle is usually
+            # small-bodied with a long rejection wick. On CADJPY 4H the last
+            # bullish candle before a 1.9x ATR collapse that broke structure
+            # had a 0.106 body ratio and was discarded against a 0.75 floor.
+            #
+            # The ratio is recorded on the evidence so ranking and AI review
+            # can weigh it against displacement, structure causation, location
+            # and freshness -- which is where that judgement belongs.
+            below_body_floor = body_ratio < self.min_body_ratio
             cluster_ids = [_candle_id(candle) for candle in cluster]
             departure = candles[cluster_end + 1 : break_index + 1]
             departure_ids = [_candle_id(candle) for candle in departure]
@@ -71,9 +85,13 @@ class OrderBlockDetector:
             # opposing-color cluster, body-ratio gate only.
             admission = _admit_origin_cluster(brk, departure_ids)
             if admission["admitted"] is False:
-                # Geometric candidate retained for audit but not emitted as a POI.
-                # We do NOT append to order_blocks here.
-                continue
+                # Emitted, not discarded. A candidate the causal gate rejects is
+                # still a real opposing base a trader may reference; dropping it
+                # left downstream ranking and AI review with nothing to weigh
+                # and no way to explain why one zone was preferred over another.
+                # It carries poi_grade=False so it can never be mistaken for a
+                # promoted POI.
+                pass
             origin_fvg = _causal_origin_fvg(
                 brk,
                 fvg_list,
@@ -86,7 +104,14 @@ class OrderBlockDetector:
                 structure_break_id=brk.object_id,
                 source_candle_id=_candle_id(source),
                 body_ratio=body_ratio,
-                poi_grade=True,
+                # Facts, so selection can reason instead of guess.
+                # Validation is causal, not cosmetic: the departure must have
+                # produced displacement AND the move must have broken structure.
+                # Body size stays a recorded fact and no longer decides this.
+                poi_grade=bool(admission["admitted"]),
+                caused_structure_break=True,
+                below_body_floor=below_body_floor,
+                admission_status=str(admission.get("reason") or ("admitted" if admission["admitted"] else "rejected")),
             )
             break_identity = hashlib.sha256(str(brk.object_id).encode("utf-8")).hexdigest()[:10]
             obj = OrderBlockObject(
@@ -128,6 +153,30 @@ class OrderBlockDetector:
                     "causal_origin_admission": admission,
                 },
             )
+            zone_key = (
+                str(getattr(brk.direction, "value", brk.direction)),
+                str(obj.price_low), str(obj.price_high), cluster_ids[0], cluster_ids[-1],
+            )
+            existing_index = seen_clusters.get(zone_key)
+            if existing_index is not None:
+                existing = order_blocks[existing_index]
+                keep_new = (
+                    bool(evidence.poi_grade) and not bool(existing.evidence.poi_grade)
+                ) or (
+                    str(brk.structure_scope) == "external"
+                    and str(existing.metadata.get("linked_break_scope")) != "external"
+                )
+                if not keep_new:
+                    continue
+                order_blocks.pop(existing_index)
+                seen_clusters = {
+                    key: (idx - 1 if idx > existing_index else idx)
+                    for key, idx in seen_clusters.items()
+                    if key != zone_key
+                }
+            obj.metadata["linked_break_scope"] = str(brk.structure_scope)
+            seen_clusters[zone_key] = len(order_blocks)
+
             apply_event(
                 obj,
                 SMCEvent(

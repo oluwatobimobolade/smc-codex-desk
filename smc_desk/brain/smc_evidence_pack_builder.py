@@ -25,6 +25,14 @@ from smc_desk.perception.sweep_lifecycle import enrich_sweep_lifecycles
 from smc_desk.profile.smc_intraday_profile import get_intraday_profile
 
 
+def _coerce_float(value: Any) -> float | None:
+    """Read a price without inventing one. Decimals and strings are fine; None stays None."""
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 CANDIDATE_GROUPS = (
     "swings",
     "structure_breaks",
@@ -189,15 +197,30 @@ def _market_state(pack: Mapping[str, Any]) -> dict[str, Any]:
         # Collect POI candidates from the causal authority, which already
         # assigns structural roles. Both scenarios are offered; the narrative
         # picks the one aligned with context.
+        #
+        # Every POI each scenario carries is offered, not just the one it
+        # nominated. Taking only `primary_causal_poi` meant the ranking below
+        # could never overturn an upstream choice -- it would rank a field of
+        # one. The secondaries are the field.
         candidates: list[Mapping[str, Any]] = []
+        seen_poi_ids: set[str] = set()
         scenarios = (pack.get("causal_poi_authority") or {}).get("scenarios")
         if isinstance(scenarios, Mapping):
             for direction, scenario in scenarios.items():
                 if not isinstance(scenario, Mapping):
                     continue
-                primary = scenario.get("primary_causal_poi")
-                if isinstance(primary, Mapping) and primary.get("object_id"):
-                    candidates.append({**primary, "direction": primary.get("direction") or direction})
+                offered = [
+                    scenario.get("primary_causal_poi"),
+                    *(scenario.get("secondary_reaction_pois") or []),
+                ]
+                for poi in offered:
+                    if not isinstance(poi, Mapping):
+                        continue
+                    poi_id = str(poi.get("object_id") or "")
+                    if not poi_id or poi_id in seen_poi_ids:
+                        continue
+                    seen_poi_ids.add(poi_id)
+                    candidates.append({**poi, "direction": poi.get("direction") or direction})
 
         primary_poi = None
         if candidates and narrative_payload.get("is_coherent"):
@@ -211,7 +234,16 @@ def _market_state(pack: Mapping[str, Any]) -> dict[str, Any]:
                 liquidity_levels=liquidity,
                 swept_object_ids=swept_ids,
             )
-            primary_poi = select_primary_poi(narrative=narrative, poi_candidates=candidates)
+            active_range = graph.get("active_range") or {}
+            primary_poi = select_primary_poi(
+                narrative=narrative,
+                poi_candidates=candidates,
+                # The resolved dealing range, so premium/discount is measured
+                # against the range price is actually trading in rather than
+                # against whatever extremes happen to sit in the window.
+                equilibrium=_coerce_float(active_range.get("equilibrium")),
+                current_price=_coerce_float(active_range.get("current_price")),
+            )
 
         return build_market_state(evidence_pack=pack, primary_poi=primary_poi).to_dict()
     except Exception as exc:  # noqa: BLE001 -- descriptive layer, never fatal

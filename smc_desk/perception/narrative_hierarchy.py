@@ -510,17 +510,31 @@ def select_primary_poi(
     *,
     narrative: NarrativeRead,
     poi_candidates: Sequence[Mapping[str, Any]],
+    equilibrium: float | None = None,
+    current_price: float | None = None,
 ) -> dict[str, Any] | None:
     """Choose ONE primary POI from the narrative instead of hedging.
 
-    The current thesis offers a bullish *and* a bearish POI as "conditional
-    route-map POIs" because a vote gives no basis to choose. A narrative does:
-    the primary POI is the one aligned with context bias, sitting on the
-    correct side of equilibrium, nearest to price in the retracement path.
-    Everything else is returned as the explicit alternate.
+    A vote gives no basis to choose, so the thesis used to offer a bullish
+    *and* a bearish POI and call both "conditional". A narrative can choose.
+
+    This function previously sorted the aligned candidates by distance alone,
+    while its own docstring claimed it weighed equilibrium -- it did not. That
+    is the wrong criterion and the wrong kind of wrong: nearest-to-price is
+    what an indicator does, and a trader routinely steps over a near zone to
+    reach the one that actually caused the move. Ordering now comes from
+    ``poi_quality.rank_pois``: causation, then scope, then displacement, then
+    premium/discount location, then freshness -- with proximity demoted to the
+    tie-break it always should have been.
+
+    ``equilibrium`` should come from the resolved dealing range. When it is
+    absent, location is scored neutrally rather than guessed, so an unknown
+    range cannot manufacture a premium/discount verdict.
     """
     if not narrative.is_coherent or not poi_candidates:
         return None
+    from smc_desk.perception.poi_quality import rank_pois
+
     wanted = narrative.context_bias
     aligned = [
         poi for poi in poi_candidates
@@ -531,26 +545,28 @@ def select_primary_poi(
     if not aligned:
         return None
 
-    def distance(poi: Mapping[str, Any]) -> float:
-        low = _f(poi.get("price_low"))
-        high = _f(poi.get("price_high"))
-        if low is None or high is None:
-            return float("inf")
-        midpoint = (low + high) / 2.0
-        target = narrative.draw.target_price
-        if target is None:
-            return abs(midpoint)
-        return abs(midpoint - target)
-
-    aligned.sort(key=distance)
-    primary = dict(aligned[0])
-    primary["selection_reason"] = (
-        f"Aligned with {narrative.context_timeframe} {wanted} context and closest to the "
-        f"{narrative.draw.target_kind} draw; chosen over {len(aligned) - 1} alternate(s)."
+    anchor = current_price if current_price is not None else narrative.draw.target_price
+    ranked = rank_pois(
+        aligned,
+        equilibrium=equilibrium,
+        current_price=anchor,
+        include_spent=True,  # lifecycle was already filtered above
     )
-    primary["alternates"] = [
-        str(poi.get("object_id") or "") for poi in aligned[1:] if poi.get("object_id")
-    ]
+    if not ranked:
+        return None
+
+    by_id = {str(poi.get("object_id") or ""): poi for poi in aligned}
+    winner = ranked[0]
+    primary = dict(by_id.get(winner.object_id) or aligned[0])
+    primary["selection_reason"] = (
+        f"Aligned with {narrative.context_timeframe} {wanted} context; "
+        f"{'; '.join(winner.reasons)}. "
+        f"Chosen over {len(ranked) - 1} alternate(s) on SMC quality, not proximity."
+    )
+    primary["quality_score"] = winner.score
+    primary["quality_factors"] = winner.to_dict()
+    primary["alternates"] = [poi.object_id for poi in ranked[1:] if poi.object_id]
+    primary["ranked_alternates"] = [poi.to_dict() for poi in ranked[1:]]
     return primary
 
 

@@ -130,6 +130,14 @@ class OrderBlockEvidence(SMCObjectEvidence):
     source_candle_id: Optional[str] = None
     body_ratio: float = 0.0
     poi_grade: bool = True
+    # An order block IS the origin of a structure-breaking move, so causation
+    # is the strongest validation it can carry. Body size and gate status are
+    # recorded as facts rather than used to silently delete the candidate --
+    # turning-point candles are habitually small-bodied, and the zone a trader
+    # wants is frequently the one a body filter removes.
+    caused_structure_break: bool = False
+    below_body_floor: bool = False
+    admission_status: str = "unknown"
 
 
 class InducementEvidence(SMCObjectEvidence):

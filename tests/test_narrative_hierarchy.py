@@ -343,3 +343,87 @@ def test_invalidated_poi_is_never_primary():
          "lifecycle": "invalidated"},
     ])
     assert primary is None
+
+
+# -- POI selection ranks on SMC quality, not on nearness ----------------------
+#
+# select_primary_poi used to sort aligned candidates by distance to the draw and
+# nothing else, while its docstring claimed it weighed equilibrium. These tests
+# hold the corrected behaviour: proximity is the tie-break, never the reason.
+
+
+def _bear_poi(object_id, low, high, *, caused=False, scope="internal"):
+    return {
+        "object_id": object_id, "direction": "bearish",
+        "price_low": low, "price_high": high, "lifecycle": "fresh",
+        "metadata": {"linked_break_scope": scope},
+        "evidence": {"caused_structure_break": caused, "poi_grade": caused,
+                     "structure_scope": scope},
+    }
+
+
+def test_causal_poi_beats_a_nearer_one_that_broke_nothing():
+    """The zone that caused the move wins even from further away.
+
+    This is the founder's chart complaint in test form: an indicator marks the
+    closest box, a trader marks the origin of the displacement.
+    """
+    read = read_narrative(timeframes={"1d": _node("bearish"), "4h": _node("bearish")})
+    primary = select_primary_poi(
+        narrative=read,
+        poi_candidates=[
+            _bear_poi("near_but_idle", 64000.0, 64200.0),
+            _bear_poi("far_but_causal", 66000.0, 66500.0, caused=True, scope="external"),
+        ],
+        current_price=64100.0,  # sitting inside the idle zone
+    )
+    assert primary is not None
+    assert primary["object_id"] == "far_but_causal"
+    assert "near_but_idle" in primary["alternates"]
+    assert primary["quality_score"] > 0
+
+
+def test_equilibrium_is_actually_honoured_now():
+    """Supply in premium beats supply in discount once a range is supplied."""
+    read = read_narrative(timeframes={"1d": _node("bearish"), "4h": _node("bearish")})
+    primary = select_primary_poi(
+        narrative=read,
+        poi_candidates=[
+            _bear_poi("discount_supply", 60000.0, 60500.0, caused=True),
+            _bear_poi("premium_supply", 68000.0, 68500.0, caused=True),
+        ],
+        equilibrium=64000.0,
+        current_price=60200.0,  # nearer the discount zone, which must still lose
+    )
+    assert primary is not None
+    assert primary["object_id"] == "premium_supply"
+    assert primary["quality_factors"]["location"] == "premium"
+
+
+def test_selection_reason_states_the_criteria_not_just_the_verdict():
+    read = read_narrative(timeframes={"1d": _node("bearish"), "4h": _node("bearish")})
+    primary = select_primary_poi(
+        narrative=read,
+        poi_candidates=[
+            _bear_poi("winner", 68000.0, 68500.0, caused=True, scope="external"),
+            _bear_poi("loser", 64000.0, 64200.0),
+        ],
+        equilibrium=64000.0,
+    )
+    assert primary is not None
+    reason = primary["selection_reason"].lower()
+    assert "structure" in reason
+    assert "external" in reason
+    assert "not proximity" in reason
+    assert primary["ranked_alternates"][0]["object_id"] == "loser"
+
+
+def test_missing_equilibrium_does_not_manufacture_a_location_verdict():
+    """No dealing range means no premium/discount claim -- not a guessed one."""
+    read = read_narrative(timeframes={"1d": _node("bearish"), "4h": _node("bearish")})
+    primary = select_primary_poi(
+        narrative=read,
+        poi_candidates=[_bear_poi("only", 64000.0, 64200.0, caused=True)],
+    )
+    assert primary is not None
+    assert primary["quality_factors"]["location"] == "unknown"
