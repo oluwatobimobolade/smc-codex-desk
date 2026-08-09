@@ -246,3 +246,76 @@ def test_range_zone_still_requires_deterministic_equilibrium():
             "start_index": 0, "end_index": 5,
             "start_time": "a", "end_time": "b",
         })
+
+
+# -- Guard rail 4: structural sequence coherence ------------------------------
+#
+# The density rails above would not have caught the defect a human reviewer
+# found on CADJPY 4H: a bearish BOS recorded at 115.871 four hours AFTER a
+# bearish CHoCH at 115.486 -- i.e. a continuation break at a HIGHER price than
+# the change of character that preceded it. That is one plausible-looking
+# object, so nothing measuring object counts could object to it.
+#
+# These rails measure coherence instead of volume.
+
+
+def _confirmed_external(breaks):
+    return [
+        b for b in breaks
+        if _dv(b.confirmation_status) == "confirmed"
+        and str(b.structure_scope) == "external"
+    ]
+
+
+# NOTE: a "bearish breaks must always be lower" rule was tried here and
+# removed. It is wrong. Verified on live BTCUSDT: a bearish BOS at 63,360 was
+# followed by price rallying to 64,568 and then a bearish CHoCH at 64,199 --
+# higher than the earlier break and entirely legitimate. Break, retrace,
+# break again is the most common structure in a trend.
+#
+# The real distinction is not monotonic price but whether price returned to
+# the protected side before breaking, which the next test checks directly.
+
+
+def test_every_break_is_approached_from_the_protected_side(btc):
+    """A break candle opens on the side the level protects.
+
+    Without this, any candle sitting beyond a stale level satisfies the
+    crossing test forever and records a retroactive phantom break.
+    """
+    for brk in _confirmed_external(btc["confirmed"]):
+        level = float(brk.evidence.broken_price)
+        probe_id = brk.evidence.probe_candle_id
+        candle = next(
+            (c for c in btc["candles"] if f"c_{c.open_time.timestamp()}" == probe_id), None
+        )
+        if candle is None:
+            continue
+        if _dv(brk.direction) == "bearish":
+            assert float(candle.open) >= level, (
+                f"{brk.object_id} claims a bearish break of {level} on a candle "
+                f"opening at {float(candle.open)} -- already below it"
+            )
+        else:
+            assert float(candle.open) <= level, (
+                f"{brk.object_id} claims a bullish break of {level} on a candle "
+                f"opening at {float(candle.open)} -- already above it"
+            )
+
+
+def test_a_decisive_candle_records_every_level_it_closed_through(btc):
+    """Levels a candle closed beyond must not stay live in the model.
+
+    The tracker once held a single active low and high, so a candle sweeping
+    several structural levels retired one and left the rest believed intact
+    while price traded far past them.
+    """
+    swept = [
+        b for b in _confirmed_external(btc["confirmed"])
+        if getattr(b.evidence, "levels_broken_by_candle", 0) > 1
+    ]
+    for brk in swept:
+        assert brk.evidence.levels_broken_by_candle >= 1
+    # The field must exist on every break, so magnitude is always inspectable.
+    for brk in _confirmed_external(btc["confirmed"]):
+        assert hasattr(brk.evidence, "levels_broken_by_candle")

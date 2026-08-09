@@ -116,6 +116,34 @@ def _tz_aware(value: pd.Timestamp | datetime) -> datetime:
     return ts.to_pydatetime()
 
 
+SESSION_PROFILES = ("continuous", "forex_5d")
+
+# Forex closes Friday ~21:00 UTC and reopens Sunday ~21:00 UTC. A wider window
+# than the nominal 48 hours absorbs DST shifts and venue-specific open times
+# without excusing a genuine mid-week hole.
+_WEEKEND_MIN_HOURS = 24.0
+_WEEKEND_MAX_HOURS = 75.0
+
+
+def _is_expected_closure(
+    previous_close: datetime, next_open: datetime, session_profile: str
+) -> bool:
+    """True when a timestamp discontinuity is a scheduled market closure.
+
+    Only the weekend break qualifies, and only under a session-based profile.
+    A missing candle inside an open session is still corruption and must still
+    fail: this widens what counts as *expected*, never what counts as valid.
+    """
+    if session_profile != "forex_5d":
+        return False
+    hours = (next_open - previous_close).total_seconds() / 3600.0
+    if not (_WEEKEND_MIN_HOURS <= hours <= _WEEKEND_MAX_HOURS):
+        return False
+    # The break must actually straddle the weekend: out on Friday or Saturday,
+    # back on Sunday or Monday.
+    return previous_close.weekday() in {4, 5} and next_open.weekday() in {6, 0}
+
+
 def dataframe_to_candles(
     df: pd.DataFrame,
     *,
@@ -123,6 +151,7 @@ def dataframe_to_candles(
     instrument: str,
     timeframe: str,
     reference_time: datetime | None = None,
+    session_profile: str = "continuous",
 ) -> list[Candle]:
     """Convert historical DataFrame rows to Candle objects with quality metadata.
 
@@ -151,7 +180,15 @@ def dataframe_to_candles(
         if prev_close_time is not None:
             expected_open = prev_close_time
             if open_time != expected_open:
-                has_gap = True
+                # A discontinuity is only a data defect if the market was
+                # actually open across it. Crypto trades continuously, so any
+                # break is corruption. Forex closes each weekend, so the
+                # Friday-to-Sunday gap is expected structure -- flagging it
+                # made every forex instrument unanalysable, which is why the
+                # session profile exists.
+                has_gap = not _is_expected_closure(
+                    prev_close_time, open_time, session_profile
+                )
         prev_close_time = close_time
 
         # Compute closure status.

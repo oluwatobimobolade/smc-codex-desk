@@ -30,6 +30,12 @@ class _StructureTrack:
     last_break: Optional[StructureBreakObject] = None
     last_bos_swing_id: Optional[str] = None
     pending: Dict[tuple[str, str], StructureBreakObject] = field(default_factory=dict)
+    # Every confirmed swing of this scope that price has NOT yet traded
+    # through. The tracker used to hold a single active low and high, so a
+    # candle sweeping five structural levels retired only one and the other
+    # four stayed "live" in the model while price traded far beyond them.
+    unbroken_lows: list[SwingObject] = field(default_factory=list)
+    unbroken_highs: list[SwingObject] = field(default_factory=list)
 
 
 class ProtectedStructureState:
@@ -98,6 +104,7 @@ class StructureDetector:
         if swing.direction == Direction.BEARISH:
             track.active_high = swing
             track.last_confirmed_high = swing
+            track.unbroken_highs.append(swing)
             track.pending = {key: value for key, value in track.pending.items() if key[0] != Direction.BULLISH.value}
             if track.scope == "external":
                 state.last_confirmed_external_high = swing.object_id
@@ -106,6 +113,7 @@ class StructureDetector:
         else:
             track.active_low = swing
             track.last_confirmed_low = swing
+            track.unbroken_lows.append(swing)
             track.pending = {key: value for key, value in track.pending.items() if key[0] != Direction.BEARISH.value}
             if track.scope == "external":
                 state.last_confirmed_external_low = swing.object_id
@@ -130,6 +138,26 @@ class StructureDetector:
                 continue
             key = (direction.value, target.object_id)
             level = target.price_high if direction == Direction.BULLISH else target.price_low
+
+            # A level price has ALREADY traded through cannot be broken again.
+            #
+            # A swing needs bars to its right before it confirms, so price can
+            # crash through a low and only afterwards have that low become an
+            # available target. Without this guard the very next candle
+            # trivially satisfies `low < level` and a retroactive phantom break
+            # is recorded -- on CADJPY 4H a "bearish BOS" of 115.871 was logged
+            # at 20:00 on a candle ranging 113.755-114.332, four hours after
+            # the 12:00 collapse had already taken price to 112.707, and while
+            # price was moving up.
+            #
+            # A genuine break approaches from the correct side: the candle
+            # opens on the level's protected side and closes through it.
+            approached_correctly = (
+                candle.open <= level if direction == Direction.BULLISH else candle.open >= level
+            )
+            if not approached_correctly:
+                continue
+
             wick_crossed = candle.high > level if direction == Direction.BULLISH else candle.low < level
             if not wick_crossed:
                 continue
@@ -147,7 +175,29 @@ class StructureDetector:
                 self._confirm_break(pending, candle, state, track, target, candles, swings, current_time)
                 track.pending.pop(key, None)
 
+        # One violent candle can close through several structural levels at
+        # once. Only the target above becomes a labelled structural event --
+        # exploding one collapse into five BOS objects would be its own kind
+        # of noise -- but every level it genuinely closed beyond must stop
+        # being treated as live structure. Leaving them "unbroken" made the
+        # model believe levels were intact while price traded far past them,
+        # and let them resurface later as phantom targets.
+        swept = self._retire_broken_levels(track, candle)
+        for brk in created:
+            brk.evidence.levels_broken_by_candle = swept
+
         return created
+
+    def _retire_broken_levels(self, track: _StructureTrack, candle: Candle) -> int:
+        """Retire every level this candle BODY-CLOSED through. Returns the count."""
+        before = len(track.unbroken_lows) + len(track.unbroken_highs)
+        track.unbroken_lows = [
+            swing for swing in track.unbroken_lows if candle.close >= swing.price_low
+        ]
+        track.unbroken_highs = [
+            swing for swing in track.unbroken_highs if candle.close <= swing.price_high
+        ]
+        return before - (len(track.unbroken_lows) + len(track.unbroken_highs))
 
     def _target_high(self, track: _StructureTrack) -> Optional[SwingObject]:
         if track.scope == "external" and track.current_direction == Direction.BEARISH and track.protected_high:

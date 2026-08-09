@@ -88,6 +88,10 @@ class StructureBreakEvidence(SMCObjectEvidence):
     confirmation_candle_body_ratio: Optional[float] = None
     confirmation_candle_range: Optional[Decimal] = None
     confirmation_body_size: Optional[Decimal] = None
+    # How many confirmed structural levels this candle closed through. A
+    # decisive collapse takes out several at once; recording the count keeps
+    # that magnitude visible without emitting one break object per level.
+    levels_broken_by_candle: int = 0
 
 
 class FairValueGapEvidence(SMCObjectEvidence):

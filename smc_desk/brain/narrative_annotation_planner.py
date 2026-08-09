@@ -33,8 +33,8 @@ MIN_LABEL_SEPARATION_ATR = 0.35
 
 # Deliberately below the schema's 12-object ceiling. A professional context
 # chart carries a handful of marks; the budget is a fence, not a target.
-DEFAULT_STRUCTURE_LIMIT = 3
-DEFAULT_CLUTTER_BUDGET = 8
+DEFAULT_STRUCTURE_LIMIT = 2
+DEFAULT_CLUTTER_BUDGET = 12
 
 
 def _f(value: Any) -> float | None:
@@ -83,14 +83,28 @@ def plan_narrative_annotations(
             f"Range drawn first: price is in {active_range.get('price_location')}."
         )
 
+    # The draw is the question a trader asks first -- where is price going --
+    # so it is selected before structure and cannot be truncated away.
     selections.extend(
-        _structure_selections(
-            evidence_pack=evidence_pack,
-            timeframe=timeframe,
-            limit=structure_limit,
-            rationale=rationale,
+        _liquidity_selections(
+            evidence_pack=evidence_pack, narrative=narrative, rationale=rationale
         )
     )
+
+    # Structure is selected for EVERY rendered timeframe, not only the context
+    # one. Selecting only the context timeframe left each chart carrying half a
+    # markup: the daily had structure and no range, the 4H had a range and no
+    # structure. A reader needs location and structure together on whichever
+    # chart is in front of them.
+    for chart_timeframe in _rendered_timeframes(evidence_pack, timeframe):
+        selections.extend(
+            _structure_selections(
+                evidence_pack=evidence_pack,
+                timeframe=chart_timeframe,
+                limit=structure_limit,
+                rationale=rationale,
+            )
+        )
 
     return {
         "clutter_budget": clutter_budget,
@@ -100,6 +114,84 @@ def plan_narrative_annotations(
         "authority": "observe_only_narrative_selection",
         "signal_allowed": False,
     }
+
+
+def _liquidity_selections(
+    *,
+    evidence_pack: Mapping[str, Any],
+    narrative: Mapping[str, Any],
+    rationale: list[str],
+) -> list[dict[str, Any]]:
+    """Draw the pool the narrative named as the draw, when it is a real object.
+
+    Only the draw target is selected, not every level. Marking all liquidity
+    reproduces the firehose this system was built to escape; marking the one
+    pool price is being drawn toward is what a trader actually annotates.
+    """
+    draw = narrative.get("draw") if isinstance(narrative.get("draw"), Mapping) else {}
+    object_id = str(draw.get("target_object_id") or "")
+    if not object_id:
+        rationale.append("No identified liquidity object to draw; draw omitted.")
+        return []
+
+    for timeframe, payload in (evidence_pack.get("detector_candidates") or {}).items():
+        if not isinstance(payload, Mapping):
+            continue
+        for level in payload.get("liquidity_levels") or []:
+            if not isinstance(level, Mapping):
+                continue
+            if str(level.get("object_id") or level.get("liquidity_id") or "") != object_id:
+                continue
+            kind = str(draw.get("target_kind") or "liquidity").replace("_", " ").upper()
+            rationale.append(
+                f"Drew the draw target: {kind} at {draw.get('target_price')} on {timeframe}."
+            )
+            return [{
+                "semantic_object_id": object_id,
+                "timeframe": timeframe,
+                "object_type": "equal_levels" if "equal" in str(draw.get("target_kind") or "")
+                else "liquidity_line",
+                "label": kind,
+                "reason": f"Draw on liquidity: {draw.get('rationale') or 'named by the narrative'}",
+            }]
+
+    rationale.append(f"Draw target {object_id} is not a drawable detector object.")
+    return []
+
+
+def _window_start(candles: Any) -> str:
+    """Timestamp of the first candle on the rendered chart."""
+    if isinstance(candles, list) and candles and isinstance(candles[0], Mapping):
+        first = candles[0]
+        return str(first.get("timestamp") or first.get("open_time") or "")
+    return ""
+
+
+def _within_window(brk: Mapping[str, Any], window_start: str) -> bool:
+    """True when a break's own origin is visible on the rendered chart.
+
+    Compared against ``pivot_time`` -- the swing the break originated from --
+    because a structure segment is drawn from that swing to the breaking
+    candle. A break confirmed inside the window but originating before it
+    would be drawn from off-screen.
+    """
+    if not window_start:
+        return True
+    origin = str(brk.get("pivot_time") or brk.get("candidate_at") or brk.get("confirmed_at") or "")
+    return bool(origin) and origin >= window_start
+
+
+def _rendered_timeframes(evidence_pack: Mapping[str, Any], context_timeframe: str) -> list[str]:
+    """Timeframes that will actually be drawn, context first.
+
+    A chart with no marks of its own is worse than no chart: it reads as
+    "nothing here" rather than "not analysed".
+    """
+    windows = evidence_pack.get("ohlcv_windows")
+    available = [tf for tf in (windows or {}) if isinstance(windows.get(tf), list)]
+    ordered = [context_timeframe] if context_timeframe in available else []
+    ordered += [tf for tf in ("1d", "4h", "1h", "15m") if tf in available and tf not in ordered]
+    return ordered
 
 
 def _structure_selections(
@@ -115,11 +207,16 @@ def _structure_selections(
         rationale.append(f"No candidates or window for {timeframe}; structure omitted.")
         return []
 
+    # Only structure inside the rendered window can be drawn. The bridge
+    # rejects out-of-window marks fail-closed, which is correct, but a planner
+    # that proposes them turns a good chart into REVIEW_REQUIRED for no reason.
+    window_start = _window_start(candles)
     breaks = [
         b for b in (payload.get("structure_breaks") or [])
         if isinstance(b, Mapping)
         and b.get("confirmed_at")
         and not ((b.get("evidence") or {}).get("is_unconfirmed_probe"))
+        and _within_window(b, window_start)
     ]
     if not breaks:
         rationale.append(f"No confirmed {timeframe} structure to draw.")

@@ -299,14 +299,69 @@ def test_perception_programme_executes_real_six_role_runtime(tmp_path: Path) -> 
     assert envelope.certification["summary"]["blocks"] == 0
 
 
-def test_runtime_refuses_to_advertise_unimplemented_tool_loop(tmp_path: Path) -> None:
-    with pytest.raises(ValueError, match="anchor_tools is an A/B prompt surface only"):
-        run_structure_lab(
-            case=_lab_case(),
-            provider=ReplayRoleProvider(_responses()),
-            output_dir=tmp_path,
-            candidate_payload_design="anchor_tools",
-        )
+def test_advertised_retrieval_tools_are_actually_callable(tmp_path: Path) -> None:
+    """The runtime once refused anchor_tools because the loop did not exist.
+
+    The guarantee has changed rather than disappeared: what the prompt
+    advertises must now be executable. A role that emits a tool call gets a
+    real answer and can then respond, instead of the tools being described and
+    unreachable.
+    """
+    manifest = run_structure_lab(
+        case=_lab_case(),
+        provider=ReplayRoleProvider(_responses()),
+        output_dir=tmp_path,
+        candidate_payload_design="anchor_tools",
+    )
+    assert manifest["candidate_payload_design"] == "anchor_tools"
+    # Every role audit records its tool usage, even when it asked nothing.
+    for audit in manifest["role_audits"]:
+        assert "tool_calls_used" in audit
+        assert "tool_transcript" in audit
+
+
+def test_a_role_tool_call_is_executed_and_answered(tmp_path: Path) -> None:
+    """A role that asks a question gets a real answer from the evidence."""
+    case = _lab_case()
+    responses = _responses()
+    from smc_desk.brain.structure_reasoning_roles import REQUIRED_ROLES
+    first_role = REQUIRED_ROLES[0]
+    # The role asks once, then answers on the follow-up completion.
+    responses[first_role] = [
+        {"tool_call": {"tool": "search_candidates", "arguments": {"timeframe": "4h"}}},
+        responses[first_role],
+    ]
+    manifest = run_structure_lab(
+        case=case,
+        provider=ReplayRoleProvider(responses),
+        output_dir=tmp_path,
+        candidate_payload_design="anchor_tools",
+    )
+    audit = next(a for a in manifest["role_audits"] if a["role"] == first_role)
+    assert audit["tool_calls_used"] == 1
+    call = audit["tool_transcript"][0]
+    assert call["call"]["tool"] == "search_candidates"
+    assert call["result"], "the tool must return a real answer, not an empty stub"
+
+
+def test_tool_calls_are_bounded(tmp_path: Path) -> None:
+    """A role that only ever asks must not loop forever."""
+    from smc_desk.brain.structure_lab.runtime import MAX_TOOL_CALLS_PER_ROLE
+
+    responses = _responses()
+    from smc_desk.brain.structure_reasoning_roles import REQUIRED_ROLES
+    first_role = REQUIRED_ROLES[0]
+    asking = {"tool_call": {"tool": "search_candidates", "arguments": {"timeframe": "4h"}}}
+    # Always ask, until the budget is spent and the recorded answer is used.
+    responses[first_role] = [asking] * (MAX_TOOL_CALLS_PER_ROLE + 1) + [responses[first_role]]
+    manifest = run_structure_lab(
+        case=_lab_case(),
+        provider=ReplayRoleProvider(responses),
+        output_dir=tmp_path,
+        candidate_payload_design="anchor_tools",
+    )
+    audit = next(a for a in manifest["role_audits"] if a["role"] == first_role)
+    assert audit["tool_calls_used"] <= MAX_TOOL_CALLS_PER_ROLE
 
 
 def test_ai_structure_lab_allows_one_bounded_grounding_repair(tmp_path: Path) -> None:

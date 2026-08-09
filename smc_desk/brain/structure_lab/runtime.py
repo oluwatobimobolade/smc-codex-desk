@@ -42,13 +42,21 @@ class ReplayRoleProvider:
 
     def __init__(self, responses: Mapping[str, Any]):
         self.responses = dict(responses)
+        # Calls per role, so a recorded list advances on every completion
+        # rather than only on a repair attempt. A real provider answers anew
+        # each time it is called, and the tool loop calls it repeatedly within
+        # one attempt; indexing by attempt alone would replay the same
+        # response forever.
+        self._calls: dict[str, int] = {}
 
     def complete(self, role: str, prompt: str, payload: Mapping[str, Any], attempt: int) -> RoleCompletion:
         if role not in self.responses:
             raise KeyError(f"No replay response registered for role: {role}")
         value = self.responses[role]
+        call_index = self._calls.get(role, 0)
+        self._calls[role] = call_index + 1
         if isinstance(value, list):
-            index = min(attempt, len(value) - 1)
+            index = min(max(attempt, call_index), len(value) - 1)
             value = value[index]
         return RoleCompletion(
             raw=value,
@@ -119,10 +127,9 @@ def run_structure_lab(
 ) -> dict[str, Any]:
     if max_repair_attempts not in {0, 1}:
         raise ValueError("Structure lab permits at most one bounded repair attempt.")
-    if candidate_payload_design not in {None, "full", "flat", "anchor"}:
+    if candidate_payload_design not in {None, "full", "flat", "anchor", "anchor_tools"}:
         raise ValueError(
-            "Runtime supports full, flat, or anchor payloads. anchor_tools is an A/B prompt "
-            "surface only until a bounded tool-call execution loop exists."
+            "Runtime supports full, flat, anchor, or anchor_tools payloads."
         )
     root = Path(output_dir).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
@@ -133,6 +140,20 @@ def run_structure_lab(
     )
     outputs: dict[str, dict[str, Any]] = {}
     audits: list[dict[str, Any]] = []
+
+    # The anchor_tools design advertises the retrieval tools in the prompt, so
+    # they must actually be callable. Bound them over the full as-of candidate
+    # pool and the certified graph -- the same slice the role already sees, so
+    # a tool call can reach a dropped candidate but never future data.
+    tools = None
+    if candidate_payload_design == "anchor_tools":
+        from smc_desk.brain.structure_lab.tools import RetrievalTools
+        from smc_desk.perception.programme_schema import flatten_candidate_objects
+
+        tools = RetrievalTools(
+            flatten_candidate_objects(case.get("candidate_objects") or {}),
+            case.get("formal_structure_graph") or {},
+        )
 
     for order, role in enumerate(REQUIRED_ROLES, start=1):
         role_payload = _role_input(role, runtime_case, outputs)
@@ -148,6 +169,7 @@ def run_structure_lab(
             provider=provider,
             max_repair_attempts=max_repair_attempts,
             allowed_evidence_ids=allowed_evidence_ids,
+            tools=tools,
         )
         stage_order = order + 1 if annotation_renderer is not None and role == "visual_annotation_critic" else order
         role_dir = root / f"{stage_order:02d}_{role}"
@@ -222,6 +244,73 @@ def run_structure_lab(
     return manifest
 
 
+MAX_TOOL_CALLS_PER_ROLE = 6
+
+
+def _run_tool_loop(
+    *,
+    role: str,
+    prompt: str,
+    payload: dict[str, Any],
+    provider: StructureRoleProvider,
+    attempt: int,
+    tools: Any,
+) -> tuple[Any, list[dict[str, Any]]]:
+    """Let a role ask follow-up questions before it answers.
+
+    The retriever necessarily drops candidates from the compact context, and
+    the retrieval tools exist so nothing is unreachable. Without an execution
+    loop those tools were advertised in the prompt and never callable, which is
+    the difference between a model reading a report and a mind investigating a
+    chart.
+
+    Bounded on purpose: at most ``MAX_TOOL_CALLS_PER_ROLE`` calls, and the
+    transcript is returned for the audit so a reader can see exactly what the
+    role asked and what it was told. Tools are read-only over the same as-of
+    slice the role already has, so this cannot widen the evidence boundary or
+    reach future data.
+    """
+    transcript: list[dict[str, Any]] = []
+    working_payload = dict(payload)
+    for call_index in range(MAX_TOOL_CALLS_PER_ROLE + 1):
+        completion = provider.complete(role, prompt, working_payload, attempt)
+        raw = completion.raw
+        request = _tool_request(raw)
+        if request is None or tools is None:
+            return completion, transcript
+        if call_index >= MAX_TOOL_CALLS_PER_ROLE:
+            # Out of budget: hand back the exhaustion so the role answers from
+            # what it already has rather than looping forever.
+            working_payload = {
+                **working_payload,
+                "tool_budget_exhausted": True,
+                "tool_transcript": list(transcript),
+            }
+            continue
+        result = tools.handle(request)
+        transcript.append({"call": dict(request), "result": result})
+        working_payload = {**working_payload, "tool_transcript": list(transcript)}
+    return completion, transcript
+
+
+def _tool_request(raw: Any) -> dict[str, Any] | None:
+    """Recognise a tool call in a role response, or None if it answered."""
+    payload = raw
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except json.JSONDecodeError:
+            return None
+    if not isinstance(payload, Mapping):
+        return None
+    request = payload.get("tool_call") or payload.get("tool_request")
+    if isinstance(request, Mapping) and request.get("tool"):
+        return dict(request)
+    if payload.get("tool") and payload.get("arguments") is not None:
+        return {"tool": payload["tool"], "arguments": payload.get("arguments") or {}}
+    return None
+
+
 def _complete_validated_role(
     *,
     role: str,
@@ -230,11 +319,16 @@ def _complete_validated_role(
     provider: StructureRoleProvider,
     max_repair_attempts: int,
     allowed_evidence_ids: set[str],
+    tools: Any = None,
 ) -> tuple[dict[str, Any], dict[str, Any], str]:
     errors: list[str] = []
+    tool_transcript: list[dict[str, Any]] = []
     for attempt in range(max_repair_attempts + 1):
         repair_payload = payload if not errors else {**payload, "repair_errors": list(errors)}
-        completion = provider.complete(role, prompt_packet["prompt"], repair_payload, attempt)
+        completion, tool_transcript = _run_tool_loop(
+            role=role, prompt=prompt_packet["prompt"], payload=repair_payload,
+            provider=provider, attempt=attempt, tools=tools,
+        )
         raw_text = completion.raw if isinstance(completion.raw, str) else json.dumps(completion.raw, sort_keys=True, default=str)
         try:
             raw_object = json.loads(raw_text)
@@ -254,6 +348,11 @@ def _complete_validated_role(
                 "input_sha256": object_sha256(repair_payload),
                 "raw_response_sha256": sha256_text(raw_text),
                 "parsed_response_sha256": object_sha256(parsed),
+                # What the role asked for and what it was told. Kept in the
+                # audit so a reader can see the investigation, not just the
+                # answer.
+                "tool_calls_used": len(tool_transcript),
+                "tool_transcript": list(tool_transcript),
                 "metadata": completion.metadata,
             }
             return parsed, audit, raw_text
