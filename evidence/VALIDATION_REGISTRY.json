@@ -9,7 +9,7 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R2-20260811",
+    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R4-20260811",
     "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
     "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001"
   },
@@ -1270,6 +1270,90 @@
         }
       ],
       "primary_result": "1391 passed, 1 skipped in 444.74s (0:07:24)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Transition and shadow artifacts are run-package evidence only; the sealed evidence pack and pack hash are untouched.",
+        "The narrative shadow is not rendered and not validated; canonical composer, context authority, validator, and visual critic keep full chart authority.",
+        "No thresholds changed, no P6 provider orchestration started, no signal, paper, live, or predictive authority created.",
+        "No perception accuracy, predictive edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R3-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T10:36:03.032978+00:00",
+      "status": "IMPLEMENTED_LOCAL_OBSERVE_ONLY_GOVERNANCE_REBIND_PENDING",
+      "source": {
+        "git_head": "0926a47e113f147eececf5a84dded6c322bda4c4",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 1,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "ba3c828be6fbf0e2cdea920d6f2a8fb65f6b53852590a84a4402527521eb11e3"
+      },
+      "commands": [
+        {
+          "command": "env .venv/bin/python -m pytest tests/test_market_state_memory.py -q",
+          "exit_code": 0,
+          "summary": "17 passed (13 original + 4 time-order guard)"
+        },
+        {
+          "command": "focused ring: market_state, memory, narrative planner, live runner, acceptance package, context authority, poi contract",
+          "exit_code": 0,
+          "summary": "85 passed"
+        },
+        {
+          "command": "env .venv/bin/python -m compileall -q smc_desk tools tests",
+          "exit_code": 0,
+          "summary": "clean"
+        }
+      ],
+      "primary_result": "Self-audit repair: time-order guard on colleague memory (replay cannot poison store or fake a regression); caller-side guard; governance source rebind pending R4",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Transition and shadow artifacts remain run-package evidence only; the sealed evidence pack and pack hash are untouched.",
+        "The narrative shadow is not rendered and not validated; canonical composer, context authority, validator, and visual critic keep full chart authority.",
+        "No thresholds changed, no provider orchestration (P6) started, no signal, paper, live, or predictive authority created.",
+        "No perception accuracy, predictive edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R4-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T10:43:49.209543+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "0926a47e113f147eececf5a84dded6c322bda4c4",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 2,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "ba3c828be6fbf0e2cdea920d6f2a8fb65f6b53852590a84a4402527521eb11e3"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1395 passed, 1 skipped in 448.90s (0:07:28)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1395 passed, 1 skipped in 448.90s (0:07:28)",
       "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
       "authority_mode": "additive_observe_only_run_package_evidence",
       "limitations": [
