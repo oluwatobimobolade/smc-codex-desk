@@ -23,6 +23,8 @@ from smc_desk.perception.market_state_memory import (
 )
 from tools.run_live_ai_smc_full_system import (
     _load_final_evidence_pack,
+    _narrative_draw_note,
+    _perception_failures,
     write_colleague_memory_and_narrative_shadow,
 )
 
@@ -273,4 +275,74 @@ def test_unverifiable_time_order_is_disclosed(tmp_path: Path) -> None:
     record = record_run_transition(output_root=tmp_path, symbol="BTCUSDT", current_market_state=_pack_state())
     assert record["forward_transition"] is True
     assert any("time order could not be verified" in note for note in record["notes"])
+
+
+
+def _pack_with_draw_and_failures() -> dict:
+    return {
+        "formal_structure_graph": {
+            "narrative_context": {
+                "state": "ALIGNED_CONTINUATION",
+                "draw": {"direction": "bearish", "target_price": 1820.61,
+                         "target_kind": "equal_lows", "rationale": "nearest unswept"},
+            }
+        },
+        "session_context": {
+            "perception_candidates": {
+                "timeframes": {
+                    "15m": {"status": "FAILED", "error_type": "ValueError",
+                            "error": "Cannot analyze sequence containing gaps or incomplete data"},
+                    "1h": {"status": "PASS", "candidate_counts": {}},
+                    "4h": {"status": "PASS", "candidate_counts": {}},
+                    "1d": {"status": "PASS", "candidate_counts": {}},
+                }
+            }
+        },
+    }
+
+
+def test_narrative_draw_note_names_the_draw_descriptively() -> None:
+    note = _narrative_draw_note(_pack_with_draw_and_failures())
+    assert "bearish" in note
+    assert "1,820.6" in note
+    assert "equal lows" in note
+    assert "unpromoted" in note and "not a validated sweep target" in note
+
+
+def test_narrative_draw_note_is_silent_without_a_valid_draw() -> None:
+    assert _narrative_draw_note({}) == ""
+    assert _narrative_draw_note({"formal_structure_graph": {"narrative_context": {"draw": {}}}}) == ""
+    bad = _pack_with_draw_and_failures()
+    bad["formal_structure_graph"]["narrative_context"]["draw"]["direction"] = "sideways"
+    assert _narrative_draw_note(bad) == ""
+    bad2 = _pack_with_draw_and_failures()
+    bad2["formal_structure_graph"]["narrative_context"]["draw"]["target_price"] = "n/a"
+    assert _narrative_draw_note(bad2) == ""
+
+
+def test_perception_failures_are_surfaced_in_timeframe_order() -> None:
+    failures = _perception_failures(_pack_with_draw_and_failures())
+    assert failures == ["15m: ValueError - Cannot analyze sequence containing gaps or incomplete data"]
+
+
+def test_perception_failures_empty_when_all_pass() -> None:
+    pack = _pack_with_draw_and_failures()
+    pack["session_context"]["perception_candidates"]["timeframes"]["15m"] = {"status": "PASS"}
+    assert _perception_failures(pack) == []
+    assert _perception_failures({}) == []
+
+
+def test_runner_helper_reports_perception_failures(tmp_path: Path) -> None:
+    symbol_root = tmp_path / "run" / "XAUUSD"
+    pack_dir = symbol_root / "10_smc_evidence_pack_run_1"
+    pack_dir.mkdir(parents=True)
+    pack = _pack_with_draw_and_failures()
+    pack["market_state"] = _pack_state()
+    (pack_dir / "evidence_pack.json").write_text(json.dumps(pack), encoding="utf-8")
+    outcome = write_colleague_memory_and_narrative_shadow(
+        symbol_root=symbol_root, output_root=tmp_path, symbol="XAUUSD"
+    )
+    assert outcome["perception_failures"] == [
+        "15m: ValueError - Cannot analyze sequence containing gaps or incomplete data"
+    ]
 

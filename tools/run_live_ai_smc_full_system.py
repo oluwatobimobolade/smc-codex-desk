@@ -101,6 +101,7 @@ def main() -> None:
             summary["colleague_memory"] = colleague.get("memory_status")
             summary["narrative_shadow_plan"] = colleague.get("shadow_status")
             summary["memory_transition_notes"] = colleague.get("transition_notes")
+            summary["perception_failures"] = colleague.get("perception_failures")
         except Exception as exc:
             summary = {
                 "symbol": normalize_symbol(symbol),
@@ -189,6 +190,11 @@ def write_colleague_memory_and_narrative_shadow(
         outcome["memory_status"] = "evidence_pack_unavailable"
         outcome["shadow_status"] = "evidence_pack_unavailable"
         return outcome
+
+    try:
+        outcome["perception_failures"] = _perception_failures(pack)
+    except Exception as exc:  # noqa: BLE001 -- additive evidence, never fatal
+        outcome["perception_failures"] = [f"unreadable:{type(exc).__name__}"]
 
     stage_dir = symbol_root / "18_colleague_memory_narrative"
     try:
@@ -781,7 +787,7 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
                 else (
                     "A confirmed active POI is mapped for observation, but no validated sweep/displacement/entry confirmation is promoted into a trade plan."
                     if has_active_poi
-                    else f"{_source_mode_subject(source_manifest)} sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
+                    else f"{_source_mode_subject(source_manifest)} sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan.{_narrative_draw_note(pack)}"
                 )
             ),
         },
@@ -899,6 +905,52 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             )
         ),
     }
+
+
+def _narrative_draw_note(pack: dict[str, Any]) -> str:
+    """Name the standing liquidity draw when the hierarchical narrative read found one.
+
+    Descriptive only: the draw is the nearest unswept pool in the direction of
+    the narrative bias, computed by ``narrative_hierarchy``. It is not a
+    validated sweep, not a POI, and not a target -- but a liquidity story that
+    never names the draw is a story with its central fact removed.
+    """
+    graph = pack.get("formal_structure_graph") if isinstance(pack, dict) else {}
+    narrative = graph.get("narrative_context") if isinstance(graph, dict) else {}
+    draw = narrative.get("draw") if isinstance(narrative, dict) else {}
+    if not isinstance(draw, dict):
+        return ""
+    try:
+        price = float(draw.get("target_price"))
+    except (TypeError, ValueError):
+        return ""
+    direction = str(draw.get("direction") or "")
+    if direction not in {"bullish", "bearish"}:
+        return ""
+    kind = str(draw.get("target_kind") or "liquidity").replace("_", " ")
+    return (
+        f" The hierarchical read names the standing draw: {direction} toward "
+        f"{kind} at {format_price(price)} -- descriptive and unpromoted, not a "
+        "validated sweep target."
+    )
+
+
+def _perception_failures(pack: dict[str, Any]) -> list[str]:
+    """Name any timeframe whose canonical perception failed closed.
+
+    A bare chart must never read as "nothing here" when the truth is "not
+    analysed". These failures already exist inside the pack's perception
+    report; surfacing them keeps fail-closed honest instead of silent.
+    """
+    session_context = pack.get("session_context") if isinstance(pack, dict) else {}
+    report = session_context.get("perception_candidates") if isinstance(session_context, dict) else {}
+    timeframes = report.get("timeframes") if isinstance(report, dict) else {}
+    failures: list[str] = []
+    for timeframe in ("15m", "1h", "4h", "1d"):
+        node = timeframes.get(timeframe) if isinstance(timeframes, dict) else None
+        if isinstance(node, dict) and node.get("status") == "FAILED":
+            failures.append(f"{timeframe}: {node.get('error_type')} - {node.get('error')}")
+    return failures
 
 
 def _source_mode_subject(source_manifest: dict[str, Any]) -> str:
@@ -1108,6 +1160,10 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
             lines.append("Since last look:")
             for note in item["memory_transition_notes"]:
                 lines.append(f"- {note}")
+        if item.get("perception_failures"):
+            lines.append("Perception gaps (fail-closed, not 'nothing here'):")
+            for failure in item["perception_failures"]:
+                lines.append(f"- {failure}")
         lines.append(f"Last prices: `{item.get('last_prices')}`")
         if item.get("source_manifest", {}).get("proxy_note"):
             lines.append(f"Source note: {item['source_manifest']['proxy_note']}")

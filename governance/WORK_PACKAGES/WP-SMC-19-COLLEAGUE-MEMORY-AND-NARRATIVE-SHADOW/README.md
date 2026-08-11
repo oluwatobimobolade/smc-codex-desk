@@ -92,4 +92,32 @@ closed it before anything depended on it:
   `WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R2-20260811` (PASS, 1391/1).
 - R3/R4 (self-audit repair rebind and revalidation): see the append-only
   records `WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R3-20260811` and
-  `...-R4-20260811`.
+  `...-R4-20260811` (R4 PASS, 1395/1).
+
+## Live-exercise closures (2026-08-11, R5/R6)
+
+A live three-symbol exercise (ETHUSDT, HYPEUSDT, XAUUSD; run
+`analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_20260811_104810`) surfaced two
+surfacing gaps, both closed at the text/evidence level only:
+
+- **The liquidity draw was computed but never surfaced.** Every pack's
+  `narrative_context.draw` held an exact, evidence-bound target (ETH 1820.61
+  equal lows; HYPE 57.999 equal highs; XAU 4363.5 equal lows), while the
+  thesis Liquidity Story printed one canned sentence. The local provider now
+  appends the draw to that narrative, explicitly labelled "descriptive and
+  unpromoted, not a validated sweep target". Real-pack proof: the sealed
+  ETHUSDT pack renders the sentence and the decision remains
+  `mixed / REVIEW_REQUIRED`.
+- **Silent fail-closed perception.** XAUUSD 15m/1h perception raised
+  `ValueError` on COMEX daily-settlement gaps (the `forex_5d` session model
+  covers weekend closures, not daily settlement), leaving bare charts that
+  read as "nothing here" instead of "not analysed". Per-timeframe perception
+  failures are now surfaced into the run summary JSON and markdown
+  ("Perception gaps (fail-closed)"), via the post-run helper. The underlying
+  session-model question (a daily-settlement profile or a 24h spot feed for
+  metals) is a doctrine/data decision and is deliberately NOT changed here.
+
+5 new tests (draw note content and silence, failure extraction and ordering,
+helper integration): 22/22 in `tests/test_market_state_memory.py`; brain,
+validator, and acceptance ring 90 passed. R5/R6 registry records follow the
+same rebind-then-validate pattern.
