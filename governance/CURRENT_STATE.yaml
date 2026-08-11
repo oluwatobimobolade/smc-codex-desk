@@ -3,8 +3,8 @@ project:
   product: Dual-Lens Market Colleague
   release: colleague-core-rc0
   status: evaluation_truth_boundary_repaired_empirical_certification_open
-  current_date: "2026-08-10"
-  last_updated: "2026-08-10"
+  current_date: "2026-08-11"
+  last_updated: "2026-08-11"
 
 scope:
   certified_initial_scope:
@@ -76,7 +76,7 @@ authority:
   governed_ai_structure_lab: validated_wp0041b_six_role_render_before_visual_critic_pixel_verified
   ai_doctrine_panel: validated_br006_local_source_grounded_consensus_certification_pending
   perception_bridge_validation: current_984_passed_1_skipped_scenario_poi_mapping_repair
-  current_repository_validation: wp_smc_18_ethusdt_fresh_full_system_annotation_repair_1378_passed_1_skipped_source_bound
+  current_repository_validation: wp_smc_19_colleague_memory_narrative_shadow_1391_passed_1_skipped_source_bound
   evaluation_truth_boundary: repaired_wp_smc_12_closed_candle_cutoff_1d_evidence_parity_atr_and_object_index
   placeholder_markup_cohort: quarantined_invalid_do_not_mark_or_score
   liquidity_reasoning_adapter: repaired_real_nested_evidence_and_separate_sweep_join
@@ -131,8 +131,8 @@ active_contracts:
   ai_structure_reasoning: AI_CENTERED_STRUCTURE_REASONING_V1
 
 current_gate:
-  id: GATE-WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-001
-  work_package: WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR
+  id: GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001
+  work_package: WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW
   status: passed_local_observe_only_empirical_certification_unchanged
   next_programme: analyst_select_development_cases_then_blind_markup_before_threshold_tuning
 

@@ -9,9 +9,9 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-R2-20260810",
-    "work_package": "WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR",
-    "gate": "GATE-WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-001"
+    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R2-20260811",
+    "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+    "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001"
   },
   "records": [
     {
@@ -1188,6 +1188,95 @@
         "The V1/V3 reconciliation issue remains fail-closed and no active POI was selected.",
         "Context visibility and dealing-range display cannot alter bias, entry, stop, target, RR, trade state, paper authority, or live authority.",
         "No perception accuracy, predictive edge, signal, execution, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R1-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T09:56:38.165698+00:00",
+      "status": "IMPLEMENTED_LOCAL_OBSERVE_ONLY_GOVERNANCE_REBIND_PENDING",
+      "source": {
+        "git_head": "b4a255327958f41ba489afa20a73e02ccdc7f867",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 2,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "44a3fe0f7166255f160d7e78943b31dc0a67a509ca2331389d446b33958f5f3d"
+      },
+      "commands": [
+        {
+          "command": "env .venv/bin/python -m pytest -q",
+          "exit_code": 1,
+          "summary": "1390 passed, 1 skipped, 1 governance-only source-manifest mismatch before WP-SMC-19 rebind; no behavioral failures"
+        },
+        {
+          "command": "focused ring: market_state, memory, narrative planner, live runner, acceptance package, context authority, poi contract",
+          "exit_code": 0,
+          "summary": "81 passed"
+        },
+        {
+          "command": "env .venv/bin/python -m compileall -q smc_desk tools tests",
+          "exit_code": 0,
+          "summary": "clean"
+        },
+        {
+          "command": "real-evidence smoke: sealed ETHUSDT 2026-08-10 pack through write_colleague_memory_and_narrative_shadow",
+          "exit_code": 0,
+          "summary": "first observation recorded; repeat read still NO_CONTEXT; shadow composed range -> draw -> structure (10 selections)"
+        }
+      ],
+      "primary_result": "Colleague memory and narrative planner shadow wired into live run packages; governance source rebind pending",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Transition and shadow artifacts are run-package evidence only; the sealed evidence pack and pack hash are untouched.",
+        "The narrative shadow is not rendered and not validated; the canonical composer, context authority, validator, and visual critic keep full chart authority.",
+        "No thresholds changed, no provider orchestration (P6) started, no signal, paper, live, or predictive authority created.",
+        "No perception accuracy, predictive edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R2-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T10:05:07.054617+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "b4a255327958f41ba489afa20a73e02ccdc7f867",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 3,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "44a3fe0f7166255f160d7e78943b31dc0a67a509ca2331389d446b33958f5f3d"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1391 passed, 1 skipped in 444.74s (0:07:24)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1391 passed, 1 skipped in 444.74s (0:07:24)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Transition and shadow artifacts are run-package evidence only; the sealed evidence pack and pack hash are untouched.",
+        "The narrative shadow is not rendered and not validated; canonical composer, context authority, validator, and visual critic keep full chart authority.",
+        "No thresholds changed, no P6 provider orchestration started, no signal, paper, live, or predictive authority created.",
+        "No perception accuracy, predictive edge, or profitability claim is created."
       ]
     }
   ]
