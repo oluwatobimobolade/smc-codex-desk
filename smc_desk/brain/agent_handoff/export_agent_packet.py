@@ -81,6 +81,10 @@ This is a hash-sealed, observe-only reasoning packet. Read files in this order:
 - A failed, unresolved, missing, ungrounded, or hash-mismatched station forces `REVIEW_REQUIRED` and strips entry/SL/TP/RR/trade annotations.
 - Record detector disagreements in `dissent_records`; never silently replace evidence.
 - Record doctrine-dependent unresolved claims in `doctrine_pending_claims`.
+- Audit `annotation_context_authority` after deciding the active POI. An object
+  rejected for active entry may be retained only when it has a prequalified
+  requirement ID. Cite it in `context_exception_requests`, request
+  `context_only`, and acknowledge that it cannot change bias or grant entry.
 - The AI seat, self-exam, and gauntlet have no promotion, signal, paper, live, or execution authority.
 """
 
@@ -112,6 +116,10 @@ This packet is for an **EXTERNAL_AI_AGENT**. The system does not call an LLM API
 - WATCH_ONLY, THESIS_ONLY, WAIT_FOR_*, POI_TOUCHED_*, MISSED_TRADE_NO_CHASE, VALID_DIRECTION_BAD_RR_WAIT_FOR_BETTER_ENTRY, INDUCEMENT_RISK, INVALIDATED_REMAP, MOVE_STARTED_NOT_CHASEABLE, NO_TRADE must NOT have entry/SL/TP/RR or trade box.
 - Use chart_template: context_chart, watch_chart, or review_chart.
 - Prefer annotation_plan_v2 for professional markup. Every V2 object must be sparse, local, readable, and grounded with evidence_object_ids and exact source geometry. For structure, declare the matching external/internal scope. A path requires a certified active POI; a trade_box requires kind=trade plus validated entry_price, stop_price, and target_prices.
+- A contextual exception is visibility-only. It must cite an existing
+  `annotation_context_authority.requirements[].requirement_id`, preserve exact
+  geometry, use a context display role, set `active_entry_authority=false`, and
+  cannot alter the active POI, direction, entry, stop, target, or trade state.
 
 ## Parent-child conflict
 
@@ -148,13 +156,66 @@ def _build_chart_manifest(timeframe_dfs: Mapping[str, Path], evidence_pack: Mapp
     manifest = {"schema": "ai_smc_chart_manifest_v1", "timeframes": {}}
     for tf, path in timeframe_dfs.items():
         if path and path.exists():
+            source_rows = list((evidence_pack.get("ohlcv_windows") or {}).get(tf) or [])
             manifest["timeframes"][tf] = {
                 "path": str(path),
                 "sha256": _hash_file(path),
                 "size_bytes": path.stat().st_size,
-                "row_count": len(evidence_pack.get("ohlcv_windows", {}).get(tf, [])),
+                "row_count": len(source_rows),
+                "evidence_bound": bool(source_rows),
+                "source": "evidence_pack.ohlcv_windows" if source_rows else "provided_chart_path",
+                "source_window_sha256": _hash_json(source_rows) if source_rows else None,
             }
     return manifest
+
+
+def _materialize_packet_charts(
+    *,
+    symbol: str,
+    evidence_pack: Mapping[str, Any],
+    provided_chart_paths: Mapping[str, Path],
+    output_dir: Path,
+) -> dict[str, Path]:
+    """Render packet charts from the exact sealed OHLCV windows when present.
+
+    Supplied images remain a compatibility fallback only for synthetic or
+    legacy packets that do not carry source rows.
+    """
+    tf_to_filename = {
+        "1d": "04_clean_1d_chart.png",
+        "4h": "05_clean_4h_chart.png",
+        "1h": "06_clean_1h_chart.png",
+        "15m": "07_clean_15m_chart.png",
+        "5m": "07b_clean_5m_chart.png",
+    }
+    bound_paths: dict[str, Path] = {}
+    windows = evidence_pack.get("ohlcv_windows") or {}
+    for timeframe, filename in tf_to_filename.items():
+        destination = output_dir / filename
+        rows = list(windows.get(timeframe) or []) if isinstance(windows, Mapping) else []
+        if rows:
+            import pandas as pd
+
+            from smc_desk.rendering.clean_mtf_chart_pack import render_clean_candle_chart
+
+            frame = pd.DataFrame(rows)
+            if "timestamp" not in frame.columns:
+                raise ValueError(f"Evidence window {timeframe} has no timestamp column.")
+            frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
+            render_clean_candle_chart(
+                frame,
+                destination,
+                symbol=symbol,
+                timeframe=timeframe,
+                max_display_bars=None,
+            )
+            bound_paths[timeframe] = destination
+            continue
+        source = provided_chart_paths.get(timeframe)
+        if source and source.exists():
+            shutil.copy2(source, destination)
+            bound_paths[timeframe] = destination
+    return bound_paths
 
 
 def _build_candidate_levels(evidence_pack: Mapping[str, Any]) -> dict[str, Any]:
@@ -230,16 +291,16 @@ def export_agent_packet(
         json.dumps(evidence_pack, indent=2, sort_keys=True, default=str), encoding="utf-8"
     )
 
-    chart_manifest = _build_chart_manifest(chart_paths, evidence_pack)
+    packet_chart_paths = _materialize_packet_charts(
+        symbol=symbol,
+        evidence_pack=evidence_pack,
+        provided_chart_paths=chart_paths,
+        output_dir=output_dir,
+    )
+    chart_manifest = _build_chart_manifest(packet_chart_paths, evidence_pack)
     (output_dir / "03_chart_manifest.json").write_text(
         json.dumps(chart_manifest, indent=2, sort_keys=True, default=str), encoding="utf-8"
     )
-
-    tf_to_filename = {"1d": "04_clean_1d_chart.png", "4h": "05_clean_4h_chart.png", "1h": "06_clean_1h_chart.png", "15m": "07_clean_15m_chart.png", "5m": "07b_clean_5m_chart.png"}
-    for tf, filename in tf_to_filename.items():
-        src = chart_paths.get(tf)
-        if src and src.exists():
-            shutil.copy2(src, output_dir / filename)
 
     candidate_levels = _build_candidate_levels(evidence_pack)
     (output_dir / "08_candidate_levels.json").write_text(

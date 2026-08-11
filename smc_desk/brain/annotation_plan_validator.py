@@ -8,7 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+import pandas as pd
+
 from smc_desk.brain.ai_smc_trader_brain import AISMCDecision, AnnotationDrawingObject
+from smc_desk.brain.annotation_context_authority import validate_context_exception_requests
 from smc_desk.brain.annotation_evidence import (
     AnnotationEvidenceAnchor,
     build_annotation_evidence_index,
@@ -75,10 +78,22 @@ def validate_annotation_plan_v2(
     evidence_pack: Mapping[str, Any],
 ) -> AnnotationPlanValidation:
     plan = decision.annotation_plan_v2
-    if plan is None:
-        return AnnotationPlanValidation(status="NOT_PRESENT", issues=[], object_count=0)
-
     issues: list[AnnotationPlanIssue] = []
+    exception_validation = validate_context_exception_requests(
+        [item.model_dump(mode="json", by_alias=True) for item in decision.context_exception_requests],
+        evidence_pack.get("annotation_context_authority"),
+    )
+    for item in exception_validation.get("issues", []) or []:
+        if isinstance(item, Mapping):
+            _issue(
+                issues,
+                str(item.get("code") or "context_exception_invalid"),
+                str(item.get("message") or "Context exception request failed validation."),
+            )
+    if plan is None:
+        status = "REVIEW_REQUIRED" if issues else "NOT_PRESENT"
+        return AnnotationPlanValidation(status=status, issues=issues, object_count=0)
+
     objects = list(plan.objects)
     chart_template = decision.annotation_plan.chart_template
     max_objects = MAX_V2_OBJECTS.get(chart_template, 7)
@@ -99,6 +114,13 @@ def validate_annotation_plan_v2(
         _check_type_semantics(obj, anchors, decision, evidence_pack, issues)
         _check_trade_gating(obj, decision, issues)
         _check_parent_child_conflict(obj, decision, has_parent_child_conflict, issues)
+        _check_context_display_contract(
+            obj,
+            decision,
+            evidence_pack,
+            exception_validation,
+            issues,
+        )
 
     status = "REVIEW_REQUIRED" if any(issue.severity == "hard" for issue in issues) else "VALIDATED"
     return AnnotationPlanValidation(status=status, issues=issues, object_count=len(objects))
@@ -213,6 +235,33 @@ def _check_geometry(
         _check_liquidity_geometry(obj, anchors, issues)
     elif obj.object_type == "trade_box":
         _check_trade_box_geometry(obj, decision, issues)
+    _check_latest_visible_window_binding(obj, evidence_pack, issues)
+
+
+def _check_latest_visible_window_binding(
+    obj: AnnotationDrawingObject,
+    evidence_pack: Mapping[str, Any],
+    issues: list[AnnotationPlanIssue],
+) -> None:
+    display = obj.display_geometry
+    rule = str(display.clipping_rule if display is not None else "")
+    if rule not in {"context_zone_to_latest_visible_bar", "active_range_to_latest_visible_bar"}:
+        return
+    window = (evidence_pack.get("ohlcv_windows") or {}).get(obj.timeframe)
+    if not isinstance(window, list) or not window or not isinstance(window[-1], Mapping):
+        _issue(issues, "annotation_v2_latest_visible_window_missing", f"{obj.label} cannot prove the latest visible bar.")
+        return
+    latest_time = window[-1].get("timestamp")
+    if not latest_time or obj.end_time is None:
+        _issue(issues, "annotation_v2_latest_visible_endpoint_missing", f"{obj.label} lacks a timestamp-bound latest visible endpoint.")
+    else:
+        try:
+            if pd.Timestamp(obj.end_time) != pd.Timestamp(latest_time):
+                _issue(issues, "annotation_v2_latest_visible_endpoint_mismatch", f"{obj.label} does not end on the sealed window's latest candle.")
+        except (TypeError, ValueError):
+            _issue(issues, "annotation_v2_latest_visible_extension_time_invalid", f"{obj.label} extension timestamps are invalid.")
+    if obj.end_index != len(window) - 1:
+        _issue(issues, "annotation_v2_latest_visible_index_mismatch", f"{obj.label} does not end at the sealed window's latest index.")
 
 
 def _check_geometry_contract(
@@ -259,6 +308,8 @@ def _check_geometry_contract(
         end = display.get("end_index")
         if start is None or end is None or not (0 <= int(end) - int(start) <= 12):
             _issue(issues, "annotation_v2_local_display_span_invalid", f"{obj.label} local display span must be at most 12 bars.")
+    elif rule in {"context_zone_to_latest_visible_bar", "active_range_to_latest_visible_bar"}:
+        _check_latest_visible_extension(obj, evidence, display, rule, issues)
     elif rule == "legacy_unverified" and obj.object_type not in {"trade_box", "path_projection"}:
         _issue(issues, "annotation_v2_legacy_display_geometry", f"{obj.label} has unverified legacy display geometry.")
 
@@ -286,6 +337,37 @@ def _check_confirmation_side_clip(
             _issue(issues, "annotation_v2_invalid_confirmation_side_clip", f"{label} timestamp clip must preserve the confirmation anchor.")
         return
     _issue(issues, "annotation_v2_invalid_confirmation_side_clip", f"{label} clip cannot be reconstructed from source geometry.")
+
+
+def _check_latest_visible_extension(
+    obj: AnnotationDrawingObject,
+    evidence: Mapping[str, Any],
+    display: Mapping[str, Any],
+    rule: str,
+    issues: list[AnnotationPlanIssue],
+) -> None:
+    """Permit a provenance-preserving horizontal extension, never a moved zone."""
+    allowed_type = "poi_zone" if rule == "context_zone_to_latest_visible_bar" else "range_zone"
+    if obj.object_type != allowed_type:
+        _issue(issues, "annotation_v2_latest_visible_extension_wrong_type", f"{obj.label} uses {rule} on {obj.object_type}.")
+        return
+    if rule == "context_zone_to_latest_visible_bar" and (
+        obj.active_entry_authority or not obj.context_requirement_id
+    ):
+        _issue(issues, "annotation_v2_context_extension_has_authority", f"{obj.label} may extend only as authority-free required context.")
+    if evidence.get("start_index") is not None and display.get("start_index") != evidence.get("start_index"):
+        _issue(issues, "annotation_v2_latest_visible_extension_moved_origin", f"{obj.label} changed its certified start index.")
+    if evidence.get("start_time") is not None and display.get("start_time") != evidence.get("start_time"):
+        _issue(issues, "annotation_v2_latest_visible_extension_moved_origin", f"{obj.label} changed its certified start time.")
+    if evidence.get("end_index") is not None and display.get("end_index") is not None:
+        if int(display["end_index"]) < int(evidence["end_index"]):
+            _issue(issues, "annotation_v2_latest_visible_extension_reversed", f"{obj.label} display ends before its evidence geometry.")
+    if evidence.get("end_time") is not None and display.get("end_time") is not None:
+        try:
+            if pd.Timestamp(display["end_time"]) < pd.Timestamp(evidence["end_time"]):
+                _issue(issues, "annotation_v2_latest_visible_extension_reversed", f"{obj.label} display ends before its evidence geometry.")
+        except (TypeError, ValueError):
+            _issue(issues, "annotation_v2_latest_visible_extension_time_invalid", f"{obj.label} extension timestamps are invalid.")
 
 
 def _check_evidence_geometry_matches_anchor(
@@ -426,6 +508,75 @@ def _check_parent_child_conflict(
             issues,
             "annotation_v2_internal_structure_drawn_as_parent_bias",
             "Parent-child conflict requires mixed direction; structure annotations cannot present a clean parent bias.",
+        )
+
+
+def _check_context_display_contract(
+    obj: AnnotationDrawingObject,
+    decision: AISMCDecision,
+    evidence_pack: Mapping[str, Any],
+    exception_validation: Mapping[str, Any],
+    issues: list[AnnotationPlanIssue],
+) -> None:
+    context_roles = {
+        "context_only",
+        "superseded_context_poi",
+        "superseded_context_imbalance",
+        "superseded_context_structure",
+        "context_refinement",
+        "context_refinement_structure",
+    }
+    authority = evidence_pack.get("annotation_context_authority") or {}
+    requirements = {
+        str(item.get("requirement_id") or ""): item
+        for item in authority.get("requirements", []) or []
+        if isinstance(item, Mapping) and item.get("requirement_id")
+    } if isinstance(authority, Mapping) else {}
+    accepted_request_ids = {
+        str(item.get("requirement_id") or "")
+        for item in exception_validation.get("accepted_requests", []) or []
+        if isinstance(item, Mapping)
+    }
+    is_context = obj.display_role in context_roles or obj.context_requirement_id is not None
+    if not is_context:
+        contextual_ids = {
+            str(item.get("object_id") or "")
+            for item in requirements.values()
+        }
+        if obj.object_type == "poi_zone" and contextual_ids.intersection(obj.evidence_object_ids):
+            _issue(
+                issues,
+                "annotation_context_object_missing_display_role",
+                f"{obj.label} cites a superseded context object but presents it as an active setup object.",
+            )
+        return
+    if obj.active_entry_authority:
+        _issue(
+            issues,
+            "annotation_context_entry_authority_forbidden",
+            f"{obj.label} is context-only and cannot carry active-entry authority.",
+        )
+    requirement_id = str(obj.context_requirement_id or "")
+    requirement = requirements.get(requirement_id)
+    if requirement is None:
+        _issue(
+            issues,
+            "annotation_context_requirement_missing",
+            f"{obj.label} does not cite a deterministic context requirement.",
+        )
+        return
+    expected_id = str(requirement.get("object_id") or "")
+    if obj.evidence_object_ids != [expected_id]:
+        _issue(
+            issues,
+            "annotation_context_evidence_mismatch",
+            f"{obj.label} must cite exactly the sealed context object {expected_id}.",
+        )
+    if requirement_id not in accepted_request_ids:
+        _issue(
+            issues,
+            "annotation_context_exception_not_accepted",
+            f"{obj.label} has no accepted AI context-display exception request.",
         )
 
 

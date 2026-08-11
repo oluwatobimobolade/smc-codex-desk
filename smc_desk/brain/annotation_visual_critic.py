@@ -32,7 +32,12 @@ def review_annotation_scene(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[
                 message="A V2 professional chart must not retain legacy explanatory text panels.",
             )
         )
-    limit = 4 if scene.get("chart_template") in {"watch_chart", "context_chart", "review_chart"} else 5
+    explicit_limit = scene.get("visible_object_limit_override")
+    limit = (
+        max(0, int(explicit_limit))
+        if explicit_limit is not None
+        else 4 if scene.get("chart_template") in {"watch_chart", "context_chart", "review_chart"} else 5
+    )
     if len(objects) > limit:
         issues.append(
             VisualCriticIssue(
@@ -42,7 +47,23 @@ def review_annotation_scene(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[
                 object_ids=tuple(str(item.get("semantic_object_id") or "") for item in objects[limit:]),
             )
         )
-    issues.extend(_overlap_issues(objects, df))
+    required_context_ids = {
+        str(item.get("semantic_object_id") or "")
+        for item in objects
+        if item.get("context_requirement_id")
+    }
+    for issue in _overlap_issues(objects, df):
+        if required_context_ids.intersection(issue.object_ids):
+            issues.append(
+                VisualCriticIssue(
+                    code="required_context_overlap_requires_review",
+                    severity="hard",
+                    message="A mandatory context mark has a label-overlap risk and cannot be silently removed.",
+                    object_ids=issue.object_ids,
+                )
+            )
+        else:
+            issues.append(issue)
     cleanup_ids = _cleanup_ids(issues, objects)
     hard = [issue for issue in issues if issue.severity == "hard"]
     status = "REVIEW_REQUIRED" if hard else "CLEANUP_REQUIRED" if cleanup_ids else "PASSED"
@@ -125,7 +146,12 @@ def _cleanup_ids(issues: list[VisualCriticIssue], objects: list[Mapping[str, Any
     # Avoid deleting all evidence objects when duplicate overlap diagnostics point
     # at the same small plan. A professional chart with no mark is less useful.
     all_ids = {str(item.get("semantic_object_id") or "") for item in objects}
-    unique = list(dict.fromkeys(ids))
+    protected = {
+        str(item.get("semantic_object_id") or "")
+        for item in objects
+        if item.get("context_requirement_id")
+    }
+    unique = [object_id for object_id in dict.fromkeys(ids) if object_id not in protected]
     return unique if len(unique) < len(all_ids) else unique[:-1]
 
 

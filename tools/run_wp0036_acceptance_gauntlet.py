@@ -5,6 +5,7 @@ Generates verification packages and verifies the 12 checklist criteria.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import sys
@@ -46,14 +47,31 @@ REQUIRED_PACKAGE_FILES = (
 
 
 def build_gauntlet_ai_payload(request: LLMCompletionRequest, symbol: str, source_manifest: dict[str, Any]) -> dict[str, Any]:
-    prompt_lower = request.prompt.lower()
-    if "ai smc critic colleague" in prompt_lower:
+    if _is_critic_request(request.prompt):
         return {
             "veto": False,
             "critique": "No critic veto. The run remains observe-only unless validator-approved trade readiness exists.",
             "suggested_downgrade_state": "KEEP_CURRENT",
         }
     return build_conservative_ai_payload(request, source_manifest)
+
+
+def _is_critic_request(prompt: str) -> bool:
+    """Recognize the current and legacy critic roles without matching trader prompts."""
+    try:
+        payload = json.loads(prompt)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        payload = {}
+    if isinstance(payload, Mapping):
+        role = str(payload.get("role") or "").lower()
+        response_schema = payload.get("response_schema") or {}
+        schema_keys = set(response_schema) if isinstance(response_schema, Mapping) else set()
+        if "critic" in role or "graph challenger" in role:
+            return True
+        if {"veto", "critique", "suggested_downgrade_state"}.issubset(schema_keys):
+            return True
+    prompt_lower = str(prompt).lower()
+    return "ai smc critic colleague" in prompt_lower
 
 
 def main() -> None:
@@ -104,7 +122,11 @@ def main() -> None:
             provider=provider,
             output_dir=symbol_run_dir,
             detector_candidates=None,
-            session_context={"source_manifest": source_manifest, "live_system_test": True},
+            session_context={
+                "source_manifest": source_manifest,
+                "live_system_test": args.data_source == "live",
+                "offline_stale_demo": args.data_source == "local_csv",
+            },
             enforce_minimum_depth=True,
         )
 
@@ -229,22 +251,39 @@ def load_local_csv_timeframes(symbol: str) -> tuple[dict[str, pd.DataFrame], dic
     if missing:
         raise FileNotFoundError(f"Missing local CSV files for {symbol}: {missing}")
     timeframe_dfs: dict[str, pd.DataFrame] = {}
+    source_details: dict[str, Any] = {}
     for timeframe, path in paths.items():
         df = pd.read_csv(path)
         df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
         keep = ["timestamp", "open", "high", "low", "close", "volume"]
         df = df[keep].dropna(subset=["open", "high", "low", "close"]).sort_values("timestamp")
         required = REQUIRED_CONTEXT_DEPTH[timeframe]
-        timeframe_dfs[timeframe] = df.tail(required).reset_index(drop=True)
+        selected = df.tail(required).reset_index(drop=True)
+        timeframe_dfs[timeframe] = selected
+        source_details[timeframe] = {
+            "path": str(path),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "source_rows": len(df),
+            "sealed_rows": len(selected),
+            "first_sealed_timestamp": str(selected["timestamp"].iloc[0]),
+            "last_sealed_timestamp": str(selected["timestamp"].iloc[-1]),
+        }
+    latest_closed_15m = pd.Timestamp(timeframe_dfs["15m"]["timestamp"].iloc[-1]) + pd.Timedelta("15min")
     source_manifest = {
-        "schema": "wp0036_local_csv_source_manifest_v1",
+        "schema": "wp0036_local_csv_source_manifest_v2",
         "status": "LOCAL_CSV_REPLAY",
+        "data_mode": "OFFLINE_STALE_REPLAY",
         "provider": "canonical_binance_futures_csv",
         "symbol": symbol,
         "paths": {timeframe: str(path) for timeframe, path in paths.items()},
         "rows": {timeframe: len(df) for timeframe, df in timeframe_dfs.items()},
+        "source_details": source_details,
+        "decision_cutoff": latest_closed_15m.isoformat(),
+        "latest_closed_15m": latest_closed_15m.isoformat(),
         "tradingview_used_as_market_truth": False,
         "live_route_used": False,
+        "live_read": False,
+        "network_fetch_attempted": False,
     }
     return timeframe_dfs, source_manifest
 
@@ -455,14 +494,21 @@ def perform_acceptance_checkpoints(
     # Checkpoint 3: Anchor Grounding
     lines.append(f"Checkpoint 3: Anchor Grounding Verification")
     grounded_count = 0
+    failed_anchors: list[str] = []
     for anchor in anchor_grounding.get("anchors") or []:
         lines.append(f"  - Field: '{anchor.get('field')}' | Anchor: '{anchor.get('anchor')}' -> Mapped price: {anchor.get('mapped_price')} (Proposed: {anchor.get('proposed_price')}) | Status: {anchor.get('status')}")
         if anchor.get("status") == "grounded":
             grounded_count += 1
+        elif anchor.get("status") == "failed":
+            failed_anchors.append(str(anchor.get("field") or "unknown"))
     lines.append(f"  - Grounded anchors count: {grounded_count}")
-    if grounded_count > 0 or official_decision.get("official_state") == "WATCH_ONLY":
+    anchor_state = official_decision.get("official_state")
+    if anchor_state != "TRADE_PLAN_READY" and not failed_anchors:
+        lines.append(f"  - Result: PASS (not applicable: no executable trade anchors in {anchor_state})")
+    elif grounded_count > 0 and not failed_anchors:
         lines.append(f"  - Result: PASS")
     else:
+        failures.append("checkpoint_3_anchor_grounding")
         lines.append(f"  - Result: FAIL")
     lines.append("")
 
@@ -476,6 +522,7 @@ def perform_acceptance_checkpoints(
     if not failed_liq:
         lines.append(f"  - Result: PASS")
     else:
+        failures.append("checkpoint_4_swept_liquidity_mislabeled_fresh")
         lines.append(f"  - Result: FAIL")
     lines.append("")
 
@@ -537,6 +584,7 @@ def perform_acceptance_checkpoints(
     if not legacy_allowed and legacy_role == "DEBUG_LEGACY_COMPARISON_ONLY":
         lines.append(f"  - Result: PASS")
     else:
+        failures.append("checkpoint_9_legacy_narrative_authority")
         lines.append(f"  - Result: FAIL")
     lines.append("")
 
@@ -544,7 +592,11 @@ def perform_acceptance_checkpoints(
     label_count = len((official_decision.get("annotation_plan") or {}).get("labels") or [])
     lines.append(f"Checkpoint 10: Annotation label budget and visual overlay budget")
     lines.append(f"  - Rendered label count: {label_count}")
-    lines.append(f"  - Result: PASS")
+    if label_count <= 7:
+        lines.append(f"  - Result: PASS")
+    else:
+        failures.append("checkpoint_10_annotation_label_budget")
+        lines.append(f"  - Result: FAIL")
     lines.append("")
 
     # Checkpoint 11: Context Depth check
@@ -572,7 +624,16 @@ def perform_acceptance_checkpoints(
     lines.append(f"  - critic veto value: {critic_data.get('veto')}")
     lines.append(f"  - critic critique: '{critic_data.get('critique')}'")
     lines.append(f"  - suggested downgrade: '{critic_data.get('suggested_downgrade_state')}'")
-    lines.append(f"  - Result: PASS")
+    critic_schema_valid = (
+        isinstance(critic_data.get("veto"), bool)
+        and isinstance(critic_data.get("critique"), str)
+        and isinstance(critic_data.get("suggested_downgrade_state"), str)
+    )
+    if critic_schema_valid:
+        lines.append(f"  - Result: PASS")
+    else:
+        failures.append("checkpoint_12_critic_schema")
+        lines.append(f"  - Result: FAIL")
     lines.append("")
 
     # Final overall score

@@ -153,6 +153,42 @@ def test_export_agent_packet_contains_charts_prompts_evidence_schema(tmp_path: P
     assert manifest["chart_count"] >= 1
 
 
+def test_exported_packet_chart_is_rendered_from_exact_evidence_window(tmp_path: Path) -> None:
+    evidence_pack = _make_evidence_pack()
+    timeframe_dfs = _make_timeframe_dfs()
+    evidence_pack["ohlcv_windows"] = {
+        timeframe: [
+            {
+                **row,
+                "timestamp": pd.Timestamp(row["timestamp"]).isoformat(),
+            }
+            for row in frame.to_dict(orient="records")
+        ]
+        for timeframe, frame in timeframe_dfs.items()
+    }
+    supplied = _make_chart_paths(tmp_path)
+    supplied_bytes = supplied["15m"].read_bytes()
+    packet_dir = tmp_path / "packet"
+
+    export_agent_packet(
+        symbol="BTCUSDT",
+        evidence_pack=evidence_pack,
+        chart_paths=supplied,
+        output_dir=packet_dir,
+    )
+
+    from PIL import Image
+
+    exported = packet_dir / "07_clean_15m_chart.png"
+    manifest = json.loads((packet_dir / "03_chart_manifest.json").read_text())
+    assert exported.read_bytes() != supplied_bytes
+    assert Image.open(exported).size[0] > 100
+    assert manifest["timeframes"]["15m"]["row_count"] == len(timeframe_dfs["15m"])
+    assert manifest["timeframes"]["15m"]["evidence_bound"] is True
+    assert manifest["timeframes"]["15m"]["source"] == "evidence_pack.ohlcv_windows"
+    assert len(manifest["timeframes"]["15m"]["source_window_sha256"]) == 64
+
+
 def test_agent_packet_has_hash_and_manifest(tmp_path: Path) -> None:
     """Packet must have run_manifest.json with file hashes and evidence pack hash."""
     evidence_pack = _make_evidence_pack()

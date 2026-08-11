@@ -126,7 +126,11 @@ _WEEKEND_MAX_HOURS = 75.0
 
 
 def _is_expected_closure(
-    previous_close: datetime, next_open: datetime, session_profile: str
+    previous_close: datetime,
+    next_open: datetime,
+    session_profile: str,
+    *,
+    timeframe: str | None = None,
 ) -> bool:
     """True when a timestamp discontinuity is a scheduled market closure.
 
@@ -137,6 +141,13 @@ def _is_expected_closure(
     if session_profile != "forex_5d":
         return False
     hours = (next_open - previous_close).total_seconds() / 3600.0
+    if timeframe == "1d":
+        # Daily FX candles are session labels, not continuously traded 24-hour
+        # buckets.  DST moves the UTC session boundary by one hour and bank
+        # holidays can remove one or more whole daily labels.  Treat only this
+        # bounded daily-session pattern as an expected closure; intraday holes
+        # remain data defects.
+        return -1.5 <= hours <= 120.0
     if not (_WEEKEND_MIN_HOURS <= hours <= _WEEKEND_MAX_HOURS):
         return False
     # The break must actually straddle the weekend: out on Friday or Saturday,
@@ -187,7 +198,10 @@ def dataframe_to_candles(
                 # made every forex instrument unanalysable, which is why the
                 # session profile exists.
                 has_gap = not _is_expected_closure(
-                    prev_close_time, open_time, session_profile
+                    prev_close_time,
+                    open_time,
+                    session_profile,
+                    timeframe=timeframe,
                 )
         prev_close_time = close_time
 

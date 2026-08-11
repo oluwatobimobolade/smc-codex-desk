@@ -7,11 +7,14 @@ futures for crypto symbols and Yahoo chart data for XAU/GC futures proxy.
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import pandas as pd
 import requests
@@ -31,6 +34,8 @@ BINANCE_BASE = "https://fapi.binance.com"
 YAHOO_BASE = "https://query1.finance.yahoo.com/v8/finance/chart"
 TIMEFRAMES = ("15m", "1h", "4h", "1d")
 TIMEFRAME_DELTAS = {"15m": pd.Timedelta(minutes=15), "1h": pd.Timedelta(hours=1), "4h": pd.Timedelta(hours=4), "1d": pd.Timedelta(days=1)}
+APPROVED_PUBLIC_DATA_HOSTS = {"fapi.binance.com", "query1.finance.yahoo.com"}
+DNS_FALLBACK_AUDIT: list[dict[str, Any]] = []
 
 
 def main() -> None:
@@ -131,6 +136,7 @@ def is_forex_pair(symbol: str) -> bool:
 
 
 def load_binance_usdm_timeframes(symbol: str) -> tuple[dict[str, pd.DataFrame], dict[str, Any]]:
+    audit_start = len(DNS_FALLBACK_AUDIT)
     specs = {"15m": 1500, "1h": 1000, "4h": 500, "1d": 365}
     frames: dict[str, pd.DataFrame] = {}
     manifests: dict[str, Any] = {}
@@ -152,11 +158,18 @@ def load_binance_usdm_timeframes(symbol: str) -> tuple[dict[str, pd.DataFrame], 
             "last_open_time": str(df["timestamp"].iloc[-1]),
             "last_close_time": str(df["timestamp"].iloc[-1] + TIMEFRAME_DELTAS[interval]),
         }
+    fallback_events = [dict(item) for item in DNS_FALLBACK_AUDIT[audit_start:]]
     return frames, {
         "symbol": symbol,
         "source": "binance_usdm_rest",
         "market_type": "USD-M perpetual futures",
         "timeframes": manifests,
+        "network_transport": {
+            "default_system_dns_succeeded": not fallback_events,
+            "public_dns_fallback_used": bool(fallback_events),
+            "fallback_events": fallback_events,
+            "tls_certificate_verification": "required",
+        },
     }
 
 
@@ -206,9 +219,131 @@ def load_yahoo_forex_timeframes(symbol: str) -> tuple[dict[str, pd.DataFrame], d
 
 
 def http_get_json(url: str, params: dict[str, Any], timeout: float = 20.0) -> Any:
-    response = requests.get(url, params=params, timeout=timeout, headers={"User-Agent": "smc-codex-desk-live-system-test/1.0"})
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = requests.get(url, params=params, timeout=timeout, headers={"User-Agent": "smc-codex-desk-live-system-test/1.0"})
+        response.raise_for_status()
+        return response.json()
+    except requests.ConnectionError as exc:
+        if not _is_name_resolution_error(exc):
+            raise
+        return _http_get_json_via_public_dns(url, params, timeout=timeout, original_error=exc)
+
+
+def _is_name_resolution_error(exc: BaseException) -> bool:
+    text = repr(exc).lower()
+    return any(
+        marker in text
+        for marker in (
+            "nameresolutionerror",
+            "failed to resolve",
+            "name or service not known",
+            "nodename nor servname provided",
+        )
+    )
+
+
+def _resolve_public_ipv4(hostname: str) -> tuple[str, list[str]]:
+    """Resolve an approved market-data host without changing macOS DNS state."""
+    if hostname not in APPROVED_PUBLIC_DATA_HOSTS:
+        raise RuntimeError(f"Public DNS fallback is not approved for host: {hostname}")
+    failures: list[str] = []
+    for resolver in ("1.1.1.1", "8.8.8.8"):
+        try:
+            result = subprocess.run(
+                ["dig", "+short", "+timeout=3", "+tries=1", f"@{resolver}", hostname, "A"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=6,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            failures.append(f"{resolver}:{type(exc).__name__}")
+            continue
+        addresses: list[str] = []
+        for raw_line in result.stdout.splitlines():
+            candidate = raw_line.strip().rstrip(".")
+            try:
+                address = ipaddress.ip_address(candidate)
+            except ValueError:
+                continue
+            if isinstance(address, ipaddress.IPv4Address):
+                addresses.append(str(address))
+        if addresses:
+            return resolver, list(dict.fromkeys(addresses))
+        failures.append(f"{resolver}:no_ipv4_answer")
+    raise requests.ConnectionError(
+        f"Approved public resolvers could not resolve {hostname}: {failures}"
+    )
+
+
+def _http_get_json_via_public_dns(
+    url: str,
+    params: dict[str, Any],
+    *,
+    timeout: float,
+    original_error: BaseException,
+) -> Any:
+    """Use curl's --resolve so HTTPS SNI and certificate checks stay intact."""
+    parsed = urlparse(url)
+    hostname = str(parsed.hostname or "")
+    if parsed.scheme != "https" or hostname not in APPROVED_PUBLIC_DATA_HOSTS:
+        raise original_error
+    resolver, addresses = _resolve_public_ipv4(hostname)
+    failures: list[str] = []
+    for address in addresses:
+        command = [
+            "curl",
+            "--silent",
+            "--show-error",
+            "--fail",
+            "--get",
+            "--proto",
+            "=https",
+            "--connect-timeout",
+            "5",
+            "--max-time",
+            str(max(1, int(timeout))),
+            "--resolve",
+            f"{hostname}:443:{address}",
+            "--header",
+            "User-Agent: smc-codex-desk-live-system-test/1.0",
+            url,
+        ]
+        for key, value in sorted(params.items()):
+            command.extend(["--data-urlencode", f"{key}={value}"])
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=max(6, int(timeout) + 5),
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            failures.append(f"{address}:{type(exc).__name__}")
+            continue
+        if result.returncode != 0:
+            failures.append(f"{address}:curl_exit_{result.returncode}")
+            continue
+        try:
+            payload = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            failures.append(f"{address}:invalid_json")
+            continue
+        DNS_FALLBACK_AUDIT.append(
+            {
+                "route": "public_dns_curl_resolve",
+                "hostname": hostname,
+                "resolver": resolver,
+                "resolved_ip": address,
+                "url_path": parsed.path,
+                "tls_hostname_verification": True,
+            }
+        )
+        return payload
+    raise requests.ConnectionError(
+        f"DNS fallback could not reach {hostname} with verified HTTPS: {failures}"
+    ) from original_error
 
 
 def binance_rows_to_df(rows: list[list[Any]], *, server_time_ms: int) -> pd.DataFrame:
@@ -249,6 +384,16 @@ def yahoo_chart_df(ticker: str, *, interval: str, range_: str) -> pd.DataFrame:
         }
     )
     df = df.dropna(subset=["open", "high", "low", "close"]).copy()
+    if interval == "1d":
+        # Yahoo can append the final FX daily candle at regularMarketTime
+        # instead of the exchange-local session boundary, duplicating the
+        # same local trading date. Canonicalize by exchange session date and
+        # retain the final (complete) record for that date.
+        exchange_tz = str(result.get("meta", {}).get("exchangeTimezoneName") or "UTC")
+        local_session = df["timestamp"].dt.tz_convert(exchange_tz).dt.normalize()
+        df["_session_date"] = local_session.dt.date
+        df["timestamp"] = local_session.dt.tz_convert("UTC")
+        df = df.drop_duplicates("_session_date", keep="last").drop(columns=["_session_date"])
     minutes = interval_to_minutes(interval)
     now = pd.Timestamp.now(tz="UTC")
     df = df[df["timestamp"] + pd.to_timedelta(minutes, unit="min") <= now]
@@ -414,6 +559,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
         }
     if causal_episode_requires_review:
         official_state = "REVIEW_REQUIRED"
+        # A stricter enforcement-ready causal replay disagreement invalidates
+        # promotion of the provisional V1 vote into an official direction.
+        # Keep the original HTF vote in evidence, but expose mixed/unresolved
+        # decision authority until reconciliation succeeds.
+        direction = "mixed"
 
     target_side = "sell_side" if direction == "bearish" else "buy_side" if direction == "bullish" else "unknown"
     target_price = low if direction == "bearish" and low is not None else high if direction == "bullish" and high is not None else None
@@ -505,7 +655,7 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
                 else (
                     "A confirmed active POI is mapped for observation, but no validated sweep/displacement/entry confirmation is promoted into a trade plan."
                     if has_active_poi
-                    else "This live system test sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
+                    else f"{_source_mode_subject(source_manifest)} sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
                 )
             ),
         },
@@ -623,6 +773,24 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             )
         ),
     }
+
+
+def _source_mode_subject(source_manifest: dict[str, Any]) -> str:
+    """Describe the sealed data route without overstating replay freshness."""
+    mode_text = " ".join(
+        str(source_manifest.get(key) or "")
+        for key in ("data_mode", "status", "source")
+    ).upper()
+    live_read = source_manifest.get("live_read")
+    live_route = source_manifest.get("live_route_used")
+    if (
+        "OFFLINE" in mode_text
+        or "LOCAL_CSV_REPLAY" in mode_text
+        or live_read is False
+        or live_route is False
+    ):
+        return "This offline source-bound replay"
+    return "This live source-bound system test"
 
 
 def _build_conservative_annotation_plan_v2(

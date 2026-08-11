@@ -91,6 +91,83 @@ def test_structure_follows_the_range():
     assert types == ["range_zone", "structure_segment"]
 
 
+def test_authority_selected_primary_poi_is_drawn_and_resolves_to_detector_geometry():
+    pack = _pack([_brk("b1", 63500.0, 900.0)])
+    pack["detector_candidates"]["4h"]["order_blocks"] = [{
+        "object_id": "ob-primary",
+        "timeframe": "4h",
+        "direction": "bullish",
+        "pivot_time": "2026-06-12T00:00:00Z",
+        "candidate_at": "2026-06-12T00:00:00Z",
+        "confirmed_at": "2026-06-13T00:00:00Z",
+        "confirmation_status": "confirmed",
+        "activity_status": "active",
+        "mitigation_status": "untouched",
+        "price_low": 62500.0,
+        "price_high": 63000.0,
+        "evidence": {"poi_grade": True, "caused_structure_break": True},
+    }]
+    pack["causal_poi_authority"] = {
+        "scenarios": {
+            "bullish": {
+                "status": "SELECTED",
+                "controlling_timeframe": "4h",
+                "primary_causal_poi": {
+                    "poi_id": "4h:order_block:ob-primary",
+                    "source_object_id": "ob-primary",
+                    "timeframe": "4h",
+                    "kind": "order_block",
+                    "direction": "bullish",
+                    "price_low": 62500.0,
+                    "price_high": 63000.0,
+                    "freshness": "fresh",
+                    "causal_status": "ELIGIBLE_CAUSAL_OB",
+                    "causal_certificate": {"status": "PASS"},
+                    "primary_reason": "Owns the accepted external break lineage.",
+                },
+            }
+        }
+    }
+
+    plan = plan_narrative_annotations(evidence_pack=pack)
+    poi = next(item for item in plan["selections"] if item["object_type"] == "poi_zone")
+    assert poi["semantic_object_id"] == "ob-primary"
+    assert "price_low" not in poi and "price_high" not in poi
+
+    resolution = resolve_semantic_annotation_plan(plan, pack)
+    assert resolution["status"] == "PASS", resolution["issues"]
+    resolved = next(
+        item for item in resolution["annotation_plan_v2"]["objects"]
+        if item["object_type"] == "poi_zone"
+    )
+    assert resolved["price_low"] == pytest.approx(62500.0)
+    assert resolved["price_high"] == pytest.approx(63000.0)
+
+
+def test_spent_or_noncausal_authority_primary_is_not_drawn():
+    pack = _pack([_brk("b1", 63500.0, 900.0)])
+    pack["detector_candidates"]["4h"]["order_blocks"] = [{
+        "object_id": "ob-rejected", "timeframe": "4h", "direction": "bullish",
+        "pivot_time": "2026-06-12T00:00:00Z", "confirmed_at": "2026-06-13T00:00:00Z",
+        "confirmation_status": "confirmed", "price_low": 62500.0, "price_high": 63000.0,
+    }]
+    pack["causal_poi_authority"] = {"scenarios": {"bullish": {
+        "status": "SELECTED",
+        "primary_causal_poi": {
+            "poi_id": "4h:order_block:ob-rejected", "source_object_id": "ob-rejected",
+            "timeframe": "4h", "kind": "order_block", "direction": "bullish",
+            "price_low": 62500.0, "price_high": 63000.0, "freshness": "invalidated",
+            "causal_status": "REJECTED_CAUSAL_ORIGIN_GATE",
+            "causal_certificate": {"status": "FAIL"},
+        },
+    }}}
+
+    plan = plan_narrative_annotations(evidence_pack=pack)
+
+    assert not any(item["object_type"] == "poi_zone" for item in plan["selections"])
+    assert any("failed the shared causal/lifecycle contract" in item for item in plan["rationale"])
+
+
 # -- the two defects real rendering exposed -----------------------------------
 
 

@@ -5,7 +5,7 @@ from smc_desk.brain.prompt_system.prompt_contract import PromptModule
 
 PROMPT = PromptModule(
     name="json_schema_prompt",
-    version="1.1.0",
+    version="1.2.0",
     purpose="Force strict JSON output matching AISMCDecision.",
     text="""Return strict JSON only. No markdown. No prose outside JSON.
 
@@ -14,6 +14,8 @@ official_state, setup_grade, direction, setup_model, bias_summary, active_range,
 liquidity_story, displacement_assessment, active_poi, entry_plan, stop_loss_plan,
 target_plan, rr_status, invalidation, annotation_plan, final_thesis.
 annotation_plan_v2 is optional for backward compatibility but preferred for professional chart rendering.
+context_exception_requests is optional and may contain only prequalified
+context-only display requests from annotation_context_authority.
 
 annotation_plan.reasoning_order must exactly equal required_reasoning_order.
 annotation_plan_v2, when present, must use schema professional_smc_annotation_plan_v2 and objects with:

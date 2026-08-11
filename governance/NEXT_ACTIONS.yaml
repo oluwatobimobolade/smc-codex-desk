@@ -1,4 +1,64 @@
 next_actions:
+  - id: WP-SMC-17
+    priority: 0
+    title: Preserve causally proven superseded HYPEUSDT context without weakening active-entry gates
+    owner: Perception Validation Engineer
+    status: VALIDATED_LOCAL_OBSERVE_ONLY
+    gate: GATE-WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-001
+    completed_scope:
+      - separate deterministic annotation-context authority from active-entry authority
+      - retain only V3-accepted structure and admitted causal OB FVG lineage
+      - exact lower-timeframe causal refinement inside parent zone and causal window
+      - AI visibility exception restricted to prequalified sealed requirement IDs
+      - bounded evidence-window expansion with newest-candle retention and hard ceiling
+      - complete requested required rendered omitted and off-window coverage ledger
+      - required context protected from silent storyboard truncation and visual-critic cleanup
+      - HYPEUSDT 4H supply and FVG context render with no active entry or trade box
+    prohibited_claims:
+      - context visibility is not current directional or active-entry authority
+      - the broad geometric 1H base is not a causal order block
+      - HYPEUSDT is not promoted into the certified initial scope
+      - no predictive edge signal paper live or execution authority was created
+  - id: WP-SMC-16
+    priority: 0
+    title: Repair AUDNZD accepted external origin visibility across newer nested ranges
+    owner: Perception Validation Engineer
+    status: VALIDATED_LOCAL_OBSERVE_ONLY
+    gate: GATE-WP-SMC-16-AUDNZD-CAUSAL-ORIGIN-NATIVE-POI-001
+    completed_scope:
+      - exact AUDNZD D1 4H 1H and 15M closed-candle diagnostic
+      - accepted 4H external MSS origin and candle-level departure verification
+      - causal scenario retention for the exact admitted external-break origin across a newer nested range
+      - active-entry authority denial preserved for the straddled partially mitigated zone
+      - non-owning geometric spent and rejected straddle cases remain fail-closed
+      - partial-mitigation disclosure on the native protected-OB label
+      - source-bound focused validation and chart QA
+    prohibited_claims:
+      - AUDNZD and forex are not certified by this diagnostic
+      - causal origin ownership does not guarantee a reaction
+      - scenario POI authority is not active-entry authority
+      - no predictive edge signal paper live or execution authority was created
+  - id: WP-SMC-15
+    priority: 0
+    title: Run and repair the EURJPY full-system native MTF annotation diagnostic
+    owner: Perception Validation Engineer
+    status: VALIDATED_LOCAL_OBSERVE_ONLY
+    gate: GATE-WP-SMC-15-EURJPY-FULL-SYSTEM-ANNOTATION-001
+    completed_scope:
+      - expected daily forex closure handling with unexplained intraday gap refusal preserved
+      - sufficiently deep clean post-gap session segment recovery
+      - exchange-local Yahoo daily-date canonicalization and deduplication
+      - alternating active-range swing authority
+      - bounded timeframe-specific chart windows
+      - strict ActivePOI schema compatibility with causal lineage retained in evidence
+      - V1 and causal V3 disagreement promoted to REVIEW_REQUIRED and mixed decision authority
+      - D1 4H 1H and 15M native storyboards with causal-authority selected POI visibility
+      - EURJPY complete diagnostic package and source-bound validation
+    prohibited_claims:
+      - EURJPY and forex are not certified by this diagnostic
+      - the Yahoo spot proxy is not executable broker truth
+      - deterministic bitmap review is not human semantic review
+      - no predictive edge signal paper live or execution authority was created
   - id: WP-SMC-12
     priority: 0
     title: Repair evaluation truth boundary and production detector adapters
@@ -21,6 +81,29 @@ next_actions:
     prohibited_claims:
       - implementation correctness is not human perception accuracy
       - the quarantined 20-case cohort is not gold and must not be marked
+      - no predictive edge signal paper live or execution authority was created
+  - id: WP-SMC-14
+    priority: 0
+    title: Repair the canonical POI contract and native TradingView markup boundary
+    owner: Perception Validation Engineer
+    status: VALIDATED_LOCAL_OBSERVE_ONLY
+    gate: GATE-WP-SMC-14-POI-CONTRACT-NATIVE-MARKUP-001
+    completed_scope:
+      - canonical POI identifier and production-schema adapter
+      - causal OB rejection enforced through authority evidence pack and market state
+      - historical POI lifecycle replay and delayed confirmation origin anchoring
+      - one production causal primary selection authority with descriptive alternate ranking
+      - lower-timeframe confirmation sequence after real POI arrival
+      - consistent entry anchor models
+      - expected forex weekend closure with unexplained midweek gap refusal
+      - delayed multi-level break accounting
+      - shared static and TradingView visual grammar
+      - versioned native TradingView MCP capability handshake path and targeted cleanup
+      - historical WP-SMC-13 identity collision recorded without deleting append-only evidence
+    prohibited_claims:
+      - implementation validation is not human perception accuracy
+      - native MCP contract tests are not a live-shape probe
+      - forex and CADJPY remain outside certified scope
       - no predictive edge signal paper live or execution authority was created
   - id: WP-SMC-13
     priority: 1

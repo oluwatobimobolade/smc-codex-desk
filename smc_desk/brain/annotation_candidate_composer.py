@@ -31,7 +31,19 @@ def select_local_active_poi(
     authority = evidence_pack.get("causal_poi_authority")
     if isinstance(authority, Mapping) and (authority.get("authority_contract") or {}).get("enforcement_ready") is True:
         selected = _authority_active_poi(authority, direction)
-        return selected if _poi_link_survives_episode_graph(evidence_pack, selected) else None
+        if not _poi_link_survives_episode_graph(evidence_pack, selected):
+            return None
+        # linked_break_id is causal-authority evidence used to validate the
+        # selection, not a field in the canonical ActivePOI decision schema.
+        # Preserve the linkage through evidence_object_ids and never leak the
+        # authority's wider internal record into the strict AI decision.
+        decision_poi = dict(selected or {})
+        linked_break_id = str(decision_poi.pop("linked_break_id", "") or "")
+        evidence_ids = [str(item) for item in decision_poi.get("evidence_object_ids", []) if item]
+        if linked_break_id and linked_break_id not in evidence_ids:
+            evidence_ids.append(linked_break_id)
+        decision_poi["evidence_object_ids"] = evidence_ids
+        return decision_poi
     index = build_annotation_evidence_index(evidence_pack)
     windows = evidence_pack.get("ohlcv_windows") or {}
     candles = windows.get("15m") if isinstance(windows, Mapping) else None

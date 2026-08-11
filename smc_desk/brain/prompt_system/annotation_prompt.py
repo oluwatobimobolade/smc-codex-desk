@@ -5,7 +5,7 @@ from smc_desk.brain.prompt_system.prompt_contract import PromptModule
 
 PROMPT = PromptModule(
     name="annotation_prompt",
-    version="1.4.0",
+    version="1.5.0",
     purpose="Make the AI output a clean professional SMC annotation plan, not detector clutter.",
     text="""Annotation rules:
 
@@ -30,6 +30,14 @@ Across the native MTF chart pack, preserve scope rather than forcing every mark 
 - 1H: controlling setup episode, internal pullback, sweep/inducement, primary and secondary POI roles.
 - 15m: execution confirmation only: local sweep, displacement, internal CHoCH/BOS, and active refinement.
 
+After selecting the active setup, audit annotation_context_authority. A zone
+that lost active-entry authority after a later opposing external break may
+still be material context. Retain it only when the deterministic atlas supplies
+a requirement_id. Cite that requirement in context_exception_requests, keep
+the exact sealed geometry, mark the drawing context-only, and set
+active_entry_authority=false. This exception changes visibility only: it may
+not alter bias, the active POI, trade state, entry, stop, target, or trade box.
+
 Keep watch-chart annotations sparse like a professional TradingView markup.
 V2 professional objects:
 - structure_segment: short BOS/CHoCH/IDM line anchored exactly between the source swing and confirmation candle. Include structure_scope=external or internal; internal labels must visibly say iBOS/iCHoCH or Internal BOS/CHoCH.
@@ -38,7 +46,7 @@ V2 professional objects:
 - path_projection: optional dashed thesis path, never a prediction guarantee, only after a certified active POI exists.
 - trade_box: only when official_state is TRADE_PLAN_READY; use kind=trade and include entry_price, stop_price, and target_prices matching the validated decision.
 
-Every v2 object must include semantic_object_id, timeframe, reason, evidence_object_ids, evidence_contract_ids, immutable evidence_geometry, and separately derived display_geometry. Display clipping may shorten only the horizontal presentation span and must preserve prices and the confirmation anchor. The validator reconstructs both geometries; an existing ID alone is not enough.
+Every v2 object must include semantic_object_id, timeframe, reason, evidence_object_ids, evidence_contract_ids, immutable evidence_geometry, and separately derived display_geometry. Context objects must also include display_role, control_status, active_entry_authority=false, and context_requirement_id. Display clipping may shorten only the horizontal presentation span and must preserve prices and the confirmation anchor. The validator reconstructs both geometries; an existing ID alone is not enough.
 Do not turn the chart into a written thesis. Put detailed reasoning in final_thesis, not on the chart.
 Do not draw full-width zones across the whole chart unless the level is a genuine HTF range boundary.
 Prefer localized rectangles and short horizontal segments with start_index/end_index.

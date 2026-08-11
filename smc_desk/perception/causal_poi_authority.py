@@ -84,6 +84,7 @@ def build_causal_poi_authority(
             "status": "PASS",
             "rules": [
                 "candidate_geometry_is_not_primary_authority",
+                "causal_origin_gate_rejection_cannot_be_promoted",
                 "explicit_break_lineage_required",
                 "explicit_departure_trace_required_for_order_block",
                 "accepted_external_origin_outranks_nested_range_membership",
@@ -248,6 +249,18 @@ def _select_timeframe(
     }
 
 
+def _first_lifecycle_event_time(
+    lifecycle: Mapping[str, Any],
+    event_type: str,
+) -> Any:
+    for event in lifecycle.get("event_history") or []:
+        if not isinstance(event, Mapping):
+            continue
+        if str(event.get("event_type") or "") == event_type:
+            return event.get("timestamp")
+    return None
+
+
 def _evaluate_candidate(
     *,
     timeframe: str,
@@ -263,6 +276,11 @@ def _evaluate_candidate(
     raw = raw_index.get(source_id)
     kind = "fvg" if str(lifecycle.get("created_by") or lifecycle.get("kind") or "").lower() == "fvg" else "order_block"
     base = {
+        # Downstream selection uses one identifier contract. ``poi_id`` remains
+        # the lifecycle identity and ``source_object_id`` remains the raw
+        # detector identity, but the candidate itself is addressed by
+        # ``object_id`` everywhere after this authority boundary.
+        "object_id": poi_id,
         "poi_id": poi_id,
         "source_object_id": source_id,
         "timeframe": timeframe,
@@ -274,14 +292,50 @@ def _evaluate_candidate(
         "price_relation": str(lifecycle.get("price_relation") or "unknown"),
         "validity_status": lifecycle.get("validity_status"),
         "scope": lifecycle.get("scope"),
+        "event_history": list(lifecycle.get("event_history") or []),
+        "first_touch_time": _first_lifecycle_event_time(
+            lifecycle,
+            "OBJECT_FIRST_TOUCHED",
+        ),
     }
     if not raw:
         return {**base, "causal_status": "UNRESOLVED_RAW_OBJECT_MISSING", "causal_failures": ["raw_detector_object_missing"]}
-    if not _lifecycle_eligible(lifecycle):
-        return {**base, "causal_status": "REJECTED_LIFECYCLE", "causal_failures": ["poi_not_fresh_or_active"]}
 
     evidence = raw.get("evidence") or {}
     metadata = raw.get("metadata") or {}
+    if kind == "order_block":
+        admission = metadata.get("causal_origin_admission")
+        admission = admission if isinstance(admission, Mapping) else {}
+        if evidence.get("poi_grade") is False or admission.get("admitted") is False:
+            reason = str(
+                admission.get("reason")
+                or evidence.get("admission_status")
+                or "causal_origin_gate_rejected"
+            )
+            return {
+                **base,
+                "causal_status": "REJECTED_CAUSAL_ORIGIN_GATE",
+                "causal_failures": [reason],
+                "causal_origin_admission": dict(admission),
+            }
+    accepted_origin_override = _accepted_external_origin_survives_nested_range_reclassification(
+        lifecycle=lifecycle,
+        raw=raw,
+        accepted=accepted,
+        direction=direction,
+    )
+    if not _lifecycle_eligible(lifecycle) and not accepted_origin_override:
+        return {**base, "causal_status": "REJECTED_LIFECYCLE", "causal_failures": ["poi_not_fresh_or_active"]}
+    if accepted_origin_override:
+        base.update(
+            {
+                "authority_reconciliation": "accepted_external_origin_survives_newer_nested_range_straddle",
+                "authority_scope": "causal_scenario_only",
+                "active_entry_authority": False,
+                "lifecycle_scope_preserved": lifecycle.get("scope"),
+                "lifecycle_validity_status_preserved": lifecycle.get("validity_status"),
+            }
+        )
     lineage = _select_causal_lineage(
         raw=raw,
         break_index=break_index,
@@ -812,6 +866,52 @@ def _lifecycle_eligible(candidate: Mapping[str, Any]) -> bool:
         and candidate.get("scope") == "active_setup"
         and freshness not in {"invalidated", "full", "consumed", "terminal"}
         and not relation.startswith("invalidated")
+    )
+
+
+def _accepted_external_origin_survives_nested_range_reclassification(
+    *,
+    lifecycle: Mapping[str, Any],
+    raw: Mapping[str, Any],
+    accepted: Mapping[str, Any],
+    direction: str,
+) -> bool:
+    """Retain an exact external-break origin as scenario authority only.
+
+    The lifecycle classifier answers whether a POI is usable inside the
+    *current* protected range.  A later nested range can therefore classify
+    the historical origin of an already accepted external break as straddling
+    that newer boundary.  That must deny active-entry authority, but it must
+    not erase the causal origin from the structural story.
+
+    The exception is intentionally narrow: an unspent admitted OB must own the
+    exact accepted external break through an explicit departure trace.  Mere
+    geometric overlap, an older lineage, or a spent zone remains rejected.
+    """
+    freshness = str(lifecycle.get("freshness") or "").lower()
+    relation = str(lifecycle.get("price_relation") or "").lower()
+    if (
+        lifecycle.get("validity_status") != "REVIEW_REQUIRED_STRADDLES_PROTECTED_LEVEL"
+        or lifecycle.get("scope") != "rejected"
+        or freshness in {"invalidated", "full", "consumed", "terminal"}
+        or relation.startswith("invalidated")
+    ):
+        return False
+    evidence = raw.get("evidence") or {}
+    metadata = raw.get("metadata") or {}
+    admission = metadata.get("causal_origin_admission")
+    admission = admission if isinstance(admission, Mapping) else {}
+    accepted_id = str(accepted.get("object_id") or "")
+    linked_id = str(metadata.get("linked_break_id") or evidence.get("structure_break_id") or "")
+    return bool(
+        accepted_id
+        and linked_id == accepted_id
+        and str(raw.get("direction") or "") == direction
+        and str(accepted.get("direction") or "") == direction
+        and _scope(accepted) == "external"
+        and metadata.get("causal_link_method") == "explicit_break_departure_trace"
+        and admission.get("admitted") is True
+        and evidence.get("poi_grade") is True
     )
 
 

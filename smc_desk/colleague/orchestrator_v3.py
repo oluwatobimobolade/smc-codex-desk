@@ -42,7 +42,12 @@ from smc_desk.brain.llm_provider import AISMCProvider, LLMCompletionRequest, LLM
 from smc_desk.brain.prompt_system import build_prompt_registry_manifest
 from smc_desk.brain.smc_evidence_pack_builder import build_smc_evidence_pack
 from smc_desk.colleague.__main__ import build_authority_trace, write_authority_trace
-from smc_desk.colleague.run_context import TIMEFRAME_DURATIONS, dataframe_to_candles
+from smc_desk.colleague.run_context import (
+    TIMEFRAME_DURATIONS,
+    _is_expected_closure,
+    _tz_aware,
+    dataframe_to_candles,
+)
 from smc_desk.colleague.smc_thesis_ai_v1 import build_smc_thesis_ai_v1, render_smc_thesis_ai_v1_markdown
 from smc_desk.data.historical_backfill import DEFAULT_MINIMUM_DEPTH, FOREX_MINIMUM_DEPTH, build_context_depth_report
 from smc_desk.perception.engine_v2 import PerceptionEngineV2
@@ -580,14 +585,44 @@ def _run_perception_candidates(
             continue
         try:
             normalized = _normalize_timeframe_df(df)
-            gap_trim_report: dict[str, Any] = {"session_gap_trimmed": False}
-            if _uses_sessioned_chart_proxy(symbol.upper().replace("/", "").replace("-", "")):
-                normalized, gap_trim_report = _trim_to_latest_contiguous_segment(normalized, timeframe=timeframe)
+            normalized_symbol = symbol.upper().replace("/", "").replace("-", "")
+            session_profile = (
+                "forex_5d"
+                if _uses_sessioned_chart_proxy(normalized_symbol)
+                else "continuous"
+            )
+            trim_report = {
+                "session_gap_trimmed": False,
+                "original_rows": len(normalized),
+                "rows_after_trim": len(normalized),
+            }
+            analysis_df = normalized
+            if session_profile == "forex_5d":
+                trimmed, proposed_trim_report = _trim_to_latest_contiguous_segment(
+                    normalized,
+                    timeframe=timeframe,
+                    session_profile=session_profile,
+                )
+                minimum_rows = int(FOREX_MINIMUM_DEPTH.get(timeframe, 0))
+                if proposed_trim_report["session_gap_trimmed"] and len(trimmed) >= minimum_rows:
+                    analysis_df = trimmed
+                    trim_report = proposed_trim_report
+                elif proposed_trim_report["session_gap_trimmed"]:
+                    trim_report = {
+                        **proposed_trim_report,
+                        "session_gap_trimmed": False,
+                        "trim_refused": True,
+                        "trim_refused_reason": (
+                            f"Latest contiguous segment has {len(trimmed)} rows; "
+                            f"{minimum_rows} are required for {timeframe}."
+                        ),
+                    }
             candles = dataframe_to_candles(
-                normalized,
+                analysis_df,
                 venue="LOCAL",
                 instrument=symbol,
                 timeframe=timeframe,
+                session_profile=session_profile,
             )
             decision_time = max(candle.close_time for candle in candles)
             snapshot = PerceptionEngineV2(
@@ -606,8 +641,9 @@ def _run_perception_candidates(
                     "inducements": len(snapshot.inducements),
                     "poi_grade_fvgs": len(snapshot.poi_grade_fvgs),
                 },
-                "rows_analyzed": len(normalized),
-                **gap_trim_report,
+                "rows_analyzed": len(analysis_df),
+                "session_profile": session_profile,
+                **trim_report,
             }
         except Exception as exc:
             candidates[timeframe] = {}
@@ -692,7 +728,12 @@ def _normalize_timeframe_df(df: pd.DataFrame) -> pd.DataFrame:
     return out.sort_values("timestamp").reset_index(drop=True)
 
 
-def _trim_to_latest_contiguous_segment(df: pd.DataFrame, *, timeframe: str) -> tuple[pd.DataFrame, dict[str, Any]]:
+def _trim_to_latest_contiguous_segment(
+    df: pd.DataFrame,
+    *,
+    timeframe: str,
+    session_profile: str = "continuous",
+) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Keep the latest contiguous segment for sessioned markets such as FX.
 
     The perception engine should still reject unexplained missing candles, but
@@ -704,8 +745,20 @@ def _trim_to_latest_contiguous_segment(df: pd.DataFrame, *, timeframe: str) -> t
         return df, {"session_gap_trimmed": False, "original_rows": len(df), "rows_after_trim": len(df)}
     timestamps = pd.to_datetime(df["timestamp"], utc=True)
     expected = TIMEFRAME_DURATIONS[timeframe]
-    diffs = timestamps.diff()
-    gap_positions = [idx for idx, delta in enumerate(diffs.iloc[1:], start=1) if delta != expected]
+    gap_positions: list[int] = []
+    for idx in range(1, len(timestamps)):
+        previous_close = timestamps.iloc[idx - 1] + expected
+        next_open = timestamps.iloc[idx]
+        if next_open == previous_close:
+            continue
+        if _is_expected_closure(
+            _tz_aware(previous_close),
+            _tz_aware(next_open),
+            session_profile,
+            timeframe=timeframe,
+        ):
+            continue
+        gap_positions.append(idx)
     if not gap_positions:
         return df, {"session_gap_trimmed": False, "original_rows": len(df), "rows_after_trim": len(df)}
     start = gap_positions[-1]

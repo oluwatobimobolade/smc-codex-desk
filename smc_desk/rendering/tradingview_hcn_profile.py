@@ -12,14 +12,17 @@ move price levels.
 from __future__ import annotations
 
 from collections import Counter
+import json
 from math import isfinite
 from typing import Any, Iterable, Mapping
 
+from smc_desk.rendering import smc_visual_grammar as visual_grammar
+
 
 PROFILE_NAME = "hcn_clean_smc_v1"
-MAX_DRAWINGS = 8
-MAX_ZONES = 3
-MAX_STRUCTURE_RAYS = 3
+MAX_DRAWINGS = visual_grammar.OBJECT_BUDGET["trade_plan"]
+MAX_ZONES = visual_grammar.MAX_ZONES
+MAX_STRUCTURE_RAYS = visual_grammar.MAX_STRUCTURE_LINES
 MAX_PATH_POINTS = 6
 MAX_LABEL_CHARS = 32
 
@@ -38,36 +41,47 @@ FORBIDDEN_WATCH_KINDS = {
     "short_position",
 }
 
-# The MCP server (tradesdontlie/tradingview-mcp) exposes ONE drawing tool,
-# `draw_shape`, and it accepts exactly four shapes. Everything we emit must be
-# one of these; anything else is silently undrawable.
-#
-# This list is the contract, not an aspiration. An earlier version of this
-# module emitted `horizontal_ray`, `path`, `long_position` and
-# `short_position` -- none of which exist in the server -- so the payloads
-# validated locally and would have drawn nothing.
-SUPPORTED_SHAPES = {"horizontal_line", "trend_line", "rectangle", "text"}
+# Versioned capability contract of the installed local MCP drawing server.
+# Its `draw_shape` schema accepts native shape names and its core dispatches
+# multi-point geometry through TradingView's `createMultipointShape`.  These
+# are the shapes this profile has an explicit, tested semantic mapping for;
+# arbitrary server strings are not treated as a capability claim.
+MCP_CAPABILITY_CONTRACT = {
+    "schema": "tradingview_mcp_drawing_capabilities_v1",
+    "server_contract": "local_tradingview_mcp_multipoint_v2",
+    "draw_tool": "draw_shape",
+    "update_tool": "draw_update",
+    "targeted_remove_tool": "draw_remove_one",
+    "overrides_encoding": "json_string",
+    "options_encoding": "json_string",
+    "multipoint": True,
+    "shapes": (
+        "horizontal_line",
+        "horizontal_ray",
+        "trend_line",
+        "rectangle",
+        "text",
+        "path",
+    ),
+}
+SUPPORTED_SHAPES = set(MCP_CAPABILITY_CONTRACT["shapes"])
 
 # Native TradingView tool for each SMC concept. Using the platform's own
 # drawing objects rather than approximating them means the markup stays
 # editable by hand after it lands and reads as a normal chart to another
 # trader.
 #
-# Three concepts have no native shape and are decomposed faithfully rather
-# than dropped: a conditional path becomes connected trend-line segments, and
-# a position becomes the two rectangles a trader would draw by hand -- risk
-# from entry to stop, reward from entry to target -- plus a text label. That
-# loses TradingView's own risk/reward arithmetic, which is recorded in the
-# payload so a reader knows the number came from us.
+# Native position support has not yet been live-probed, so positions remain a
+# fail-honest composite. Rays and paths are native in the installed contract.
 NATIVE_TOOL_MAP = {
     "order_block": "rectangle",
     "fvg": "rectangle",
     "htf_zone": "rectangle",
     "dealing_range": "rectangle",
-    "liquidity": "horizontal_line",
-    "structure": "horizontal_line",
+    "liquidity": "horizontal_ray",
+    "structure": "horizontal_ray",
     "structure_segment": "trend_line",
-    "conditional_path": "trend_line (segmented)",
+    "conditional_path": "path",
     "note": "text",
     "long_position": "rectangle x2 + text (no native position tool)",
     "short_position": "rectangle x2 + text (no native position tool)",
@@ -75,19 +89,9 @@ NATIVE_TOOL_MAP = {
 
 # Server-side companions to draw_shape, recorded so a caller can clear a chart
 # before re-annotating rather than stacking drawings.
-COMPANION_TOOLS = ("draw_list", "draw_remove_one", "draw_clear")
+COMPANION_TOOLS = ("draw_list", "draw_get_properties", "draw_update", "draw_remove_one")
 
-PALETTE = {
-    "ink": "#111827",
-    "muted_ink": "#6B7280",
-    "order_block": "#9CA3AF",
-    "fvg": "#F4C2C2",
-    "htf_zone": "#BFE8F2",
-    # The dealing range is context, not a POI: it sits furthest back and
-    # lightest so premium/discount location reads without competing with the
-    # zones inside it.
-    "dealing_range": "#D8DEE4",
-}
+PALETTE = visual_grammar.PALETTE
 
 
 def compile_hcn_native_markup(
@@ -95,8 +99,12 @@ def compile_hcn_native_markup(
     *,
     watch_only: bool = True,
     clutter_budget: int = MAX_DRAWINGS,
+    server_capabilities: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Return MCP-ready ``draw_shape`` payloads for a clean SMC chart."""
+    capabilities = validate_mcp_capabilities(
+        server_capabilities or MCP_CAPABILITY_CONTRACT
+    )
     mark_list = [dict(mark) for mark in marks]
     if clutter_budget < 1 or clutter_budget > MAX_DRAWINGS:
         raise ValueError(f"clutter_budget must be between 1 and {MAX_DRAWINGS}")
@@ -118,13 +126,19 @@ def compile_hcn_native_markup(
         raise ValueError(f"watch-only markup cannot contain executable objects: {forbidden}")
 
     drawings = [_compile_mark(mark) for mark in mark_list]
-    _assert_server_can_draw(drawings)
+    _assert_server_can_draw(drawings, supported_shapes=set(capabilities["shapes"]))
+    native_drawing_count = sum(_native_call_count(drawing) for drawing in drawings)
+    if native_drawing_count > clutter_budget:
+        raise ValueError(
+            f"compiled markup exceeds native clutter budget ({native_drawing_count} > {clutter_budget})"
+        )
     return {
-        "schema": "tradingview_native_markup_v1",
+        "schema": "tradingview_native_markup_v2",
         "profile": PROFILE_NAME,
         "authority": "visual_only_observe_only" if watch_only else "visual_only",
         "watch_only": watch_only,
-        "drawing_count": len(drawings),
+        "semantic_mark_count": len(drawings),
+        "drawing_count": native_drawing_count,
         "drawings": drawings,
         "visual_rules": {
             "zones_max": MAX_ZONES,
@@ -135,52 +149,118 @@ def compile_hcn_native_markup(
             "trade_box_authorized": not watch_only,
         },
         "native_tool_map": dict(NATIVE_TOOL_MAP),
+        "capability_contract": capabilities,
+        "cleanup_policy": "remove_only_recorded_workflow_entity_ids",
     }
 
 
-def _assert_server_can_draw(drawings: list[Mapping[str, Any]]) -> None:
+def _native_call_count(drawing: Mapping[str, Any]) -> int:
+    if str(drawing.get("shape") or "") == "composite":
+        return len(drawing.get("parts") or [])
+    return 1
+
+
+def validate_mcp_capabilities(capabilities: Mapping[str, Any]) -> dict[str, Any]:
+    """Fail closed when the connected server does not match this compiler."""
+    if str(capabilities.get("schema") or "") != MCP_CAPABILITY_CONTRACT["schema"]:
+        raise ValueError("TradingView MCP drawing capability schema is missing or incompatible")
+    for field in (
+        "server_contract",
+        "draw_tool",
+        "update_tool",
+        "targeted_remove_tool",
+    ):
+        if capabilities.get(field) != MCP_CAPABILITY_CONTRACT[field]:
+            raise ValueError(f"TradingView MCP {field} is missing or incompatible")
+    if capabilities.get("multipoint") is not True:
+        raise ValueError("TradingView MCP must support native multipoint drawings")
+    if capabilities.get("overrides_encoding") != "json_string" or capabilities.get("options_encoding") != "json_string":
+        raise ValueError("TradingView MCP drawing option encoding is incompatible")
+    shapes = {str(shape) for shape in capabilities.get("shapes") or []}
+    required = {"horizontal_ray", "trend_line", "rectangle", "text", "path"}
+    missing = sorted(required - shapes)
+    if missing:
+        raise ValueError(f"TradingView MCP is missing required native shapes: {missing}")
+    result = dict(capabilities)
+    result["shapes"] = sorted(shapes)
+    return result
+
+
+def _assert_server_can_draw(
+    drawings: list[Mapping[str, Any]],
+    *,
+    supported_shapes: set[str] | None = None,
+) -> None:
     """Every emitted shape must exist in the MCP server's vocabulary.
 
-    A payload naming a shape the server does not implement validates locally
-    and then draws nothing, which is the worst possible failure: the run looks
-    successful and the chart is empty. This module previously emitted
-    horizontal_ray, path, long_position and short_position, none of which
-    exist.
+    A payload naming a shape outside the bound capability contract fails before
+    it reaches the chart. Native shape availability still requires a compliant
+    live-instance probe before dispatch.
     """
+    supported = supported_shapes or SUPPORTED_SHAPES
     for drawing in drawings:
         shape = str(drawing.get("shape") or "")
         if shape == "composite":
             for part in drawing.get("parts") or []:
                 part_shape = str(part.get("shape") or "")
-                if part_shape not in SUPPORTED_SHAPES:
+                if part_shape not in supported:
                     raise ValueError(
                         f"composite part uses unsupported shape {part_shape!r}; "
-                        f"server supports {sorted(SUPPORTED_SHAPES)}"
+                        f"server supports {sorted(supported)}"
                     )
             continue
-        if shape not in SUPPORTED_SHAPES:
+        if shape not in supported:
             raise ValueError(
-                f"unsupported shape {shape!r}; server supports {sorted(SUPPORTED_SHAPES)}"
+                f"unsupported shape {shape!r}; server supports {sorted(supported)}"
             )
 
 
 def flatten_draw_calls(plan: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """Expand a compiled plan into individual ``draw_shape`` calls.
+    """Expand a plan into MCP call envelopes with schema-correct arguments.
 
-    Composites become their constituent parts, so a caller can iterate the
-    result and issue one MCP call per entry without knowing which concepts
-    happen to have native shapes.
+    ``overrides`` and ``options`` are JSON strings because that is what the
+    installed MCP tool schema accepts. Semantic metadata stays outside
+    ``arguments`` so a caller can pass the argument object directly without
+    leaking unsupported keys into the MCP call.
     """
     calls: list[dict[str, Any]] = []
     for drawing in plan.get("drawings") or []:
         if str(drawing.get("shape")) == "composite":
             for part in drawing.get("parts") or []:
-                call = {k: v for k, v in part.items() if k != "role"}
-                call["semantic_kind"] = drawing.get("semantic_kind")
-                calls.append(call)
+                calls.append(_call_envelope(
+                    part,
+                    semantic_kind=str(drawing.get("semantic_kind") or ""),
+                    role=str(part.get("role") or ""),
+                ))
         else:
-            calls.append(dict(drawing))
+            calls.append(_call_envelope(
+                drawing,
+                semantic_kind=str(drawing.get("semantic_kind") or ""),
+            ))
     return calls
+
+
+def _call_envelope(
+    drawing: Mapping[str, Any],
+    *,
+    semantic_kind: str,
+    role: str = "",
+) -> dict[str, Any]:
+    accepted = {"shape", "point", "point2", "points", "overrides", "options", "text"}
+    arguments = {key: drawing[key] for key in accepted if key in drawing}
+    for key in ("overrides", "options"):
+        if isinstance(arguments.get(key), Mapping):
+            arguments[key] = json.dumps(
+                arguments[key],
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+    return {
+        "tool": "draw_shape",
+        "arguments": arguments,
+        "semantic_kind": semantic_kind,
+        "role": role or None,
+    }
 
 
 def _compile_mark(mark: Mapping[str, Any]) -> dict[str, Any]:
@@ -221,8 +301,9 @@ def _compile_mark(mark: Mapping[str, Any]) -> dict[str, Any]:
         price = _price(mark.get("price"), "price")
         color = PALETTE["ink"] if kind == "structure" else PALETTE["muted_ink"]
         return {
-            # `horizontal_line`, not `horizontal_ray`: the server has no ray.
-            "shape": "horizontal_line",
+            # A ray begins at the evidence-bound swing/liquidity event. A full
+            # width line would erase the origin and make a different claim.
+            "shape": "horizontal_ray",
             "point": {"time": time, "price": price},
             "text": label,
             "overrides": {
@@ -250,7 +331,8 @@ def _compile_mark(mark: Mapping[str, Any]) -> dict[str, Any]:
         if end_time <= start_time:
             raise ValueError("structure_segment time_end must be after time_start")
         scope = str(mark.get("scope") or "external").lower()
-        internal = scope == "internal"
+        style = visual_grammar.structure_style(scope, mark.get("break_type"))
+        internal = style["scope"] == "internal"
         return {
             "shape": "trend_line",
             "point": {"time": start_time, "price": price},
@@ -258,12 +340,12 @@ def _compile_mark(mark: Mapping[str, Any]) -> dict[str, Any]:
             "text": label,
             "overrides": {
                 "bold": False,
-                "fontsize": 9 if internal else 11,
+                "fontsize": int(round(style["fontsize"])),
                 "linecolor": PALETTE["muted_ink"] if internal else PALETTE["ink"],
                 # Internal structure dashed, swing structure solid: the single
                 # most important visual distinction on an SMC chart.
-                "linestyle": 2 if internal else 0,
-                "linewidth": 1 if internal else 2,
+                "linestyle": 2 if style["style_name"] == "dashed" else 0,
+                "linewidth": int(round(style["linewidth"])),
                 "showLabel": True,
                 "textcolor": PALETTE["muted_ink"] if internal else PALETTE["ink"],
             },
@@ -354,33 +436,18 @@ def _compile_mark(mark: Mapping[str, Any]) -> dict[str, Any]:
         ]
         if any(right["time"] <= left["time"] for left, right in zip(points, points[1:])):
             raise ValueError("conditional_path points must move forward in time")
-        # No path tool on the server: a projected route is drawn as connected
-        # dashed trend-line segments, which is what it looks like anyway.
         return {
-            "shape": "composite",
+            "shape": "path",
+            "points": points,
             "text": label,
             "semantic_kind": kind,
-            "native_support": False,
-            "decomposition_note": (
-                "TradingView MCP exposes no path tool; drawn as connected "
-                "dashed trend-line segments."
-            ),
-            "parts": [
-                {
-                    "shape": "trend_line",
-                    "point": left,
-                    "point2": right,
-                    "text": label if index == 0 else "",
-                    "overrides": {
-                        "linecolor": PALETTE["muted_ink"],
-                        "linestyle": 2,
-                        "linewidth": 1,
-                    },
-                    "options": _native_options(),
-                    "role": f"segment_{index + 1}",
-                }
-                for index, (left, right) in enumerate(zip(points, points[1:]))
-            ],
+            "native_support": True,
+            "overrides": {
+                "lineColor": PALETTE["muted_ink"],
+                "lineStyle": 2,
+                "lineWidth": 1,
+            },
+            "options": _native_options(),
         }
 
     if kind == "note":
@@ -446,6 +513,7 @@ def _finite(value: Any, name: str) -> float:
 
 __all__ = [
     "COMPANION_TOOLS",
+    "MCP_CAPABILITY_CONTRACT",
     "NATIVE_TOOL_MAP",
     "SUPPORTED_SHAPES",
     "flatten_draw_calls",
@@ -456,4 +524,5 @@ __all__ = [
     "PALETTE",
     "PROFILE_NAME",
     "compile_hcn_native_markup",
+    "validate_mcp_capabilities",
 ]

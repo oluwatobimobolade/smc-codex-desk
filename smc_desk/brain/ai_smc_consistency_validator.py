@@ -1020,6 +1020,34 @@ def _float(value: Any) -> float | None:
         return None
 
 
+def _entry_price_for_zone(
+    zone: Mapping[str, Any],
+    *,
+    direction: str,
+    anchor: str,
+) -> float | None:
+    """Resolve one explicit entry model for a bounded POI.
+
+    The old validator used the midpoint when an object ID resolved and the
+    distal edge when only semantic text resolved.  Entry geometry must depend
+    on the named model, never on the lookup route.
+    """
+    low = _float(zone.get("price_low"))
+    high = _float(zone.get("price_high"))
+    if low is None or high is None:
+        return None
+    low, high = sorted((low, high))
+    model = str(anchor or "").lower()
+    if any(token in model for token in ("proximal", "near_edge", "near edge")):
+        return high if direction == "bullish" else low
+    if any(token in model for token in ("distal", "far_edge", "far edge")):
+        return low if direction == "bullish" else high
+    # Consequent encroachment / 50% and an unqualified POI/OB anchor both use
+    # the midpoint.  This is the historical project convention and is now
+    # explicit and identical on every resolution path.
+    return (low + high) / 2.0
+
+
 def _resolve_anchor_price(anchor: str, evidence_ids: list[str], evidence_pack: Mapping[str, Any], decision: AISMCDecision, kind: str) -> float | None:
     anchor = str(anchor or "").lower()
     
@@ -1046,7 +1074,11 @@ def _resolve_anchor_price(anchor: str, evidence_ids: list[str], evidence_pack: M
         # Depending on kind, extract price
         if kind == "entry":
             if "price_low" in first and "price_high" in first:
-                return (float(first["price_low"]) + float(first["price_high"])) / 2.0
+                return _entry_price_for_zone(
+                    first,
+                    direction=str(decision.direction),
+                    anchor=anchor,
+                )
             return float(first.get("price") or first.get("price_low") or first.get("price_high") or 0.0)
         elif kind == "stop":
             if "high" in anchor and "price_high" in first:
@@ -1100,10 +1132,11 @@ def _resolve_anchor_price(anchor: str, evidence_ids: list[str], evidence_pack: M
     if "fvg" in anchor or "poi" in anchor or "ob" in anchor:
         poi = decision.active_poi
         if poi.price_high is not None and poi.price_low is not None:
-            if decision.direction == "bullish":
-                return float(poi.price_low)
-            else:
-                return float(poi.price_high)
+            return _entry_price_for_zone(
+                {"price_low": poi.price_low, "price_high": poi.price_high},
+                direction=str(decision.direction),
+                anchor=anchor,
+            )
 
     return None
 

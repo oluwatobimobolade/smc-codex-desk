@@ -42,7 +42,11 @@ VISIBLE_LEVEL_LIMITS = {
 }
 
 
-def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any]:
+def build_smc_trader_annotation_scene(
+    result: ValidationResult,
+    *,
+    visible_object_limit: int | None = None,
+) -> dict[str, Any]:
     decision = result.official_decision
     annotation = decision["annotation_plan"]
     chart_template = annotation["chart_template"]
@@ -68,10 +72,18 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
     ] if v2_present else []
     if v2_present:
         labels = []
-    visible_drawing_objects = _select_visible_drawing_objects(drawing_objects, chart_template)
+    visible_drawing_objects = _select_visible_drawing_objects(
+        drawing_objects,
+        chart_template,
+        limit=visible_object_limit,
+    )
     levels = _drawing_objects_to_levels(visible_drawing_objects) if v2_present else legacy_levels
     visible_labels = _select_visible_labels(labels, chart_template)
-    visible_levels = _select_visible_levels(levels, chart_template)
+    visible_levels = _select_visible_levels(
+        levels,
+        chart_template,
+        limit=visible_object_limit if v2_present else None,
+    )
     return {
         "schema": "smc_trader_annotation_scene_v1",
         "source": "ValidatedAISMCDecision" if result.status == "VALIDATED" else "ReviewRequiredAISMCDecision",
@@ -89,6 +101,7 @@ def build_smc_trader_annotation_scene(result: ValidationResult) -> dict[str, Any
         "visible_drawing_objects": visible_drawing_objects,
         "drawing_object_count": len(drawing_objects),
         "visible_drawing_object_count": len(visible_drawing_objects),
+        "visible_object_limit_override": visible_object_limit,
         "level_source": "annotation_plan_v2" if v2_present else "annotation_plan",
         "visible_labels": visible_labels,
         "visible_levels": visible_levels,
@@ -120,6 +133,7 @@ def render_smc_trader_annotation_chart(
     output_path: str | Path,
     *,
     timeframe: str = "15m",
+    visible_object_limit: int | None = None,
 ) -> dict[str, Any]:
     if df.empty:
         raise ValueError("Cannot render SMC trader annotation chart from an empty dataframe.")
@@ -127,7 +141,13 @@ def render_smc_trader_annotation_chart(
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df = _normalize_df(df)
-    scene = _resolve_scene_time_geometry(build_smc_trader_annotation_scene(result), df)
+    scene = _resolve_scene_time_geometry(
+        build_smc_trader_annotation_scene(
+            result,
+            visible_object_limit=visible_object_limit,
+        ),
+        df,
+    )
     scene = apply_visual_cleanup(scene, df)
     o = df["open"].to_numpy(float)
     h = df["high"].to_numpy(float)
@@ -155,6 +175,11 @@ def render_smc_trader_annotation_chart(
 
     for level in _assign_level_label_positions(levels, low=low, high=high):
         x1, x2 = _level_x_span(level, n, scene["chart_template"])
+        if level.get("source_object_type") == "range_zone":
+            equilibrium = _float(level.get("equilibrium_price"))
+            if equilibrium is not None and level["low"] <= equilibrium <= level["high"]:
+                _draw_dealing_range(ax, level, x1=x1, x2=x2, equilibrium=equilibrium)
+                continue
         if _is_zone_kind(level["kind"]) and level["low"] != level["high"]:
             width = max(1.0, x2 - x1)
             ax.add_patch(
@@ -167,6 +192,7 @@ def render_smc_trader_annotation_chart(
                     alpha=level["alpha"],
                     zorder=1,
                     linewidth=1.0,
+                    linestyle=level["linestyle"],
                 )
             )
             _inline_label(ax, (x1 + x2) / 2, level.get("label_y", level["high"]), level["label"], level["edge_color"])
@@ -389,6 +415,7 @@ def _scene_levels(scene: Mapping[str, Any]) -> list[dict[str, Any]]:
         "poi": "#9467bd",
         "order_block": "#8fbaf5",
         "fvg": "#98c9ff",
+        "range": "#8b93a1",
         "path": "#777777",
         "bos": "#111111",
         "choch": "#ef5350",
@@ -430,7 +457,7 @@ def _scene_levels(scene: Mapping[str, Any]) -> list[dict[str, Any]]:
         end_index = _int(raw.get("end_index"))
         if start_index is not None and end_index is not None and end_index < start_index:
             start_index, end_index = end_index, start_index
-        kind_color = colors.get(kind, "#cfd2dc")
+        kind_color = _semantic_level_color(raw, colors.get(kind, "#cfd2dc"))
         levels.append({
             "kind": kind,
             "label": str(raw.get("label") or kind).upper(),
@@ -445,6 +472,9 @@ def _scene_levels(scene: Mapping[str, Any]) -> list[dict[str, Any]]:
             "end_index": end_index,
             "source_object_type": raw.get("source_object_type"),
             "semantic_object_id": raw.get("semantic_object_id"),
+            "direction": raw.get("direction"),
+            "display_role": raw.get("display_role"),
+            "equilibrium_price": _float(raw.get("equilibrium_price")),
         })
     return levels
 
@@ -478,8 +508,13 @@ def _select_visible_labels(labels: list[Mapping[str, Any]], chart_template: str)
     return [labels[index] for index in selected_indexes]
 
 
-def _select_visible_levels(levels: list[Mapping[str, Any]], chart_template: str) -> list[Mapping[str, Any]]:
-    limit = VISIBLE_LEVEL_LIMITS.get(chart_template, 3)
+def _select_visible_levels(
+    levels: list[Mapping[str, Any]],
+    chart_template: str,
+    *,
+    limit: int | None = None,
+) -> list[Mapping[str, Any]]:
+    limit = VISIBLE_LEVEL_LIMITS.get(chart_template, 3) if limit is None else max(0, int(limit))
     if len(levels) <= limit:
         return levels
     priority = {
@@ -502,8 +537,13 @@ def _select_visible_levels(levels: list[Mapping[str, Any]], chart_template: str)
     return [levels[index] for index in selected_indexes]
 
 
-def _select_visible_drawing_objects(objects: list[Mapping[str, Any]], chart_template: str) -> list[Mapping[str, Any]]:
-    limit = VISIBLE_LEVEL_LIMITS.get(chart_template, 3)
+def _select_visible_drawing_objects(
+    objects: list[Mapping[str, Any]],
+    chart_template: str,
+    *,
+    limit: int | None = None,
+) -> list[Mapping[str, Any]]:
+    limit = VISIBLE_LEVEL_LIMITS.get(chart_template, 3) if limit is None else max(0, int(limit))
     if len(objects) <= limit:
         return objects
     priority = {
@@ -545,9 +585,34 @@ def _drawing_objects_to_levels(objects: list[Mapping[str, Any]]) -> list[dict[st
                 "line_style": obj.get("line_style"),
                 "semantic_object_id": obj.get("semantic_object_id"),
                 "source_object_type": obj.get("object_type"),
+                "direction": obj.get("direction"),
+                "display_role": obj.get("display_role"),
+                "equilibrium_price": obj.get("equilibrium_price"),
             }
         )
     return levels
+
+
+def _semantic_level_color(raw: Mapping[str, Any], fallback: str) -> str:
+    """Use trader-semantic supply/demand colors without changing geometry."""
+    kind = str(raw.get("kind") or "")
+    direction = str(raw.get("direction") or "").lower()
+    if kind == "order_block":
+        if direction == "bearish":
+            return "#d85b5b"
+        if direction == "bullish":
+            return "#2a9d8f"
+    if kind == "fvg":
+        if direction == "bearish":
+            return "#d59a45"
+        if direction == "bullish":
+            return "#5a9bd4"
+    if kind == "choch":
+        if direction == "bullish":
+            return "#2a9d8f"
+        if direction == "bearish":
+            return "#d85b5b"
+    return fallback
 
 
 def _object_with_display_geometry(raw: Mapping[str, Any]) -> dict[str, Any]:
@@ -579,7 +644,7 @@ def _assign_level_label_positions(levels: list[dict[str, Any]], *, low: float, h
 
 
 def _is_zone_kind(kind: str) -> bool:
-    return kind in {"poi", "order_block", "fvg"}
+    return kind in {"poi", "order_block", "fvg", "range"}
 
 
 def _level_x_span(level: Mapping[str, Any], n: int, chart_template: str) -> tuple[float, float]:
@@ -605,6 +670,54 @@ def _level_x_span(level: Mapping[str, Any], n: int, chart_template: str) -> tupl
     width = max(10.0, min(32.0, n * 0.28))
     right = n - 1.0
     return max(0.0, right - width), right
+
+
+def _draw_dealing_range(
+    ax: Any,
+    level: Mapping[str, Any],
+    *,
+    x1: float,
+    x2: float,
+    equilibrium: float,
+) -> None:
+    """Render premium/discount from the certified range as one sparse object."""
+    lower = float(level["low"])
+    upper = float(level["high"])
+    width = max(1.0, x2 - x1)
+    ax.add_patch(
+        Rectangle(
+            (x1, equilibrium), width, upper - equilibrium,
+            facecolor="#d2544b", edgecolor="none", alpha=0.055, zorder=0,
+        )
+    )
+    ax.add_patch(
+        Rectangle(
+            (x1, lower), width, equilibrium - lower,
+            facecolor="#0f8b7e", edgecolor="none", alpha=0.055, zorder=0,
+        )
+    )
+    for price, style in (
+        (upper, (0, (6, 4))),
+        (equilibrium, (0, (2, 4))),
+        (lower, (0, (6, 4))),
+    ):
+        ax.plot([x1, x2], [price, price], color="#8b93a1", linewidth=0.9, linestyle=style, zorder=4)
+    # A narrow current range can occupy only a few pixels on a broad HTF
+    # chart. Three independent captions would collide even though their price
+    # lines are exact, so present one compact legend in the right margin.
+    ax.text(
+        x2 + 0.8,
+        equilibrium,
+        f"H {upper:g}\nEQ {equilibrium:g}\nL {lower:g}",
+        color="#7b8492",
+        fontsize=7,
+        fontweight="bold",
+        ha="left",
+        va="center",
+        linespacing=1.15,
+        zorder=8,
+        bbox={"facecolor": "#ffffff", "edgecolor": "none", "alpha": 0.82, "pad": 1.2},
+    )
 
 
 def _inline_label(ax: Any, x: float, price: float, text: str, color: str) -> None:

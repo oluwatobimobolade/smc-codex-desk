@@ -140,7 +140,42 @@ def _narrative_context(evidence_pack: Mapping[str, Any]) -> dict[str, Any] | Non
     if not isinstance(graph, Mapping):
         return None
     narrative = graph.get("narrative_context")
-    return dict(narrative) if isinstance(narrative, Mapping) else None
+    if not isinstance(narrative, Mapping):
+        return None
+    result = dict(narrative)
+    causal_graph = evidence_pack.get("formal_causal_episode_graph")
+    invariants = causal_graph.get("invariants") if isinstance(causal_graph, Mapping) else None
+    contract = causal_graph.get("authority_contract") if isinstance(causal_graph, Mapping) else None
+    if (
+        isinstance(contract, Mapping)
+        and contract.get("enforcement_ready") is True
+        and isinstance(invariants, Mapping)
+        and invariants.get("status") != "PASS"
+    ):
+        provisional_bias = str(result.get("context_bias") or "unknown")
+        violations = [str(value) for value in invariants.get("violations") or []]
+        result.update(
+            {
+                "state": "RECONCILIATION_REQUIRED",
+                "context_timeframe": None,
+                "context_bias": "unresolved",
+                "is_coherent": False,
+                "confirming_timeframes": [],
+                "retracing_timeframes": [],
+                "invalidating_timeframes": [],
+                "draw": {},
+                "sentence": (
+                    f"The V1 graph provisionally reads {provisional_bias}, but the stricter causal replay "
+                    "does not accept every controlling break. Direction remains unresolved for decision authority."
+                ),
+                "expectation": (
+                    "Keep the surviving V3-accepted structure as scenario evidence only; wait for graph "
+                    "reconciliation and fresh confirmation before promoting a directional plan."
+                ),
+                "reconciliation_violations": violations,
+            }
+        )
+    return result
 
 
 def _claim(
@@ -152,7 +187,14 @@ def _claim(
     title = claim_id.replace("_", " ").title()
     if claim_id == "bias_summary":
         bias = official.get("bias_summary") or {}
-        text = f"Daily={bias.get('daily')}; 4H={bias.get('4h')}; 1H={bias.get('1h')}; final bias={bias.get('final_bias')}."
+        prefix = (
+            "Provisional V1 votes: "
+            if isinstance(narrative, Mapping) and narrative.get("state") == "RECONCILIATION_REQUIRED"
+            else ""
+        )
+        text = f"{prefix}Daily={bias.get('daily')}; 4H={bias.get('4h')}; 1H={bias.get('1h')}; final bias={bias.get('final_bias')}."
+        if prefix:
+            text += " Decision-authority bias remains unresolved until the causal replay reconciles."
         # A "mixed" vote describes the tally, not the market. When the graph
         # resolved a coherent hierarchical story, state it -- disagreement
         # between timeframes is what a retracement IS.

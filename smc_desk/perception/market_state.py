@@ -36,6 +36,7 @@ execute. ``signal_allowed`` stays false at every state.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Mapping, Sequence
 
 MAP_CONTEXT = "MAP_CONTEXT"
@@ -109,6 +110,14 @@ class MarketState:
     primary_poi_high: float | None = None
     alternate_poi_ids: tuple[str, ...] = ()
 
+    # Lower-timeframe confirmation / explicit point-of-entry model
+    poi_arrival_time: str | None = None
+    confirmation_timeframe: str | None = None
+    confirmation_sweep_id: str | None = None
+    confirmation_break_id: str | None = None
+    entry_model: str | None = None
+    entry_price: float | None = None
+
     # The two questions every state must answer
     waiting_for: str = ""
     invalidation: str = ""
@@ -155,6 +164,14 @@ class MarketState:
                 "primary_low": self.primary_poi_low,
                 "primary_high": self.primary_poi_high,
                 "alternates": list(self.alternate_poi_ids),
+            },
+            "confirmation": {
+                "poi_arrival_time": self.poi_arrival_time,
+                "timeframe": self.confirmation_timeframe,
+                "sweep_id": self.confirmation_sweep_id,
+                "break_id": self.confirmation_break_id,
+                "entry_model": self.entry_model,
+                "entry_price": self.entry_price,
             },
             "waiting_for": self.waiting_for,
             "invalidation": self.invalidation,
@@ -243,6 +260,36 @@ def build_market_state(
     invalidation = str(narrative.get("invalidation_note") or "") or "No invalidation level resolved."
     reasons: list[str] = []
 
+    # The V1 graph can supply a provisional story, but an enforcement-ready
+    # causal replay disagreement means that story is not coherent enough to
+    # advance the trader state machine.  Do not let a REVIEW_REQUIRED episode
+    # graph coexist with an ALIGNED_CONTINUATION market-state headline.
+    causal_graph = evidence_pack.get("formal_causal_episode_graph")
+    invariants = causal_graph.get("invariants") if isinstance(causal_graph, Mapping) else None
+    causal_contract = causal_graph.get("authority_contract") if isinstance(causal_graph, Mapping) else None
+    if (
+        isinstance(causal_contract, Mapping)
+        and causal_contract.get("enforcement_ready") is True
+        and isinstance(invariants, Mapping)
+        and invariants.get("status") != "PASS"
+    ):
+        violations = tuple(str(value) for value in invariants.get("violations") or [])
+        reasons.extend(["causal episode reconciliation required", *violations])
+        return MarketState(
+            **{
+                **base,
+                "bias": "unknown",
+                "narrative_state": "RECONCILIATION_REQUIRED",
+            },
+            state=NO_CONTEXT,
+            waiting_for=(
+                "The canonical structure graph and stricter causal replay to agree "
+                "before directional context can advance."
+            ),
+            invalidation=invalidation,
+            reasons=tuple(reasons),
+        )
+
     # 1. Context must exist and hold together before anything else counts.
     if not coherent or bias not in {"bullish", "bearish"}:
         reasons.append(f"narrative is {narrative.get('state') or 'unresolved'}; no directional context to build on")
@@ -281,7 +328,12 @@ def build_market_state(
     reasons.append("significant displacement present on the context timeframe")
 
     # 4. A primary POI must be selected before price behaviour matters.
-    if not isinstance(primary_poi, Mapping) or not primary_poi.get("object_id"):
+    poi_object_id = (
+        str(primary_poi.get("object_id") or primary_poi.get("poi_id") or "")
+        if isinstance(primary_poi, Mapping)
+        else ""
+    )
+    if not isinstance(primary_poi, Mapping) or not poi_object_id:
         return MarketState(
             **base, state=ACCEPTED_DISPLACEMENT,
             waiting_for="A causally-owned POI aligned with context to be mapped.",
@@ -292,10 +344,11 @@ def build_market_state(
     poi_high = _f(primary_poi.get("price_high"))
     base = {
         **base,
-        "primary_poi_id": str(primary_poi.get("object_id")),
+        "primary_poi_id": poi_object_id,
         "primary_poi_low": poi_low,
         "primary_poi_high": poi_high,
         "alternate_poi_ids": tuple(str(x) for x in (primary_poi.get("alternates") or [])),
+        "poi_arrival_time": _poi_arrival_time(primary_poi),
     }
     reasons.append(f"primary POI mapped: {base['primary_poi_id']}")
 
@@ -306,11 +359,51 @@ def build_market_state(
             invalidation=invalidation, reasons=tuple(reasons),
         )
 
-    # 5-6. Where is price relative to the POI?
+    # 5-8. Where is price relative to the POI, and has a complete lower-
+    # timeframe confirmation sequence occurred after arrival?
     low, high = min(poi_low, poi_high), max(poi_low, poi_high)
     height = max(high - low, 1e-9)
+    confirmation = _lower_timeframe_confirmation(
+        evidence_pack,
+        bias=bias,
+        context_timeframe=str(base["context_timeframe"] or ""),
+        arrival_time=base["poi_arrival_time"],
+    )
+    if confirmation.get("ready"):
+        reasons.append(
+            "lower-timeframe liquidity event, displacement and aligned structural break completed after POI arrival"
+        )
+        return MarketState(
+            **base,
+            state=TRADE_PLAN_READY,
+            confirmation_timeframe=confirmation.get("timeframe"),
+            confirmation_sweep_id=confirmation.get("sweep_id"),
+            confirmation_break_id=confirmation.get("break_id"),
+            entry_model="ltf_confirmation_close",
+            entry_price=_f(confirmation.get("entry_price")),
+            waiting_for=(
+                "Human review of the evidence-bound plan; execution remains disabled."
+            ),
+            invalidation=invalidation,
+            reasons=tuple(reasons),
+        )
     if low <= current_price <= high:
         reasons.append("price is inside the POI")
+        if base["poi_arrival_time"]:
+            waiting = confirmation.get("waiting_for") or (
+                "A lower-timeframe liquidity event plus displacement and a structural break in the direction of context."
+            )
+            return MarketState(
+                **base,
+                state=LTF_CONFIRMATION_PENDING,
+                confirmation_timeframe=confirmation.get("timeframe"),
+                confirmation_sweep_id=confirmation.get("sweep_id"),
+                confirmation_break_id=confirmation.get("break_id"),
+                entry_model="ltf_confirmation_close",
+                waiting_for=str(waiting),
+                invalidation=invalidation,
+                reasons=tuple(reasons),
+            )
         return MarketState(
             **base, state=PRICE_AT_POI,
             waiting_for=(
@@ -335,6 +428,158 @@ def build_market_state(
         waiting_for="Price to travel toward the mapped POI.",
         invalidation=invalidation, reasons=tuple(reasons),
     )
+
+
+def _poi_arrival_time(primary_poi: Mapping[str, Any]) -> str | None:
+    explicit = primary_poi.get("first_touch_time")
+    if explicit:
+        return str(explicit)
+    for event in primary_poi.get("event_history") or []:
+        if not isinstance(event, Mapping):
+            continue
+        if str(event.get("event_type") or "") == "OBJECT_FIRST_TOUCHED":
+            timestamp = event.get("timestamp")
+            return str(timestamp) if timestamp else None
+    return None
+
+
+def _dt(value: Any) -> datetime | None:
+    if isinstance(value, datetime):
+        return value
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _lower_timeframe_confirmation(
+    evidence_pack: Mapping[str, Any],
+    *,
+    bias: str,
+    context_timeframe: str,
+    arrival_time: str | None,
+) -> dict[str, Any]:
+    """Resolve sweep -> displacement break -> confirmation-close entry.
+
+    No arrival timestamp means the ordering cannot be proved, so the sequence
+    fails closed.  Only 15m/5m confirmation is accepted for the current Desk
+    workflow; HTF structure cannot double as its own entry trigger.
+    """
+    arrived = _dt(arrival_time)
+    if arrived is None:
+        return {
+            "ready": False,
+            "waiting_for": "A recorded POI arrival before lower-timeframe confirmation can be evaluated.",
+        }
+
+    detector = evidence_pack.get("detector_candidates") or {}
+    context_minutes = {"1d": 1440, "4h": 240, "1h": 60, "15m": 15, "5m": 5}.get(
+        context_timeframe,
+        1440,
+    )
+    candidates = [
+        timeframe
+        for timeframe in ("15m", "5m")
+        if {"15m": 15, "5m": 5}[timeframe] < context_minutes
+        and isinstance(detector.get(timeframe), Mapping)
+    ]
+    if not candidates:
+        return {
+            "ready": False,
+            "waiting_for": "Closed 15m/5m evidence after POI arrival.",
+        }
+
+    wanted_side = "sell_side" if bias == "bullish" else "buy_side"
+    for timeframe in candidates:
+        payload = detector.get(timeframe) or {}
+        levels = {
+            str(item.get("object_id") or ""): str(
+                item.get("side") or (item.get("evidence") or {}).get("side") or ""
+            )
+            for item in payload.get("liquidity_levels") or []
+            if isinstance(item, Mapping)
+        }
+        sweeps: list[tuple[datetime, Mapping[str, Any]]] = []
+        for sweep in payload.get("sweeps") or []:
+            if not isinstance(sweep, Mapping):
+                continue
+            when = _dt(sweep.get("confirmed_at") or sweep.get("pivot_time"))
+            if when is None or when < arrived:
+                continue
+            evidence = sweep.get("evidence") if isinstance(sweep.get("evidence"), Mapping) else {}
+            level_id = str(
+                evidence.get("swept_level_id")
+                or sweep.get("swept_level_id")
+                or sweep.get("swept_liquidity_id")
+                or ""
+            )
+            side = str(sweep.get("side") or evidence.get("side") or levels.get(level_id) or "")
+            direction = str(sweep.get("direction") or "").lower()
+            if direction == bias or side == wanted_side:
+                sweeps.append((when, sweep))
+        if not sweeps:
+            continue
+        sweep_time, sweep = sorted(sweeps, key=lambda item: item[0])[0]
+        sweep_id = str(sweep.get("object_id") or "")
+
+        qualifying: list[tuple[datetime, Mapping[str, Any], float]] = []
+        for brk in payload.get("structure_breaks") or []:
+            if not isinstance(brk, Mapping):
+                continue
+            when = _dt(brk.get("confirmed_at"))
+            evidence = brk.get("evidence") if isinstance(brk.get("evidence"), Mapping) else {}
+            metadata = brk.get("metadata") if isinstance(brk.get("metadata"), Mapping) else {}
+            displacement = _f(
+                evidence.get("displacement_strength")
+                or (metadata.get("displacement") or {}).get("score")
+            )
+            if (
+                when is None
+                or when < sweep_time
+                or str(brk.get("direction") or "").lower() != bias
+                or evidence.get("is_unconfirmed_probe") is True
+                or displacement is None
+                or displacement < 0.45
+            ):
+                continue
+            broken_price = _f(evidence.get("broken_price"))
+            penetration = _f(evidence.get("body_close_penetration"))
+            if broken_price is None or penetration is None:
+                continue
+            entry_price = (
+                broken_price + penetration
+                if bias == "bullish"
+                else broken_price - penetration
+            )
+            qualifying.append((when, brk, entry_price))
+
+        if qualifying:
+            _, brk, entry_price = sorted(qualifying, key=lambda item: item[0])[0]
+            return {
+                "ready": True,
+                "timeframe": timeframe,
+                "sweep_id": sweep_id,
+                "break_id": str(brk.get("object_id") or ""),
+                "entry_price": entry_price,
+            }
+        return {
+            "ready": False,
+            "timeframe": timeframe,
+            "sweep_id": sweep_id,
+            "waiting_for": (
+                f"A {timeframe} displacement break in the {bias} direction after {sweep_id or 'the liquidity sweep'}."
+            ),
+        }
+
+    return {
+        "ready": False,
+        "timeframe": candidates[0],
+        "waiting_for": (
+            f"A {candidates[0]} {wanted_side.replace('_', '-')} liquidity sweep after POI arrival."
+        ),
+    }
 
 
 def diff_states(previous: MarketState | None, current: MarketState) -> StateTransition:

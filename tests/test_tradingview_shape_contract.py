@@ -1,24 +1,15 @@
-"""Tests binding the compiler to the MCP server's real shape vocabulary.
-
-The server (tradesdontlie/tradingview-mcp) exposes one drawing tool,
-``draw_shape``, accepting exactly four shapes: horizontal_line, trend_line,
-rectangle and text.
-
-This file exists because an earlier version of the compiler emitted
-``horizontal_ray``, ``path``, ``long_position`` and ``short_position`` -- none
-of which the server implements. Those payloads validated locally and would
-have drawn nothing: the run reports success and the chart stays empty, which
-is worse than an error.
-"""
+"""Bind the compiler to the installed MCP's versioned drawing contract."""
 from __future__ import annotations
 
 import pytest
 
 from smc_desk.rendering.tradingview_hcn_profile import (
+    MCP_CAPABILITY_CONTRACT,
     NATIVE_TOOL_MAP,
     SUPPORTED_SHAPES,
     compile_hcn_native_markup,
     flatten_draw_calls,
+    validate_mcp_capabilities,
 )
 
 
@@ -33,15 +24,39 @@ def _position(kind="long_position"):
             "stop_price": 100.0, "target_prices": [120.0]}
 
 
-# -- the vocabulary is exactly what the server implements ----------------------
+# -- the vocabulary is exactly what the bound profile has tested ---------------
 
 
 def test_supported_shapes_match_the_server():
-    assert SUPPORTED_SHAPES == {"horizontal_line", "trend_line", "rectangle", "text"}
+    assert SUPPORTED_SHAPES == {
+        "horizontal_line", "horizontal_ray", "trend_line", "rectangle", "text", "path",
+    }
+    assert MCP_CAPABILITY_CONTRACT["multipoint"] is True
+    assert MCP_CAPABILITY_CONTRACT["overrides_encoding"] == "json_string"
 
 
-def test_shapes_the_server_lacks_are_never_emitted():
-    """The exact bug this file exists for."""
+def test_compiler_fails_closed_when_live_capabilities_are_stale() -> None:
+    stale = {**MCP_CAPABILITY_CONTRACT, "shapes": ["rectangle", "text"]}
+    with pytest.raises(ValueError, match="missing required native shapes"):
+        compile_hcn_native_markup([_zone()], server_capabilities=stale)
+
+
+def test_compiler_fails_closed_on_wrong_server_or_cleanup_contract() -> None:
+    wrong_server = {**MCP_CAPABILITY_CONTRACT, "server_contract": "unknown_server"}
+    with pytest.raises(ValueError, match="server_contract"):
+        compile_hcn_native_markup([_zone()], server_capabilities=wrong_server)
+    unsafe_cleanup = {**MCP_CAPABILITY_CONTRACT, "targeted_remove_tool": "draw_clear"}
+    with pytest.raises(ValueError, match="targeted_remove_tool"):
+        compile_hcn_native_markup([_zone()], server_capabilities=unsafe_cleanup)
+
+
+def test_capability_handshake_normalizes_shape_order() -> None:
+    actual = {**MCP_CAPABILITY_CONTRACT, "shapes": list(reversed(MCP_CAPABILITY_CONTRACT["shapes"]))}
+    checked = validate_mcp_capabilities(actual)
+    assert checked["shapes"] == sorted(MCP_CAPABILITY_CONTRACT["shapes"])
+
+
+def test_all_emitted_shapes_are_inside_the_bound_capability_contract():
     plan = compile_hcn_native_markup([
         _zone(),
         {"kind": "liquidity", "label": "EQL", "time": 1_750_000_000, "price": 99.0},
@@ -49,14 +64,15 @@ def test_shapes_the_server_lacks_are_never_emitted():
          "time_start": 1_750_000_000, "time_end": 1_750_050_000, "price": 108.0},
     ])
     for call in flatten_draw_calls(plan):
-        assert call["shape"] in SUPPORTED_SHAPES, f"server cannot draw {call['shape']!r}"
+        shape = call["arguments"]["shape"]
+        assert shape in SUPPORTED_SHAPES, f"server cannot draw {shape!r}"
 
 
-def test_liquidity_is_a_horizontal_line_not_a_ray():
+def test_liquidity_is_a_native_horizontal_ray_from_its_evidence_time():
     plan = compile_hcn_native_markup([
         {"kind": "liquidity", "label": "EQL", "time": 1_750_000_000, "price": 99.0},
     ])
-    assert plan["drawings"][0]["shape"] == "horizontal_line"
+    assert plan["drawings"][0]["shape"] == "horizontal_ray"
 
 
 def test_structure_segment_is_a_trend_line():
@@ -68,7 +84,7 @@ def test_structure_segment_is_a_trend_line():
     assert plan["drawings"][0]["shape"] == "trend_line"
 
 
-# -- decomposition of concepts with no native shape ---------------------------
+# -- unprobed position concepts remain fail-honest composites -----------------
 
 
 def test_position_decomposes_into_risk_and_reward_boxes():
@@ -99,7 +115,7 @@ def test_short_position_geometry_is_mirrored():
     assert plan["drawings"][0]["semantic_kind"] == "short_position"
 
 
-def test_conditional_path_decomposes_into_connected_segments():
+def test_conditional_path_is_one_native_multipoint_path():
     plan = compile_hcn_native_markup([{
         "kind": "conditional_path", "label": "Draw to 4H high",
         "points": [
@@ -108,11 +124,10 @@ def test_conditional_path_decomposes_into_connected_segments():
             {"time": 1_750_100_000, "price": 110.0},
         ],
     }])
-    parts = plan["drawings"][0]["parts"]
-    assert len(parts) == 2, "three points make two segments"
-    assert all(part["shape"] == "trend_line" for part in parts)
-    # Segments must join end-to-end or the path reads as disconnected marks.
-    assert parts[0]["point2"] == parts[1]["point"]
+    drawing = plan["drawings"][0]
+    assert drawing["shape"] == "path"
+    assert len(drawing["points"]) == 3
+    assert plan["drawing_count"] == 1
 
 
 # -- flattening to individual draw_shape calls --------------------------------
@@ -123,7 +138,7 @@ def test_flatten_expands_composites_into_individual_calls():
     calls = flatten_draw_calls(plan)
     # one rectangle for the zone, plus three parts for the position
     assert len(calls) == 4
-    assert all("role" not in call for call in calls)
+    assert all(call["tool"] == "draw_shape" for call in calls)
     assert all(call["semantic_kind"] for call in calls)
 
 
@@ -133,13 +148,20 @@ def test_flatten_preserves_the_semantic_kind_of_each_part():
     assert {call["semantic_kind"] for call in calls} == {"long_position"}
 
 
+def test_flattened_arguments_match_the_mcp_string_encoding_contract():
+    call = flatten_draw_calls(compile_hcn_native_markup([_zone()]))[0]
+    assert isinstance(call["arguments"]["overrides"], str)
+    assert isinstance(call["arguments"]["options"], str)
+    assert "semantic_kind" not in call["arguments"]
+
+
 # -- the map is honest about what is native -----------------------------------
 
 
 def test_native_tool_map_marks_non_native_concepts():
     assert NATIVE_TOOL_MAP["order_block"] == "rectangle"
     assert "no native position tool" in NATIVE_TOOL_MAP["long_position"]
-    assert "segmented" in NATIVE_TOOL_MAP["conditional_path"]
+    assert NATIVE_TOOL_MAP["conditional_path"] == "path"
 
 
 def test_watch_only_still_refuses_positions():

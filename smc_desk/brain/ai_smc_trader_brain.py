@@ -295,6 +295,8 @@ class AnnotationDisplayGeometry(StrictModel):
         "confirmation_side_max_18_bars",
         "local_span_max_12_bars",
         "bounded_zone_legibility",
+        "context_zone_to_latest_visible_bar",
+        "active_range_to_latest_visible_bar",
         "conditional_projection",
         "legacy_unverified",
     ] = "none"
@@ -361,6 +363,21 @@ class AnnotationDrawingObject(StrictModel):
     evidence_contract_ids: list[str] = Field(default_factory=list)
     evidence_geometry: AnnotationEvidenceGeometry | None = None
     display_geometry: AnnotationDisplayGeometry | None = None
+    # A historical causal zone may be visually material after it loses control
+    # of the active setup.  These fields make that downgrade explicit; they do
+    # not relax evidence geometry, lifecycle, trade gating, or POI selection.
+    display_role: Literal[
+        "active_setup",
+        "context_only",
+        "superseded_context_poi",
+        "superseded_context_imbalance",
+        "superseded_context_structure",
+        "context_refinement",
+        "context_refinement_structure",
+    ] = "active_setup"
+    control_status: str = "controlling_or_not_applicable"
+    active_entry_authority: bool = False
+    context_requirement_id: str | None = None
     importance: int = Field(default=2, ge=1, le=3)
 
     @model_validator(mode="before")
@@ -457,6 +474,32 @@ class SelfReview(StrictModel):
     remaining_uncertainties: list[str] = Field(default_factory=list)
 
 
+class ContextExceptionRequest(StrictModel):
+    """AI request to retain a prequalified object as display-only context."""
+
+    schema_: Literal["ai_annotation_context_exception_request_v1"] = Field(
+        default="ai_annotation_context_exception_request_v1",
+        alias="schema",
+    )
+    request_id: str
+    requirement_id: str
+    evidence_object_ids: list[str]
+    requested_display_role: Literal["context_only"] = "context_only"
+    rationale: str
+    acknowledges_no_entry_authority: Literal[True] = True
+    acknowledges_no_bias_override: Literal[True] = True
+
+    @model_validator(mode="after")
+    def _non_empty_request(self) -> "ContextExceptionRequest":
+        if not self.request_id.strip() or not self.requirement_id.strip():
+            raise ValueError("context exception request_id and requirement_id cannot be blank")
+        if len(self.evidence_object_ids) != 1 or not self.evidence_object_ids[0].strip():
+            raise ValueError("context exception must cite exactly one sealed evidence object")
+        if not self.rationale.strip():
+            raise ValueError("context exception requires an evidence-based rationale")
+        return self
+
+
 class AISMCDecision(StrictModel):
     schema_: Literal["ai_smc_trader_decision_v1"] = Field(default="ai_smc_trader_decision_v1", alias="schema")
     symbol: str
@@ -476,6 +519,7 @@ class AISMCDecision(StrictModel):
     invalidation: InvalidationPlan
     annotation_plan: AnnotationPlan
     annotation_plan_v2: AnnotationPlanV2 | None = None
+    context_exception_requests: list[ContextExceptionRequest] = Field(default_factory=list)
     self_review: SelfReview = Field(default_factory=SelfReview)
     final_thesis: str
 

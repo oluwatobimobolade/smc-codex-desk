@@ -314,8 +314,11 @@ def test_a_decisive_candle_records_every_level_it_closed_through(btc):
         b for b in _confirmed_external(btc["confirmed"])
         if getattr(b.evidence, "levels_broken_by_candle", 0) > 1
     ]
+    # The deterministic unit test in test_wp0022_smc_detector_rebuild pins the
+    # multi-level delayed-confirmation case. This real-data guard asserts the
+    # field remains coherent whenever such an event appears in BTC history.
     for brk in swept:
-        assert brk.evidence.levels_broken_by_candle >= 1
+        assert brk.evidence.levels_broken_by_candle > 1
     # The field must exist on every break, so magnitude is always inspectable.
     for brk in _confirmed_external(btc["confirmed"]):
         assert hasattr(brk.evidence, "levels_broken_by_candle")

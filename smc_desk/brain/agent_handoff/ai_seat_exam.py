@@ -266,6 +266,10 @@ def apply_exam_downgrade(decision_payload: Mapping[str, Any], validation: Mappin
         "levels": [],
         "reasoning_order": list((payload.get("annotation_plan") or {}).get("reasoning_order") or []),
     }
+    # A failed exam cannot retain an AI-authored display exception. The
+    # deterministic context atlas may still render its mandatory objects, but
+    # that visibility is no longer attributed to the failed AI seat.
+    payload["context_exception_requests"] = []
     if payload.get("annotation_plan_v2") is not None:
         payload["annotation_plan_v2"] = {
             "schema": "professional_smc_annotation_plan_v2",

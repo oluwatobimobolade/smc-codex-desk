@@ -14,6 +14,7 @@ from typing import Any
 
 import pandas as pd
 
+from smc_desk.brain.annotation_context_authority import build_annotation_context_authority
 from smc_desk.decision.active_range_resolver import resolve_active_range_authority
 from smc_desk.perception.causal_poi_authority import build_causal_poi_authority
 from smc_desk.perception.formal_causal_episode_graph import build_formal_causal_episode_graph
@@ -65,11 +66,13 @@ def build_smc_evidence_pack(
     ohlcv_summaries: dict[str, Any] = {}
     ohlcv_windows: dict[str, Any] = {}
     dataframe_hashes: dict[str, str] = {}
+    normalized_dfs: dict[str, pd.DataFrame] = {}
 
     for timeframe, df in timeframe_dfs.items():
         if df.empty:
             raise ValueError(f"{timeframe} dataframe is empty")
         normalized = _normalize_df(df)
+        normalized_dfs[timeframe] = normalized
         ohlcv_summaries[timeframe] = _summarize_df(normalized, timeframe=timeframe)
         ohlcv_windows[timeframe] = _tail_records(normalized, max_candles_per_timeframe)
         dataframe_hashes[timeframe] = _hash_dataframe(normalized)
@@ -175,6 +178,22 @@ def build_smc_evidence_pack(
             "paper_execution": "disabled",
         },
     }
+    # Entry authority and chart context are intentionally separate.  The
+    # active causal selector may reject an old opposing origin after a later
+    # external break, while a trader still needs that causally proven zone on
+    # the native chart.  Build the context atlas only from accepted structure
+    # and admitted detector lineage, then expand sealed windows just enough to
+    # make every mandatory context anchor reconstructable.
+    pack["annotation_context_authority"] = build_annotation_context_authority(pack)
+    _expand_annotation_context_windows(
+        pack=pack,
+        normalized_dfs=normalized_dfs,
+        base_max_rows=max_candles_per_timeframe,
+    )
+    pack["structural_significance"] = _significance_report(
+        candidate_manifest,
+        pack["ohlcv_windows"],
+    )
     # Derived last so it can read the assembled graph, significance report and
     # POI authority in one place. Observe-only: it describes where the setup
     # has got to and what is still missing, and grants no execution authority.
@@ -184,24 +203,104 @@ def build_smc_evidence_pack(
     return pack
 
 
+def _expand_annotation_context_windows(
+    *,
+    pack: dict[str, Any],
+    normalized_dfs: Mapping[str, pd.DataFrame],
+    base_max_rows: int,
+) -> None:
+    """Expand only native windows needed by the material-context contract.
+
+    The newest candle always stays present.  A hard 720-row ceiling prevents a
+    very old zone from silently turning every AI packet into a full-history
+    dump; anything older remains a visible REVIEW_REQUIRED coverage failure.
+    """
+    authority = pack.get("annotation_context_authority")
+    if not isinstance(authority, dict):
+        return
+    window_requirements = authority.get("window_requirements") or {}
+    earliest = window_requirements.get("earliest_required_time_by_timeframe") or {}
+    maximum = int(window_requirements.get("maximum_context_rows_per_timeframe") or 720)
+    padding = int(window_requirements.get("pre_anchor_padding_bars") or 8)
+    windows = pack.get("ohlcv_windows")
+    if not isinstance(windows, dict):
+        return
+
+    resolution: dict[str, Any] = {}
+    for timeframe, raw_time in earliest.items() if isinstance(earliest, Mapping) else []:
+        df = normalized_dfs.get(str(timeframe))
+        if df is None or df.empty:
+            resolution[str(timeframe)] = {
+                "status": "SOURCE_TIMEFRAME_UNAVAILABLE",
+                "required_start_time": raw_time,
+                "base_rows": base_max_rows,
+                "sealed_rows": 0,
+            }
+            continue
+        target = pd.Timestamp(raw_time)
+        if target.tzinfo is None:
+            target = target.tz_localize("UTC")
+        else:
+            target = target.tz_convert("UTC")
+        positions = df.index[df["timestamp"] >= target].tolist()
+        anchor_position = int(positions[0]) if positions else len(df) - 1
+        start_position = max(0, anchor_position - padding)
+        rows_required = len(df) - start_position
+        sealed_rows = max(int(base_max_rows), min(rows_required, maximum))
+        windows[str(timeframe)] = _tail_records(df, sealed_rows)
+        first_timestamp = str(windows[str(timeframe)][0]["timestamp"]) if windows[str(timeframe)] else None
+        target_visible = bool(first_timestamp and pd.Timestamp(first_timestamp) <= target)
+        resolution[str(timeframe)] = {
+            "status": "EXPANDED_AND_VISIBLE" if target_visible else "OUTSIDE_MAXIMUM_CONTEXT_WINDOW",
+            "required_start_time": str(raw_time),
+            "base_rows": int(base_max_rows),
+            "rows_required": rows_required,
+            "sealed_rows": len(windows[str(timeframe)]),
+            "maximum_rows": maximum,
+            "first_sealed_timestamp": first_timestamp,
+            "last_sealed_timestamp": str(windows[str(timeframe)][-1]["timestamp"]) if windows[str(timeframe)] else None,
+        }
+
+    for requirement in authority.get("requirements", []) or []:
+        if not isinstance(requirement, dict):
+            continue
+        timeframe = str(requirement.get("timeframe") or "")
+        tf_resolution = resolution.get(timeframe)
+        if tf_resolution is None:
+            candles = windows.get(timeframe) or []
+            start = requirement.get("required_start_time")
+            visible = bool(
+                candles
+                and start
+                and pd.Timestamp(candles[0]["timestamp"]) <= pd.Timestamp(start) <= pd.Timestamp(candles[-1]["timestamp"])
+            )
+            requirement["window_status"] = "VISIBLE_IN_BASE_WINDOW" if visible else "OUTSIDE_BASE_WINDOW"
+        else:
+            requirement["window_status"] = (
+                "VISIBLE_IN_EXPANDED_WINDOW"
+                if tf_resolution.get("status") == "EXPANDED_AND_VISIBLE"
+                else str(tf_resolution.get("status") or "UNRESOLVED")
+            )
+    authority["window_resolution"] = resolution
+
+
 def _market_state(pack: Mapping[str, Any]) -> dict[str, Any]:
     """Run the trader confirmation sequence over the assembled evidence."""
     try:
         from smc_desk.perception.market_state import build_market_state
         from smc_desk.perception.liquidity_model import collect_liquidity_evidence
         from smc_desk.perception.narrative_hierarchy import select_primary_poi, read_narrative
+        from smc_desk.perception.poi_contract import canonicalize_poi_candidate
+        from smc_desk.perception.poi_quality import rank_pois, score_poi
 
         graph = pack.get("formal_structure_graph") or {}
         narrative_payload = graph.get("narrative_context") or {}
 
-        # Collect POI candidates from the causal authority, which already
-        # assigns structural roles. Both scenarios are offered; the narrative
-        # picks the one aligned with context.
-        #
-        # Every POI each scenario carries is offered, not just the one it
-        # nominated. Taking only `primary_causal_poi` meant the ranking below
-        # could never overturn an upstream choice -- it would rank a field of
-        # one. The secondaries are the field.
+        # Collect the causal-authority field for the legacy fallback below and
+        # for descriptive comparisons.  Production ownership is stricter:
+        # causal_poi_authority chooses the primary; the uncalibrated quality
+        # scorer may explain that choice and order alternates, but may not
+        # silently replace it with a secondary reaction candidate.
         candidates: list[Mapping[str, Any]] = []
         seen_poi_ids: set[str] = set()
         scenarios = (pack.get("causal_poi_authority") or {}).get("scenarios")
@@ -216,11 +315,15 @@ def _market_state(pack: Mapping[str, Any]) -> dict[str, Any]:
                 for poi in offered:
                     if not isinstance(poi, Mapping):
                         continue
-                    poi_id = str(poi.get("object_id") or "")
+                    canonical = canonicalize_poi_candidate(
+                        poi,
+                        fallback_direction=str(direction),
+                    )
+                    poi_id = str(canonical.get("object_id") or "")
                     if not poi_id or poi_id in seen_poi_ids:
                         continue
                     seen_poi_ids.add(poi_id)
-                    candidates.append({**poi, "direction": poi.get("direction") or direction})
+                    candidates.append(canonical)
 
         primary_poi = None
         if candidates and narrative_payload.get("is_coherent"):
@@ -235,15 +338,67 @@ def _market_state(pack: Mapping[str, Any]) -> dict[str, Any]:
                 swept_object_ids=swept_ids,
             )
             active_range = graph.get("active_range") or {}
-            primary_poi = select_primary_poi(
-                narrative=narrative,
-                poi_candidates=candidates,
-                # The resolved dealing range, so premium/discount is measured
-                # against the range price is actually trading in rather than
-                # against whatever extremes happen to sit in the window.
-                equilibrium=_coerce_float(active_range.get("equilibrium")),
-                current_price=_coerce_float(active_range.get("current_price")),
+            equilibrium = _coerce_float(active_range.get("equilibrium"))
+            current_price = _coerce_float(active_range.get("current_price"))
+            aligned_scenario = (
+                scenarios.get(narrative.context_bias)
+                if isinstance(scenarios, Mapping)
+                else None
             )
+            authority_primary = (
+                aligned_scenario.get("primary_causal_poi")
+                if isinstance(aligned_scenario, Mapping)
+                else None
+            )
+            if isinstance(authority_primary, Mapping):
+                canonical_primary = canonicalize_poi_candidate(
+                    authority_primary,
+                    fallback_direction=narrative.context_bias,
+                )
+                # Fail closed: a scenario object must still satisfy the shared
+                # causal and lifecycle contract at the consumer boundary.
+                if (
+                    canonical_primary.get("direction") == narrative.context_bias
+                    and canonical_primary.get("causal_eligible") is True
+                    and canonical_primary.get("is_spent") is not True
+                ):
+                    primary_poi = dict(canonical_primary)
+                    score = score_poi(
+                        primary_poi,
+                        equilibrium=equilibrium,
+                        current_price=current_price,
+                    )
+                    secondary_candidates = [
+                        candidate
+                        for candidate in candidates
+                        if candidate.get("object_id") != primary_poi.get("object_id")
+                        and candidate.get("direction") == narrative.context_bias
+                    ]
+                    alternates = rank_pois(
+                        secondary_candidates,
+                        equilibrium=equilibrium,
+                        current_price=current_price,
+                    )
+                    primary_poi["selection_authority"] = "causal_poi_authority_v1"
+                    primary_poi["selection_reason"] = (
+                        str(authority_primary.get("primary_reason") or "")
+                        or "Selected by explicit causal-lineage authority."
+                    )
+                    primary_poi["quality_score"] = score.score if score else None
+                    primary_poi["quality_factors"] = score.to_dict() if score else None
+                    primary_poi["alternates"] = [item.object_id for item in alternates]
+                    primary_poi["ranked_alternates"] = [item.to_dict() for item in alternates]
+
+            # Backward-compatible path for legacy/synthetic packs that have no
+            # canonical causal primary. It stays observe-only and cannot run
+            # when an authority object exists but fails the shared contract.
+            if primary_poi is None and not isinstance(authority_primary, Mapping):
+                primary_poi = select_primary_poi(
+                    narrative=narrative,
+                    poi_candidates=candidates,
+                    equilibrium=equilibrium,
+                    current_price=current_price,
+                )
 
         return build_market_state(evidence_pack=pack, primary_poi=primary_poi).to_dict()
     except Exception as exc:  # noqa: BLE001 -- descriptive layer, never fatal

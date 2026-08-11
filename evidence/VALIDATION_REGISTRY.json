@@ -9,9 +9,9 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-13-POI-VISIBILITY-20260809",
-    "work_package": "WP-SMC-13-POI-VISIBILITY-AND-RANKING",
-    "gate": "GATE-WP-SMC-13-POI-VISIBILITY-001"
+    "record_id": "WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-R2-20260810",
+    "work_package": "WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR",
+    "gate": "GATE-WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-001"
   },
   "records": [
     {
@@ -744,6 +744,450 @@
         "Emitting 11 order blocks where 2 were emitted is a visibility change, not an accuracy claim.",
         "Whether the ranking selects what a trader would select is unmeasured until the markup cohort is populated.",
         "No perception accuracy, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-14-POI-CONTRACT-NATIVE-MARKUP-20260809",
+      "work_package": "WP-SMC-14-POI-CONTRACT-AND-NATIVE-MARKUP-REPAIR",
+      "gate": "GATE-WP-SMC-14-POI-CONTRACT-NATIVE-MARKUP-001",
+      "date": "2026-08-09",
+      "recorded_at": "2026-08-09T12:00:00Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_EMPIRICAL_CERTIFICATION_UNCHANGED",
+      "source": {
+        "git_head": "922eba9293dd9c544b506f76b36541f38dcc9b0b",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-14-POI-CONTRACT-AND-NATIVE-MARKUP-REPAIR/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "f7085479d0b0116b358758b7db3d5a11d38c22dd85576e9c1bf0987c121c6ea2",
+        "external_tradingview_mcp_manifest": "governance/WORK_PACKAGES/WP-SMC-14-POI-CONTRACT-AND-NATIVE-MARKUP-REPAIR/TRADINGVIEW_MCP_EXTERNAL_SOURCE_MANIFEST.tsv"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_wp0022_smc_detector_rebuild.py tests/test_causal_poi_authority.py tests/test_poi_contract_integration.py tests/perception/test_poi_quality.py",
+          "exit_code": 0,
+          "summary": "50 passed in 0.83s"
+        },
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_poi_contract_integration.py tests/test_market_state.py tests/test_narrative_hierarchy.py tests/test_smc_narrative_authority_selects_one_model.py tests/test_wp0031_narrative_and_charts.py",
+          "exit_code": 0,
+          "summary": "63 passed in 1.31s"
+        },
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_tradingview_hcn_profile.py tests/test_tradingview_shape_contract.py tests/test_smc_visual_grammar.py tests/test_smc_annotation_correctness.py",
+          "exit_code": 0,
+          "summary": "42 passed in 4.12s"
+        },
+        {
+          "command": "node --test tests/drawing-capabilities.test.js tests/sanitization.test.js && npm run lint (in /Users/tobimobolade/tools/tradingview-mcp)",
+          "exit_code": 0,
+          "summary": "72 passed; ESLint 0 errors and 4 pre-existing warnings"
+        },
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1348 passed, 1 skipped in 448.47s (0:07:28)"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py && .venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS; 130 files scanned and no governance inconsistency"
+        }
+      ],
+      "primary_result": "1348 passed, 1 skipped in 448.47s (0:07:28)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-14-POI-CONTRACT-AND-NATIVE-MARKUP-REPAIR/README.md",
+      "authority_mode": "deterministic_poi_and_native_markup_repair_observe_only",
+      "limitations": [
+        "The POI quality weights are reasoned defaults and have not been calibrated against independent human markup.",
+        "Offline TradingView MCP contract tests do not prove live availability until the attached signed-in instance returns the matching capability record.",
+        "The signed-in TradingView instance was not restarted or duplicated for validation.",
+        "Forex and CADJPY remain outside certified scope.",
+        "WP-SMC-13 remains the independent analyst-selected development cohort; this repair does not satisfy that empirical gate.",
+        "No perception accuracy, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-14-POI-CONTRACT-NATIVE-MARKUP-R2-20260809",
+      "work_package": "WP-SMC-14-POI-CONTRACT-AND-NATIVE-MARKUP-REPAIR",
+      "gate": "GATE-WP-SMC-14-POI-CONTRACT-NATIVE-MARKUP-001",
+      "date": "2026-08-09",
+      "recorded_at": "2026-08-09T17:15:52Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_EMPIRICAL_CERTIFICATION_UNCHANGED",
+      "source": {
+        "git_head": "922eba9293dd9c544b506f76b36541f38dcc9b0b",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-14-POI-CONTRACT-AND-NATIVE-MARKUP-REPAIR/SOURCE_MANIFEST_R2.tsv",
+        "source_manifest_sha256": "e9d8ba1024788c958f519a03634f1708d3dd0119c75065e2947e5f796081ee60",
+        "external_tradingview_mcp_manifest": "governance/WORK_PACKAGES/WP-SMC-14-POI-CONTRACT-AND-NATIVE-MARKUP-REPAIR/TRADINGVIEW_MCP_EXTERNAL_SOURCE_MANIFEST.tsv"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_narrative_annotation_planner.py tests/test_structure_lab_annotation_bridge.py tests/test_wp0041_professional_annotation_planner.py tests/test_wp0041a_annotation_integrity_repair.py tests/test_wp0041b_ai_annotation_render_loop.py tests/test_smc_annotation_correctness.py",
+          "exit_code": 0,
+          "summary": "47 passed in 3.01s"
+        },
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1350 passed, 1 skipped in 375.46s (0:06:15)"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py && .venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS; 130 files scanned and no governance inconsistency"
+        },
+        {
+          "command": "node --test tests/drawing-capabilities.test.js tests/sanitization.test.js && npm run lint (in /Users/tobimobolade/tools/tradingview-mcp)",
+          "exit_code": 0,
+          "summary": "72 passed; ESLint 0 errors and 4 pre-existing warnings"
+        },
+        {
+          "command": "annotate_pair.py CADJPY post-gap 1889-row forex_5d diagnostic",
+          "exit_code": 0,
+          "summary": "PASS; 9 semantic objects, deterministic geometry PASS, 3/3 pixel reviews PASS"
+        }
+      ],
+      "diagnostics": [
+        {
+          "command": "annotate_pair.py CADJPY full 3000-row forex_5d source",
+          "outcome": "EXPECTED_FAIL_CLOSED",
+          "reason": "unexplained two-hour midweek source gap on 2026-04-20"
+        }
+      ],
+      "primary_result": "1350 passed, 1 skipped in 375.46s (0:06:15)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-14-POI-CONTRACT-AND-NATIVE-MARKUP-REPAIR/README.md",
+      "authority_mode": "deterministic_poi_and_native_markup_repair_observe_only",
+      "limitations": [
+        "The POI quality weights are reasoned defaults and have not been calibrated against independent human markup.",
+        "Offline TradingView MCP contract tests do not prove live availability until the attached signed-in instance returns the matching capability record.",
+        "The signed-in TradingView instance was not restarted or duplicated for validation.",
+        "The CADJPY result uses a clean post-gap source segment and remains diagnostic outside certified scope.",
+        "WP-SMC-13 remains the independent analyst-selected development cohort; this repair does not satisfy that empirical gate.",
+        "No perception accuracy, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-15-EURJPY-FULL-SYSTEM-ANNOTATION-20260809",
+      "work_package": "WP-SMC-15-EURJPY-FULL-SYSTEM-ANNOTATION-REPAIR",
+      "gate": "GATE-WP-SMC-15-EURJPY-FULL-SYSTEM-ANNOTATION-001",
+      "date": "2026-08-09",
+      "recorded_at": "2026-08-09T18:47:18Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_FOREX_CERTIFICATION_UNCHANGED",
+      "source": {
+        "git_head": "922eba9293dd9c544b506f76b36541f38dcc9b0b",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 41,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-15-EURJPY-FULL-SYSTEM-ANNOTATION-REPAIR/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "e91a5cf70c03929f9d598ad1ba516b45fa9a9aa241a1a6f96898c59e6af3eeaa"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_clean_mtf_chart_pack_windows.py tests/test_wp0037_active_range_authority.py tests/test_wp0038_avax_eurnzd_repairs.py tests/test_causal_poi_authority.py tests/test_market_state.py tests/test_native_mtf_story_pack.py",
+          "exit_code": 0,
+          "summary": "72 passed in 19.83s"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS; 130 files scanned"
+        },
+        {
+          "command": "run_live_ai_smc_full_system.py --symbols EURJPY",
+          "exit_code": 0,
+          "summary": "REVIEW_REQUIRED by design; D1/4H/1H/15M rendered; deterministic storyboard validation PASS"
+        }
+      ],
+      "diagnostics": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "outcome": "1357 passed, 1 skipped, 1 governance-only failure before source rebind",
+          "reason": "The prior WP-SMC-14 source manifest correctly detected four files changed by WP-SMC-15."
+        }
+      ],
+      "primary_result": "72 focused tests passed; EURJPY full-system run completed fail-closed",
+      "report": "governance/WORK_PACKAGES/WP-SMC-15-EURJPY-FULL-SYSTEM-ANNOTATION-REPAIR/README.md",
+      "authority_mode": "eurjpy_full_system_annotation_diagnostic_observe_only",
+      "limitations": [
+        "EURJPY and forex remain outside the certified BTCUSDT/Binance-USDM scope.",
+        "Yahoo EURJPY spot data is a chart proxy and not executable broker truth.",
+        "The diagnostic used completed market data through 2026-08-07 while the market was closed.",
+        "Deterministic bitmap review does not replace human semantic chart review.",
+        "Native TradingView Desktop markup was not attempted because the detected process used the prohibited isolated audit profile.",
+        "No perception accuracy, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-16-AUDNZD-CAUSAL-ORIGIN-NATIVE-POI-20260809",
+      "work_package": "WP-SMC-16-AUDNZD-CAUSAL-ORIGIN-AND-NATIVE-POI-REPAIR",
+      "gate": "GATE-WP-SMC-16-AUDNZD-CAUSAL-ORIGIN-NATIVE-POI-001",
+      "date": "2026-08-09",
+      "recorded_at": "2026-08-09T19:05:13Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_FOREX_CERTIFICATION_UNCHANGED",
+      "source": {
+        "git_head": "922eba9293dd9c544b506f76b36541f38dcc9b0b",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 42,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-16-AUDNZD-CAUSAL-ORIGIN-AND-NATIVE-POI-REPAIR/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "a920c80fa0471daf058adbd4a7b03805e5208e2f00eb39c4853ba90437846f5f"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_causal_poi_authority.py tests/test_poi_contract_integration.py tests/test_market_state.py tests/test_native_mtf_story_pack.py tests/test_narrative_annotation_planner.py tests/test_active_poi_must_be_inside_protected_range.py tests/test_btc_rejects_far_supply_above_protected_high.py tests/test_wp0022_smc_detector_rebuild.py tests/test_perception_quality_guardrails.py tests/perception/test_poi_quality.py",
+          "exit_code": 0,
+          "summary": "118 passed in 1.44s"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS; 130 files scanned"
+        },
+        {
+          "command": "run_live_ai_smc_full_system.py --symbols AUDNZD",
+          "exit_code": 0,
+          "summary": "REVIEW_REQUIRED by design; exact 4H causal scenario OB selected; D1/4H/1H/15M deterministic storyboards rendered"
+        }
+      ],
+      "primary_result": "118 focused tests passed; AUDNZD causal scenario POI and native annotation corrected",
+      "report": "governance/WORK_PACKAGES/WP-SMC-16-AUDNZD-CAUSAL-ORIGIN-AND-NATIVE-POI-REPAIR/README.md",
+      "authority_mode": "audnzd_causal_origin_and_native_poi_repair_observe_only",
+      "limitations": [
+        "AUDNZD and forex remain outside the certified BTCUSDT/Binance-USDM scope.",
+        "Yahoo AUDNZD spot data is a chart proxy and not executable broker truth.",
+        "Causal origin ownership does not guarantee a future reaction.",
+        "The selected straddled origin has causal-scenario authority only and explicitly has no active-entry authority.",
+        "Deterministic bitmap review does not replace human semantic chart review.",
+        "Native TradingView Desktop markup was not attempted because the detected process used the prohibited isolated audit profile.",
+        "No perception accuracy, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-20260810",
+      "work_package": "WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-REPAIR",
+      "gate": "GATE-WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-001",
+      "date": "2026-08-10",
+      "recorded_at": "2026-08-10T08:20:39Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_EMPIRICAL_CERTIFICATION_UNCHANGED",
+      "source": {
+        "git_head": "922eba9293dd9c544b506f76b36541f38dcc9b0b",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 56,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-REPAIR/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "29ad2e1f8142c39f4c4d56f43a50d80381980ececddb52072d98abc7c628ea71"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_annotation_context_authority.py tests/test_native_mtf_story_pack.py tests/test_wp0037_external_agent_handoff.py tests/test_wp0041b_ai_annotation_render_loop.py tests/test_wp0041a_annotation_integrity_repair.py tests/test_wp0041_professional_annotation_planner.py",
+          "exit_code": 0,
+          "summary": "49 passed in 6.03s"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS; 131 files scanned"
+        },
+        {
+          "command": "frozen HYPEUSDT context-authority replay and native render",
+          "exit_code": 0,
+          "summary": "4H required context rendered; six visible objects; visual critic and deterministic bitmap PASS; no trade box"
+        }
+      ],
+      "diagnostics": [
+        {
+          "command": ".venv/bin/python -m pytest -q before WP-SMC-17 source rebind",
+          "outcome": "1368 passed, 1 skipped, 1 governance-only failure",
+          "reason": "The prior WP-SMC-16 manifest correctly detected three files changed by WP-SMC-17."
+        },
+        {
+          "command": "run_live_ai_smc_full_system.py --symbols HYPEUSDT",
+          "outcome": "DATA_PROVIDER_UNAVAILABLE",
+          "reason": "DNS resolution for fapi.binance.com failed; no live-data conclusion was manufactured."
+        }
+      ],
+      "primary_result": "49 focused tests passed; HYPEUSDT material context retained without active-entry authority",
+      "report": "governance/WORK_PACKAGES/WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-REPAIR/README.md",
+      "authority_mode": "hypeusdt_context_visibility_repair_observe_only",
+      "limitations": [
+        "The frozen replay cannot reconstruct the older 1H refinement because the prior packet sealed only 120 1H candles.",
+        "Fresh Binance HYPEUSDT retrieval was unavailable because DNS resolution failed.",
+        "HYPEUSDT remains outside the certified initial BTCUSDT scope.",
+        "Context visibility cannot alter bias, active POI, entry, stop, target, RR, or trade state.",
+        "The geometric 59.716-60.311 base remains omitted because it is not the nearest admitted causal origin.",
+        "Deterministic bitmap review does not replace independent human semantic chart review.",
+        "No perception accuracy, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-R2-20260810",
+      "work_package": "WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-REPAIR",
+      "gate": "GATE-WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-001",
+      "date": "2026-08-10",
+      "recorded_at": "2026-08-10T08:33:15Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_EMPIRICAL_CERTIFICATION_UNCHANGED",
+      "source": {
+        "git_head": "922eba9293dd9c544b506f76b36541f38dcc9b0b",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 56,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-REPAIR/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "29ad2e1f8142c39f4c4d56f43a50d80381980ececddb52072d98abc7c628ea71"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1369 passed, 1 skipped in 668.40s (0:11:08)"
+        },
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_annotation_context_authority.py tests/test_native_mtf_story_pack.py tests/test_wp0037_external_agent_handoff.py tests/test_wp0041b_ai_annotation_render_loop.py tests/test_wp0041a_annotation_integrity_repair.py tests/test_wp0041_professional_annotation_planner.py",
+          "exit_code": 0,
+          "summary": "49 passed in 6.03s"
+        },
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_wp0044_governance_reconciliation.py",
+          "exit_code": 0,
+          "summary": "12 passed in 0.20s"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && git diff --check",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py && .venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS; 131 files scanned and no governance inconsistency"
+        },
+        {
+          "command": "frozen HYPEUSDT context-authority replay and native render",
+          "exit_code": 0,
+          "summary": "4H required context rendered; six visible objects; visual critic and deterministic bitmap PASS; no trade box"
+        }
+      ],
+      "primary_result": "1369 passed, 1 skipped in 668.40s; HYPEUSDT material context retained without active-entry authority",
+      "report": "governance/WORK_PACKAGES/WP-SMC-17-HYPEUSDT-CONTEXT-AUTHORITY-REPAIR/README.md",
+      "authority_mode": "hypeusdt_context_visibility_repair_observe_only",
+      "limitations": [
+        "The frozen replay cannot reconstruct the older 1H refinement because the prior packet sealed only 120 1H candles.",
+        "Fresh Binance HYPEUSDT retrieval was unavailable because DNS resolution failed.",
+        "HYPEUSDT remains outside the certified initial BTCUSDT scope.",
+        "Context visibility cannot alter bias, active POI, entry, stop, target, RR, or trade state.",
+        "The geometric 59.716-60.311 base remains omitted because it is not the nearest admitted causal origin.",
+        "Deterministic bitmap review does not replace independent human semantic chart review.",
+        "No perception accuracy, predictive edge, signal, paper, live, or execution authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-R1-20260810",
+      "work_package": "WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR",
+      "gate": "GATE-WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-001",
+      "date": "2026-08-10",
+      "recorded_at": "2026-08-10T12:24:15Z",
+      "status": "IMPLEMENTED_LOCAL_OBSERVE_ONLY_GOVERNANCE_REBIND_PENDING",
+      "source": {
+        "git_head": "922eba9293dd9c544b506f76b36541f38dcc9b0b",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 61,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "8f7c7337b3c6cd1a07eb13d579ae6f5d9b92d5242fe8041ff6cc24acc05a2632"
+      },
+      "commands": [
+        {
+          "command": "env PYTHONPATH=/Users/tobimobolade/smc-codex-desk .venv/bin/pytest -q",
+          "exit_code": 1,
+          "summary": "1377 passed, 1 skipped, 1 governance-only source-manifest mismatch before WP-SMC-18 rebind; no behavioral failures"
+        },
+        {
+          "command": "WP-0036 live acceptance gauntlet --symbols ETHUSDT",
+          "exit_code": 0,
+          "summary": "12 of 12 checkpoints PASS"
+        },
+        {
+          "command": "focused context, geometry, native renderer and annotation compatibility ring",
+          "exit_code": 0,
+          "summary": "50 passed"
+        }
+      ],
+      "primary_result": "Fresh ETHUSDT full-system run completed; REVIEW_REQUIRED / no trade; governance source rebind pending",
+      "report": "governance/WORK_PACKAGES/WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR/README.md",
+      "authority_mode": "ethusdt_fresh_full_system_observe_only_annotation_repair",
+      "limitations": [
+        "ETHUSDT remains outside the certified initial BTCUSDT scope.",
+        "The built-in provider is local deterministic; independent Codex semantic review is recorded separately.",
+        "The V1/V3 reconciliation issue remains fail-closed and no active POI was selected.",
+        "Context visibility and dealing-range display cannot alter bias, entry, stop, target, RR, trade state, paper authority, or live authority.",
+        "No perception accuracy, predictive edge, signal, execution, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-R2-20260810",
+      "work_package": "WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR",
+      "gate": "GATE-WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-001",
+      "date": "2026-08-10",
+      "recorded_at": "2026-08-10T12:35:40.168957+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "922eba9293dd9c544b506f76b36541f38dcc9b0b",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 61,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "8f7c7337b3c6cd1a07eb13d579ae6f5d9b92d5242fe8041ff6cc24acc05a2632"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1378 passed, 1 skipped in 613.31s (0:10:13)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1378 passed, 1 skipped in 613.31s (0:10:13)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR/README.md",
+      "authority_mode": "ethusdt_fresh_full_system_observe_only_annotation_repair",
+      "limitations": [
+        "ETHUSDT remains outside the certified initial BTCUSDT scope.",
+        "The built-in provider is local deterministic; independent Codex semantic review is recorded separately.",
+        "The V1/V3 reconciliation issue remains fail-closed and no active POI was selected.",
+        "Context visibility and dealing-range display cannot alter bias, entry, stop, target, RR, trade state, paper authority, or live authority.",
+        "No perception accuracy, predictive edge, signal, execution, or profitability claim is created."
       ]
     }
   ]

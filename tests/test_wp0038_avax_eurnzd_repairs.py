@@ -13,7 +13,11 @@ from smc_desk.brain.ai_smc_trader_brain import REASONING_ORDER, parse_ai_smc_dec
 from smc_desk.brain.llm_provider import CallableAISMCProvider, LLMCompletionRequest
 from smc_desk.brain.smc_evidence_pack_builder import build_smc_evidence_pack
 from smc_desk.colleague.orchestrator_v3 import _run_perception_candidates, run_ai_smc_orchestrator_v3
-from smc_desk.colleague.smc_thesis_ai_v1 import build_smc_thesis_ai_v1, render_smc_thesis_ai_v1_markdown
+from smc_desk.colleague.smc_thesis_ai_v1 import (
+    _narrative_context,
+    build_smc_thesis_ai_v1,
+    render_smc_thesis_ai_v1_markdown,
+)
 from smc_desk.data.historical_backfill import DEFAULT_MINIMUM_DEPTH, FOREX_MINIMUM_DEPTH, build_context_depth_report
 from smc_desk.gauntlet.wp0035_ai_brain_gauntlet import run_wp0035_ai_brain_gauntlet
 from smc_desk.rendering.smc_trader_annotation_renderer import _assign_level_label_positions
@@ -379,6 +383,36 @@ def test_live_conservative_provider_does_not_let_active_range_override_htf_bias(
     assert any(issue.code == "direction_conflicts_with_active_range" and issue.severity == "warning" for issue in result.issues)
 
 
+def test_live_provider_downgrades_direction_when_causal_replay_disagrees():
+    module = _tool_module("run_live_ai_smc_full_system")
+
+    class Request:
+        evidence_pack = {
+            "symbol": "EURJPY",
+            "ohlcv_summaries": {
+                timeframe: {"first_open": 185.0, "last_close": 182.0, "high": 188.0, "low": 179.0}
+                for timeframe in ("15m", "1h", "4h", "1d")
+            },
+            "active_range_authority": {"selected_range": None},
+            "formal_causal_episode_graph": {
+                "schema": "formal_causal_episode_graph_v2",
+                "authority_contract": {"enforcement_ready": True},
+                "invariants": {
+                    "status": "REVIEW_REQUIRED",
+                    "violations": ["1d_v1_controlling_external_break_survives_v3"],
+                },
+                "current_story": {},
+            },
+        }
+
+    payload = module.build_conservative_ai_payload(Request(), {"source": "test"})
+
+    assert payload["official_state"] == "REVIEW_REQUIRED"
+    assert payload["direction"] == "mixed"
+    assert payload["bias_summary"]["final_bias"] == "mixed"
+    assert payload["active_poi"]["poi_id"] is None
+
+
 def test_live_provider_preserves_bullish_external_structure_with_internal_pullback():
     module = _tool_module("run_live_ai_smc_full_system")
 
@@ -489,7 +523,7 @@ def test_live_provider_preserves_bullish_external_structure_with_internal_pullba
     assert result.status == "VALIDATED"
 
 
-def test_forex_perception_trims_known_session_gaps_without_disabling_crypto_gap_guard():
+def test_forex_perception_accepts_weekend_closure_without_discarding_context():
     before_gap = pd.DataFrame(
         {
             "timestamp": pd.date_range("2026-06-26 20:00", periods=4, freq="15min", tz="UTC"),
@@ -506,13 +540,105 @@ def test_forex_perception_trims_known_session_gaps_without_disabling_crypto_gap_
 
     _, forex_report = _run_perception_candidates(symbol="EURNZD", timeframe_dfs={"15m": gapped})
     assert forex_report["timeframes"]["15m"]["status"] == "PASS"
-    assert forex_report["timeframes"]["15m"]["session_gap_trimmed"] is True
-    assert forex_report["timeframes"]["15m"]["rows_after_trim"] == 60
+    assert forex_report["timeframes"]["15m"]["session_profile"] == "forex_5d"
+    assert forex_report["timeframes"]["15m"]["session_gap_trimmed"] is False
+    assert forex_report["timeframes"]["15m"]["rows_analyzed"] == len(gapped)
 
     _, gold_report = _run_perception_candidates(symbol="XAUUSD", timeframe_dfs={"15m": gapped})
     assert gold_report["timeframes"]["15m"]["status"] == "PASS"
-    assert gold_report["timeframes"]["15m"]["session_gap_trimmed"] is True
-    assert gold_report["timeframes"]["15m"]["rows_after_trim"] == 60
+    assert gold_report["timeframes"]["15m"]["session_profile"] == "forex_5d"
+    assert gold_report["timeframes"]["15m"]["session_gap_trimmed"] is False
+    assert gold_report["timeframes"]["15m"]["rows_analyzed"] == len(gapped)
 
     _, crypto_report = _run_perception_candidates(symbol="AVAXUSDT", timeframe_dfs={"15m": gapped})
     assert crypto_report["timeframes"]["15m"]["status"] == "FAILED"
+
+
+def test_forex_perception_still_rejects_a_midweek_data_hole() -> None:
+    first = _df(20, "15min", base=1.05)
+    first["timestamp"] = pd.date_range(
+        "2026-06-23 08:00", periods=len(first), freq="15min", tz="UTC"
+    )
+    second = _df(20, "15min", base=1.06)
+    second["timestamp"] = pd.date_range(
+        "2026-06-23 14:00", periods=len(second), freq="15min", tz="UTC"
+    )
+    gapped = pd.concat([first, second], ignore_index=True)
+
+    _, report = _run_perception_candidates(
+        symbol="EURNZD",
+        timeframe_dfs={"15m": gapped},
+    )
+
+    assert report["timeframes"]["15m"]["status"] == "FAILED"
+    assert "gaps" in report["timeframes"]["15m"]["error"].lower()
+
+
+def test_forex_perception_uses_long_clean_segment_after_old_midweek_hole() -> None:
+    first = _df(30, "1h", base=1.05)
+    first["timestamp"] = pd.date_range(
+        "2026-01-06 00:00", periods=len(first), freq="1h", tz="UTC"
+    )
+    second = _df(520, "1h", base=1.06)
+    second["timestamp"] = pd.date_range(
+        "2026-01-07 10:00", periods=len(second), freq="1h", tz="UTC"
+    )
+    gapped = pd.concat([first, second], ignore_index=True)
+
+    candidates, report = _run_perception_candidates(
+        symbol="EURJPY",
+        timeframe_dfs={"1h": gapped},
+    )
+
+    tf_report = report["timeframes"]["1h"]
+    assert tf_report["status"] == "PASS"
+    assert tf_report["session_gap_trimmed"] is True
+    assert tf_report["original_rows"] == 550
+    assert tf_report["rows_analyzed"] == 520
+    assert candidates["1h"]
+
+
+def test_forex_daily_session_accepts_bounded_holiday_closures() -> None:
+    timestamps = list(pd.bdate_range("2025-11-03", periods=80, tz="UTC"))
+    timestamps = [timestamp for timestamp in timestamps if timestamp.date().isoformat() != "2025-12-25"]
+    df = _df(len(timestamps), "1d", base=182.0)
+    df["timestamp"] = timestamps
+
+    candidates, report = _run_perception_candidates(
+        symbol="EURJPY",
+        timeframe_dfs={"1d": df},
+    )
+
+    assert report["timeframes"]["1d"]["status"] == "PASS"
+    assert report["timeframes"]["1d"]["session_gap_trimmed"] is False
+    assert candidates["1d"]
+
+
+def test_thesis_cannot_claim_alignment_when_causal_replay_requires_review() -> None:
+    evidence_pack = {
+        "formal_structure_graph": {
+            "narrative_context": {
+                "state": "ALIGNED_CONTINUATION",
+                "context_timeframe": "1d",
+                "context_bias": "bearish",
+                "is_coherent": True,
+                "sentence": "All context timeframes align bearish.",
+                "draw": {"target_price": 179.0, "direction": "bearish"},
+            }
+        },
+        "formal_causal_episode_graph": {
+            "authority_contract": {"enforcement_ready": True},
+            "invariants": {
+                "status": "REVIEW_REQUIRED",
+                "violations": ["1d_v1_controlling_external_break_survives_v3"],
+            },
+        },
+    }
+
+    narrative = _narrative_context(evidence_pack)
+
+    assert narrative["state"] == "RECONCILIATION_REQUIRED"
+    assert narrative["context_bias"] == "unresolved"
+    assert narrative["is_coherent"] is False
+    assert narrative["draw"] == {}
+    assert "provisionally reads bearish" in narrative["sentence"]

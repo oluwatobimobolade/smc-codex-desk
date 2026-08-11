@@ -513,7 +513,12 @@ def select_primary_poi(
     equilibrium: float | None = None,
     current_price: float | None = None,
 ) -> dict[str, Any] | None:
-    """Choose ONE primary POI from the narrative instead of hedging.
+    """Choose one POI for legacy or local observe-only candidate fields.
+
+    Canonical production packs already carry a primary selected by
+    ``causal_poi_authority_v1``.  Their consumer must preserve that authority;
+    this helper is not a second production selector and must not overturn a
+    certified causal primary with an uncalibrated fixed-weight score.
 
     A vote gives no basis to choose, so the thesis used to offer a bullish
     *and* a bearish POI and call both "conditional". A narrative can choose.

@@ -59,6 +59,13 @@ PALETTE: dict[str, str] = {
     "poi_bullish": "#0F8B7E",
     "poi_bearish": "#D2544B",
     "liquidity": "#8B93A1",
+    # HCN-inspired semantic zones. TradingView and matplotlib import these
+    # same tokens so the same evidence cannot change visual meaning by output
+    # surface.
+    "order_block": "#9CA3AF",
+    "fvg": "#F4C2C2",
+    "htf_zone": "#BFE8F2",
+    "dealing_range": "#D8DEE4",
 }
 
 # Zone fills sit behind candles; these are deliberately faint.

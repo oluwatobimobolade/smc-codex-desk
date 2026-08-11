@@ -17,6 +17,7 @@ from matplotlib.patches import Rectangle
 
 
 DEFAULT_TIMEFRAMES = ("1d", "4h", "1h", "15m")
+DISPLAY_WINDOW_BARS = {"1d": 180, "4h": 180, "1h": 240, "15m": 320, "5m": 360}
 
 
 def render_clean_mtf_chart_pack(
@@ -32,6 +33,8 @@ def render_clean_mtf_chart_pack(
     if include_5m:
         expected.append("5m")
     chart_paths: dict[str, str] = {}
+    source_rows: dict[str, int] = {}
+    displayed_rows: dict[str, int] = {}
     missing: list[str] = []
     for timeframe in expected:
         df = timeframe_dfs.get(timeframe)
@@ -39,7 +42,16 @@ def render_clean_mtf_chart_pack(
             missing.append(timeframe)
             continue
         path = output_dir / f"{symbol}_{timeframe}_clean.png"
-        render_clean_candle_chart(df, path, symbol=symbol, timeframe=timeframe)
+        source_rows[timeframe] = len(df)
+        display_limit = DISPLAY_WINDOW_BARS.get(timeframe)
+        displayed_rows[timeframe] = min(len(df), display_limit) if display_limit else len(df)
+        render_clean_candle_chart(
+            df,
+            path,
+            symbol=symbol,
+            timeframe=timeframe,
+            max_display_bars=display_limit,
+        )
         chart_paths[timeframe] = str(path)
     return {
         "schema": "clean_mtf_chart_pack_v1",
@@ -49,6 +61,8 @@ def render_clean_mtf_chart_pack(
         "contains_trade_box": False,
         "timeframes_requested": expected,
         "chart_paths": chart_paths,
+        "source_rows": source_rows,
+        "displayed_rows": displayed_rows,
         "missing_timeframes": missing,
     }
 
@@ -59,12 +73,16 @@ def render_clean_candle_chart(
     *,
     symbol: str,
     timeframe: str,
+    max_display_bars: int | None = None,
 ) -> None:
     if df.empty:
         raise ValueError("Cannot render a clean chart from an empty dataframe.")
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df = _normalize_df(df)
+    source_rows = len(df)
+    if max_display_bars is not None and max_display_bars > 0:
+        df = df.tail(max_display_bars).reset_index(drop=True)
     o = df["open"].to_numpy(float)
     h = df["high"].to_numpy(float)
     l = df["low"].to_numpy(float)
@@ -93,7 +111,11 @@ def render_clean_candle_chart(
             )
         )
     ax.set_title(
-        f"{symbol} {timeframe} clean candles ({n} candles)",
+        (
+            f"{symbol} {timeframe} clean candles ({n} shown / {source_rows} source)"
+            if n != source_rows
+            else f"{symbol} {timeframe} clean candles ({n} candles)"
+        ),
         color="#e0e0e0",
         fontsize=12,
         fontweight="bold",

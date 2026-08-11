@@ -130,6 +130,7 @@ class StructureDetector:
         swings: List[SwingObject],
     ) -> list[StructureBreakObject]:
         created: list[StructureBreakObject] = []
+        confirmed_this_candle: list[StructureBreakObject] = []
         for direction, target in (
             (Direction.BULLISH, self._target_high(track)),
             (Direction.BEARISH, self._target_low(track)),
@@ -173,6 +174,7 @@ class StructureDetector:
             body_confirmed = candle.close > level if direction == Direction.BULLISH else candle.close < level
             if body_confirmed and pending.confirmation_status == ConfirmationStatus.CANDIDATE:
                 self._confirm_break(pending, candle, state, track, target, candles, swings, current_time)
+                confirmed_this_candle.append(pending)
                 track.pending.pop(key, None)
 
         # One violent candle can close through several structural levels at
@@ -182,9 +184,12 @@ class StructureDetector:
         # being treated as live structure. Leaving them "unbroken" made the
         # model believe levels were intact while price traded far past them,
         # and let them resurface later as phantom targets.
-        swept = self._retire_broken_levels(track, candle)
-        for brk in created:
-            brk.evidence.levels_broken_by_candle = swept
+        retired_count = self._retire_broken_levels(track, candle)
+        # Magnitude belongs to the candle that BODY-CONFIRMED the break. A
+        # delayed confirmation object was created on an earlier wick probe, so
+        # assigning only to ``created`` silently left those events at zero.
+        for brk in confirmed_this_candle:
+            brk.evidence.levels_broken_by_candle = retired_count
 
         return created
 

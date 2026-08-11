@@ -32,6 +32,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Iterable, Mapping
 
+from smc_desk.perception.poi_contract import (
+    SPENT_STATES as CONTRACT_SPENT_STATES,
+    canonicalize_poi_candidate,
+)
+
 # Weights are ordered by how much a trader leans on each factor. They are
 # reasoned defaults, NOT calibrated constants -- no markup has scored them yet.
 WEIGHT_CAUSATION = 0.34
@@ -120,6 +125,15 @@ def location_alignment(direction: str, location: str) -> float:
 
 def freshness_of(poi: Mapping[str, Any]) -> tuple[str, float]:
     """Untouched > partial > spent."""
+    explicit = str(poi.get("freshness") or "").lower()
+    if explicit in CONTRACT_SPENT_STATES:
+        return "spent", 0.0
+    if explicit in {"partial", "partially_mitigated"}:
+        return "partial", 0.5
+    if explicit in {"touched", "first_touched"}:
+        return "touched", 0.65
+    if explicit in {"fresh", "untouched"}:
+        return "fresh", 1.0
     activity = str(poi.get("activity_status") or "").lower()
     mitigation = str(poi.get("mitigation_status") or "untouched").lower()
     if activity in SPENT_STATES or mitigation == "full":
@@ -136,22 +150,17 @@ def score_poi(
     current_price: float | None = None,
 ) -> PoiScore | None:
     """Score one POI candidate. Returns None when it carries no geometry."""
-    low, high = _f(poi.get("price_low")), _f(poi.get("price_high"))
+    candidate = canonicalize_poi_candidate(poi)
+    low, high = _f(candidate.get("price_low")), _f(candidate.get("price_high"))
     if low is None or high is None:
         return None
     low, high = min(low, high), max(low, high)
     midpoint = (low + high) / 2.0
-    direction = str(poi.get("direction") or "unknown").lower()
-    evidence = poi.get("evidence") if isinstance(poi.get("evidence"), Mapping) else {}
-
-    caused = bool(evidence.get("caused_structure_break")) and bool(evidence.get("poi_grade"))
-    scope = str(
-        (poi.get("metadata") or {}).get("linked_break_scope")
-        or evidence.get("structure_scope")
-        or "internal"
-    ).lower()
+    direction = str(candidate.get("direction") or "unknown").lower()
+    caused = bool(candidate.get("caused_structure_break"))
+    scope = str(candidate.get("structure_scope") or "internal").lower()
     location = classify_location(direction, midpoint, equilibrium)
-    freshness, freshness_value = freshness_of(poi)
+    freshness, freshness_value = freshness_of(candidate)
 
     reasons: list[str] = []
     causation_value = 1.0 if caused else 0.0
@@ -163,7 +172,11 @@ def score_poi(
     scope_value = 1.0 if scope == "external" else 0.45
     reasons.append(f"{scope} scope")
 
-    displacement_value = min(1.0, max(0.0, _f(evidence.get("displacement_atr")) or (0.8 if caused else 0.2)))
+    measured_displacement = _f(candidate.get("displacement_strength"))
+    displacement_value = min(
+        1.0,
+        max(0.0, measured_displacement if measured_displacement is not None else (0.8 if caused else 0.2)),
+    )
 
     alignment = location_alignment(direction, location)
     reasons.append(
@@ -182,9 +195,9 @@ def score_poi(
 
     distance = abs(midpoint - current_price) if current_price is not None else None
     return PoiScore(
-        object_id=str(poi.get("object_id") or poi.get("poi_id") or ""),
+        object_id=str(candidate.get("object_id") or ""),
         direction=direction, price_low=low, price_high=high,
-        timeframe=str(poi.get("timeframe") or "unknown"),
+        timeframe=str(candidate.get("timeframe") or "unknown"),
         score=round(score, 6), caused_structure_break=caused, scope=scope,
         location=location, freshness=freshness, distance=distance,
         reasons=tuple(reasons),

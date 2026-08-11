@@ -17,11 +17,13 @@ from smc_desk.perception.market_state import (
     ACCEPTED_DISPLACEMENT,
     INVALIDATED,
     LIQUIDITY_EVENT_IDENTIFIED,
+    LTF_CONFIRMATION_PENDING,
     MAP_CONTEXT,
     NO_CONTEXT,
     POI_MAPPED,
     PRICE_APPROACHING_POI,
     PRICE_AT_POI,
+    TRADE_PLAN_READY,
     build_market_state,
     diff_states,
 )
@@ -73,9 +75,18 @@ def _pack(
     }
 
 
-def _poi(low=62500.0, high=63200.0, object_id="4h_ob_demand"):
-    return {"object_id": object_id, "price_low": low, "price_high": high,
-            "alternates": ["alt_1"]}
+def _poi(
+    low=62500.0,
+    high=63200.0,
+    object_id="4h_ob_demand",
+    *,
+    first_touch_time=None,
+):
+    result = {"object_id": object_id, "price_low": low, "price_high": high,
+              "alternates": ["alt_1"]}
+    if first_touch_time:
+        result["first_touch_time"] = first_touch_time
+    return result
 
 
 # -- every state answers both questions ---------------------------------------
@@ -100,6 +111,24 @@ def test_every_state_names_what_it_waits_for_and_what_invalidates(pack_kwargs, p
 def test_incoherent_narrative_yields_no_context():
     state = build_market_state(evidence_pack=_pack(coherent=False))
     assert state.state == NO_CONTEXT
+
+
+def test_causal_reconciliation_required_cannot_present_as_aligned_context():
+    pack = _pack(coherent=True, bias="bearish")
+    pack["formal_causal_episode_graph"] = {
+        "authority_contract": {"enforcement_ready": True},
+        "invariants": {
+            "status": "REVIEW_REQUIRED",
+            "violations": ["1d_v1_controlling_external_break_survives_v3"],
+        },
+    }
+
+    state = build_market_state(evidence_pack=pack)
+
+    assert state.state == NO_CONTEXT
+    assert state.bias == "unknown"
+    assert state.narrative_state == "RECONCILIATION_REQUIRED"
+    assert "causal episode reconciliation required" in state.reasons
 
 
 def test_parent_invalidation_is_terminal():
@@ -151,6 +180,57 @@ def test_price_inside_poi_waits_for_confirmation():
     )
     assert state.state == PRICE_AT_POI
     assert "lower-timeframe" in state.waiting_for.lower()
+
+
+def test_recorded_arrival_advances_to_ltf_confirmation_pending() -> None:
+    state = build_market_state(
+        evidence_pack=_pack(current_price=62800.0),
+        primary_poi=_poi(first_touch_time="2026-06-19T22:00:00Z"),
+    )
+    assert state.state == LTF_CONFIRMATION_PENDING
+    assert state.entry_model == "ltf_confirmation_close"
+
+
+def test_post_arrival_sweep_and_displacement_resolve_an_explicit_entry_model() -> None:
+    pack = _pack(current_price=62800.0)
+    pack["detector_candidates"]["15m"] = {
+        "liquidity_levels": [
+            {"object_id": "ssl", "side": "sell_side", "price": 62600.0}
+        ],
+        "sweeps": [
+            {
+                "object_id": "sweep_ssl",
+                "direction": "bullish",
+                "confirmed_at": "2026-06-19T22:15:00Z",
+                "evidence": {"swept_level_id": "ssl"},
+            }
+        ],
+        "structure_breaks": [
+            {
+                "object_id": "15m_bull_mss",
+                "direction": "bullish",
+                "confirmed_at": "2026-06-19T22:30:00Z",
+                "evidence": {
+                    "is_unconfirmed_probe": False,
+                    "displacement_strength": 0.82,
+                    "broken_price": 62750.0,
+                    "body_close_penetration": 50.0,
+                },
+            }
+        ],
+    }
+
+    state = build_market_state(
+        evidence_pack=pack,
+        primary_poi=_poi(first_touch_time="2026-06-19T22:00:00Z"),
+    )
+
+    assert state.state == TRADE_PLAN_READY
+    assert state.confirmation_sweep_id == "sweep_ssl"
+    assert state.confirmation_break_id == "15m_bull_mss"
+    assert state.entry_model == "ltf_confirmation_close"
+    assert state.entry_price == 62800.0
+    assert state.to_dict()["signal_allowed"] is False
 
 
 def test_arrival_is_required_before_confirmation_is_even_considered():

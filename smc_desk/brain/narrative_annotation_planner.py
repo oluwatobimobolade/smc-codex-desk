@@ -91,6 +91,15 @@ def plan_narrative_annotations(
         )
     )
 
+    # The causal authority owns the active POI. It is selected before the
+    # structure detail so a tight clutter budget can never produce a chart
+    # that says "POI_MAPPED" while omitting the POI itself.
+    selections.extend(
+        _poi_selections(
+            evidence_pack=evidence_pack, narrative=narrative, rationale=rationale
+        )
+    )
+
     # Structure is selected for EVERY rendered timeframe, not only the context
     # one. Selecting only the context timeframe left each chart carrying half a
     # markup: the daily had structure and no range, the 4H had a range and no
@@ -157,6 +166,73 @@ def _liquidity_selections(
 
     rationale.append(f"Draw target {object_id} is not a drawable detector object.")
     return []
+
+
+def _poi_selections(
+    *,
+    evidence_pack: Mapping[str, Any],
+    narrative: Mapping[str, Any],
+    rationale: list[str],
+) -> list[dict[str, Any]]:
+    """Draw exactly the authority-selected active POI, never a local guess."""
+    from smc_desk.perception.poi_contract import canonicalize_poi_candidate
+
+    direction = str(narrative.get("context_bias") or "").lower()
+    authority = evidence_pack.get("causal_poi_authority")
+    scenarios = authority.get("scenarios") if isinstance(authority, Mapping) else None
+    scenario = scenarios.get(direction) if isinstance(scenarios, Mapping) else None
+    if not isinstance(scenario, Mapping) or scenario.get("status") != "SELECTED":
+        rationale.append("No authority-selected causal POI to draw.")
+        return []
+    raw_primary = scenario.get("primary_causal_poi")
+    if not isinstance(raw_primary, Mapping):
+        rationale.append("Causal POI scenario selected no primary zone; POI omitted.")
+        return []
+    primary = canonicalize_poi_candidate(raw_primary, fallback_direction=direction)
+    if (
+        primary.get("causal_eligible") is not True
+        or primary.get("is_spent") is True
+        or primary.get("direction") != direction
+    ):
+        rationale.append("Authority primary failed the shared causal/lifecycle contract; POI omitted.")
+        return []
+
+    # The annotation evidence index is detector-object keyed. The authority's
+    # poi_id stays the canonical consumer identity, while source_object_id is
+    # the immutable geometry anchor that the bridge can resolve.
+    source_id = str(primary.get("source_object_id") or "")
+    timeframe = str(primary.get("timeframe") or scenario.get("controlling_timeframe") or "")
+    kind = str(primary.get("kind") or "")
+    bucket = "order_blocks" if kind == "order_block" else "fvgs" if kind == "fvg" else ""
+    payload = (evidence_pack.get("detector_candidates") or {}).get(timeframe)
+    raw_candidates = payload.get(bucket) if isinstance(payload, Mapping) and bucket else None
+    drawable = any(
+        isinstance(item, Mapping)
+        and str(item.get("object_id") or item.get("poi_id") or "") == source_id
+        for item in (raw_candidates or [])
+    )
+    if not source_id or not timeframe or not drawable:
+        rationale.append(
+            f"Authority POI {primary.get('poi_id') or source_id} has no certified detector geometry; POI omitted."
+        )
+        return []
+
+    side = "Demand" if direction == "bullish" else "Supply"
+    label_kind = "OB" if kind == "order_block" else "FVG"
+    rationale.append(
+        f"Drew the causal primary POI: {timeframe.upper()} {side} {label_kind} "
+        f"({primary.get('freshness') or 'lifecycle unknown'})."
+    )
+    return [{
+        "semantic_object_id": source_id,
+        "timeframe": timeframe,
+        "object_type": "poi_zone",
+        "label": f"{timeframe.upper()} {side} {label_kind}",
+        "reason": (
+            str(raw_primary.get("primary_reason") or "")
+            or "Primary origin selected by causal_poi_authority_v1."
+        ),
+    }]
 
 
 def _window_start(candles: Any) -> str:

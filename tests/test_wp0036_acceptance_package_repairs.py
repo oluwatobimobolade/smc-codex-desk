@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 
 from smc_desk.brain.llm_provider import LLMCompletionRequest
+from smc_desk.brain.prompt_system import build_critic_prompt
+from tools.run_live_ai_smc_full_system import build_conservative_ai_payload
 from tools import run_wp0036_acceptance_gauntlet as gauntlet
 
 
@@ -77,6 +79,28 @@ def test_wp0036_payload_returns_critic_json_for_critic_prompt():
     assert payload["veto"] is False
 
 
+def test_wp0036_payload_recognizes_current_graph_challenger_prompt():
+    prompt = build_critic_prompt(
+        {"official_state": "REVIEW_REQUIRED", "direction": "mixed"},
+        _evidence_pack(),
+    )
+    payload = gauntlet.build_gauntlet_ai_payload(_request(prompt), "BTCUSDT", {})
+
+    assert set(payload) == {"veto", "critique", "suggested_downgrade_state"}
+    assert payload["veto"] is False
+
+
+def test_offline_source_manifest_never_claims_live_system_test():
+    payload = build_conservative_ai_payload(
+        _request(),
+        {"status": "LOCAL_CSV_REPLAY", "live_route_used": False},
+    )
+
+    narrative = payload["liquidity_story"]["narrative"]
+    assert "offline source-bound replay" in narrative
+    assert "live system test" not in narrative
+
+
 def test_wp0036_clean_chart_renderer_uses_full_depth(monkeypatch, tmp_path):
     captured = {}
 
@@ -135,3 +159,66 @@ def test_watch_invalidation_is_not_reported_as_failed_executable_anchor():
 
     assert report["anchors"][0]["field"] == "invalidation"
     assert report["anchors"][0]["status"] == "not_applicable_watch_reference"
+
+
+def test_review_required_without_trade_anchors_passes_as_not_applicable():
+    summary = gauntlet.perform_acceptance_checkpoints(
+        symbol="ETHUSDT",
+        result=type(
+            "Result",
+            (),
+            {
+                "status": "LOCAL_DETERMINISTIC_WORKFLOW:REVIEW_REQUIRED",
+                "report": {
+                    "legacy_narrative_authority_allowed_for_official_output": False,
+                    "legacy_authority_role": "DEBUG_LEGACY_COMPARISON_ONLY",
+                },
+            },
+        )(),
+        evidence_pack={},
+        official_decision={
+            "official_state": "REVIEW_REQUIRED",
+            "annotation_plan": {"chart_template": "review_chart", "show_trade_box": False, "labels": []},
+        },
+        validation_result_data={"smc_model_validity": "invalid", "trade_plan_validity": "failed"},
+        provider_manifest={"provider_mode": "LOCAL_DETERMINISTIC_PROVIDER", "is_real_llm_call": False, "is_manual": False, "is_stub": False},
+        critic_data={"veto": False, "critique": "No veto.", "suggested_downgrade_state": "KEEP_CURRENT"},
+        anchor_grounding={"anchors": []},
+        liq_status={"swept_liquidity_checks": []},
+        timeframe_dfs={"15m": _df(1500), "1h": _df(1000), "4h": _df(500), "1d": _df(365)},
+    )
+
+    assert "PASS (not applicable: no executable trade anchors in REVIEW_REQUIRED)" in summary
+    assert "checkpoint_3_anchor_grounding" not in summary
+    assert "FINAL ACCEPTANCE STATUS FOR ETHUSDT: PASS" in summary
+
+
+def test_trade_ready_without_grounded_anchor_fails_overall_acceptance():
+    summary = gauntlet.perform_acceptance_checkpoints(
+        symbol="ETHUSDT",
+        result=type(
+            "Result",
+            (),
+            {
+                "status": "VALIDATED",
+                "report": {
+                    "legacy_narrative_authority_allowed_for_official_output": False,
+                    "legacy_authority_role": "DEBUG_LEGACY_COMPARISON_ONLY",
+                },
+            },
+        )(),
+        evidence_pack={},
+        official_decision={
+            "official_state": "TRADE_PLAN_READY",
+            "annotation_plan": {"chart_template": "trade_plan_chart", "show_trade_box": True, "labels": []},
+        },
+        validation_result_data={"smc_model_validity": "valid", "trade_plan_validity": "valid"},
+        provider_manifest={"provider_mode": "LOCAL_DETERMINISTIC_PROVIDER", "is_real_llm_call": False, "is_manual": False, "is_stub": False},
+        critic_data={"veto": False, "critique": "No veto.", "suggested_downgrade_state": "KEEP_CURRENT"},
+        anchor_grounding={"anchors": []},
+        liq_status={"swept_liquidity_checks": []},
+        timeframe_dfs={"15m": _df(1500), "1h": _df(1000), "4h": _df(500), "1d": _df(365)},
+    )
+
+    assert "checkpoint_3_anchor_grounding" in summary
+    assert "FINAL ACCEPTANCE STATUS FOR ETHUSDT: FAIL" in summary

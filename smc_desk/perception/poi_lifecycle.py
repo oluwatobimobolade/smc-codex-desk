@@ -122,7 +122,14 @@ def build_pois_for_timeframe(
                 price_high=high,
                 origin_event_id=(ob.get("evidence") or {}).get("structure_break_id") or ob.get("object_id"),
                 created_by="order_block",
-                freshness=_freshness_from_price(price, low, high, direction),
+                freshness=_freshness_from_object(
+                    ob,
+                    event_history=event_history,
+                    price=price,
+                    low=low,
+                    high=high,
+                    direction=direction,
+                ),
                 price_relation=_price_relation(price, low, high, direction),
                 event_history=event_history,
                 quality_score=quality_score,
@@ -932,5 +939,41 @@ def _freshness_from_price(price: Decimal, low: Decimal, high: Decimal, direction
     if relation.startswith("invalidated"):
         return "invalidated"
     if relation == "inside_poi":
+        return "touched"
+    return "fresh"
+
+
+def _freshness_from_object(
+    obj: Mapping[str, Any],
+    *,
+    event_history: list[dict[str, Any]],
+    price: Decimal,
+    low: Decimal,
+    high: Decimal,
+    direction: str,
+) -> str:
+    """Derive freshness from history, using current price only for a live touch."""
+    terminal = str(obj.get("terminal_reason") or "none").lower()
+    activity = str(obj.get("activity_status") or "").lower()
+    mitigation = str(obj.get("mitigation_status") or "untouched").lower()
+    if terminal not in {"", "none"}:
+        return "invalidated" if terminal == "invalidated" else "consumed"
+    if activity == "terminal":
+        return "consumed"
+    if mitigation == "full":
+        return "consumed"
+    if mitigation == "partial":
+        return "partial"
+    event_types = {str(event.get("event_type") or "") for event in event_history}
+    if "OBJECT_FULLY_MITIGATED" in event_types:
+        return "consumed"
+    if "OBJECT_PARTIALLY_MITIGATED" in event_types:
+        return "partial"
+    if "OBJECT_FIRST_TOUCHED" in event_types:
+        return "touched"
+    # A legacy/synthetic object may not yet carry replayed events. If price is
+    # inside now, the present candle itself proves a touch; once the detector
+    # records that event, later runs will retain it after price leaves.
+    if _price_relation(price, low, high, direction) == "inside_poi":
         return "touched"
     return "fresh"

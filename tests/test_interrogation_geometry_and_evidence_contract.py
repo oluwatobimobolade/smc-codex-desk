@@ -3,7 +3,10 @@ from __future__ import annotations
 from smc_desk.brain.ai_smc_trader_brain import AnnotationDrawingObject
 from smc_desk.brain.annotation_evidence import AnnotationEvidenceAnchor
 from smc_desk.brain.annotation_geometry import build_geometry_contract, geometry_hash
-from smc_desk.brain.annotation_plan_validator import _check_geometry_contract
+from smc_desk.brain.annotation_plan_validator import (
+    _check_geometry_contract,
+    _check_latest_visible_window_binding,
+)
 from smc_desk.perception.evidence_contract import build_object_evidence_contracts, contract_ids_for_object
 from smc_desk.rendering.smc_trader_annotation_renderer import _object_with_display_geometry
 
@@ -100,6 +103,72 @@ def test_display_price_change_is_a_hard_geometry_issue() -> None:
     issues = []
     _check_geometry_contract(obj, [_anchor()], issues)
     assert "annotation_v2_display_changed_price" in {issue.code for issue in issues}
+
+
+def test_context_extension_is_bound_to_sealed_latest_visible_bar() -> None:
+    contract = build_geometry_contract(
+        evidence={
+            "start_index": 5,
+            "end_index": 8,
+            "start_time": "2026-01-01T05:00:00Z",
+            "end_time": "2026-01-01T08:00:00Z",
+            "price": None,
+            "price_low": 98.0,
+            "price_high": 99.0,
+        },
+        display={
+            "start_index": 5,
+            "end_index": 19,
+            "start_time": "2026-01-01T05:00:00Z",
+            "end_time": "2026-01-01T19:00:00Z",
+            "price": None,
+            "price_low": 98.0,
+            "price_high": 99.0,
+        },
+        source_object_ids=["ob-context"],
+        clipping_rule="context_zone_to_latest_visible_bar",
+    )
+    obj = AnnotationDrawingObject.model_validate(
+        {
+            "object_type": "poi_zone",
+            "semantic_object_id": "ob-context:zone",
+            "timeframe": "1h",
+            "label": "HTF Demand OB (context)",
+            "reason": "Required historical context only.",
+            "kind": "order_block",
+            "direction": "bullish",
+            "price_low": 98.0,
+            "price_high": 99.0,
+            "start_index": 5,
+            "end_index": 19,
+            "start_time": "2026-01-01T05:00:00Z",
+            "end_time": "2026-01-01T19:00:00Z",
+            "evidence_object_ids": ["ob-context"],
+            "context_requirement_id": "context_requirement:1h:ob-context",
+            "display_role": "context_only",
+            "active_entry_authority": False,
+            **contract,
+        }
+    )
+    pack = {
+        "ohlcv_windows": {
+            "1h": [
+                {"timestamp": f"2026-01-01T{index:02d}:00:00Z"}
+                for index in range(20)
+            ]
+        }
+    }
+
+    issues = []
+    _check_latest_visible_window_binding(obj, pack, issues)
+    assert issues == []
+
+    bad = obj.model_copy(update={"end_index": 18})
+    bad_issues = []
+    _check_latest_visible_window_binding(bad, pack, bad_issues)
+    assert "annotation_v2_latest_visible_index_mismatch" in {
+        issue.code for issue in bad_issues
+    }
 
 
 def test_geometry_hash_detects_source_tampering() -> None:

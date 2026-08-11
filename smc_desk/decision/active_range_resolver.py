@@ -287,6 +287,11 @@ def _latest_bracketing_pair(pivots: list[SwingPivot], *, current_price: float) -
         second = pivots[idx + 1]
         if first.kind == second.kind:
             continue
+        # A wide outside candle can be both a local high and local low.  Those
+        # two extrema are one candle, not an alternating structural leg, and
+        # must never become both protected boundaries of the active range.
+        if first.index == second.index:
+            continue
         high = max(first.price, second.price)
         low = min(first.price, second.price)
         if low <= current_price <= high:

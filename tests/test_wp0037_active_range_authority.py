@@ -116,6 +116,33 @@ def test_active_range_uses_latest_execution_price_to_invalidate_htf_range():
     }
 
 
+def test_active_range_never_uses_one_outside_candle_as_both_swing_legs():
+    timestamps = pd.date_range("2026-01-01", periods=40, freq="1h", tz="UTC")
+    df = pd.DataFrame(
+        {
+            "timestamp": timestamps,
+            "open": [100.0] * 40,
+            "high": [100.4] * 40,
+            "low": [99.6] * 40,
+            "close": [100.0] * 40,
+            "volume": [1000] * 40,
+        }
+    )
+    df.loc[20, "high"] = 110.0
+    df.loc[20, "low"] = 90.0
+
+    authority = resolve_active_range_authority(
+        symbol="EURJPY",
+        timeframe_dfs={"1h": df},
+        preferred_timeframes=("1h",),
+    )
+
+    assert authority["status"] == "RANGE_UNRESOLVED_REVIEW_REQUIRED"
+    assert authority["selected_range"] is None
+    recent = authority["rejected_ranges"][0]["recent_pivots"]
+    assert {pivot["index"] for pivot in recent} == {20}
+
+
 def test_evidence_pack_carries_active_range_authority():
     df = _range_df()
     pack = build_smc_evidence_pack(symbol="BTCUSDT", timeframe_dfs={"1h": df})

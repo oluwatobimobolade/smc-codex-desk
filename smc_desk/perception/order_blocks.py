@@ -10,6 +10,7 @@ from smc_desk.data.schemas import Candle
 from smc_desk.perception.causal_repair_flags import causal_ob_origin_gate_enabled
 from smc_desk.perception.lifecycle import EventType, SMCEvent, apply_event
 from smc_desk.perception.ontology import (
+    ActivityStatus,
     ConfirmationStatus,
     Direction,
     FairValueGapObject,
@@ -17,6 +18,10 @@ from smc_desk.perception.ontology import (
     OrderBlockObject,
     StructureBreakObject,
 )
+
+
+def _status_value(value):
+    return getattr(value, "value", value)
 
 
 class OrderBlockDetector:
@@ -45,7 +50,13 @@ class OrderBlockDetector:
                 continue
             if brk.confirmation_status != ConfirmationStatus.CONFIRMED:
                 continue
-            break_index = by_open.get(brk.candidate_at)
+            # A delayed break belongs to the candle that actually closed
+            # through structure, not the earlier wick-probe candle. Anchoring
+            # origin search to candidate_at can miss the final opposing base
+            # formed between probe and confirmation.
+            break_index = _confirmation_candle_index(candles, brk)
+            if break_index is None:
+                break_index = by_open.get(brk.candidate_at)
             if break_index is None:
                 break_index = _first_candle_at_or_after(candles, brk.candidate_at)
             if break_index is None:
@@ -109,7 +120,7 @@ class OrderBlockDetector:
                 # produced displacement AND the move must have broken structure.
                 # Body size stays a recorded fact and no longer decides this.
                 poi_grade=bool(admission["admitted"]),
-                caused_structure_break=True,
+                caused_structure_break=bool(admission["admitted"]),
                 below_body_floor=below_body_floor,
                 admission_status=str(admission.get("reason") or ("admitted" if admission["admitted"] else "rejected")),
             )
@@ -139,8 +150,16 @@ class OrderBlockDetector:
                 evidence=evidence,
                 confirmation_status=ConfirmationStatus.CONFIRMED,
                 metadata={
-                    "candidate_authority": "causal_candidate_not_final_poi",
-                    "causal_link_method": "explicit_break_departure_trace",
+                    "candidate_authority": (
+                        "causal_candidate_not_final_poi"
+                        if admission["admitted"]
+                        else "geometric_candidate_rejected_by_origin_gate"
+                    ),
+                    "causal_link_method": (
+                        "explicit_break_departure_trace"
+                        if admission["admitted"]
+                        else "geometric_opposing_cluster_only"
+                    ),
                     "linked_break_id": brk.object_id,
                     "origin_geometry": "single_candle" if len(cluster) == 1 else "multi_candle_cluster",
                     "origin_cluster_start_id": cluster_ids[0],
@@ -195,8 +214,126 @@ class OrderBlockDetector:
                     details="Origin cluster explicitly linked to the accepted structure-breaking departure",
                 ),
             )
+            apply_event(
+                obj,
+                SMCEvent(
+                    event_type=EventType.OBJECT_ACTIVATED,
+                    timestamp=brk.confirmed_at,
+                    trigger_candle_id=_candle_id(candles[break_index]),
+                    details="Order-block candidate became active after break confirmation",
+                ),
+            )
             order_blocks.append(obj)
+
+            # Visibility ledger: retain older opposing bases from the same
+            # lookback so a human or AI can inspect what lost. They are
+            # explicitly non-causal; only the nearest traced departure origin
+            # above may pass the causal admission gate.
+            for extra_cluster in self._find_origin_clusters(
+                candles, break_index, brk.direction
+            )[1:]:
+                extra = self._geometric_candidate(
+                    candles=candles,
+                    brk=brk,
+                    cluster_bounds=extra_cluster,
+                    break_index=break_index,
+                    current_time=current_time,
+                )
+                extra_ids = extra.metadata["origin_cluster_candle_ids"]
+                extra_key = (
+                    str(getattr(brk.direction, "value", brk.direction)),
+                    str(extra.price_low), str(extra.price_high),
+                    extra_ids[0], extra_ids[-1],
+                )
+                if extra_key in seen_clusters:
+                    continue
+                seen_clusters[extra_key] = len(order_blocks)
+                order_blocks.append(extra)
+        self._replay_lifecycle(order_blocks, candles, current_time)
         return order_blocks
+
+    def _replay_lifecycle(
+        self,
+        order_blocks: list[OrderBlockObject],
+        candles: List[Candle],
+        current_time: datetime,
+    ) -> None:
+        """Replay every post-confirmation candle so freshness cannot reset.
+
+        Current price describes where price is now; it cannot prove a zone was
+        never touched earlier.  The event history is therefore the authority
+        for untouched/partial/full/invalidated state.
+        """
+        for ob in order_blocks:
+            first_touch_recorded = any(
+                _status_value(getattr(event, "event_type", None))
+                == EventType.OBJECT_FIRST_TOUCHED.value
+                for event in ob.events
+            )
+            for candle in candles:
+                if ob.confirmed_at is None or candle.close_time <= ob.confirmed_at:
+                    continue
+                if candle.close_time > current_time:
+                    break
+                if _status_value(ob.activity_status) == ActivityStatus.TERMINAL.value:
+                    break
+
+                overlaps = candle.low <= ob.price_high and candle.high >= ob.price_low
+                if overlaps and not first_touch_recorded:
+                    first_touch_recorded = True
+                    apply_event(
+                        ob,
+                        SMCEvent(
+                            event_type=EventType.OBJECT_FIRST_TOUCHED,
+                            timestamp=candle.close_time,
+                            trigger_candle_id=_candle_id(candle),
+                            details="Order block first revisited after confirmation",
+                        ),
+                    )
+
+                if ob.direction == Direction.BULLISH:
+                    invalidated = candle.close < ob.price_low
+                    fully_mitigated = overlaps and candle.low <= ob.price_low
+                else:
+                    invalidated = candle.close > ob.price_high
+                    fully_mitigated = overlaps and candle.high >= ob.price_high
+
+                if invalidated:
+                    apply_event(
+                        ob,
+                        SMCEvent(
+                            event_type=EventType.OBJECT_INVALIDATED,
+                            timestamp=candle.close_time,
+                            trigger_candle_id=_candle_id(candle),
+                            details="Body close invalidated the order-block distal boundary",
+                        ),
+                    )
+                    continue
+                if fully_mitigated:
+                    apply_event(
+                        ob,
+                        SMCEvent(
+                            event_type=EventType.OBJECT_FULLY_MITIGATED,
+                            timestamp=candle.close_time,
+                            trigger_candle_id=_candle_id(candle),
+                            details="Price reached the order-block distal boundary",
+                        ),
+                    )
+                    continue
+                if overlaps and _status_value(ob.mitigation_status) == "untouched":
+                    apply_event(
+                        ob,
+                        SMCEvent(
+                            event_type=EventType.OBJECT_PARTIALLY_MITIGATED,
+                            timestamp=candle.close_time,
+                            trigger_candle_id=_candle_id(candle),
+                            details="Price entered the order block without reaching its distal boundary",
+                        ),
+                    )
+
+            # Even an untouched object has been evaluated through the cutoff.
+            ob.current_as_of = current_time
+            ob.last_updated_at = current_time
 
     def _find_origin_cluster(
         self, candles: List[Candle], break_index: int, direction: Direction,
@@ -222,6 +359,131 @@ class OrderBlockDetector:
         while cluster_start > start and _is_opposing(candles[cluster_start - 1], direction_value):
             cluster_start -= 1
         return cluster_start, source_index
+
+    def _find_origin_clusters(
+        self, candles: List[Candle], break_index: int, direction: Direction,
+    ) -> list[tuple[int, int]]:
+        """Return every separated opposing cluster, nearest first.
+
+        The first cluster is the only one eligible to own the departure. The
+        remainder are visibility candidates, retained so rejection remains
+        inspectable instead of silently deleting plausible trader markups.
+        """
+        direction_value = getattr(direction, "value", direction)
+        start = max(0, break_index - self.lookback)
+        clusters: list[tuple[int, int]] = []
+        idx = start
+        while idx < break_index:
+            if not _is_opposing(candles[idx], direction_value):
+                idx += 1
+                continue
+            cluster_start = idx
+            while idx + 1 < break_index and _is_opposing(candles[idx + 1], direction_value):
+                idx += 1
+            clusters.append((cluster_start, idx))
+            idx += 1
+        clusters.reverse()
+        return clusters
+
+    def _geometric_candidate(
+        self,
+        *,
+        candles: List[Candle],
+        brk: StructureBreakObject,
+        cluster_bounds: tuple[int, int],
+        break_index: int,
+        current_time: datetime,
+    ) -> OrderBlockObject:
+        """Build a visible older base carrying no causal POI authority."""
+        cluster_start, cluster_end = cluster_bounds
+        cluster = candles[cluster_start : cluster_end + 1]
+        source = cluster[-1]
+        cluster_ids = [_candle_id(candle) for candle in cluster]
+        departure = candles[cluster_end + 1 : break_index + 1]
+        departure_ids = [_candle_id(candle) for candle in departure]
+        body_ratio = max((_body_ratio(candle) for candle in cluster), default=0.0)
+        admission = {
+            "admitted": False,
+            "gate": "visibility_ledger",
+            "reason": "not_nearest_traced_departure_origin",
+        }
+        break_identity = hashlib.sha256(str(brk.object_id).encode("utf-8")).hexdigest()[:10]
+        obj = OrderBlockObject(
+            object_id=(
+                f"ob_{brk.direction.value if hasattr(brk.direction, 'value') else brk.direction}_"
+                f"{cluster[0].open_time.timestamp()}_{cluster[-1].open_time.timestamp()}_"
+                f"break_{break_identity}"
+            ),
+            venue=source.venue,
+            instrument=source.instrument,
+            timeframe=source.timeframe,
+            pivot_time=cluster[0].open_time,
+            candidate_at=brk.candidate_at,
+            confirmed_at=brk.confirmed_at,
+            current_as_of=current_time,
+            schema_version="1.0.0",
+            detector_version=self.detector_version,
+            configuration_hash=self.configuration_hash,
+            source_candle_ids=[*cluster_ids, *departure_ids],
+            last_updated_at=current_time,
+            confidence=min(0.72, 0.42 + body_ratio * 0.20),
+            direction=brk.direction,
+            price_low=min(candle.low for candle in cluster),
+            price_high=max(candle.high for candle in cluster),
+            evidence=OrderBlockEvidence(
+                originating_fvg_id=None,
+                volume_ratio=1.0,
+                structure_break_id=brk.object_id,
+                source_candle_id=_candle_id(source),
+                body_ratio=body_ratio,
+                poi_grade=False,
+                caused_structure_break=False,
+                below_body_floor=body_ratio < self.min_body_ratio,
+                admission_status=admission["reason"],
+            ),
+            confirmation_status=ConfirmationStatus.CONFIRMED,
+            metadata={
+                "candidate_authority": "geometric_visibility_only_no_promotion",
+                "causal_link_method": "geometric_opposing_cluster_in_break_lookback",
+                "linked_break_id": brk.object_id,
+                "linked_break_scope": str(brk.structure_scope),
+                "origin_geometry": "single_candle" if len(cluster) == 1 else "multi_candle_cluster",
+                "origin_cluster_start_id": cluster_ids[0],
+                "origin_cluster_end_id": cluster_ids[-1],
+                "origin_cluster_candle_ids": cluster_ids,
+                "departure_candle_ids": departure_ids,
+                "originating_fvg_link_method": None,
+                "causal_origin_admission": admission,
+            },
+        )
+        apply_event(
+            obj,
+            SMCEvent(
+                event_type=EventType.OBJECT_CREATED,
+                timestamp=cluster[0].open_time,
+                trigger_candle_id=cluster_ids[0],
+                details="Older opposing-base visibility candidate created",
+            ),
+        )
+        apply_event(
+            obj,
+            SMCEvent(
+                event_type=EventType.OBJECT_CONFIRMED,
+                timestamp=brk.confirmed_at,
+                trigger_candle_id=_candle_id(candles[break_index]),
+                details="Geometric candidate retained but causal origin ownership rejected",
+            ),
+        )
+        apply_event(
+            obj,
+            SMCEvent(
+                event_type=EventType.OBJECT_ACTIVATED,
+                timestamp=brk.confirmed_at,
+                trigger_candle_id=_candle_id(candles[break_index]),
+                details="Visibility candidate active for lifecycle tracking only",
+            ),
+        )
+        return obj
 
 
 # WP-SMC-10/3 thresholds. A cluster is admitted as a causal OB origin when the
@@ -361,6 +623,22 @@ def _first_candle_at_or_after(candles: list[Candle], when: datetime) -> int | No
     for idx, candle in enumerate(candles):
         if candle.open_time >= when:
             return idx
+    return None
+
+
+def _confirmation_candle_index(
+    candles: list[Candle], brk: StructureBreakObject,
+) -> int | None:
+    """Resolve the actual body-close candle for immediate or delayed breaks."""
+    confirmation_id = str(getattr(brk.evidence, "body_close_candle_id", None) or "")
+    if confirmation_id:
+        for idx, candle in enumerate(candles):
+            if _candle_id(candle) == confirmation_id:
+                return idx
+    if brk.confirmed_at is not None:
+        for idx, candle in enumerate(candles):
+            if candle.close_time == brk.confirmed_at:
+                return idx
     return None
 
 

@@ -179,6 +179,79 @@ def test_external_origin_beyond_newer_nested_range_remains_eligible() -> None:
     assert primary["causal_certificate"]["status"] == "PASS"
 
 
+def test_exact_accepted_external_origin_survives_newer_range_straddle_as_scenario_only() -> None:
+    detector, graph = _pack()
+    latest = next(item for item in detector["1h"]["structure_breaks"] if item["object_id"] == "bos_latest")
+    shallow = next(item for item in detector["1h"]["order_blocks"] if item["object_id"] == "shallow_continuation")
+    shallow["price_low"], shallow["price_high"] = 111.0, 113.0
+    shallow["evidence"].update({"poi_grade": True, "structure_break_id": "bos_latest"})
+    shallow["metadata"].update(
+        {
+            "linked_break_id": "bos_latest",
+            "causal_origin_admission": {
+                "admitted": True,
+                "reason": "departure_produced_displacement_into_accepted_break",
+            },
+        }
+    )
+    lifecycle = _active("shallow_continuation", "order_block", 111.0, 113.0)
+    lifecycle.update(
+        {
+            "freshness": "partial",
+            "validity_status": "REVIEW_REQUIRED_STRADDLES_PROTECTED_LEVEL",
+            "scope": "rejected",
+            "rejection_reason": "Bearish POI straddles a newer protected high.",
+        }
+    )
+    detector["1h"].update(
+        {
+            "structure_breaks": [latest],
+            "order_blocks": [shallow],
+            "fvgs": [],
+            "poi_grade_fvgs": [],
+            "active_pois": [lifecycle],
+            "pois": [lifecycle],
+        }
+    )
+
+    result = build_causal_poi_authority(detector_candidates=detector, formal_structure_graph=graph)
+
+    primary = result["official_selection"]["primary_causal_poi"]
+    assert primary["source_object_id"] == "shallow_continuation"
+    assert primary["causal_status"] == "ELIGIBLE_CAUSAL_OB"
+    assert primary["range_relationship"] == "accepted_external_origin_beyond_newer_nested_range"
+    assert primary["authority_reconciliation"] == "accepted_external_origin_survives_newer_nested_range_straddle"
+    assert primary["authority_scope"] == "causal_scenario_only"
+    assert primary["active_entry_authority"] is False
+    assert primary["lifecycle_validity_status_preserved"] == "REVIEW_REQUIRED_STRADDLES_PROTECTED_LEVEL"
+
+
+def test_non_owning_straddled_zone_remains_lifecycle_rejected() -> None:
+    detector, graph = _pack()
+    shallow = next(item for item in detector["1h"]["order_blocks"] if item["object_id"] == "shallow_continuation")
+    shallow["evidence"].update({"poi_grade": True, "structure_break_id": "choch_origin"})
+    shallow["metadata"].update(
+        {
+            "linked_break_id": "choch_origin",
+            "causal_origin_admission": {"admitted": True},
+        }
+    )
+    lifecycle = next(item for item in detector["1h"]["active_pois"] if item["poi_id"].endswith("shallow_continuation"))
+    lifecycle.update(
+        {
+            "validity_status": "REVIEW_REQUIRED_STRADDLES_PROTECTED_LEVEL",
+            "scope": "rejected",
+        }
+    )
+
+    result = build_causal_poi_authority(detector_candidates=detector, formal_structure_graph=graph)
+
+    rejected = result["timeframes"]["1h"]["rejected_candidates"]
+    item = next(value for value in rejected if value["source_object_id"] == "shallow_continuation")
+    assert item["causal_status"] == "REJECTED_LIFECYCLE"
+    assert item["causal_failures"] == ["poi_not_fresh_or_active"]
+
+
 def test_wrong_side_outside_candidate_is_still_not_promoted() -> None:
     detector, graph = _pack()
     deep_raw = next(item for item in detector["1h"]["order_blocks"] if item["object_id"] == "deep_origin")
@@ -206,6 +279,8 @@ def test_annotation_selector_uses_causal_authority_instead_of_nearest_zone() -> 
     assert selected is not None
     assert selected["poi_id"].endswith(":deep_origin")
     assert "deep_origin" in selected["evidence_object_ids"]
+    assert "linked_break_id" not in selected
+    assert "choch_origin" in selected["evidence_object_ids"]
     assert "not a guaranteed reaction" in selected["summary"]
 
 

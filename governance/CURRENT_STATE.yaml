@@ -3,8 +3,8 @@ project:
   product: Dual-Lens Market Colleague
   release: colleague-core-rc0
   status: evaluation_truth_boundary_repaired_empirical_certification_open
-  current_date: "2026-08-09"
-  last_updated: "2026-08-09"
+  current_date: "2026-08-10"
+  last_updated: "2026-08-10"
 
 scope:
   certified_initial_scope:
@@ -76,11 +76,17 @@ authority:
   governed_ai_structure_lab: validated_wp0041b_six_role_render_before_visual_critic_pixel_verified
   ai_doctrine_panel: validated_br006_local_source_grounded_consensus_certification_pending
   perception_bridge_validation: current_984_passed_1_skipped_scenario_poi_mapping_repair
-  current_repository_validation: 1239_passed_1_skipped_wp_smc_12
+  current_repository_validation: wp_smc_18_ethusdt_fresh_full_system_annotation_repair_1378_passed_1_skipped_source_bound
   evaluation_truth_boundary: repaired_wp_smc_12_closed_candle_cutoff_1d_evidence_parity_atr_and_object_index
   placeholder_markup_cohort: quarantined_invalid_do_not_mark_or_score
   liquidity_reasoning_adapter: repaired_real_nested_evidence_and_separate_sweep_join
   canonical_market_state_price: repaired_latest_closed_price_carried_in_formal_graph
+  canonical_poi_consumer_contract: repaired_wp_smc_14_single_causal_selection_authority_lifecycle_and_schema
+  tradingview_native_markup_contract: repaired_wp_smc_14_versioned_capability_handshake_targeted_cleanup
+  eurjpy_full_system_diagnostic: repaired_wp_smc_15_session_truth_range_selection_causal_reconciliation_and_native_mtf_story
+  audnzd_causal_origin_diagnostic: repaired_wp_smc_16_exact_external_origin_survives_newer_nested_range_as_scenario_only
+  hypeusdt_context_authority_diagnostic: repaired_wp_smc_17_material_superseded_context_visible_without_active_entry_authority
+  ethusdt_full_system_diagnostic: repaired_wp_smc_18_tls_safe_fresh_route_context_extension_and_native_dealing_range_no_trade
   perception_programme_integrity: validated_local_experimental_observe_only_941_passed_1_skipped
   perception_programme_doctrine: proposed_non_authoritative_14_decisions_unresolved
   perception_programme_tool_loop: anchor_context_only_unimplemented_tools_not_advertised
@@ -125,8 +131,8 @@ active_contracts:
   ai_structure_reasoning: AI_CENTERED_STRUCTURE_REASONING_V1
 
 current_gate:
-  id: GATE-WP-SMC-13-POI-VISIBILITY-001
-  work_package: WP-SMC-13-POI-VISIBILITY-AND-RANKING
+  id: GATE-WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-001
+  work_package: WP-SMC-18-ETHUSDT-FRESH-FULL-SYSTEM-AND-ANNOTATION-REPAIR
   status: passed_local_observe_only_empirical_certification_unchanged
   next_programme: analyst_select_development_cases_then_blind_markup_before_threshold_tuning
 
