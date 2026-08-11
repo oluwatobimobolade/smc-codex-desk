@@ -86,11 +86,18 @@ def main() -> None:
                 "last_open_timestamps": {tf: str(df["timestamp"].iloc[-1]) for tf, df in timeframe_dfs.items()},
                 "last_close_timestamps": {tf: str(df["timestamp"].iloc[-1] + TIMEFRAME_DELTAS[tf]) for tf, df in timeframe_dfs.items()},
             }
-            colleague = write_colleague_memory_and_narrative_shadow(
-                symbol_root=symbol_root,
-                output_root=args.output_root,
-                symbol=normalize_symbol(symbol),
-            )
+            try:
+                colleague = write_colleague_memory_and_narrative_shadow(
+                    symbol_root=symbol_root,
+                    output_root=args.output_root,
+                    symbol=normalize_symbol(symbol),
+                )
+            except Exception as exc:  # noqa: BLE001 -- additive evidence may never fail a run
+                colleague = {
+                    "memory_status": f"failed:{type(exc).__name__}",
+                    "shadow_status": f"failed:{type(exc).__name__}",
+                    "transition_notes": [],
+                }
             summary["colleague_memory"] = colleague.get("memory_status")
             summary["narrative_shadow_plan"] = colleague.get("shadow_status")
             summary["memory_transition_notes"] = colleague.get("transition_notes")

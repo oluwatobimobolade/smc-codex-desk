@@ -140,16 +140,40 @@ def record_run_transition(
     current = market_state_from_dict(current_market_state)
     transition = diff_states(previous, current)
 
-    try:
-        save_current_state(path, current_market_state)
-    except OSError as exc:
-        notes.append(f"memory save failed ({type(exc).__name__}); transition recorded but not stored")
+    # Time-order guard: a replay into the past must not masquerade as the
+    # market moving backwards, and must not poison the store the next live
+    # run diffs against. When both decision times parse and the stored state
+    # is strictly newer, this is not a forward transition.
+    forward = True
+    previous_dt = _parse_dt(previous.decision_time) if previous is not None else None
+    current_dt = _parse_dt(current.decision_time)
+    if previous_dt is not None and current_dt is not None and previous_dt > current_dt:
+        forward = False
+        notes.append(
+            "stored state is from a LATER decision time "
+            f"({previous.decision_time} > {current.decision_time}); this run reads as a "
+            "historical replay, so the diff is descriptive only and the store was NOT updated"
+        )
+    elif previous is not None and (previous_dt is None or current_dt is None):
+        notes.append(
+            "decision time missing or unparseable on one side; diff recorded but the "
+            "time order could not be verified"
+        )
+
+    if forward:
+        try:
+            save_current_state(path, current_market_state)
+        except OSError as exc:
+            notes.append(f"memory save failed ({type(exc).__name__}); transition recorded but not stored")
 
     return {
         "schema": SCHEMA,
         "symbol": symbol.upper(),
         "recorded_at": recorded_at,
         "store_path": str(path),
+        "previous_decision_time": previous.decision_time if previous is not None else None,
+        "current_decision_time": current.decision_time,
+        "forward_transition": forward,
         "transition": transition.to_dict(),
         "notes": notes,
         "authority": "observe_only_colleague_memory",
@@ -162,6 +186,18 @@ def _f(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _parse_dt(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    # A naive timestamp is treated as UTC so it never crashes against an
+    # aware one; the desk's canonical times are UTC anyway.
+    return parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None else parsed
 
 
 __all__ = [

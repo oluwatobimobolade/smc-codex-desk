@@ -226,3 +226,51 @@ def test_runner_helper_reports_when_pack_has_no_market_state(tmp_path: Path) -> 
     assert outcome["memory_status"] == "no_market_state_in_pack"
     assert outcome["shadow_status"] == "recorded"
 
+
+
+def test_out_of_order_replay_is_flagged_and_does_not_update_store(tmp_path: Path) -> None:
+    newer = _pack_state("TRADE_PLAN_READY", decision_time="2026-08-10T12:00:00+00:00")
+    record_run_transition(output_root=tmp_path, symbol="BTCUSDT", current_market_state=newer)
+
+    older = _pack_state("POI_MAPPED", decision_time="2026-08-09T12:00:00+00:00")
+    record = record_run_transition(output_root=tmp_path, symbol="BTCUSDT", current_market_state=older)
+
+    assert record["forward_transition"] is False
+    assert record["previous_decision_time"] == "2026-08-10T12:00:00+00:00"
+    assert record["current_decision_time"] == "2026-08-09T12:00:00+00:00"
+    assert any("LATER decision time" in note for note in record["notes"])
+    # The store must still hold the newer state: a replay never poisons memory.
+    stored, note = load_previous_state(store_path(tmp_path, "BTCUSDT"))
+    assert stored is not None and stored.decision_time == "2026-08-10T12:00:00+00:00"
+    assert stored.state == "TRADE_PLAN_READY"
+
+
+def test_forward_run_updates_store(tmp_path: Path) -> None:
+    older = _pack_state("POI_MAPPED", decision_time="2026-08-10T12:00:00+00:00")
+    record_run_transition(output_root=tmp_path, symbol="BTCUSDT", current_market_state=older)
+    newer = _pack_state("PRICE_AT_POI", decision_time="2026-08-10T13:00:00+00:00")
+    record = record_run_transition(output_root=tmp_path, symbol="BTCUSDT", current_market_state=newer)
+    assert record["forward_transition"] is True
+    assert record["transition"]["advanced"] is True
+    stored, _ = load_previous_state(store_path(tmp_path, "BTCUSDT"))
+    assert stored is not None and stored.state == "PRICE_AT_POI"
+
+
+def test_equal_decision_time_rerun_is_a_forward_reobservation(tmp_path: Path) -> None:
+    state = _pack_state(decision_time="2026-08-10T12:00:00+00:00")
+    record_run_transition(output_root=tmp_path, symbol="BTCUSDT", current_market_state=state)
+    record = record_run_transition(output_root=tmp_path, symbol="BTCUSDT", current_market_state=state)
+    assert record["forward_transition"] is True
+    assert record["transition"]["advanced"] is False
+    assert record["transition"]["regressed"] is False
+
+
+def test_unverifiable_time_order_is_disclosed(tmp_path: Path) -> None:
+    record_run_transition(
+        output_root=tmp_path, symbol="BTCUSDT",
+        current_market_state=_pack_state(decision_time="not-a-timestamp"),
+    )
+    record = record_run_transition(output_root=tmp_path, symbol="BTCUSDT", current_market_state=_pack_state())
+    assert record["forward_transition"] is True
+    assert any("time order could not be verified" in note for note in record["notes"])
+

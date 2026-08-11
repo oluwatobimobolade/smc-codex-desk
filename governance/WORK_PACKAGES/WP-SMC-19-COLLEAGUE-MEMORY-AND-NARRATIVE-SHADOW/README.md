@@ -56,17 +56,40 @@ packages weaker than the design intended:
   orchestration (P6) was started. No signal, paper, live, or predictive
   authority was created; both artifacts carry `signal_allowed: false`.
 
+## Self-audit repair (2026-08-11, R3/R4)
+
+A post-validation self-audit found one real gap in the new memory layer and
+closed it before anything depended on it:
+
+- **Time-order guard.** The store previously accepted any run as "latest". A
+  historical replay through the same runner would have overwritten the stored
+  state with an older `decision_time`, and the next live run would then have
+  reported a false regression. `record_run_transition` now compares decision
+  times: when the stored state is strictly newer, the record is flagged
+  `forward_transition: false`, the diff is descriptive only, and the store is
+  NOT updated. Equal decision times (sealed-pack reruns) remain forward
+  re-observations; unparseable times are disclosed as unverifiable order.
+  Naive timestamps are treated as UTC so naive/aware comparison cannot crash.
+- **Caller-side guard.** The runner wraps the memory/shadow helper so even a
+  future regression inside the helper can never fail an analysis run.
+- 4 new tests (out-of-order replay flagged and store preserved, forward
+  update, equal-time re-observation, unverifiable-order disclosure): 17/17
+  in `tests/test_market_state_memory.py`; focused ring 85 passed.
+
 ## Validation
 
 - Full suite R1 (pre-rebind): 1390 passed, 1 skipped, 1 governance-only
   source-manifest mismatch (this package's own rebind); no behavioral
   failures.
 - Focused ring (market state, narrative planner, live runner, acceptance
-  package, context authority, POI contract): 81 passed.
+  package, context authority, POI contract): 85 passed.
 - Real-evidence smoke on the sealed ETHUSDT 2026-08-10 pack: first
   observation recorded; repeat run reads `still NO_CONTEXT` (matching the
   V1/V3 causal disagreement); shadow composed 4H dealing range, 1D equal-lows
   draw, then per-timeframe structure (10 selections,
   RETRACEMENT_WITHIN_PARENT).
-- R2 (post-rebind): see the append-only validation registry record
-  `WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R2-20260811`.
+- R2 (first rebind validation): registry record
+  `WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R2-20260811` (PASS, 1391/1).
+- R3/R4 (self-audit repair rebind and revalidation): see the append-only
+  records `WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R3-20260811` and
+  `...-R4-20260811`.
