@@ -9,7 +9,7 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R4-20260811",
+    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R6-20260811",
     "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
     "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001"
   },
@@ -1359,6 +1359,90 @@
       "limitations": [
         "Transition and shadow artifacts are run-package evidence only; the sealed evidence pack and pack hash are untouched.",
         "The narrative shadow is not rendered and not validated; canonical composer, context authority, validator, and visual critic keep full chart authority.",
+        "No thresholds changed, no P6 provider orchestration started, no signal, paper, live, or predictive authority created.",
+        "No perception accuracy, predictive edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R5-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T11:05:24.486919+00:00",
+      "status": "IMPLEMENTED_LOCAL_OBSERVE_ONLY_GOVERNANCE_REBIND_PENDING",
+      "source": {
+        "git_head": "34ae80599a6a3526192bf7d03f4768e8e47c602c",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 1,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "e21ef3b5ae4ee284986fdd2a9dd7fdf4896f7904e11ddaad8b2ce4040df6fd04"
+      },
+      "commands": [
+        {
+          "command": "env .venv/bin/python -m pytest tests/test_market_state_memory.py -q",
+          "exit_code": 0,
+          "summary": "22 passed (memory, time-order guard, draw note, perception failure surfacing)"
+        },
+        {
+          "command": "ring: brain, validators, acceptance package, live runner, narrative planner, market state",
+          "exit_code": 0,
+          "summary": "90 passed"
+        },
+        {
+          "command": "real-pack proof: sealed ETHUSDT 2026-08-11 pack through build_conservative_ai_payload",
+          "exit_code": 0,
+          "summary": "liquidity narrative names standing draw bearish equal lows 1,820.6 as descriptive/unpromoted; decision remains mixed/REVIEW_REQUIRED"
+        }
+      ],
+      "primary_result": "Live-exercise closures: narrative draw surfaced in liquidity story; fail-closed perception gaps surfaced in run summary; governance source rebind pending R6",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "The draw note is descriptive text only: not a validated sweep, POI, or target; decision authority unchanged.",
+        "Perception failure surfacing discloses fail-closed gaps; it does not change the session model or any detector behavior.",
+        "No thresholds changed, no provider orchestration (P6) started, no signal, paper, live, or predictive authority created.",
+        "No perception accuracy, predictive edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R6-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T11:13:16.334253+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "34ae80599a6a3526192bf7d03f4768e8e47c602c",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 2,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "e21ef3b5ae4ee284986fdd2a9dd7fdf4896f7904e11ddaad8b2ce4040df6fd04"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1400 passed, 1 skipped in 450.45s (0:07:30)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1400 passed, 1 skipped in 450.45s (0:07:30)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "The draw note is descriptive text only: not a validated sweep, POI, or target; decision authority unchanged.",
+        "Perception failure surfacing discloses fail-closed gaps; it does not change the session model or any detector behavior.",
         "No thresholds changed, no P6 provider orchestration started, no signal, paper, live, or predictive authority created.",
         "No perception accuracy, predictive edge, or profitability claim is created."
       ]
