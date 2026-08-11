@@ -1,5 +1,52 @@
 # Decision Log
 
+## 2026-08-11 - Wire Colleague Memory And Narrative Shadow Into Live Run Packages
+
+Decision: Close two documented-but-never-landed wires with additive,
+observe-only run-package artifacts, leaving the canonical annotation chain
+unchanged.
+
+1. Cross-run market-state memory. `build_market_state` has derived the trader
+   sequence per run since WP-SMC-11 phase 2, and `diff_states` could always
+   compare two states, but no run ever persisted the previous state, so every
+   run started with amnesia. `smc_desk/perception/market_state_memory.py` now
+   stores the last `market_state` per symbol (atomic, fail-soft, under
+   `analysis_runs/market_state_store/`), and the live runner writes
+   `18_colleague_memory_narrative/market_state_transition.json` naming what
+   changed since the last look: newly swept liquidity, bias or primary-POI
+   change, advance or regression along the trader sequence.
+2. Narrative planner shadow. `plan_narrative_annotations` (range, then the
+   draw, then the causal POI, then structure per rendered timeframe; evidence
+   IDs only) was built in WP-SMC-11 P1 and its canonical wiring was
+   recommended on 2026-08-08, but it was never connected. It now runs after
+   the canonical run and is recorded as
+   `18_colleague_memory_narrative/narrative_annotation_plan_shadow.json`,
+   explicitly not rendered and not validated, so the WP-SMC-13 analyst-marked
+   cohort can measure planner-versus-composer selections against human markup
+   before any selector is promoted or retired.
+
+Consequences:
+
+- The sealed evidence pack is untouched: both artifacts are written post-run
+  from the pack artifact, so `pack_hash` stays a pure function of evidence.
+- The canonical composer, context authority, validator, and visual critic keep
+  full authority over rendered charts; the shadow cannot influence them.
+- Memory is fail-soft: a missing or corrupt store becomes a note, never a run
+  failure.
+- No thresholds changed (prohibited before WP-SMC-13), no provider
+  orchestration (P6) started, and no signal, paper, live, or predictive
+  authority created; `signal_allowed` stays false on both artifacts.
+
+Evidence:
+
+- `smc_desk/perception/market_state_memory.py`
+- `tools/run_live_ai_smc_full_system.py` (`write_colleague_memory_and_narrative_shadow`)
+- `tests/test_market_state_memory.py` (13 tests)
+- Real-evidence smoke on the sealed ETHUSDT 2026-08-10 pack: first observation
+  recorded, repeat run reads `still NO_CONTEXT` (matching the V1/V3 causal
+  disagreement), and the shadow composed 4H dealing range, 1D equal-lows draw,
+  then per-timeframe structure (10 selections, RETRACEMENT_WITHIN_PARENT).
+
 ## 2026-06-25 - Establish Governance Foundation
 
 Decision: Treat the two PDFs in `/Users/tobimobolade/Downloads/` as the current

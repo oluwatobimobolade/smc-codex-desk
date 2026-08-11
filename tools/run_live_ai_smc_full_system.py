@@ -86,6 +86,14 @@ def main() -> None:
                 "last_open_timestamps": {tf: str(df["timestamp"].iloc[-1]) for tf, df in timeframe_dfs.items()},
                 "last_close_timestamps": {tf: str(df["timestamp"].iloc[-1] + TIMEFRAME_DELTAS[tf]) for tf, df in timeframe_dfs.items()},
             }
+            colleague = write_colleague_memory_and_narrative_shadow(
+                symbol_root=symbol_root,
+                output_root=args.output_root,
+                symbol=normalize_symbol(symbol),
+            )
+            summary["colleague_memory"] = colleague.get("memory_status")
+            summary["narrative_shadow_plan"] = colleague.get("shadow_status")
+            summary["memory_transition_notes"] = colleague.get("transition_notes")
         except Exception as exc:
             summary = {
                 "symbol": normalize_symbol(symbol),
@@ -110,6 +118,117 @@ def main() -> None:
     (root / "live_full_system_summary.json").write_text(json.dumps(final, indent=2, sort_keys=True, default=str), encoding="utf-8")
     (root / "live_full_system_summary.md").write_text(render_summary_markdown(final), encoding="utf-8")
     print(json.dumps(final, indent=2, sort_keys=True, default=str))
+
+
+def _load_final_evidence_pack(symbol_root: Path) -> dict[str, Any] | None:
+    """Load the last loop's sealed evidence pack artifact, if one exists."""
+    candidates: list[tuple[int, Path]] = []
+    for path in symbol_root.glob("10_smc_evidence_pack_run_*/evidence_pack.json"):
+        suffix = path.parent.name.rsplit("_", 1)[-1]
+        try:
+            candidates.append((int(suffix), path))
+        except ValueError:
+            continue
+    pack_path = (
+        sorted(candidates)[-1][1]
+        if candidates
+        else symbol_root / "10_smc_evidence_pack" / "evidence_pack.json"
+    )
+    if not pack_path.exists():
+        return None
+    payload = json.loads(pack_path.read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else None
+
+
+def write_colleague_memory_and_narrative_shadow(
+    *,
+    symbol_root: Path,
+    output_root: str | Path,
+    symbol: str,
+) -> dict[str, Any]:
+    """Record cross-run memory and the narrative planner's shadow selection.
+
+    Both artifacts are additive run-package evidence written to a new
+    ``18_colleague_memory_narrative`` stage folder, after the canonical run
+    has completed:
+
+    * ``market_state_transition.json`` -- what changed since this symbol's
+      previous run (the colleague's memory: liquidity taken, bias or POI
+      change, advance/regression along the trader sequence).
+    * ``narrative_annotation_plan_shadow.json`` -- the narrative planner's
+      compositional selection (range, then the draw, then the causal POI,
+      then structure per rendered timeframe). It is **not rendered and not
+      validated**: the canonical, validator-checked plan remains
+      ``annotation_plan_v2``. Recording the shadow lets the analyst-marked
+      development cohort (WP-SMC-13) measure the planner against the
+      composer before any selector is promoted or retired.
+
+    Fail-soft by contract: every step reports a status string; nothing here
+    may fail the run, alter the sealed evidence pack (pack hash stays a pure
+    function of evidence), or create signal authority.
+    """
+    outcome: dict[str, Any] = {
+        "memory_status": "not_attempted",
+        "shadow_status": "not_attempted",
+        "transition_notes": [],
+    }
+    try:
+        pack = _load_final_evidence_pack(symbol_root)
+    except Exception as exc:  # noqa: BLE001 -- additive evidence, never fatal
+        outcome["memory_status"] = f"evidence_pack_unavailable:{type(exc).__name__}"
+        outcome["shadow_status"] = outcome["memory_status"]
+        return outcome
+    if pack is None:
+        outcome["memory_status"] = "evidence_pack_unavailable"
+        outcome["shadow_status"] = "evidence_pack_unavailable"
+        return outcome
+
+    stage_dir = symbol_root / "18_colleague_memory_narrative"
+    try:
+        from smc_desk.perception.market_state_memory import record_run_transition
+
+        market_state = pack.get("market_state") if isinstance(pack, dict) else None
+        if isinstance(market_state, dict) and market_state:
+            stage_dir.mkdir(parents=True, exist_ok=True)
+            record = record_run_transition(
+                output_root=output_root, symbol=symbol, current_market_state=market_state
+            )
+            (stage_dir / "market_state_transition.json").write_text(
+                json.dumps(record, indent=2, sort_keys=True, default=str), encoding="utf-8"
+            )
+            outcome["memory_status"] = "recorded"
+            outcome["transition_notes"] = list(record.get("transition", {}).get("notes") or [])
+        else:
+            outcome["memory_status"] = "no_market_state_in_pack"
+    except Exception as exc:  # noqa: BLE001 -- additive evidence, never fatal
+        outcome["memory_status"] = f"failed:{type(exc).__name__}"
+
+    try:
+        from smc_desk.brain.narrative_annotation_planner import plan_narrative_annotations
+
+        plan = plan_narrative_annotations(evidence_pack=pack)
+        shadow = {
+            "schema": "narrative_annotation_plan_shadow_v1",
+            "shadow_comparison_only": True,
+            "rendered": False,
+            "canonical_annotation_plan": "14_clean_annotation_render/annotation_plan_v2.json",
+            "purpose": (
+                "Recorded so the analyst-marked development cohort (WP-SMC-13) can "
+                "measure the narrative planner against the canonical composer before "
+                "any selector is promoted or retired."
+            ),
+            "plan": plan,
+            "authority": "observe_only_shadow_comparison",
+            "signal_allowed": False,
+        }
+        stage_dir.mkdir(parents=True, exist_ok=True)
+        (stage_dir / "narrative_annotation_plan_shadow.json").write_text(
+            json.dumps(shadow, indent=2, sort_keys=True, default=str), encoding="utf-8"
+        )
+        outcome["shadow_status"] = "recorded"
+    except Exception as exc:  # noqa: BLE001 -- additive evidence, never fatal
+        outcome["shadow_status"] = f"failed:{type(exc).__name__}"
+    return outcome
 
 
 def normalize_symbol(symbol: str) -> str:
@@ -978,6 +1097,10 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
         lines.append(f"Output: `{item.get('output_dir')}`")
         lines.append(f"Official chart: `{item.get('official_chart')}`")
         lines.append(f"Thesis: `{item.get('thesis_path')}`")
+        if item.get("memory_transition_notes"):
+            lines.append("Since last look:")
+            for note in item["memory_transition_notes"]:
+                lines.append(f"- {note}")
         lines.append(f"Last prices: `{item.get('last_prices')}`")
         if item.get("source_manifest", {}).get("proxy_note"):
             lines.append(f"Source note: {item['source_manifest']['proxy_note']}")
