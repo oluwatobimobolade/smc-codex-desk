@@ -585,3 +585,35 @@ Evidence:
 - `tests/test_wp0041b_ai_annotation_render_loop.py`
 - `analysis_runs/WP0041B_AI_ANNOTATION_RENDER_LOOP_BTCUSDT_20260711/`
 - `governance/WORK_PACKAGES/WP-0041B-AI-ANNOTATION-RENDER-LOOP/TEST_REPORT.json`
+
+## 2026-08-11 - Make Colleague Memory Source-Bound And Fail-Closed
+
+Decision: retain WP-SMC-19's observe-only cross-run memory and narrative
+planner shadow, but repair the integrity gaps found by the post-Plan audit
+before treating either artifact as dependable colleague evidence.
+
+Consequences:
+
+- Memory updates only for a parseable first observation or a strictly newer
+  observation of the same provider instrument. Older, ambiguous, and
+  equal-time conflicting observations cannot replace trusted state.
+- Symbol alone is not market identity. Provider source, provider symbol,
+  market type, and timeframe profile now scope every live store.
+- The compare/write transaction is process-locked and atomically persisted.
+- Human summaries distinguish created, updated, re-observed, preserved, and
+  failed memory outcomes and disclose all ordering/source warnings.
+- The shadow remains non-authoritative but now produces a provenance-bound
+  comparison against the canonical plan. Reconciliation conflicts and absent
+  human scores make promotion ineligible by construction.
+- The liquidity draw is included in every thesis branch, and XAU's GC=F proxy
+  identity plus 15m/1h perception gaps are explicit.
+- No detector threshold, causal authority, entry authority, paper execution,
+  live execution, or predictive claim changed.
+
+Evidence:
+
+- `smc_desk/perception/market_state_memory.py`
+- `tools/run_live_ai_smc_full_system.py`
+- `tests/test_market_state_memory.py`
+- `analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_20260811_145115/`
+- `governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md`

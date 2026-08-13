@@ -133,7 +133,7 @@ active_contracts:
 current_gate:
   id: GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001
   work_package: WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW
-  status: passed_local_observe_only_empirical_certification_unchanged
+  status: passed_local_observe_only_source_bound_memory_and_shadow_measurement_empirical_certification_unchanged
   next_programme: analyst_select_development_cases_then_blind_markup_before_threshold_tuning
 
 evaluation_truth_boundary_gate:

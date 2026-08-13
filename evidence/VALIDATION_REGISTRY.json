@@ -9,7 +9,7 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R6-20260811",
+    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R10-20260811",
     "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
     "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001"
   },
@@ -1445,6 +1445,179 @@
         "Perception failure surfacing discloses fail-closed gaps; it does not change the session model or any detector behavior.",
         "No thresholds changed, no P6 provider orchestration started, no signal, paper, live, or predictive authority created.",
         "No perception accuracy, predictive edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R7-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T14:57:03.947529+00:00",
+      "status": "IMPLEMENTED_LOCAL_OBSERVE_ONLY_GOVERNANCE_REBIND_PENDING",
+      "source": {
+        "git_head": "5628379ddbe5cb1783296849c04a540a503939b4",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 7,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "6676d3eb4a99a5d97a8211523fe3c019e344ce406889957109c7847ac8c095bc"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_market_state_memory.py tests/test_narrative_annotation_planner.py tests/test_live_full_system_closed_resample.py tests/test_wp0034_ai_smc_trader_brain.py tests/test_ai_smc_trade_ready_cases.py",
+          "exit_code": 0,
+          "summary": "79 passed in 3.98s"
+        },
+        {
+          "command": ".venv/bin/python tools/run_live_ai_smc_full_system.py --symbols ETHUSDT HYPEUSDT XAUUSD --output-root analysis_runs",
+          "exit_code": 0,
+          "summary": "fresh post-repair run LIVE_FULL_SYSTEM_AI_SMC_V3_20260811_145115; all memory identities created; XAU perception gaps surfaced; all shadow conflicts promotion-ineligible"
+        },
+        {
+          "command": "two-process same-symbol memory race: POI_MAPPED@12:00 vs TRADE_PLAN_READY@13:00",
+          "exit_code": 0,
+          "summary": "both processes exited 0; final store retained TRADE_PLAN_READY@13:00"
+        },
+        {
+          "command": ".venv/bin/python -m compileall -q smc_desk tools tests && .venv/bin/python tools/check_authority_boundaries.py && git diff --check",
+          "exit_code": 0,
+          "summary": "compile clean; authority boundary PASS; diff check clean"
+        }
+      ],
+      "primary_result": "Source-bound fail-closed colleague memory and provenance-bound shadow comparison implemented; fresh live proof complete; full-suite revalidation pending R8",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Memory and shadow comparison remain post-run evidence only; they cannot alter the sealed pack, canonical decision, chart geometry, or trade authority.",
+        "Shadow overlap is measured but human cohort truth remains NOT_SCORED and promotion_eligible remains false.",
+        "XAUUSD in the live harness is explicitly a GC=F COMEX futures proxy; its daily-settlement perception gaps remain fail-closed and unresolved at the data/session-doctrine layer.",
+        "No thresholds changed, no provider orchestration promotion started, and no signal, paper, live, predictive, accuracy, edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R8-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T15:03:39.094885+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "5628379ddbe5cb1783296849c04a540a503939b4",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 8,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "6676d3eb4a99a5d97a8211523fe3c019e344ce406889957109c7847ac8c095bc"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1412 passed, 1 skipped, 2 warnings in 350.43s (0:05:50)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1412 passed, 1 skipped, 2 warnings in 350.43s (0:05:50)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Memory and shadow comparison remain post-run evidence only and cannot alter sealed evidence, canonical decisions, chart geometry, or trade authority.",
+        "Shadow overlap is measured but human cohort truth remains NOT_SCORED and promotion_eligible remains false.",
+        "XAUUSD in this live harness is a GC=F COMEX futures proxy; daily-settlement perception gaps remain fail-closed and unresolved at the data/session-doctrine layer.",
+        "No thresholds, provider authority, signal, paper, live, predictive, accuracy, edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R9-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T15:12:24.569733+00:00",
+      "status": "FAIL",
+      "source": {
+        "git_head": "5628379ddbe5cb1783296849c04a540a503939b4",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 8,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "2935056d8e27a6c7fbd3955c09de9eef55abd4842148cd8154e3f07809672adc"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 1,
+          "summary": "1 failed, 1411 passed, 1 skipped in 362.35s (0:06:02)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 1,
+          "summary": "  1. Current validation source manifest hash does not match registry"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1 failed, 1411 passed, 1 skipped in 362.35s (0:06:02)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Memory and shadow comparison remain post-run evidence only and cannot alter sealed evidence, canonical decisions, chart geometry, or trade authority.",
+        "Shadow overlap is measured but human cohort truth remains NOT_SCORED and promotion_eligible remains false.",
+        "XAUUSD in this live harness is a GC=F COMEX futures proxy; daily-settlement perception gaps remain fail-closed and unresolved at the data/session-doctrine layer.",
+        "No thresholds, provider authority, signal, paper, live, predictive, accuracy, edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R10-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-11",
+      "recorded_at": "2026-08-11T15:19:36.549686+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "5628379ddbe5cb1783296849c04a540a503939b4",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 8,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "2935056d8e27a6c7fbd3955c09de9eef55abd4842148cd8154e3f07809672adc"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1412 passed, 1 skipped in 365.82s (0:06:05)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1412 passed, 1 skipped in 365.82s (0:06:05)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Memory and shadow comparison remain post-run evidence only and cannot alter sealed evidence, canonical decisions, chart geometry, or trade authority.",
+        "Shadow overlap is measured but human cohort truth remains NOT_SCORED and promotion_eligible remains false.",
+        "XAUUSD in this live harness is a GC=F COMEX futures proxy; daily-settlement perception gaps remain fail-closed and unresolved at the data/session-doctrine layer.",
+        "No thresholds, provider authority, signal, paper, live, predictive, accuracy, edge, or profitability claim is created."
       ]
     }
   ]

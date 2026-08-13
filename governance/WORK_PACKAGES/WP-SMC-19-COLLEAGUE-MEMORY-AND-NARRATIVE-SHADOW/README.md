@@ -121,3 +121,72 @@ surfacing gaps, both closed at the text/evidence level only:
 helper integration): 22/22 in `tests/test_market_state_memory.py`; brain,
 validator, and acceptance ring 90 passed. R5/R6 registry records follow the
 same rebind-then-validate pattern.
+
+## Integrity audit repair (2026-08-11, R7/R8)
+
+A read-only post-Plan audit did not find a detected canonical regression, but
+it found five missing invariants in the new additive layer. They are repaired
+without changing detector thresholds, canonical decision authority, or chart
+geometry:
+
+- **Fail-closed time ordering.** Missing or unparseable current/previous times
+  can no longer overwrite trusted memory. Equal-time identical observations
+  are recorded as re-observations without rewriting the store; equal-time
+  state or evidence conflicts are descriptive only and preserve the trusted
+  state. The transition now reports `store_status`, `store_updated`, and
+  `forward_transition` separately.
+- **Source-bound market identity.** Live memory is keyed by stable
+  `{canonical_symbol, source, provider_symbol, market_type,
+  timeframe_profile}` identity. XAUUSD through this harness is therefore
+  explicitly stored as `yahoo_chart / GC=F / COMEX gold futures proxy`, never
+  silently compared with an XAUUSD spot feed. Legacy unscoped files remain
+  readable for diagnostics but the live runner does not use them.
+- **Atomic compare/write.** A per-store process lock now covers the entire
+  read/compare/write decision. Atomic writes use unique temporary files,
+  `fsync`, and replacement, preventing two live-run processes from allowing an
+  older observation to win a race.
+- **Truthful human summary.** Store failures, preservation decisions,
+  unverified ordering, source identity, perception failures, and whether the
+  store actually changed are all surfaced. A stage artifact is no longer
+  summarized merely as `recorded` when persistence failed or was refused.
+- **A real shadow comparison.** `narrative_annotation_plan_shadow_v2` binds the
+  exact evidence pack, canonical plan, official decision, planner source, and
+  market identity by SHA-256. It measures matched/shadow-only/canonical-only
+  selections, precision and recall, names reconciliation conflicts, requires
+  an unfilled human cohort score, and is always `promotion_eligible: false`.
+  The standing draw is appended in every liquidity-story branch, including
+  active-POI and context-conflict branches.
+
+New regression coverage proves timestamp poisoning is impossible, equal-time
+conflicts preserve memory, same-symbol sources get different stores, schema or
+symbol mismatches fail closed, save failures are disclosed, concurrent writers
+retain the newest state, summaries expose the full truth, and shadow overlap is
+measured without promotion. The focused ring is 79 passed.
+
+Fresh post-repair live proof:
+
+- Run: `analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_20260811_145115`
+- ETHUSDT: source-bound memory `created`; shadow/canonical `0/10/2`, explicitly
+  `RECONCILIATION_CONFLICT_REVIEW_REQUIRED`, human score `NOT_SCORED`.
+- HYPEUSDT: source-bound memory `created`; shadow/canonical `0/11/1`, same
+  reconciliation and promotion refusal.
+- XAUUSD: source-bound `GC=F` proxy memory `created`; shadow/canonical `0/6/1`;
+  15m and 1h gap failures appear in JSON and Markdown as fail-closed perception
+  gaps; the source note explicitly says this is not an XAUUSD spot feed.
+- All three raw decisions name their evidence-bound standing liquidity draw as
+  descriptive/unpromoted, while all official decisions remain
+  `REVIEW_REQUIRED` and execution remains disabled.
+
+R7 records the source-bound implementation and targeted/live proof. R8 is the
+full validation rebind. Neither record creates empirical perception
+certification, predictive authority, or a trading signal.
+
+Final validation hardening replaces the concurrency regression test's POSIX
+`fork` context with `spawn`. The test still exercises two genuinely separate
+writers and the production `fcntl` lock, but it no longer risks forking an
+already multi-threaded pytest process or emitting fork-safety warnings. The
+post-hardening source state is bound by the preserved fail-closed R9 rebind
+record; R10 is the full post-rebind validation. R9's one reported failure is
+the governance reconciliation test correctly observing R8's superseded
+manifest hash before R9 itself was appended, not a detector or memory
+regression. The exact last-failed test passes after that rebind.

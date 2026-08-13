@@ -7,6 +7,7 @@ futures for crypto symbols and Yahoo chart data for XAU/GC futures proxy.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import ipaddress
 import json
 import subprocess
@@ -99,7 +100,12 @@ def main() -> None:
                     "transition_notes": [],
                 }
             summary["colleague_memory"] = colleague.get("memory_status")
+            summary["memory_store_updated"] = colleague.get("memory_store_updated")
+            summary["memory_forward_transition"] = colleague.get("memory_forward_transition")
+            summary["memory_market_identity"] = colleague.get("market_identity")
             summary["narrative_shadow_plan"] = colleague.get("shadow_status")
+            summary["narrative_shadow_comparison"] = colleague.get("shadow_comparison_status")
+            summary["narrative_shadow_metrics"] = colleague.get("shadow_comparison_metrics")
             summary["memory_transition_notes"] = colleague.get("transition_notes")
             summary["perception_failures"] = colleague.get("perception_failures")
         except Exception as exc:
@@ -128,8 +134,8 @@ def main() -> None:
     print(json.dumps(final, indent=2, sort_keys=True, default=str))
 
 
-def _load_final_evidence_pack(symbol_root: Path) -> dict[str, Any] | None:
-    """Load the last loop's sealed evidence pack artifact, if one exists."""
+def _final_evidence_pack_path(symbol_root: Path) -> Path | None:
+    """Resolve the evidence pack that owns the orchestrator's final loop."""
     candidates: list[tuple[int, Path]] = []
     for path in symbol_root.glob("10_smc_evidence_pack_run_*/evidence_pack.json"):
         suffix = path.parent.name.rsplit("_", 1)[-1]
@@ -137,12 +143,18 @@ def _load_final_evidence_pack(symbol_root: Path) -> dict[str, Any] | None:
             candidates.append((int(suffix), path))
         except ValueError:
             continue
-    pack_path = (
+    path = (
         sorted(candidates)[-1][1]
         if candidates
         else symbol_root / "10_smc_evidence_pack" / "evidence_pack.json"
     )
-    if not pack_path.exists():
+    return path if path.exists() else None
+
+
+def _load_final_evidence_pack(symbol_root: Path) -> dict[str, Any] | None:
+    """Load the last loop's sealed evidence pack artifact, if one exists."""
+    pack_path = _final_evidence_pack_path(symbol_root)
+    if pack_path is None:
         return None
     payload = json.loads(pack_path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else None
@@ -178,9 +190,11 @@ def write_colleague_memory_and_narrative_shadow(
     outcome: dict[str, Any] = {
         "memory_status": "not_attempted",
         "shadow_status": "not_attempted",
+        "shadow_comparison_status": "not_attempted",
         "transition_notes": [],
     }
     try:
+        pack_path = _final_evidence_pack_path(symbol_root)
         pack = _load_final_evidence_pack(symbol_root)
     except Exception as exc:  # noqa: BLE001 -- additive evidence, never fatal
         outcome["memory_status"] = f"evidence_pack_unavailable:{type(exc).__name__}"
@@ -190,6 +204,10 @@ def write_colleague_memory_and_narrative_shadow(
         outcome["memory_status"] = "evidence_pack_unavailable"
         outcome["shadow_status"] = "evidence_pack_unavailable"
         return outcome
+
+    evidence_fingerprint = _file_sha256(pack_path) if pack_path is not None else None
+    market_identity = _market_identity_from_pack(pack, symbol)
+    outcome["market_identity"] = market_identity
 
     try:
         outcome["perception_failures"] = _perception_failures(pack)
@@ -204,13 +222,24 @@ def write_colleague_memory_and_narrative_shadow(
         if isinstance(market_state, dict) and market_state:
             stage_dir.mkdir(parents=True, exist_ok=True)
             record = record_run_transition(
-                output_root=output_root, symbol=symbol, current_market_state=market_state
+                output_root=output_root,
+                symbol=symbol,
+                current_market_state=market_state,
+                market_identity=market_identity,
+                evidence_fingerprint=evidence_fingerprint,
             )
             (stage_dir / "market_state_transition.json").write_text(
                 json.dumps(record, indent=2, sort_keys=True, default=str), encoding="utf-8"
             )
-            outcome["memory_status"] = "recorded"
-            outcome["transition_notes"] = list(record.get("transition", {}).get("notes") or [])
+            outcome["memory_status"] = str(record.get("store_status") or "recorded_unknown")
+            outcome["memory_store_updated"] = bool(record.get("store_updated"))
+            outcome["memory_forward_transition"] = bool(record.get("forward_transition"))
+            outcome["transition_notes"] = _dedupe_notes(
+                [
+                    *(record.get("notes") or []),
+                    *(record.get("transition", {}).get("notes") or []),
+                ]
+            )
         else:
             outcome["memory_status"] = "no_market_state_in_pack"
     except Exception as exc:  # noqa: BLE001 -- additive evidence, never fatal
@@ -220,17 +249,39 @@ def write_colleague_memory_and_narrative_shadow(
         from smc_desk.brain.narrative_annotation_planner import plan_narrative_annotations
 
         plan = plan_narrative_annotations(evidence_pack=pack)
+        canonical_plan_path = symbol_root / "14_clean_annotation_render" / "annotation_plan_v2.json"
+        official_decision_path = symbol_root / "13_official_ai_decision" / "official_decision.json"
+        canonical_plan = _read_json_mapping(canonical_plan_path)
+        official_decision = _read_json_mapping(official_decision_path)
+        comparison = _compare_shadow_to_canonical(
+            shadow_plan=plan,
+            canonical_plan=canonical_plan,
+            evidence_pack=pack,
+            official_decision=official_decision,
+        )
         shadow = {
-            "schema": "narrative_annotation_plan_shadow_v1",
+            "schema": "narrative_annotation_plan_shadow_v2",
             "shadow_comparison_only": True,
             "rendered": False,
             "canonical_annotation_plan": "14_clean_annotation_render/annotation_plan_v2.json",
+            "provenance": {
+                "evidence_pack": str(pack_path) if pack_path is not None else None,
+                "evidence_pack_sha256": evidence_fingerprint,
+                "canonical_annotation_plan_sha256": _file_sha256(canonical_plan_path),
+                "official_decision_sha256": _file_sha256(official_decision_path),
+                "planner_source_sha256": _file_sha256(
+                    REPO_ROOT / "smc_desk" / "brain" / "narrative_annotation_planner.py"
+                ),
+                "decision_time": (pack.get("market_state") or {}).get("decision_time"),
+                "market_identity": market_identity,
+            },
             "purpose": (
                 "Recorded so the analyst-marked development cohort (WP-SMC-13) can "
                 "measure the narrative planner against the canonical composer before "
                 "any selector is promoted or retired."
             ),
             "plan": plan,
+            "comparison": comparison,
             "authority": "observe_only_shadow_comparison",
             "signal_allowed": False,
         }
@@ -239,9 +290,184 @@ def write_colleague_memory_and_narrative_shadow(
             json.dumps(shadow, indent=2, sort_keys=True, default=str), encoding="utf-8"
         )
         outcome["shadow_status"] = "recorded"
+        outcome["shadow_comparison_status"] = comparison["status"]
+        outcome["shadow_comparison_metrics"] = {
+            "shadow_count": comparison["shadow_count"],
+            "canonical_count": comparison["canonical_count"],
+            "matched_count": comparison["matched_count"],
+            "shadow_precision": comparison["shadow_precision"],
+            "canonical_recall": comparison["canonical_recall"],
+            "human_review_status": comparison["human_review_status"],
+            "promotion_eligible": comparison["promotion_eligible"],
+        }
     except Exception as exc:  # noqa: BLE001 -- additive evidence, never fatal
         outcome["shadow_status"] = f"failed:{type(exc).__name__}"
     return outcome
+
+
+def _market_identity_from_pack(pack: dict[str, Any], symbol: str) -> dict[str, Any]:
+    """Extract stable provider identity without dynamic timestamps or row counts."""
+    from smc_desk.perception.market_state_memory import normalize_market_identity
+
+    session = pack.get("session_context") if isinstance(pack, dict) else {}
+    manifest = session.get("source_manifest") if isinstance(session, dict) else {}
+    manifest = manifest if isinstance(manifest, dict) else {}
+    timeframe_manifest = manifest.get("timeframes")
+    timeframe_profile = (
+        list(timeframe_manifest)
+        if isinstance(timeframe_manifest, dict)
+        else list((pack.get("ohlcv_windows") or {}).keys())
+    )
+    return normalize_market_identity(
+        symbol,
+        {
+            "canonical_symbol": symbol,
+            "source": manifest.get("source"),
+            "provider_symbol": manifest.get("provider_symbol") or manifest.get("symbol") or symbol,
+            "market_type": manifest.get("market_type"),
+            "timeframe_profile": timeframe_profile,
+        },
+    )
+
+
+def _compare_shadow_to_canonical(
+    *,
+    shadow_plan: dict[str, Any],
+    canonical_plan: dict[str, Any] | None,
+    evidence_pack: dict[str, Any],
+    official_decision: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Create the missing measurable, non-promotional planner comparison."""
+    selections = [
+        item for item in (shadow_plan.get("selections") or []) if isinstance(item, dict)
+    ]
+    canonical_objects = [
+        item
+        for item in ((canonical_plan or {}).get("objects") or [])
+        if isinstance(item, dict)
+    ]
+    unmatched_canonical = set(range(len(canonical_objects)))
+    matched: list[dict[str, Any]] = []
+    shadow_only: list[dict[str, Any]] = []
+
+    for selection in selections:
+        shadow_id = str(selection.get("semantic_object_id") or "")
+        match_index = next(
+            (
+                index
+                for index in sorted(unmatched_canonical)
+                if shadow_id in _canonical_evidence_ids(canonical_objects[index])
+                and selection.get("object_type") == canonical_objects[index].get("object_type")
+                and selection.get("timeframe") == canonical_objects[index].get("timeframe")
+            ),
+            None,
+        )
+        if match_index is None:
+            shadow_only.append(_compact_shadow_selection(selection))
+            continue
+        unmatched_canonical.remove(match_index)
+        matched.append(
+            {
+                "evidence_object_id": shadow_id,
+                "object_type": selection.get("object_type"),
+                "timeframe": selection.get("timeframe"),
+                "canonical_semantic_object_id": canonical_objects[match_index].get(
+                    "semantic_object_id"
+                ),
+            }
+        )
+
+    canonical_only = [
+        {
+            "semantic_object_id": canonical_objects[index].get("semantic_object_id"),
+            "evidence_object_ids": sorted(_canonical_evidence_ids(canonical_objects[index])),
+            "object_type": canonical_objects[index].get("object_type"),
+            "timeframe": canonical_objects[index].get("timeframe"),
+        }
+        for index in sorted(unmatched_canonical)
+    ]
+    market_state = evidence_pack.get("market_state")
+    market_state = market_state if isinstance(market_state, dict) else {}
+    reasons = [str(item).lower() for item in (market_state.get("reasons") or [])]
+    context = market_state.get("context") if isinstance(market_state.get("context"), dict) else {}
+    reconciliation_required = (
+        str(context.get("narrative_state") or "") == "RECONCILIATION_REQUIRED"
+        or any("reconciliation" in reason for reason in reasons)
+    )
+    status = (
+        "CANONICAL_PLAN_UNAVAILABLE"
+        if canonical_plan is None
+        else "RECONCILIATION_CONFLICT_REVIEW_REQUIRED"
+        if reconciliation_required and selections
+        else "SHADOW_COMPARISON_RECORDED"
+    )
+    matched_count = len(matched)
+    return {
+        "schema": "narrative_shadow_comparison_v1",
+        "status": status,
+        "shadow_count": len(selections),
+        "canonical_count": len(canonical_objects),
+        "matched_count": matched_count,
+        "shadow_precision": matched_count / len(selections) if selections else None,
+        "canonical_recall": matched_count / len(canonical_objects) if canonical_objects else None,
+        "matched": matched,
+        "shadow_only": shadow_only,
+        "canonical_only": canonical_only,
+        "official_state": (official_decision or {}).get("official_state"),
+        "market_state": market_state.get("state"),
+        "market_narrative_state": context.get("narrative_state"),
+        "reconciliation_required": reconciliation_required,
+        "human_review_status": "NOT_SCORED",
+        "human_cohort_score_required": True,
+        "promotion_eligible": False,
+        "authority": "observe_only_measurement",
+        "signal_allowed": False,
+    }
+
+
+def _canonical_evidence_ids(obj: dict[str, Any]) -> set[str]:
+    ids = {str(item) for item in (obj.get("evidence_object_ids") or []) if item}
+    geometry = obj.get("evidence_geometry")
+    if isinstance(geometry, dict):
+        ids.update(str(item) for item in (geometry.get("source_object_ids") or []) if item)
+    semantic = str(obj.get("semantic_object_id") or "")
+    if semantic:
+        ids.add(semantic)
+        ids.add(semantic.rsplit(":", 1)[0])
+    return ids
+
+
+def _compact_shadow_selection(selection: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "semantic_object_id": selection.get("semantic_object_id"),
+        "object_type": selection.get("object_type"),
+        "timeframe": selection.get("timeframe"),
+        "label": selection.get("label"),
+    }
+
+
+def _read_json_mapping(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _file_sha256(path: Path | None) -> str | None:
+    if path is None or not path.exists():
+        return None
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _dedupe_notes(notes: list[Any]) -> list[str]:
+    return list(dict.fromkeys(str(note) for note in notes if note))
 
 
 def normalize_symbol(symbol: str) -> str:
@@ -326,7 +552,8 @@ def load_yahoo_xau_timeframes() -> tuple[dict[str, pd.DataFrame], dict[str, Any]
         "symbol": "XAUUSD",
         "source": "yahoo_chart",
         "provider_symbol": ticker,
-        "proxy_note": "Yahoo XAUUSD=X returned no data; GC=F COMEX gold futures used as XAUUSD proxy for observe-only system test.",
+        "market_type": "COMEX gold futures proxy",
+        "proxy_note": "This observe-only live harness uses GC=F COMEX gold futures as an explicit XAUUSD proxy; it is not an XAUUSD spot feed.",
         "timeframes": {tf: {"row_count": len(df), "last_timestamp": str(df["timestamp"].iloc[-1])} for tf, df in frames.items()},
     }
     return frames, manifest
@@ -744,6 +971,15 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
         active_range=active_range_payload,
         active_poi=active_poi_payload,
     )
+    base_liquidity_narrative = (
+        f"{parent_child_sentence} This is a context conflict, so no clean direction is promoted into a trade plan."
+        if parent_child_conflict and parent_child_sentence
+        else (
+            "A confirmed active POI is mapped for observation, but no validated sweep/displacement/entry confirmation is promoted into a trade plan."
+            if has_active_poi
+            else f"{_source_mode_subject(source_manifest)} sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
+        )
+    )
     return {
         "schema": "ai_smc_trader_decision_v1",
         "symbol": symbol,
@@ -781,15 +1017,7 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             ]
             if target_price is not None
             else [],
-            "narrative": (
-                f"{parent_child_sentence} This is a context conflict, so no clean direction is promoted into a trade plan."
-                if parent_child_conflict and parent_child_sentence
-                else (
-                    "A confirmed active POI is mapped for observation, but no validated sweep/displacement/entry confirmation is promoted into a trade plan."
-                    if has_active_poi
-                    else f"{_source_mode_subject(source_manifest)} sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan.{_narrative_draw_note(pack)}"
-                )
-            ),
+            "narrative": _with_narrative_draw(base_liquidity_narrative, pack),
         },
         "displacement_assessment": {
             "direction": "none",
@@ -933,6 +1161,11 @@ def _narrative_draw_note(pack: dict[str, Any]) -> str:
         f"{kind} at {format_price(price)} -- descriptive and unpromoted, not a "
         "validated sweep target."
     )
+
+
+def _with_narrative_draw(base_narrative: str, pack: dict[str, Any]) -> str:
+    """Append the descriptive draw in every thesis branch, including active POIs."""
+    return f"{base_narrative}{_narrative_draw_note(pack)}"
 
 
 def _perception_failures(pack: dict[str, Any]) -> list[str]:
@@ -1156,6 +1389,34 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
         lines.append(f"Output: `{item.get('output_dir')}`")
         lines.append(f"Official chart: `{item.get('official_chart')}`")
         lines.append(f"Thesis: `{item.get('thesis_path')}`")
+        if item.get("colleague_memory"):
+            lines.append(
+                "Colleague memory: "
+                f"`{item.get('colleague_memory')}` "
+                f"(store updated: `{str(bool(item.get('memory_store_updated'))).lower()}`, "
+                f"forward: `{str(bool(item.get('memory_forward_transition'))).lower()}`)"
+            )
+        identity = item.get("memory_market_identity")
+        if isinstance(identity, dict):
+            lines.append(
+                "Memory source identity: "
+                f"`{identity.get('source')} / {identity.get('provider_symbol')} / "
+                f"{identity.get('market_type')}`"
+            )
+        if item.get("narrative_shadow_comparison"):
+            lines.append(
+                f"Narrative shadow comparison: `{item.get('narrative_shadow_comparison')}`"
+            )
+            metrics = item.get("narrative_shadow_metrics")
+            if isinstance(metrics, dict):
+                lines.append(
+                    "Shadow/canonical overlap: "
+                    f"`{metrics.get('matched_count')}` matched of "
+                    f"`{metrics.get('shadow_count')}` shadow and "
+                    f"`{metrics.get('canonical_count')}` canonical objects; "
+                    f"human score: `{metrics.get('human_review_status')}`; "
+                    f"promotion eligible: `{str(bool(metrics.get('promotion_eligible'))).lower()}`"
+                )
         if item.get("memory_transition_notes"):
             lines.append("Since last look:")
             for note in item["memory_transition_notes"]:
