@@ -9,7 +9,7 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R10-20260811",
+    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R12-20260813",
     "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
     "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001"
   },
@@ -1618,6 +1618,76 @@
         "Shadow overlap is measured but human cohort truth remains NOT_SCORED and promotion_eligible remains false.",
         "XAUUSD in this live harness is a GC=F COMEX futures proxy; daily-settlement perception gaps remain fail-closed and unresolved at the data/session-doctrine layer.",
         "No thresholds, provider authority, signal, paper, live, predictive, accuracy, edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R11-20260811",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-13",
+      "recorded_at": "2026-08-13T21:43:34.210030+00:00",
+      "status": "IMPLEMENTED_LOCAL_OBSERVE_ONLY_GOVERNANCE_REBIND_PENDING",
+      "source": {
+        "git_head": "8c2dfcc63f31e07677875f689f158b152d739800",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 2,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "065a5813598d521ddb0ad1e6f93ca1500985c32799555b70f819a4179bf8d195"
+      },
+      "commands": [
+        {
+          "command": "rewrote README.md as the repository entry point",
+          "exit_code": 0,
+          "summary": "vision, honest status, architecture, quick start, WP-SMC-13 gate, repo map, contributor process, boundaries; canonical runtime path present as required by the governance checker"
+        }
+      ],
+      "primary_result": "Repository exploration readiness: entry-point README rewritten; governance source rebind pending R12",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Documentation-only change; no runtime, threshold, authority, or evidence change.",
+        "No perception accuracy, predictive edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R12-20260813",
+      "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
+      "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001",
+      "date": "2026-08-13",
+      "recorded_at": "2026-08-13T21:49:50.236724+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "8c2dfcc63f31e07677875f689f158b152d739800",
+        "source_state": "dirty_worktree",
+        "working_tree_status_lines": 4,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "065a5813598d521ddb0ad1e6f93ca1500985c32799555b70f819a4179bf8d195"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1412 passed, 1 skipped in 346.36s (0:05:46)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1412 passed, 1 skipped in 346.36s (0:05:46)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW/README.md",
+      "authority_mode": "additive_observe_only_run_package_evidence",
+      "limitations": [
+        "Documentation-only change; no runtime, threshold, authority, or evidence change.",
+        "No perception accuracy, predictive edge, or profitability claim is created."
       ]
     }
   ]

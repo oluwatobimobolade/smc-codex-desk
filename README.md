@@ -1,329 +1,206 @@
 # SMC Codex Desk
 
-SMC Codex Desk is a local, evidence-grounded Smart Money Concepts research
-workstation. It is an observe-only market colleague, not a trading bot and not
-a certified predictive system.
+**An evidence-grounded Smart Money Concepts (SMC) market colleague.**
 
-## Current Authority
+SMC Codex Desk reads multi-timeframe market structure like a disciplined trader,
+annotates charts *only* from certified evidence, builds conditional scenarios,
+remembers what changed since its last look, and refuses to say anything it
+cannot prove. It is deliberately **not** a trading bot, a signal service, or a
+predictive system.
 
-- Canonical runtime: `smc_desk.colleague.orchestrator_v3`.
-- Canonical command surface: `python -m smc_desk.colleague`.
-- Market truth: completed canonical OHLCV and decision time.
-- Formal structure and annotation: deterministic research authority guarded by
-  evidence, parent/child invariants, and downgrade-only validation.
-- Paper execution, live-capital execution, and predictive promotion: disabled.
+```
+Release:        colleague-core-rc0
+Market truth:   completed 15m candles (UTC), Binance USD-M canonical
+Execution:      live DISABLED / paper DISABLED (and always has been)
+Perception:     research authority, deterministic and fail-closed
+Prediction/ML:  research only - never decision authority
+Certification:  NOT_CERTIFIED by design (human adjudication required)
+Validation:     1,412 tests passed / 1 skipped + append-only registry
+```
 
-Start with [`governance/README_FIRST.md`](governance/README_FIRST.md). Authority
-precedence, controlled status language, source-document hashes, repository
-ownership, and validation history are machine-readable under `governance/` and
-`evidence/VALIDATION_REGISTRY.json`.
+## Why this exists
 
-The repository `/Users/tobimobolade/smc-live-market-truth-integration` is a
-historical companion only. It cannot define current runtime or validation
-authority.
+The goal is a *colleague*, not an indicator: a system that validates market
+data, reconstructs higher-timeframe charts from canonical lower-timeframe
+candles, reasons about SMC structure, produces professional annotations,
+remembers cases, and **abstains when the evidence is not enough**. The north
+star is to be nearly always useful and highly accurate about *current* market
+state and deterministic geometry, and honest about the future: predictive edge
+must be earned through historical validation, untouched holdouts, live shadow
+operation, and calibration - never claimed.
 
-## What The Current System Does
+## Honest status (read this before anything else)
 
-- Validates and reconstructs completed multi-timeframe OHLCV.
-- Generates deterministic SMC candidates and a formal MTF structure graph.
-- Produces evidence-grounded, sparse professional annotation plans.
-- Records structured JSON, Markdown, manifests, and PNG evidence.
-- Refuses trade presentation when graph, geometry, lifecycle, or critic gates fail.
+- **The system sees well and refuses honestly.** Every live run of recent
+  symbols (BTC, ETH, HYPE, XAU, EURJPY, AUDNZD, CADJPY) ends in a fail-closed
+  refusal rather than a weak claim. That is the intended behaviour.
+- **It is not yet "sure", and that is measured, not a feeling.** Historical
+  engine setups were net-negative (PF 0.71 / -0.18R over 1,088 trades on 4yr
+  BTC+ETH calibration). The current edge hypothesis is *selectivity through
+  narrative coherence* - the value lives in the refusal rate - and it can only
+  be tested against human-marked cases, which do not exist yet.
+- **Two structure models (V1 canonical vs V3 causal replay) disagree on most
+  runs, and the system's only response is to refuse.** Reconciling them
+  requires ratified doctrine and measured disagreement classifications (the
+  next gate).
+- **The AI reasoning lab is built but not yet wired into the production run
+  path** (P6, gated on the next item).
 
-Passing these software gates does not establish economic edge or market
-correctness. Human-adjudicated perception benchmarks and blind validation remain
-required before structure or annotation promotion.
+## How it thinks
 
-## Quick Start
+```
+OHLCV -> PerceptionEngineV2 (15m/1h/4h/1d) -> Event Ledger
+      -> MTF Graph + Parent-Child Guard
+      -> Formal Structure Graph   [AUTHORITATIVE, 6 invariants]
+      -> Causal Episode Graph v2 + Causal POI Authority
+      -> Significance / Narrative Hierarchy / Market State (memory)
+      -> Evidence Pack (hash-sealed) -> AI thesis (narrates only)
+      -> Validator (downgrade-only) -> Annotation composer -> Visual critic
+```
 
-Install dependencies:
+Authority model, in one paragraph: **deterministic geometry owns every price;
+the AI owns only the words.** The formal structure graph is the single
+authoritative source for bias, ranges, POI claims and annotations. The AI can
+narrate, compare, and critique - it can never move a level, flip a bias, or
+create trade authority. Everything a chart shows is traceable to a sealed
+evidence ID; anything unproven is omitted, and omission is audited.
+
+A setup may only be considered ready when the full doctrine holds: external
+bias defined by swing structure (internal CHoCH is confirmation only), a fresh
+POI aligned with premium/discount, liquidity swept before the break,
+**body-close displacement** (wicks are never breaks), price at the POI, and at
+least 1:3 R:R. Anything less becomes Watch/Pass at 0% risk.
+
+## What it can do today
+
+- Multi-timeframe SMC perception: swings, external/internal BOS and CHoCH,
+  protected swings, order blocks, FVGs, liquidity pools, sweeps, inducement.
+- Significance grading (ATR-normalised) so a real 11-bar fractal is not drawn
+  as "major" and noise is not drawn at all.
+- A hierarchical multi-timeframe narrative that treats a disagreeing child as
+  a *retracement inside the parent*, not a contradiction - and names the
+  standing liquidity draw ("where is price being pulled to?").
+- A trader-sequence market state (MAP_CONTEXT -> ... -> TRADE_PLAN_READY) with
+  **cross-run memory**: each run records what changed since the last look.
+- Professional native MTF storyboards (dealing range, context supply/demand
+  retained as context-only, IDM, MSS) beside a sparse, validator-checked
+  annotation plan - plus a recorded *shadow* narrative selection so the two
+  selectors can be measured against human markup.
+- Governance that audits itself: append-only validation registry, source
+  manifests with SHA-256, authority-boundary scanner, controlled status
+  vocabulary, and a prohibition on generic "latest validation" claims.
+
+## Quick start
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+python -m pytest -q          # expect 1,412 passed, 1 skipped
 ```
 
-Run the canonical authority smoke:
+Run one live observe-only analysis (fetches Binance USD-M / Yahoo data):
 
 ```bash
-python -m smc_desk.colleague --smoke --output-root /tmp/smc_authority_smoke
+python tools/run_live_ai_smc_full_system.py --symbols BTCUSDT ETHUSDT
 ```
 
-The full live-research mapping is temporarily exposed through
-`tools/run_live_ai_smc_full_system.py` until the compact reproducibility and
-provenance bridge is complete.
+Per symbol the run writes `analysis_runs/LIVE_FULL_SYSTEM_AI_SMC_V3_<stamp>/<SYMBOL>/`:
 
-## Historical And Comparison Utilities
+| Stage | Artifact |
+|---|---|
+| `10_smc_evidence_pack*` | hash-sealed evidence pack (the source of all claims) |
+| `13_official_ai_decision` | the observe-only decision |
+| `14_clean_annotation_render` | validated annotation plan + native MTF storyboard PNGs |
+| `15_ai_thesis` | the written thesis (with named invalidation + liquidity draw) |
+| `16_formal_structure_graph` | structure graph, causal episodes, POI authority |
+| `17_perception_interrogation` | certification verdict (NOT_CERTIFIED by design) |
+| `18_colleague_memory_narrative` | what changed since last look + narrative shadow plan |
 
-Commands below this point include useful research and comparison tools. They do
-not supersede the canonical runtime or governance contracts above.
+## The next gate: WP-SMC-13 - human truth
 
-Generate sample market data:
+The system is one deliberate human action away from becoming *measurable*.
+`governance/NEXT_ACTIONS.yaml` has exactly one priority-1 item:
+
+> **Build and mark an analyst-selected development cohort.** Select 12-15
+> cases from clean charts *without* seeing system answers, seal their
+> provenance, and complete one expert markup pass **before** any threshold is
+> tuned.
+
+That cohort is the first-ever measurement of whether the system sees structure
+like a competent human. It gates everything downstream: threshold calibration,
+doctrine ratification (Constitution V2), wiring the AI reasoning roles into
+the run path (P6), and reconciling the two structure models.
+
+The tooling exists and refuses to do the human's job for them:
 
 ```bash
-python3 tools/generate_sample_ohlcv.py --output sample_ohlcv.csv
+python tools/survey_candidate_cases.py \
+  --source data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv \
+  --start 2026-03-01 --end 2026-06-19 --every 3D \
+  --output review_queues/candidate_survey_<date>
+# pick 12-15 cases by eye, write my_picks.json, then:
+python tools/seal_definition_set.py \
+  --survey review_queues/candidate_survey_<date> \
+  --selections my_picks.json --analyst-id founder \
+  --output data/gold_sets/development_set_<date>
+python tools/build_markup_cohort.py \
+  --gold-set data/gold_sets/development_set_<date> \
+  --output review_queues/markup_cohort_v2_<date> --reviewer-id founder
+# mark every case (never open the _sealed_system_answer.json), then:
+python tools/score_markup_cohort.py --cohort review_queues/markup_cohort_v2_<date>
 ```
 
-Run analysis:
+## Repository map
 
-```bash
-python3 tools/analyze_chart.py \
-  --ohlcv sample_ohlcv.csv \
-  --symbol XAUUSD \
-  --timeframe 15m \
-  --bias bearish \
-  --notes "Watching for sell-side sweep into bearish FVG." \
-  --output-dir outputs
+```
+governance/          READ THIS FIRST: authority precedence, current state,
+                     next actions, decision log, work-package records,
+                     append-only validation registry (evidence/)
+smc_desk/            the Python package
+  perception/        detectors, significance, narrative, market state, memory
+  colleague/         smc_desk.colleague.orchestrator_v3 - the canonical runtime
+  brain/             thesis, annotation planners, validators, structure_lab
+  rendering/         native MTF storyboards, visual grammar, critics
+  evaluation/        markup cohort integrity, scoring, gold sets
+tools/               CLI entry points (live runner, survey/seal/score,
+                     validation registry, TradingView bridges, case library)
+specs/               Constitutions V1/V2, detector configs, ontologies
+tests/               1,412 tests - run the full suite before any claim
+strategies/ journal/ case_library/ backtests/
+                     historical and comparison research (see below)
+analysis_runs/       runtime outputs - gitignored by design (large evidence)
 ```
 
-Compare your own bias versus the model:
-
-```bash
-python3 tools/compare_my_bias_vs_model.py \
-  --analysis outputs/analysis.json \
-  --ohlcv sample_ohlcv.csv \
-  --user-direction bearish \
-  --user-entry 2320.5 \
-  --user-stop 2324.2 \
-  --user-target 2312.0 \
-  --output-dir outputs
-```
-
-## Repo Layout
-
-- `prompts/`: Codex-ready prompts for building, running, and extending the workstation
-- `strategies/smc/`: the house rulebook template, rule config, and the **SMC Elite Strategy**
-- `smc_desk/`: reusable Python package for parsing data, running analysis, and rendering outputs
-- `tools/`: CLI entrypoints, including the WebBridge screenshot capture tool
-- `outputs/`: generated JSON, Markdown, and PNG artifacts that can be stored in a journal or dashboard
-- `journal/`: saved SMC Elite analyses, screenshots, and outcome tracking
-- `.opencode/skills/smc-elite-analyst/`: opencode skill for persistent chart analysis
-- `smc_elite_prompt.md`: quick prompt for instant analysis
-- `mcp/`: placeholder for future browser or broker integrations
-
-## Input Format
-
-OHLCV CSV files should include:
-
-- `timestamp`
-- `open`
-- `high`
-- `low`
-- `close`
-- `volume` is optional
-
-Timestamps should be ISO 8601 or any pandas-readable datetime format.
-
-## Output Files
-
-The default output set is:
-
-- `outputs/analysis.json`
-- `outputs/annotated_chart.png`
-- `outputs/trade_plan.md`
-- `outputs/bias_comparison.md`
-- `outputs/bias_comparison.png`
-
-If you provide screenshot input, the tool also writes:
-
-- `outputs/screenshot_review.png`
-
-## SMC Elite System
-
-A complete, high-confluence SMC workflow has been added to this repo:
-
-- **Playbook:** `strategies/smc/SMC_ELITE_STRATEGY.md`
-- **Structure doctrine:** `strategies/smc/STRUCTURE_DOCTRINE.md`
-- **Consensus research:** `strategies/smc/CONSENSUS_SMC_RESEARCH.md`
-- **Backtesting playbook:** `strategies/smc/BACKTESTING_PLAYBOOK.md`
-- **Visual accuracy spec:** `strategies/smc/VISUAL_ACCURACY_SPEC.md`
-- **Skill:** `.opencode/skills/smc-elite-analyst/SKILL.md`
-- **Quick prompt:** `smc_elite_prompt.md`
-- **Journal:** `journal/`
-- **WebBridge capture tool:** `tools/smc_webbridge_analyst.py`
-
-### Fusion Architecture (experimental observability layers)
-
-A shadow-mode observability stack sits beside the deterministic engine. It adds narrative, intent, regime, and visual context without replacing the engine or `dual_lens.py`:
-
-- **Dual-direction engine** — emits both bullish and bearish `TradePlan`s with engine-owned prices.
-- **Episode Narrative** — derives RALLY/DROP/TRAP/CONSOLIDATION episodes from engine structure events (same evidence the state machine uses).
-- **OHLCV Features** — exact, deterministic, no-cv2 detectors for spike traps, failed breakouts, wick ratios, regime proxies.
-- **Intent Detector** — log-only modulator by default until calibrated; never asserts a standalone direction.
-- **Fusion Engine** — scores the two engine plans, applies regime penalties, flags contested, maps every price to its engine source.
-- **Calibration harness** — Brier score, reliability curve, isotonic regression.
-- **Dual Lens** (`--vision` flag) — vision reconciliation as a Macro Sanity Check; defaults to `observe_only`.
-
-See `strategies/smc/FUSION_ARCHITECTURE.md` for the full contract and `strategies/smc/PRECEDENCE_LADDER.md` for the authored tiebreakers.
-
-Attach fusion to a normal chart analysis:
-
-```bash
-python3 tools/analyze_chart.py \
-  --ohlcv data/sample_ohlcv.csv \
-  --symbol EURUSD \
-  --timeframe 15m \
-  --output-dir outputs \
-  --fusion
-```
-
-### Perception V2 (object-based engine, restructure branch)
-
-A V2 perception stack with full object lifecycle, provenance, and tick-precision:
-
-- **`smc_desk/perception/`** — object-based perception: swings, structure, FVGs, lifecycle, ontology, comparator
-- **`smc_desk/rendering/`** — semantic scene graph + 4-mode deterministic chart renderer (clean / live / audit / review)
-- **`smc_desk/vision/`** — blind vision evaluation pipeline with provider abstraction (observe_only default)
-- **`smc_desk/knowledge/`** — rule cards, academy profiles, conflict matrix, retrieval
-- **`smc_desk/teacher_panel/`** — AI annotation committee (extractor, critic, judge, source-critic, adversarial-critic)
-- **`smc_desk/synthetic/`** — synthetic chart university (scene generator, ground truth, visual variants, counterfactuals)
-- **`smc_desk/evaluation/`** — sandbox evaluation (hidden holdout, metamorphic, counterfactual, human challenge)
-- **`smc_desk/data/`** — Candle schemas, provenance, quality control, Binance adapters
-
-### Testing
-
-Validation history is append-only in `evidence/VALIDATION_REGISTRY.json`. Every
-record is tied to a commit or explicit worktree state. There is no generic
-`latest_validation` claim.
-
-To run canonical validation and append a named record:
-
-```bash
-python tools/run_validation_registry.py \
-  --record-id <unique-id> \
-  --work-package <work-package> \
-  --gate <gate-id> \
-  --report <report-path>
-```
-
-### Downloading Binance futures data for backtesting
-
-```bash
-python3 tools/download_binance_futures_ohlcv.py \
-  --symbol BTCUSDT \
-  --interval 15m \
-  --start 2026-06-01 \
-  --end 2026-06-18 \
-  --output data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_20260601_20260618.csv
-```
-
-Pull the default perp universe (`BTCUSDT`, `ETHUSDT`, `SOLUSDT`, `XRPUSDT`, `BNBUSDT`) across `15m`, `1h`, `4h`, and `1d`:
-
-```bash
-bash tools/pull_binance_futures_universe.sh
-```
-
-Run the full 15m research/training loop for one pair:
-
-```bash
-bash tools/train_pair.sh BTCUSDT
-```
-
-Run it for the whole default futures universe:
-
-```bash
-bash tools/train_binance_futures_universe.sh
-```
-
-### Running a replay backtest
-
-```bash
-python3 tools/backtest_smc_elite.py \
-  --ohlcv data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_20260601_20260618.csv \
-  --symbol BTCUSDT \
-  --timeframe 15m \
-  --output-dir backtests/2026-06-18/BTCUSDT_15m_smoke \
-  --warmup-bars 250 \
-  --entry-wait-bars 24 \
-  --max-hold-bars 96
-```
-
-### Capturing exchange-matched chart screenshots for analysis
-
-```bash
-python3 tools/smc_webbridge_analyst.py --instrument BTCUSDT
-```
-
-This opens TradingView (free), switches through **Daily → 4H → 1H → 15m**, and saves screenshots to `journal/YYYY-MM-DD/<INSTRUMENT>/`.
-For Binance futures symbols, the tool defaults to TradingView perpetual charts like `BINANCE:BTCUSDT.P` so screenshots line up with Binance USD-M futures OHLCV. Legacy spot symbols `BTCUSD` and `ETHUSD` still default to Bitstamp; for other markets, pass the TradingView source explicitly, for example `--instrument OANDA:EURUSD` or `--instrument XAUUSD --exchange OANDA`.
-
-### Building a reusable SMC case
-
-Every serious example should become a case folder with:
-
-- 15m OHLCV source path and SHA-256 hash
-- data quality checks
-- no-future-leakage MTF snapshot
-- machine analysis and checklist
-- TradingView screenshot references
-- blank expert-label template
-
-```bash
-python3 tools/build_smc_case.py \
-  --symbol BTCUSDT \
-  --exchange BINANCE \
-  --ohlcv data/ohlcv/binance_futures/BTCUSDT/BTCUSDT_15m_4year.csv \
-  --screenshots-meta journal/2026-06-18/BTCUSDT/screenshots.json \
-  --output-dir case_library/BTCUSDT/current_live_case
-```
-
-Do not promote a rule from raw backtest output alone. Promote only after the case library has enough visually reviewed wins, losses, missed entries, and pass/no-trade examples.
-
-Audit the case library after adding cases:
-
-```bash
-python3 tools/audit_case_library.py --root case_library --print-summary
-```
-
-This writes `case_library/index.md` and `case_library/index.json`, showing which cases are source-aligned, which remain unreviewed, and which are eligible for machine research versus expert training.
-
-### Generating a TradingView overlay
-
-To keep models from inventing visual levels, generate a Pine Script overlay from the deterministic case data:
-
-```bash
-python3 tools/generate_tradingview_overlay.py \
-  --case case_library/BTCUSDT/current_live_case/case.json \
-  --print-summary
-```
-
-This writes `tradingview_overlay.pine` beside the case. Paste it into TradingView Pine Editor and add it to the chart to draw the exact SMC Desk zones, POI, execution SL, structural invalidation, targets, and structure labels. Public TradingView pages do not expose the Charting Library Drawings API directly, so Pine overlay is the repeatable path; browser-click drawing is a brittle fallback.
-
-### Running dual-lens live analysis
-
-The dual-lens workflow keeps the deterministic engine in charge of every price while a chart-vision read acts as a second opinion:
-
-```bash
-python3 tools/analyze_live_dual_lens.py \
-  --symbol BTCUSDT \
-  --provider binance_futures \
-  --days 20
-```
-
-Then reconcile a vision read against the engine output:
-
-```bash
-python3 tools/reconcile_dual_lens.py \
-  --case case_library/BTCUSDT/<case>/engine_analysis.json \
-  --vision case_library/BTCUSDT/<case>/vision_read.json
-```
-
-Rules: closed candles only, same-source data preferred, engine owns entry/stop/targets, vision can confirm or veto but cannot invent tradeable levels. Stops separate raw structural invalidation from execution SL; risk/reward uses the execution SL after the ATR volatility buffer.
-
-### Running an SMC Elite analysis
-
-With the skill registered in opencode, simply say:
-
-> "Analyze XAUUSD with SMC Elite."
-
-Or paste the contents of `smc_elite_prompt.md` and name the instrument.
-
-## Next Steps
-
-The highest-value upgrades are:
-
-1. Replace remaining generic heuristics with your exact house rules
-2. Add your journal and example charts as retrieval context
-3. Run broader train/holdout backtests across BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, BNBUSDT, FX majors, and metals
-4. Add a browser/Pine Script overlay layer for trusted chart visualization
+## Working process (contributors)
+
+1. Read `governance/README_FIRST.md`, then `AUTHORITY_PRECEDENCE.yaml` and
+   `CURRENT_STATE.yaml`.
+2. Confirm the current gate in `evidence/VALIDATION_REGISTRY.json`.
+3. Obey the contract: `signal_allowed` stays false; no threshold changes
+   without cohort evidence; the sealed evidence pack stays a pure function of
+   evidence; memory and shadow artifacts are post-run evidence only.
+4. Validate: full `pytest`, `tools/check_governance_consistency.py`,
+   `tools/check_authority_boundaries.py`, then append a source-bound record
+   with `tools/run_validation_registry.py`. Records are append-only; failed
+   records are retained.
+
+## Historical and comparison utilities
+
+The early SMC-Elite era tools remain for research: `tools/analyze_chart.py`,
+`tools/analyze_live_dual_lens.py`, `tools/build_smc_case.py`,
+`tools/generate_tradingview_overlay.py`, the WebBridge capture tool, and the
+strategy documents under `strategies/smc/`. They are **comparison and
+research only** - the canonical runtime is `orchestrator_v3` and the live
+runner above.
+
+## Honest boundaries (never claim otherwise)
+
+- Passing tests means code behaved as specified. It does **not** prove market
+  correctness, profitability, or edge.
+- AI labels are weak/research labels until human adjudication; implementation
+  coverage is not perception accuracy.
+- Live crypto runs use exchange-native higher-timeframe candles; the
+  candle-lineage certificate currently binds offline replays only. XAUUSD uses
+  a GC=F COMEX proxy whose daily settlement gaps fail-closed on 15m/1h
+  (disclosed in each run). Forex uses a Yahoo spot proxy.
+- No claim of live or paper trading readiness, ever, from this repository.
