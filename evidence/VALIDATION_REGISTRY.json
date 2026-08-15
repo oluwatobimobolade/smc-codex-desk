@@ -9,9 +9,9 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-R12-20260813",
-    "work_package": "WP-SMC-19-COLLEAGUE-MEMORY-AND-NARRATIVE-SHADOW",
-    "gate": "GATE-WP-SMC-19-COLLEAGUE-MEMORY-NARRATIVE-SHADOW-001"
+    "record_id": "WP-SMC-21-SCOPED-RECONCILIATION-20260815",
+    "work_package": "WP-SMC-21-SCOPED-RECONCILIATION-AND-MEASURED-REFUSAL",
+    "gate": "GATE-WP-SMC-21-SCOPED-RECONCILIATION-001"
   },
   "records": [
     {
@@ -1688,6 +1688,362 @@
       "limitations": [
         "Documentation-only change; no runtime, threshold, authority, or evidence change.",
         "No perception accuracy, predictive edge, or profitability claim is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-R1-20260814",
+      "work_package": "WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY",
+      "gate": "GATE-WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-001",
+      "date": "2026-08-14",
+      "recorded_at": "2026-08-14T08:09:30+00:00",
+      "status": "IMPLEMENTED_LOCAL_OBSERVE_ONLY_GOVERNANCE_REBIND_PENDING",
+      "source": {
+        "git_head": "c39cdaa7c3d22bfc54b45563680e1925b58bf042",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 35,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "eafcdad5b2533532e7c1d36f4b35a0f2f54a77d24c9f5d9822ea14a1799f95a3"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 1,
+          "summary": "1454 passed, 1 skipped; one expected governance source-rebind mismatch and zero behavioral failures"
+        },
+        {
+          "command": "fresh ETHUSDT HYPEUSDT XAUUSD autonomous reality check v3",
+          "exit_code": 0,
+          "summary": "All three fail closed without entry authority; XAUUSD proxy creates zero SMC objects"
+        }
+      ],
+      "primary_result": "Autonomous integrity and market-source identity repairs implemented; exact source manifest rebound; post-rebind validation pending R2",
+      "report": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/README.md",
+      "authority_mode": "observe_only_fail_closed_autonomous_research",
+      "limitations": [
+        "Deterministic integrity is not empirical perception accuracy.",
+        "The fresh runner used a local deterministic provider, not an external vision LLM.",
+        "Human adjudication remains required for empirical accuracy certification.",
+        "No signal, paper, live, predictive, edge, or profitability authority is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-R2-20260814",
+      "work_package": "WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY",
+      "gate": "GATE-WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-001",
+      "date": "2026-08-14",
+      "recorded_at": "2026-08-14T08:16:36+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "c39cdaa7c3d22bfc54b45563680e1925b58bf042",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 36,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "eafcdad5b2533532e7c1d36f4b35a0f2f54a77d24c9f5d9822ea14a1799f95a3"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1455 passed, 1 skipped in 365.11s (0:06:05)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1455 passed, 1 skipped in 365.11s (0:06:05)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/README.md",
+      "authority_mode": "observe_only_fail_closed_autonomous_research",
+      "limitations": [
+        "Deterministic integrity is not empirical perception accuracy.",
+        "The fresh runner used a local deterministic provider, not an external vision LLM.",
+        "Human adjudication remains required for empirical accuracy certification.",
+        "No signal, paper, live, predictive, edge, or profitability authority is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-R3-20260814",
+      "work_package": "WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY",
+      "gate": "GATE-WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-001",
+      "date": "2026-08-14",
+      "recorded_at": "2026-08-14T09:31:06+00:00",
+      "status": "IMPLEMENTED_LOCAL_OBSERVE_ONLY_GOVERNANCE_REBIND_PENDING",
+      "source": {
+        "git_head": "c39cdaa7c3d22bfc54b45563680e1925b58bf042",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 40,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "ddf9fe8088700b262a620f77d398de0f3733ca936a69d7ae7ba0a96e1dd9d327"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 1,
+          "summary": "1461 passed, 1 skipped in 387.78s; one expected governance source-rebind mismatch and zero behavioral failures"
+        },
+        {
+          "command": "fresh ETHUSDT HYPEUSDT autonomous reality check v6 plus offline XAUUSD proxy-quarantine proof R2",
+          "exit_code": 0,
+          "summary": "ETH and HYPE fail closed without entry authority; XAUUSD proxy creates zero requested-market SMC objects, memory updates, or narrative comparisons"
+        }
+      ],
+      "primary_result": "Two-stage protected-level MSS replay, source-identity semantic quarantine, causal narration, and native context-label repairs implemented; exact source manifest rebound; post-rebind validation pending R4",
+      "report": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/README.md",
+      "authority_mode": "observe_only_fail_closed_autonomous_research",
+      "limitations": [
+        "Deterministic integrity and manual Codex visual review are not empirical perception accuracy.",
+        "The fresh runner used a local deterministic provider, not an external vision LLM.",
+        "Human adjudication remains required for empirical accuracy certification.",
+        "No signal, paper, live, predictive, edge, or profitability authority is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-R4-20260814",
+      "work_package": "WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY",
+      "gate": "GATE-WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-001",
+      "date": "2026-08-14",
+      "recorded_at": "2026-08-14T09:38:41+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "c39cdaa7c3d22bfc54b45563680e1925b58bf042",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 40,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "ddf9fe8088700b262a620f77d398de0f3733ca936a69d7ae7ba0a96e1dd9d327"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1462 passed, 1 skipped in 379.99s (0:06:19)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1462 passed, 1 skipped in 379.99s (0:06:19)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/README.md",
+      "authority_mode": "observe_only_fail_closed_autonomous_research",
+      "limitations": [
+        "Deterministic integrity and manual Codex visual review are not empirical perception accuracy.",
+        "The fresh runner used a local deterministic provider, not an external vision LLM.",
+        "Human adjudication remains required for empirical accuracy certification.",
+        "No signal, paper, live, predictive, edge, or profitability authority is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-R5-20260814",
+      "work_package": "WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY",
+      "gate": "GATE-WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-001",
+      "date": "2026-08-14",
+      "recorded_at": "2026-08-14T09:46:54+00:00",
+      "status": "COSMETIC_THESIS_REFINEMENT_GOVERNANCE_REBIND_PENDING",
+      "source": {
+        "git_head": "c39cdaa7c3d22bfc54b45563680e1925b58bf042",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 40,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "45e6f294e516780c5d4e08b005e2167e27ca22e6df4543d7120e9ea259ba44f5"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q tests/test_structure_engine_v3_causal_episode_graph.py tests/test_wp0038_avax_eurnzd_repairs.py",
+          "exit_code": 0,
+          "summary": "31 passed in 17.27s"
+        },
+        {
+          "command": "fresh HYPEUSDT autonomous reality check v7",
+          "exit_code": 0,
+          "summary": "No duplicate disputed-POI punctuation; decision remains REVIEW_REQUIRED with confirmed bearish 15m MSS and no causal POI/entry"
+        }
+      ],
+      "primary_result": "Final disputed-POI thesis punctuation normalized and source manifest rebound; post-rebind validation pending R6",
+      "report": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/README.md",
+      "authority_mode": "observe_only_fail_closed_autonomous_research",
+      "limitations": [
+        "The final change is presentational and creates no new semantic or trade authority.",
+        "The fresh runner used a local deterministic provider, not an external vision LLM.",
+        "No signal, paper, live, predictive, edge, or profitability authority is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-R6-20260814",
+      "work_package": "WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY",
+      "gate": "GATE-WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-001",
+      "date": "2026-08-14",
+      "recorded_at": "2026-08-14T09:54:48+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "c39cdaa7c3d22bfc54b45563680e1925b58bf042",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 40,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "45e6f294e516780c5d4e08b005e2167e27ca22e6df4543d7120e9ea259ba44f5"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1462 passed, 1 skipped in 390.14s (0:06:30)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1462 passed, 1 skipped in 390.14s (0:06:30)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/README.md",
+      "authority_mode": "observe_only_fail_closed_autonomous_research",
+      "limitations": [
+        "Deterministic integrity and manual Codex visual review are not empirical perception accuracy.",
+        "The fresh runner used a local deterministic provider, not an external vision LLM.",
+        "Human adjudication remains required for empirical accuracy certification.",
+        "No signal, paper, live, predictive, edge, or profitability authority is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-R7-20260814",
+      "work_package": "WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY",
+      "gate": "GATE-WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-001",
+      "date": "2026-08-14",
+      "recorded_at": "2026-08-14T18:46:20+00:00",
+      "status": "FIVE_MARKET_REPAIR_SOURCE_REBOUND_POST_REBIND_VALIDATION_PENDING",
+      "source": {
+        "git_head": "c39cdaa7c3d22bfc54b45563680e1925b58bf042",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 43,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "bdf98b5cdb4cd9deabc6cd211a4ef268494ca0fdaf27114d6d0a70c1a3b17517"
+      },
+      "commands": [
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python -m pytest -q",
+          "exit_code": 1,
+          "summary": "1468 passed, 1 skipped; one expected governance manifest mismatch before source rebind"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "All 1468 behavioral tests passed; exact 834-record source manifest rebound and post-rebind full validation pending R8",
+      "report": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/README.md",
+      "authority_mode": "observe_only_fail_closed_autonomous_research",
+      "limitations": [
+        "The five-market runner used a local deterministic provider, not an external vision LLM.",
+        "Manual Codex chart inspection is not empirical perception certification.",
+        "No signal, paper, live, predictive, edge, or profitability authority is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-R8-20260814",
+      "work_package": "WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY",
+      "gate": "GATE-WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-001",
+      "date": "2026-08-14",
+      "recorded_at": "2026-08-14T19:10:41+00:00",
+      "status": "PASS",
+      "source": {
+        "git_head": "c39cdaa7c3d22bfc54b45563680e1925b58bf042",
+        "source_state": "dirty_worktree_source_bound",
+        "working_tree_status_lines": 43,
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "bdf98b5cdb4cd9deabc6cd211a4ef268494ca0fdaf27114d6d0a70c1a3b17517"
+      },
+      "commands": [
+        {
+          "command": "PYTHONPATH=. /Users/tobimobolade/smc-codex-desk/.venv/bin/pytest -q",
+          "exit_code": 0,
+          "summary": "1469 passed, 1 skipped in 481.86s (0:08:01)"
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "No inconsistencies found."
+        },
+        {
+          "command": "/Users/tobimobolade/smc-codex-desk/.venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "No forbidden legacy imports found."
+        }
+      ],
+      "primary_result": "1469 passed, 1 skipped in 481.86s (0:08:01)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY/README.md",
+      "authority_mode": "observe_only_fail_closed_autonomous_research",
+      "limitations": [
+        "Deterministic integrity and manual Codex visual review are not empirical perception accuracy.",
+        "The five-market runner used a local deterministic provider, not an external vision LLM.",
+        "V3 remains downgrade-only until a preregistered held-out comparison justifies promotion.",
+        "No signal, paper, live, predictive, edge, or profitability authority is created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-21-SCOPED-RECONCILIATION-20260815",
+      "work_package": "WP-SMC-21-SCOPED-RECONCILIATION-AND-MEASURED-REFUSAL",
+      "gate": "GATE-WP-SMC-21-SCOPED-RECONCILIATION-001",
+      "date": "2026-08-15",
+      "recorded_at": "2026-08-15T00:00:00Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_SOURCE_BOUND",
+      "source": {
+        "git_head": "c39cdaa",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-21-SCOPED-RECONCILIATION-AND-MEASURED-REFUSAL/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "6d4af20d06e24ae28379680750053aab02a165f87e4ccfefb04b22c274ca75e0"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1482 passed, 1 skipped in 344.99s (0:05:44)"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS; current 9-entry source manifest content verified"
+        }
+      ],
+      "primary_result": "1482 passed, 1 skipped in 344.99s (0:05:44)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-21-SCOPED-RECONCILIATION-AND-MEASURED-REFUSAL/README.md",
+      "authority_mode": "observe_only_scoped_reconciliation_and_selective_measurement",
+      "limitations": [
+        "ENTRY_TIMING_WITHHELD creates no entry, stop, target, paper or live authority.",
+        "The ledger records decisions only; selective_error and missed_favorable_outcome_rate stay null until outcomes resolve.",
+        "A context read may rest on a single surviving narrative check (CHFJPY); no depth requirement was added.",
+        "No detector threshold was tuned and no disputed object was rescued.",
+        "Human adjudication remains the only route to definition correctness."
       ]
     }
   ]

@@ -125,7 +125,16 @@ class SweepEvidence(SMCObjectEvidence):
 
 class OrderBlockEvidence(SMCObjectEvidence):
     originating_fvg_id: Optional[str] = None
-    volume_ratio: float
+    # Volume is supporting evidence, never a silent 1.0 default. A missing or
+    # unusable series is represented as None with an explicit status.
+    volume_ratio: Optional[float] = None
+    origin_volume_ratio: Optional[float] = None
+    departure_volume_ratio: Optional[float] = None
+    origin_volume: Optional[float] = None
+    departure_volume: Optional[float] = None
+    baseline_volume: Optional[float] = None
+    volume_baseline_bars: int = 0
+    volume_evidence_status: Literal["AVAILABLE", "UNAVAILABLE", "INSUFFICIENT_BASELINE"] = "UNAVAILABLE"
     structure_break_id: Optional[str] = None
     source_candle_id: Optional[str] = None
     body_ratio: float = 0.0

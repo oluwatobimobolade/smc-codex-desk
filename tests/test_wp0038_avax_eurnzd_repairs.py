@@ -12,7 +12,12 @@ from smc_desk.brain.ai_smc_consistency_validator import validate_ai_smc_decision
 from smc_desk.brain.ai_smc_trader_brain import REASONING_ORDER, parse_ai_smc_decision
 from smc_desk.brain.llm_provider import CallableAISMCProvider, LLMCompletionRequest
 from smc_desk.brain.smc_evidence_pack_builder import build_smc_evidence_pack
-from smc_desk.colleague.orchestrator_v3 import _run_perception_candidates, run_ai_smc_orchestrator_v3
+from smc_desk.colleague.orchestrator_v3 import (
+    _effective_context_depth_report,
+    _run_perception_candidates,
+    _suppress_blocked_definition_timeframes,
+    run_ai_smc_orchestrator_v3,
+)
 from smc_desk.colleague.smc_thesis_ai_v1 import (
     _narrative_context,
     build_smc_thesis_ai_v1,
@@ -198,6 +203,21 @@ def test_renderer_offsets_same_price_level_labels():
     assert len({item["label_y"] for item in positioned}) == 2
 
 
+def test_renderer_separates_nearby_ob_bos_and_idm_captions_without_moving_geometry():
+    levels = [
+        {"kind": "bos", "label": "BOS", "low": 75.70, "high": 75.70},
+        {"kind": "order_block", "label": "BEARISH OB", "low": 75.76, "high": 75.95},
+        {"kind": "idm", "label": "IDM", "low": 75.95, "high": 75.95},
+    ]
+
+    positioned = _assign_level_label_positions(levels, low=72.0, high=78.0)
+    label_positions = sorted(item["label_y"] for item in positioned)
+
+    assert all(right - left >= 6.0 * 0.018 for left, right in zip(label_positions, label_positions[1:]))
+    assert positioned[1]["low"] == 75.76
+    assert positioned[1]["high"] == 75.95
+
+
 def test_evidence_pack_embeds_chart_bytes_for_vision_providers(tmp_path):
     image_path = tmp_path / "15m.png"
     image_path.write_bytes(b"fake-png-bytes")
@@ -341,6 +361,30 @@ def test_live_harness_recognizes_forex_without_routing_to_xau_proxy():
     assert module.is_forex_pair("AVAXUSDT") is False
 
 
+def test_forex_live_loader_reconstructs_closed_ny_daily_from_hourly(monkeypatch):
+    module = _tool_module("run_live_ai_smc_full_system")
+    calls: list[str] = []
+
+    def fake_yahoo(_ticker: str, *, interval: str, range_: str) -> pd.DataFrame:
+        calls.append(interval)
+        if interval == "15m":
+            return _df(120, "15min", base=0.81)
+        if interval == "1h":
+            return _df(900, "1h", base=0.81)
+        raise AssertionError(f"Standalone Yahoo interval must not be requested: {interval}/{range_}")
+
+    monkeypatch.setattr(module, "yahoo_chart_df", fake_yahoo)
+    frames, manifest = module.load_yahoo_forex_timeframes("USDCHF")
+
+    assert calls == ["15m", "1h"]
+    assert not frames["1d"].empty
+    assert set(frames["1d"].columns) == {"timestamp", "open", "high", "low", "close", "volume"}
+    assert (frames["1d"]["high"] >= frames["1d"][["open", "close", "low"]].max(axis=1)).all()
+    assert (frames["1d"]["low"] <= frames["1d"][["open", "close", "high"]].min(axis=1)).all()
+    assert manifest["daily_session_profile"] == "new_york_close_daily"
+    assert manifest["timeframes"]["1d"]["derived_from"] == "yahoo_chart_1h"
+
+
 def test_live_conservative_provider_does_not_let_active_range_override_htf_bias():
     module = _tool_module("run_live_ai_smc_full_system")
 
@@ -411,6 +455,48 @@ def test_live_provider_downgrades_direction_when_causal_replay_disagrees():
     assert payload["direction"] == "mixed"
     assert payload["bias_summary"]["final_bias"] == "mixed"
     assert payload["active_poi"]["poi_id"] is None
+
+
+def test_live_provider_does_not_deny_fresh_v3_displacement_in_final_thesis():
+    module = _tool_module("run_live_ai_smc_full_system")
+
+    class Request:
+        evidence_pack = {
+            "symbol": "HYPEUSDT",
+            "ohlcv_summaries": {
+                timeframe: {
+                    "first_open": 55.0,
+                    "last_close": 56.0,
+                    "high": 58.0,
+                    "low": 53.0,
+                }
+                for timeframe in ("15m", "1h", "4h", "1d")
+            },
+            "detector_candidates": {},
+            "active_range_authority": {"selected_range": None},
+            "structure_engine_v3_shadow": {
+                "decision_time": "2026-08-14T09:00:00Z",
+                "timeframes": {
+                    "15m": {
+                        "latest_accepted_external": {
+                            "accepted_for_shadow_story": True,
+                            "source_break_object_id": "hype:15m:mss:bearish",
+                            "event_type": "EXTERNAL_MSS_CONFIRMED_BEARISH",
+                            "direction": "bearish",
+                            "confirmation_time": "2026-08-14T07:30:00Z",
+                            "displacement_score": 0.90,
+                        }
+                    }
+                },
+            },
+        }
+
+    payload = module.build_conservative_ai_payload(Request(), {"source": "test"})
+
+    assert payload["displacement_assessment"]["structure_broken"] is True
+    assert "fresh V3-accepted 15m EXTERNAL_MSS_CONFIRMED_BEARISH exists" in payload["final_thesis"]
+    assert "does not have validated sweep/displacement" not in payload["final_thesis"]
+    assert "fresh V3-accepted 15m displacement" in payload["liquidity_story"]["narrative"]
 
 
 def test_live_provider_preserves_bullish_external_structure_with_internal_pullback():
@@ -596,6 +682,65 @@ def test_forex_perception_uses_long_clean_segment_after_old_midweek_hole() -> No
     assert tf_report["original_rows"] == 550
     assert tf_report["rows_analyzed"] == 520
     assert candidates["1h"]
+
+
+def test_effective_depth_uses_post_gap_rows_and_failed_perception_is_zero() -> None:
+    raw = {
+        "4h": {
+            "timeframe": "4h",
+            "row_count": 3721,
+            "minimum_required": 500,
+            "status": "PASS",
+            "context_depth_warning": False,
+            "authority_adjustment": "normal",
+        },
+        "1h": {
+            "timeframe": "1h",
+            "row_count": 1300,
+            "minimum_required": 1000,
+            "status": "PASS",
+            "context_depth_warning": False,
+            "authority_adjustment": "normal",
+        },
+    }
+    report = _effective_context_depth_report(
+        raw,
+        perception_report={
+            "timeframes": {
+                "4h": {"status": "PASS", "rows_analyzed": 349},
+                "1h": {"status": "FAILED", "error": "gap"},
+            }
+        },
+        minimum_depths={"4h": 500, "1h": 1000},
+    )
+
+    assert report["4h"]["raw_row_count"] == 3721
+    assert report["4h"]["row_count"] == 349
+    assert report["4h"]["context_depth_warning"] is True
+    assert report["1h"]["row_count"] == 0
+    assert report["1h"]["status"] == "SHALLOW_CONTEXT"
+
+
+def test_data_failed_timeframe_candidates_are_suppressed_before_poi_enrichment() -> None:
+    candidates, suppressed = _suppress_blocked_definition_timeframes(
+        {"4h": {"structure_breaks": [{"object_id": "bad-break"}]}, "1d": {"swings": []}},
+        definition_conformance={
+            "by_timeframe": {
+                "4h": {
+                    "certificate": {
+                        "status": "DATA_FAILED",
+                        "failures": ["unexplained candle gap"],
+                    }
+                },
+                "1d": {"certificate": {"status": "BOUNDARY_SENSITIVE", "failures": []}},
+            }
+        },
+    )
+
+    assert candidates["4h"] == {}
+    assert candidates["1d"] == {"swings": []}
+    assert suppressed["4h"]["status"] == "DATA_FAILED"
+    assert "unexplained candle gap" in suppressed["4h"]["reason"]
 
 
 def test_forex_daily_session_accepts_bounded_holiday_closures() -> None:

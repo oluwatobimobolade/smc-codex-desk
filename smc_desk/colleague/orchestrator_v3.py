@@ -66,6 +66,8 @@ from smc_desk.evaluation.perception_interrogation import (
     load_adjudicated_evaluation_inputs,
     load_external_validation_readiness,
 )
+from smc_desk.evaluation.autonomous_conformance import run_autonomous_conformance_bundle
+from smc_desk.data.source_identity import assess_source_identity
 from smc_desk.perception.formal_structure_graph import (
     graph_invariant_violation_codes,
     graph_requires_thesis_only,
@@ -111,20 +113,80 @@ def run_ai_smc_orchestrator_v3(
     root = Path(output_dir).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
 
+    # Run before the AI sees the evidence. This certificate is independent of
+    # the provider and can only block/downgrade; model agreement cannot repair
+    # a production/reference implementation conflict.
+    normalized_symbol = symbol.upper().replace("/", "").replace("-", "")
+    source_manifest = (
+        (session_context or {}).get("source_manifest")
+        if isinstance(session_context, Mapping)
+        else None
+    )
+    source_identity_certificate = assess_source_identity(normalized_symbol, source_manifest)
+    _write_json(root / "05_source_identity" / "source_identity_certificate.json", source_identity_certificate)
+    session_profile = (
+        "forex_5d" if _uses_sessioned_chart_proxy(normalized_symbol) else "continuous"
+    )
+    depth_profile = _select_depth_profile(symbol)
+    conformance_result = run_autonomous_conformance_bundle(
+        timeframe_dfs,
+        market=symbol,
+        session_profile=session_profile,
+        minimum_depths=depth_profile,
+    )
+    definition_conformance = conformance_result["bundle"]
+    _write_json(root / "06_definition_conformance" / "bundle.json", definition_conformance)
+    for timeframe, run_payload in conformance_result["full_runs"].items():
+        _write_json(root / "06_definition_conformance" / f"{timeframe}_full_run.json", run_payload)
+
     max_candles = 120
     loop_count = 0
     while loop_count < 2:
         loop_count += 1
         
-        depth_profile = _select_depth_profile(symbol)
-        depth_report = build_context_depth_report(timeframe_dfs, minimum_depths=depth_profile)
+        raw_depth_report = build_context_depth_report(
+            timeframe_dfs, minimum_depths=depth_profile
+        )
         detector_candidates_payload: Mapping[str, Any]
         perception_report: dict[str, Any]
         if detector_candidates is None:
-            detector_candidates_payload, perception_report = _run_perception_candidates(symbol=symbol, timeframe_dfs=timeframe_dfs)
+            detector_candidates_payload, perception_report = _run_perception_candidates(
+                symbol=symbol,
+                timeframe_dfs=timeframe_dfs,
+                minimum_depths=depth_profile,
+            )
+            depth_report = _effective_context_depth_report(
+                raw_depth_report,
+                perception_report=perception_report,
+                minimum_depths=depth_profile,
+            )
         else:
             detector_candidates_payload = detector_candidates
             perception_report = {"source": "caller_supplied_detector_candidates", "auto_perception_ran": False}
+            depth_report = raw_depth_report
+        detector_candidates_payload, suppressed_timeframes = _suppress_blocked_definition_timeframes(
+            detector_candidates_payload,
+            definition_conformance=definition_conformance,
+        )
+        if source_identity_certificate["candle_authority_allowed"] is not True:
+            detector_candidates_payload, identity_suppression = _suppress_all_candidate_timeframes(
+                detector_candidates_payload,
+                timeframes=timeframe_dfs,
+                source_identity_certificate=source_identity_certificate,
+            )
+            suppressed_timeframes.update(identity_suppression)
+        if suppressed_timeframes:
+            perception_report["definition_conformance_suppression"] = suppressed_timeframes
+            for timeframe, suppression in suppressed_timeframes.items():
+                timeframe_report = perception_report.setdefault("timeframes", {}).setdefault(
+                    timeframe, {}
+                )
+                timeframe_report.update(
+                    {
+                        "authority_suppressed": True,
+                        "authority_suppression_reason": suppression["reason"],
+                    }
+                )
         detector_candidates_payload, poi_report = _enrich_detector_candidates_with_pois(
             detector_candidates_payload,
             timeframe_dfs=timeframe_dfs,
@@ -139,6 +201,7 @@ def run_ai_smc_orchestrator_v3(
         )
         context = {
             **dict(session_context or {}),
+            "source_identity_certificate": source_identity_certificate,
             "context_depth_report": depth_report,
             "context_depth_warning": any(item["context_depth_warning"] for item in depth_report.values()),
             "context_depth_profile": depth_profile,
@@ -154,6 +217,7 @@ def run_ai_smc_orchestrator_v3(
             embed_images=True,
             daily_session_profile=daily_session_profile,
             max_candles_per_timeframe=max_candles,
+            definition_conformance=definition_conformance,
         )
         
         # Write files for tracking
@@ -474,6 +538,10 @@ def run_ai_smc_orchestrator_v3(
         "evidence_pack_hash": (evidence_pack.get("provenance") or {}).get("pack_hash"),
         "chart_image_paths": chart_pack["chart_paths"],
         "context_depth_report": depth_report,
+        "source_identity_status": source_identity_certificate.get("status"),
+        "source_identity_certificate_path": str(
+            root / "05_source_identity" / "source_identity_certificate.json"
+        ),
         "context_depth_profile": depth_profile,
         "perception_candidates": perception_report,
         "validation_result": validation_result.status,
@@ -535,6 +603,7 @@ def run_ai_smc_orchestrator_v3(
             "evidence_pack_hash": (evidence_pack.get("provenance") or {}).get("pack_hash"),
             "official_state": official_decision.get("official_state"),
             "validation_status": validation_result.status,
+            "source_identity_status": source_identity_certificate.get("status"),
             "graph_invariant_status": formal_graph.get("invariants", {}).get("status", "NOT_COMPUTED"),
             "graph_parent_child_status": formal_graph.get("parent_child_context", {}).get("status", "NOT_COMPUTED"),
             "causal_episode_invariant_status": (causal_episode_graph.get("invariants") or {}).get("status", "NOT_COMPUTED"),
@@ -575,7 +644,9 @@ def _run_perception_candidates(
     *,
     symbol: str,
     timeframe_dfs: Mapping[str, pd.DataFrame],
+    minimum_depths: Mapping[str, int] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    minimum_depths = minimum_depths or _select_depth_profile(symbol)
     candidates: dict[str, Any] = {}
     report = {"source": "perception_engine_v2_auto", "auto_perception_ran": True, "timeframes": {}}
     for timeframe, df in timeframe_dfs.items():
@@ -603,7 +674,7 @@ def _run_perception_candidates(
                     timeframe=timeframe,
                     session_profile=session_profile,
                 )
-                minimum_rows = int(FOREX_MINIMUM_DEPTH.get(timeframe, 0))
+                minimum_rows = int(minimum_depths.get(timeframe, 0))
                 if proposed_trim_report["session_gap_trimmed"] and len(trimmed) >= minimum_rows:
                     analysis_df = trimmed
                     trim_report = proposed_trim_report
@@ -653,6 +724,92 @@ def _run_perception_candidates(
                 "error": str(exc),
             }
     return candidates, report
+
+
+def _effective_context_depth_report(
+    raw_report: Mapping[str, Any],
+    *,
+    perception_report: Mapping[str, Any],
+    minimum_depths: Mapping[str, int],
+) -> dict[str, Any]:
+    """Measure usable rows after gap handling, not raw rows before it.
+
+    A long file with a late unexplained gap is not deep evidence if perception
+    can safely use only a short post-gap segment (or no segment at all).
+    """
+    by_timeframe = perception_report.get("timeframes")
+    by_timeframe = by_timeframe if isinstance(by_timeframe, Mapping) else {}
+    effective: dict[str, Any] = {}
+    for timeframe, raw in raw_report.items():
+        item = dict(raw) if isinstance(raw, Mapping) else {}
+        perception = by_timeframe.get(timeframe)
+        if isinstance(perception, Mapping):
+            rows = (
+                int(perception.get("rows_analyzed") or 0)
+                if perception.get("status") == "PASS"
+                else 0
+            )
+            required = int(minimum_depths.get(timeframe, item.get("minimum_required") or 0))
+            shallow = rows < required
+            item.update(
+                {
+                    "raw_row_count": item.get("row_count"),
+                    "row_count": rows,
+                    "minimum_required": required,
+                    "status": "SHALLOW_CONTEXT" if shallow else "PASS",
+                    "context_depth_warning": shallow,
+                    "authority_adjustment": "reduce_to_review" if shallow else "normal",
+                    "effective_row_source": "perception_rows_after_gap_policy",
+                }
+            )
+        effective[str(timeframe)] = item
+    return effective
+
+
+def _suppress_blocked_definition_timeframes(
+    candidates: Mapping[str, Any],
+    *,
+    definition_conformance: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, dict[str, str]]]:
+    """Prevent data-failed/conflicted timeframes from creating chart truth."""
+    blocked_statuses = {"DATA_FAILED", "IMPLEMENTATION_CONFLICT", "DOCTRINE_UNDEFINED"}
+    by_timeframe = definition_conformance.get("by_timeframe")
+    by_timeframe = by_timeframe if isinstance(by_timeframe, Mapping) else {}
+    out = dict(candidates)
+    suppressed: dict[str, dict[str, str]] = {}
+    for timeframe, item in by_timeframe.items():
+        certificate = item.get("certificate") if isinstance(item, Mapping) else None
+        status = str(certificate.get("status") or "DATA_FAILED") if isinstance(certificate, Mapping) else "DATA_FAILED"
+        if status not in blocked_statuses:
+            continue
+        out[str(timeframe)] = {}
+        failures = list(certificate.get("failures") or []) if isinstance(certificate, Mapping) else []
+        suppressed[str(timeframe)] = {
+            "status": status,
+            "reason": (
+                f"Autonomous definition conformance is {status}: "
+                f"{failures[0] if failures else 'no admissible evidence certificate'}"
+            ),
+        }
+    return out, suppressed
+
+
+def _suppress_all_candidate_timeframes(
+    candidates: Mapping[str, Any],
+    *,
+    timeframes: Mapping[str, pd.DataFrame],
+    source_identity_certificate: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, dict[str, str]]]:
+    """Withhold every semantic candidate when instrument identity is wrong."""
+    out = dict(candidates)
+    status = str(source_identity_certificate.get("status") or "MISMATCH")
+    failures = list(source_identity_certificate.get("failures") or [])
+    reason = f"Market source identity is {status}: {failures[0] if failures else 'instrument was not certified'}"
+    suppressed: dict[str, dict[str, str]] = {}
+    for timeframe in timeframes:
+        out[str(timeframe)] = {}
+        suppressed[str(timeframe)] = {"status": status, "reason": reason}
+    return out, suppressed
 
 
 def _enrich_detector_candidates_with_pois(

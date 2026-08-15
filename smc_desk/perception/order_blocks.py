@@ -109,9 +109,15 @@ class OrderBlockDetector:
                 origin_start=cluster[0].open_time,
                 departure_ids=set(departure_ids),
             )
+            volume_evidence = _relative_volume_evidence(
+                candles,
+                cluster_start=cluster_start,
+                cluster_end=cluster_end,
+                break_index=break_index,
+            )
             evidence = OrderBlockEvidence(
                 originating_fvg_id=None if origin_fvg is None else origin_fvg.object_id,
-                volume_ratio=1.0,
+                **volume_evidence,
                 structure_break_id=brk.object_id,
                 source_candle_id=_candle_id(source),
                 body_ratio=body_ratio,
@@ -402,6 +408,12 @@ class OrderBlockDetector:
         departure = candles[cluster_end + 1 : break_index + 1]
         departure_ids = [_candle_id(candle) for candle in departure]
         body_ratio = max((_body_ratio(candle) for candle in cluster), default=0.0)
+        volume_evidence = _relative_volume_evidence(
+            candles,
+            cluster_start=cluster_start,
+            cluster_end=cluster_end,
+            break_index=break_index,
+        )
         admission = {
             "admitted": False,
             "gate": "visibility_ledger",
@@ -432,7 +444,7 @@ class OrderBlockDetector:
             price_high=max(candle.high for candle in cluster),
             evidence=OrderBlockEvidence(
                 originating_fvg_id=None,
-                volume_ratio=1.0,
+                **volume_evidence,
                 structure_break_id=brk.object_id,
                 source_candle_id=_candle_id(source),
                 body_ratio=body_ratio,
@@ -647,6 +659,84 @@ def _body_ratio(candle: Candle) -> float:
     if rng <= 0:
         return 0.0
     return float(abs(candle.close - candle.open) / rng)
+
+
+def _relative_volume_evidence(
+    candles: list[Candle],
+    *,
+    cluster_start: int,
+    cluster_end: int,
+    break_index: int,
+    baseline_window: int = 20,
+    minimum_baseline_bars: int = 5,
+) -> dict[str, object]:
+    """Return observed relative-volume facts without affecting OB admission.
+
+    The baseline ends before the origin cluster so origin and departure volume
+    cannot leak into their own comparator. A zero-filled or missing series is
+    unavailable; it is never converted to a neutral ratio of 1.0.
+    """
+    baseline = candles[max(0, cluster_start - baseline_window) : cluster_start]
+    cluster = candles[cluster_start : cluster_end + 1]
+    departure = candles[cluster_end + 1 : break_index + 1]
+    unavailable = not cluster or not departure or any(
+        candle.volume <= 0 for candle in (*baseline, *cluster, *departure)
+    )
+    if unavailable:
+        return _unavailable_volume(len(baseline), "UNAVAILABLE")
+    origin_volume = _mean_volume(cluster)
+    departure_volume = _mean_volume(departure)
+    if len(baseline) < minimum_baseline_bars:
+        return {
+            **_unavailable_volume(len(baseline), "INSUFFICIENT_BASELINE"),
+            "origin_volume": float(origin_volume),
+            "departure_volume": float(departure_volume),
+        }
+    baseline_volume = _median_decimal([candle.volume for candle in baseline])
+    if baseline_volume <= 0:
+        return {
+            **_unavailable_volume(len(baseline), "UNAVAILABLE"),
+            "origin_volume": float(origin_volume),
+            "departure_volume": float(departure_volume),
+        }
+    origin_ratio = float(origin_volume / baseline_volume)
+    departure_ratio = float(departure_volume / baseline_volume)
+    return {
+        # Backward-compatible alias now carries measured departure volume.
+        "volume_ratio": departure_ratio,
+        "origin_volume_ratio": origin_ratio,
+        "departure_volume_ratio": departure_ratio,
+        "origin_volume": float(origin_volume),
+        "departure_volume": float(departure_volume),
+        "baseline_volume": float(baseline_volume),
+        "volume_baseline_bars": len(baseline),
+        "volume_evidence_status": "AVAILABLE",
+    }
+
+
+def _unavailable_volume(baseline_bars: int, status: str) -> dict[str, object]:
+    return {
+        "volume_ratio": None,
+        "origin_volume_ratio": None,
+        "departure_volume_ratio": None,
+        "origin_volume": None,
+        "departure_volume": None,
+        "baseline_volume": None,
+        "volume_baseline_bars": baseline_bars,
+        "volume_evidence_status": status,
+    }
+
+
+def _mean_volume(candles: list[Candle]) -> Decimal:
+    return sum((candle.volume for candle in candles), Decimal("0")) / Decimal(len(candles))
+
+
+def _median_decimal(values: list[Decimal]) -> Decimal:
+    ordered = sorted(values)
+    middle = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[middle]
+    return (ordered[middle - 1] + ordered[middle]) / Decimal("2")
 
 
 def _direction(value: object) -> str:

@@ -124,6 +124,24 @@ def test_native_storyboard_tells_one_grounded_episode_without_trade_box():
     assert all(obj["object_type"] != "trade_box" for obj in storyboard["objects"])
 
 
+def test_source_identity_mismatch_suppresses_every_native_timeframe():
+    pack = _pack()
+    pack["session_context"] = {
+        "source_identity_certificate": {
+            "status": "MISMATCH_PROXY",
+            "candle_authority_allowed": False,
+        }
+    }
+
+    result = build_native_mtf_storyboards(pack)
+
+    for timeframe in ("1d", "4h", "1h", "15m"):
+        storyboard = result["storyboards"][timeframe]
+        assert storyboard["objects"] == []
+        assert storyboard["source"] == "market_source_identity_fail_closed"
+        assert storyboard["resolution_manifest"]["suppression_status"] == "MISMATCH_PROXY"
+
+
 def test_native_storyboard_includes_authority_selected_primary_poi():
     pack = _pack()
     pack["formal_causal_episode_graph"]["timeframes"]["15m"]["latest_external_episode"]["primary_poi"] = None
@@ -136,6 +154,7 @@ def test_native_storyboard_includes_authority_selected_primary_poi():
                     "poi_id": "15m:order_block:ob-1",
                     "timeframe": "15m",
                     "kind": "order_block",
+                    "linked_break_id": "break-1",
                     "lineage_role": "protected_reversal_origin",
                     "poi_role": "primary_causal_poi",
                 },
@@ -163,6 +182,7 @@ def test_native_storyboard_labels_partially_mitigated_primary_poi() -> None:
                     "poi_id": "15m:order_block:ob-1",
                     "timeframe": "15m",
                     "kind": "order_block",
+                    "linked_break_id": "break-1",
                     "freshness": "partial",
                     "lineage_role": "protected_reversal_origin",
                     "poi_role": "primary_causal_poi",
@@ -178,6 +198,34 @@ def test_native_storyboard_labels_partially_mitigated_primary_poi() -> None:
     )
 
     assert poi["label"] == "Protected OB (partial)"
+
+
+def test_native_storyboard_withholds_primary_poi_linked_to_rejected_break() -> None:
+    pack = _pack()
+    pack["formal_causal_episode_graph"]["timeframes"]["15m"]["latest_external_episode"]["primary_poi"] = None
+    pack["causal_poi_authority"] = {
+        "scenarios": {
+            "bullish": {
+                "status": "SELECTED",
+                "primary_causal_poi": {
+                    "source_object_id": "ob-1",
+                    "poi_id": "15m:order_block:ob-1",
+                    "timeframe": "15m",
+                    "kind": "order_block",
+                    "linked_break_id": "rejected-break",
+                    "lineage_role": "protected_reversal_origin",
+                    "poi_role": "primary_causal_poi",
+                },
+            }
+        }
+    }
+
+    result = build_native_mtf_storyboards(pack)
+
+    assert not any(
+        obj["object_type"] == "poi_zone"
+        for obj in result["storyboards"]["15m"]["objects"]
+    )
 
 
 def test_native_storyboard_draws_certified_dealing_range_to_latest_bar() -> None:
@@ -218,6 +266,42 @@ def test_native_storyboard_draws_certified_dealing_range_to_latest_bar() -> None
     assert range_object["evidence_geometry"]["end_time"] == window[14]["timestamp"]
     assert range_object["display_geometry"]["clipping_rule"] == "active_range_to_latest_visible_bar"
     assert range_object["active_entry_authority"] is False
+
+
+def test_data_failed_timeframe_withholds_even_separate_range_authority() -> None:
+    pack = _pack()
+    window = pack["ohlcv_windows"]["15m"]
+    pack["active_range_authority"] = {
+        "selected_range": {
+            "range_id": "15m:active_range:data-failed",
+            "timeframe": "15m",
+            "direction": "bullish",
+            "range_low": 98.0,
+            "range_high": 102.0,
+            "equilibrium": 100.0,
+            "source_pivots": [
+                {"timestamp": window[10]["timestamp"], "kind": "low", "price": 98.0},
+                {"timestamp": window[14]["timestamp"], "kind": "high", "price": 102.0},
+            ],
+        }
+    }
+    pack["definition_conformance"] = {
+        "by_timeframe": {
+            "15m": {
+                "certificate": {
+                    "status": "DATA_FAILED",
+                    "failures": ["unexplained candle gap"],
+                }
+            }
+        }
+    }
+
+    result = build_native_mtf_storyboards(pack)
+    storyboard = result["storyboards"]["15m"]
+
+    assert storyboard["objects"] == []
+    assert storyboard["resolution_manifest"]["data_authority_suppressed"] is True
+    assert storyboard["resolution_manifest"]["suppression_status"] == "DATA_FAILED"
 
 
 def test_external_ai_selection_can_suppress_auto_marks_and_select_sweep() -> None:
@@ -299,6 +383,43 @@ def test_explicit_native_story_budget_preserves_four_ai_selected_objects() -> No
     assert native_scene["visible_drawing_object_count"] == 4
     assert native_scene["visible_level_count"] == 4
     assert native_scene["visible_object_limit_override"] == 4
+
+
+def test_review_scene_explains_data_failure_even_with_v2_objects() -> None:
+    official = {
+        "symbol": "XAUUSD",
+        "official_state": "REVIEW_REQUIRED",
+        "validation_issues": [
+            {
+                "code": "autonomous_definition_conformance_blocked",
+                "severity": "hard",
+                "message": "Source: yahoo_chart/GC=F. Proxy data failed gap validation.",
+            }
+        ],
+        "annotation_plan": {
+            "chart_template": "review_chart",
+            "show_trade_box": False,
+            "labels": [],
+            "levels": [],
+        },
+        "annotation_plan_v2": {
+            "schema": "professional_smc_annotation_plan_v2",
+            "objects": [],
+        },
+    }
+    result = ValidationResult.model_construct(
+        status="REVIEW_REQUIRED",
+        decision=official,
+        official_decision=official,
+        issues=[],
+        smc_model_validity="invalid",
+        trade_plan_validity="failed",
+    )
+
+    scene = build_smc_trader_annotation_scene(result)
+
+    assert scene["review_notice"].startswith("GC=F PROXY · DATA INTEGRITY FAILED")
+    assert "NO ENTRY / SL / TP" in scene["review_notice"]
 
 
 def test_native_visual_cleanup_respects_explicit_budget_and_protects_required_context() -> None:

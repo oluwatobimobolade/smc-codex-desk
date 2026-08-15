@@ -28,6 +28,7 @@ from smc_desk.brain.ai_smc_trader_brain import REASONING_ORDER
 from smc_desk.brain.llm_provider import CallableAISMCProvider, LLMCompletionRequest
 from smc_desk.colleague.orchestrator_v3 import run_ai_smc_orchestrator_v3
 from smc_desk.data.historical_backfill import fetch_historical_closed_ohlcv
+from smc_desk.data.timeframe_reconstruction import resample_ohlcv as reconstruct_timeframe_ohlcv
 from smc_desk.perception.structure_narrative import build_structure_narrative, derive_strict_htf_bias
 
 
@@ -108,6 +109,14 @@ def main() -> None:
             summary["narrative_shadow_metrics"] = colleague.get("shadow_comparison_metrics")
             summary["memory_transition_notes"] = colleague.get("transition_notes")
             summary["perception_failures"] = colleague.get("perception_failures")
+            summary.update(
+                record_selective_decision(
+                    symbol_root=symbol_root,
+                    output_root=args.output_root,
+                    symbol=normalize_symbol(symbol),
+                    summary=summary,
+                )
+            )
         except Exception as exc:
             summary = {
                 "symbol": normalize_symbol(symbol),
@@ -215,6 +224,93 @@ def write_colleague_memory_and_narrative_shadow(
         outcome["perception_failures"] = [f"unreadable:{type(exc).__name__}"]
 
     stage_dir = symbol_root / "18_colleague_memory_narrative"
+    session = pack.get("session_context") if isinstance(pack, dict) else None
+    certificate = session.get("source_identity_certificate") if isinstance(session, dict) else None
+    source_status = (
+        str(certificate.get("status") or "")
+        if isinstance(certificate, dict)
+        else ""
+    )
+    if source_status in {"MISMATCH", "MISMATCH_PROXY"}:
+        failures = list(certificate.get("failures") or []) if isinstance(certificate, dict) else []
+        reason = (
+            f"Market source identity is {source_status}; cross-run state and narrative comparison "
+            "are suppressed for the requested instrument."
+        )
+        if failures:
+            reason = f"{reason} {failures[0]}"
+        stage_dir.mkdir(parents=True, exist_ok=True)
+        memory_record = {
+            "schema": "market_state_transition_v2",
+            "symbol": symbol,
+            "store_status": "suppressed_source_identity",
+            "store_updated": False,
+            "forward_transition": False,
+            "market_identity": market_identity,
+            "source_identity_status": source_status,
+            "authority": "source_identity_quarantine",
+            "signal_allowed": False,
+            "notes": [reason],
+            "transition": None,
+            "store_path": None,
+            "lock_path": None,
+        }
+        (stage_dir / "market_state_transition.json").write_text(
+            json.dumps(memory_record, indent=2, sort_keys=True, default=str), encoding="utf-8"
+        )
+        comparison = {
+            "status": "SUPPRESSED_SOURCE_IDENTITY",
+            "shadow_count": 0,
+            "canonical_count": 0,
+            "matched_count": 0,
+            "shadow_precision": None,
+            "canonical_recall": None,
+            "human_review_status": "NOT_APPLICABLE",
+            "promotion_eligible": False,
+            "reason": reason,
+        }
+        shadow_record = {
+            "schema": "narrative_annotation_plan_shadow_v2",
+            "shadow_comparison_only": True,
+            "rendered": False,
+            "plan": {"selections": [], "notes": [reason]},
+            "comparison": comparison,
+            "authority": "source_identity_quarantine",
+            "signal_allowed": False,
+            "provenance": {
+                "evidence_pack": str(pack_path) if pack_path is not None else None,
+                "evidence_pack_sha256": evidence_fingerprint,
+                "market_identity": market_identity,
+                "source_identity_status": source_status,
+            },
+        }
+        (stage_dir / "narrative_annotation_plan_shadow.json").write_text(
+            json.dumps(shadow_record, indent=2, sort_keys=True, default=str), encoding="utf-8"
+        )
+        outcome.update(
+            {
+                "memory_status": "suppressed_source_identity",
+                "memory_store_updated": False,
+                "memory_forward_transition": False,
+                "transition_notes": [reason],
+                "shadow_status": "suppressed_source_identity",
+                "shadow_comparison_status": "SUPPRESSED_SOURCE_IDENTITY",
+                "shadow_comparison_metrics": {
+                    key: comparison[key]
+                    for key in (
+                        "shadow_count",
+                        "canonical_count",
+                        "matched_count",
+                        "shadow_precision",
+                        "canonical_recall",
+                        "human_review_status",
+                        "promotion_eligible",
+                    )
+                },
+            }
+        )
+        return outcome
+
     try:
         from smc_desk.perception.market_state_memory import record_run_transition
 
@@ -563,16 +659,44 @@ def load_yahoo_forex_timeframes(symbol: str) -> tuple[dict[str, pd.DataFrame], d
     ticker = f"{symbol}=X"
     fifteen = yahoo_chart_df(ticker, interval="15m", range_="60d")
     one_hour = yahoo_chart_df(ticker, interval="1h", range_="730d")
-    one_day = yahoo_chart_df(ticker, interval="1d", range_="2y")
     source_cutoff = pd.Timestamp(one_hour["timestamp"].iloc[-1]) + TIMEFRAME_DELTAS["1h"]
     four_hour = resample_ohlcv(one_hour, "4h", decision_time=source_cutoff)
+    # Yahoo's standalone FX daily series can contain small but impossible
+    # envelope inconsistencies (open/close outside its reported high/low).
+    # Build the daily chart from the same closed hourly observations instead,
+    # using the explicit New York 17:00 session boundary expected by FX desks.
+    # This preserves source identity and OHLC geometry without silently
+    # clipping or inventing any provider price.
+    one_day = reconstruct_timeframe_ohlcv(
+        one_hour,
+        "1d",
+        source_cutoff,
+        daily_session_profile="new_york_close_daily",
+    )[["timestamp", "open", "high", "low", "close", "volume"]]
+    one_day["timestamp"] = pd.to_datetime(one_day["timestamp"], utc=True)
     frames = {"15m": fifteen, "1h": one_hour, "4h": four_hour, "1d": one_day}
     manifest = {
         "symbol": symbol,
         "source": "yahoo_chart",
         "provider_symbol": ticker,
         "market_type": "forex_spot_chart_proxy",
-        "timeframes": {tf: {"row_count": len(df), "last_timestamp": str(df["timestamp"].iloc[-1])} for tf, df in frames.items()},
+        "daily_session_profile": "new_york_close_daily",
+        "timeframes": {
+            tf: {
+                "row_count": len(df),
+                "last_timestamp": str(df["timestamp"].iloc[-1]),
+                **(
+                    {
+                        "derived_from": "yahoo_chart_1h",
+                        "derivation": "closed_hourly_ohlcv_resample",
+                        "session_boundary": "America/New_York 17:00",
+                    }
+                    if tf == "1d"
+                    else {}
+                ),
+            }
+            for tf, df in frames.items()
+        },
     }
     return frames, manifest
 
@@ -870,6 +994,30 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
     if isinstance(causal_story, dict) and causal_story.get("status") == "MIXED_CONTEXT":
         direction = "mixed"
 
+    fresh_v3_external = _fresh_v3_external_event(pack, timeframe="15m", maximum_age_bars=32)
+    if fresh_v3_external is not None:
+        displacement_score = float(fresh_v3_external.get("displacement_score") or 0.0)
+        displacement_quality = "strong" if displacement_score >= 0.75 else "clean"
+        displacement_payload = {
+            "direction": str(fresh_v3_external.get("direction")),
+            "quality": displacement_quality,
+            "structure_broken": True,
+            "evidence_object_ids": [str(fresh_v3_external.get("source_break_object_id"))],
+            "summary": (
+                f"V3 accepted the fresh 15m {fresh_v3_external.get('event_type')} at "
+                f"{fresh_v3_external.get('confirmation_time')}; it remains structure evidence only "
+                "until higher-timeframe reconciliation, causal POI, and entry confirmation all pass."
+            ),
+        }
+    else:
+        displacement_payload = {
+            "direction": "none",
+            "quality": "none",
+            "structure_broken": False,
+            "evidence_object_ids": [],
+            "summary": "No fresh V3-accepted 15m displacement is available for this observe-only test run.",
+        }
+
     if isinstance(selected_range, dict) and selected_range.get("status") == "RESOLVED_ACTIVE_RANGE":
         active_tf = str(selected_range["timeframe"])
         high = float(selected_range["range_high"])
@@ -940,7 +1088,15 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             "kind": "liquidity" if low is not None and high is not None else "state",
             "timeframe": active_tf,
         },
-        {"text": "No validated sweep or displacement promoted", "kind": "state"},
+        {
+            "text": (
+                f"15m {fresh_v3_external.get('event_type')} accepted · not promoted"
+                if fresh_v3_external is not None
+                else "No fresh V3 15m displacement accepted"
+            ),
+            "kind": "structure" if fresh_v3_external is not None else "state",
+            "timeframe": "15m",
+        },
         {"text": "Watch only - wait for real POI confirmation", "kind": "state"},
     ]
     levels = []
@@ -977,7 +1133,12 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
         else (
             "A confirmed active POI is mapped for observation, but no validated sweep/displacement/entry confirmation is promoted into a trade plan."
             if has_active_poi
-            else f"{_source_mode_subject(source_manifest)} sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
+            else (
+                f"{_source_mode_subject(source_manifest)} sees context and range liquidity plus a fresh V3-accepted 15m displacement, "
+                "but no validated sweep/causal POI/entry sequence is promoted into a trade plan."
+                if fresh_v3_external is not None
+                else f"{_source_mode_subject(source_manifest)} sees context and range liquidity, but no validated sweep/displacement/POI is promoted into a trade plan."
+            )
         )
     )
     return {
@@ -1019,13 +1180,7 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
             else [],
             "narrative": _with_narrative_draw(base_liquidity_narrative, pack),
         },
-        "displacement_assessment": {
-            "direction": "none",
-            "quality": "none",
-            "structure_broken": False,
-            "evidence_object_ids": [],
-            "summary": "No validated displacement candidate was promoted for this observe-only test run.",
-        },
+        "displacement_assessment": displacement_payload,
         "active_poi": active_poi_payload or {
             "poi_id": None,
             "timeframe": None,
@@ -1086,7 +1241,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
                 (
                     "Kept the confirmed active POI as watch evidence only because sweep/displacement/entry confirmation were not validated."
                     if has_active_poi
-                    else "Refused executable trade because sweep/displacement/active POI were not validated."
+                    else (
+                        "Recognized the fresh V3-accepted 15m displacement but refused execution because the sweep/causal POI/entry sequence was not validated."
+                        if fresh_v3_external is not None
+                        else "Refused executable trade because sweep/displacement/active POI were not validated."
+                    )
                 ),
                 "Used structural active range authority instead of OHLCV summary extremes.",
                 "Reconciled raw OHLC summary bias with confirmed structure narrative.",
@@ -1109,7 +1268,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
                     if has_active_poi
                     else "No validated active POI promoted into trade readiness."
                 ),
-                "No confirmed sweep/displacement sequence promoted into execution.",
+                (
+                    "A fresh V3 displacement exists, but no complete sweep/causal POI/entry sequence is authorized for execution."
+                    if fresh_v3_external is not None
+                    else "No confirmed sweep/displacement sequence promoted into execution."
+                ),
             ],
         },
         "final_thesis": (
@@ -1128,7 +1291,11 @@ def build_conservative_ai_payload(request: LLMCompletionRequest, source_manifest
                 + (
                     ". A confirmed active POI is mapped, but sweep/displacement/entry confirmation is absent, so it remains watch evidence and no trade plan is allowed."
                     if has_active_poi
-                    else ". The system does not have validated sweep/displacement/active POI/entry evidence, so it refuses a trade plan."
+                    else (
+                        f". A fresh V3-accepted 15m {fresh_v3_external.get('event_type')} exists, but no validated sweep/causal POI/entry sequence exists, so it refuses a trade plan."
+                        if fresh_v3_external is not None
+                        else ". The system does not have validated sweep/displacement/active POI/entry evidence, so it refuses a trade plan."
+                    )
                 )
             )
         ),
@@ -1161,6 +1328,46 @@ def _narrative_draw_note(pack: dict[str, Any]) -> str:
         f"{kind} at {format_price(price)} -- descriptive and unpromoted, not a "
         "validated sweep target."
     )
+
+
+def _fresh_v3_external_event(
+    pack: dict[str, Any],
+    *,
+    timeframe: str,
+    maximum_age_bars: int,
+) -> dict[str, Any] | None:
+    """Return recent accepted structure evidence without promoting a trade.
+
+    The age bound is an explanation/display contract, not a profitability
+    threshold: stale accepted history still remains in the graph, but it is
+    not described as a fresh execution-timeframe displacement.
+    """
+    shadow = pack.get("structure_engine_v3_shadow") if isinstance(pack, dict) else None
+    timeframe_node = shadow.get("timeframes", {}).get(timeframe) if isinstance(shadow, dict) else None
+    event = timeframe_node.get("latest_accepted_external") if isinstance(timeframe_node, dict) else None
+    if not isinstance(event, dict) or event.get("accepted_for_shadow_story") is not True:
+        return None
+    event_time_raw = event.get("confirmation_time") or event.get("body_close_time")
+    decision_time_raw = shadow.get("decision_time") if isinstance(shadow, dict) else None
+    if not event_time_raw or not decision_time_raw:
+        return None
+    bar_duration = TIMEFRAME_DELTAS.get(timeframe)
+    if bar_duration is None:
+        return None
+    event_time = pd.Timestamp(event_time_raw)
+    decision_time = pd.Timestamp(decision_time_raw)
+    if event_time.tzinfo is None:
+        event_time = event_time.tz_localize("UTC")
+    if decision_time.tzinfo is None:
+        decision_time = decision_time.tz_localize("UTC")
+    age = decision_time - event_time
+    if age < pd.Timedelta(0) or age > bar_duration * maximum_age_bars:
+        return None
+    if str(event.get("direction") or "") not in {"bullish", "bearish"}:
+        return None
+    if not event.get("source_break_object_id"):
+        return None
+    return dict(event)
 
 
 def _with_narrative_draw(base_narrative: str, pack: dict[str, Any]) -> str:
@@ -1438,3 +1645,71 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
 
 if __name__ == "__main__":
     main()
+
+
+def record_selective_decision(
+    *,
+    symbol_root: Path,
+    output_root: str | Path,
+    symbol: str,
+    summary: dict[str, Any],
+) -> dict[str, Any]:
+    """Append this run's decision to the selective-outcome ledger.
+
+    The ledger apparatus existed but nothing ever wrote to it, so the metric
+    that matters most for a system whose default output is refusal --
+    ``missed_favorable_outcome_rate`` -- had no data, and "correctly cautious"
+    was indistinguishable from "broken and silent".
+
+    Every run is one decision. Refusals carry the read the system *would* have
+    taken, which is what lets a later outcome pass score them. Nothing here may
+    fail the run or create any authority: it records what already happened.
+    """
+    from smc_desk.evaluation.selective_outcomes import (
+        append_selective_ledger_event,
+        build_shadow_decision_from_run,
+    )
+
+    outcome: dict[str, Any] = {"selective_ledger_status": "not_attempted"}
+    try:
+        pack = _load_final_evidence_pack(symbol_root)
+        pack = pack if isinstance(pack, dict) else {}
+        graph = pack.get("formal_structure_graph") or {}
+        episode_graph = pack.get("formal_causal_episode_graph") or {}
+        decision_raw = (pack.get("market_state") or {}).get("decision_time") or summary.get(
+            "last_close_timestamps", {}
+        ).get("15m")
+        decision_time = pd.Timestamp(decision_raw)
+        if decision_time.tzinfo is None:
+            decision_time = decision_time.tz_localize("UTC")
+
+        ledger_path = Path(output_root) / "selective_outcome_ledger.jsonl"
+        event = build_shadow_decision_from_run(
+            # Identity must include the decision time: the same symbol observed
+            # at two different closes is two cases, not a duplicate.
+            case_id=f"{symbol}:{decision_time.isoformat()}",
+            symbol=symbol,
+            decision_time=decision_time.to_pydatetime(),
+            horizon="next_20_bars_15m",
+            official_state=str(summary.get("official_state") or ""),
+            hard_issue_codes=[
+                str((issue or {}).get("code") or "")
+                for issue in (summary.get("hard_issues") or [])
+                if isinstance(issue, dict)
+            ],
+            narrative_context=graph.get("narrative_context") or {},
+            invariants=episode_graph.get("invariants") or {},
+            source_hashes={
+                "evidence_pack_sha256": str(pack.get("pack_sha256") or ""),
+            },
+            data_failed=str(summary.get("status") or "").upper().startswith("FAILED"),
+        )
+        entry = append_selective_ledger_event(ledger_path, event)
+        outcome["selective_ledger_status"] = "recorded"
+        outcome["selective_ledger_path"] = str(ledger_path)
+        outcome["selective_decision"] = entry.get("decision")
+        outcome["selective_shadow_prediction"] = entry.get("shadow_prediction")
+        outcome["selective_uncertainty"] = entry.get("uncertainty_score")
+    except Exception as exc:  # noqa: BLE001 -- additive evidence, never fatal
+        outcome["selective_ledger_status"] = f"failed:{type(exc).__name__}"
+    return outcome

@@ -136,6 +136,35 @@ def assert_smc_thesis_ai_v1_contract(payload: Mapping[str, Any]) -> None:
 
 def _narrative_context(evidence_pack: Mapping[str, Any]) -> dict[str, Any] | None:
     """Pull the hierarchical read off the formal graph, if the graph carries one."""
+    session = evidence_pack.get("session_context")
+    certificate = session.get("source_identity_certificate") if isinstance(session, Mapping) else None
+    if isinstance(certificate, Mapping) and str(certificate.get("status") or "") in {
+        "MISMATCH",
+        "MISMATCH_PROXY",
+    }:
+        failures = list(certificate.get("failures") or [])
+        return {
+            "state": "SOURCE_IDENTITY_MISMATCH",
+            "context_timeframe": None,
+            "context_bias": "unresolved",
+            "is_coherent": False,
+            "confirming_timeframes": [],
+            "retracing_timeframes": [],
+            "invalidating_timeframes": [],
+            "draw": {},
+            "sentence": (
+                "No requested-market narrative was constructed because the candle source "
+                "does not match the requested instrument."
+            ),
+            "expectation": "Acquire a source-verified candle feed and rerun the full system.",
+            "invalidation_note": "",
+            "source_identity_status": str(certificate.get("status")),
+            "source_identity_failure": (
+                failures[0] if failures else "requested/provider instrument identity did not match"
+            ),
+            "authority": "source_identity_quarantine",
+            "signal_allowed": False,
+        }
     graph = evidence_pack.get("formal_structure_graph")
     if not isinstance(graph, Mapping):
         return None
@@ -154,6 +183,11 @@ def _narrative_context(evidence_pack: Mapping[str, Any]) -> dict[str, Any] | Non
     ):
         provisional_bias = str(result.get("context_bias") or "unknown")
         violations = [str(value) for value in invariants.get("violations") or []]
+        surviving_structure = _surviving_external_structure(causal_graph)
+        surviving_text = "; ".join(
+            f"{item['timeframe']} {item['direction']} {item['event_type']} ({item['confirmation_time']})"
+            for item in surviving_structure
+        )
         result.update(
             {
                 "state": "RECONCILIATION_REQUIRED",
@@ -167,15 +201,44 @@ def _narrative_context(evidence_pack: Mapping[str, Any]) -> dict[str, Any] | Non
                 "sentence": (
                     f"The V1 graph provisionally reads {provisional_bias}, but the stricter causal replay "
                     "does not accept every controlling break. Direction remains unresolved for decision authority."
+                    + (f" Surviving V3 external structure: {surviving_text}." if surviving_text else "")
                 ),
                 "expectation": (
-                    "Keep the surviving V3-accepted structure as scenario evidence only; wait for graph "
-                    "reconciliation and fresh confirmation before promoting a directional plan."
+                    "Treat the surviving V3 events as scenario evidence only. A trade requires the current "
+                    "higher-timeframe route, causal POI, and lower-timeframe entry sequence to agree."
                 ),
                 "reconciliation_violations": violations,
+                "surviving_external_structure": surviving_structure,
             }
         )
     return result
+
+
+def _surviving_external_structure(causal_graph: Mapping[str, Any]) -> list[dict[str, Any]]:
+    timeframes = causal_graph.get("timeframes")
+    if not isinstance(timeframes, Mapping):
+        return []
+    out: list[dict[str, Any]] = []
+    for timeframe in ("1d", "4h", "1h", "15m"):
+        node = timeframes.get(timeframe)
+        episode = node.get("latest_external_episode") if isinstance(node, Mapping) else None
+        if not isinstance(episode, Mapping):
+            continue
+        direction = str(episode.get("direction") or "unknown")
+        event_type = str(episode.get("event_type") or "UNRESOLVED")
+        confirmation_time = episode.get("confirmation_time")
+        if direction not in {"bullish", "bearish"} or not confirmation_time:
+            continue
+        out.append(
+            {
+                "timeframe": timeframe,
+                "direction": direction,
+                "event_type": event_type,
+                "confirmation_time": str(confirmation_time),
+                "structure_event_id": episode.get("structure_event_id"),
+            }
+        )
+    return out
 
 
 def _claim(
@@ -202,7 +265,13 @@ def _claim(
             text += f" Hierarchical read: {narrative.get('sentence')}"
     elif claim_id == "active_range":
         active_range = official.get("active_range") or {}
-        text = f"{active_range.get('timeframe')} range {active_range.get('low')} to {active_range.get('high')}; location={active_range.get('price_location')}."
+        if active_range.get("low") is None or active_range.get("high") is None:
+            text = (
+                "No requested-market active range is authorized. "
+                + str((active_range.get("evidence") or ["Acquire valid market evidence and rerun."])[0])
+            )
+        else:
+            text = f"{active_range.get('timeframe')} range {active_range.get('low')} to {active_range.get('high')}; location={active_range.get('price_location')}."
     elif claim_id == "liquidity_story":
         story = official.get("liquidity_story") or {}
         text = str(story.get("narrative") or "No liquidity story supplied.")
@@ -270,20 +339,50 @@ def _format_scenario_watch_pois(evidence_pack: Mapping[str, Any]) -> str | None:
     scenarios = authority.get("scenarios") if isinstance(authority, Mapping) else None
     if not isinstance(scenarios, Mapping):
         return None
+    causal_graph = evidence_pack.get("formal_causal_episode_graph") or {}
+    current_story = causal_graph.get("current_story") if isinstance(causal_graph, Mapping) else None
+    route_map = current_story.get("route_map") if isinstance(current_story, Mapping) else None
+    disputed_items = route_map.get("disputed_objects") if isinstance(route_map, Mapping) else None
+    disputed_by_id = {
+        str(item.get("poi_id") or item.get("source_object_id")): item
+        for item in disputed_items or []
+        if isinstance(item, Mapping)
+        and (item.get("poi_id") or item.get("source_object_id"))
+        and item.get("display_authority") == "WITHHELD"
+    }
     mapped: list[str] = []
+    withheld: list[str] = []
     for direction in ("bullish", "bearish"):
         scenario = scenarios.get(direction)
         primary = scenario.get("primary_causal_poi") if isinstance(scenario, Mapping) and scenario.get("status") == "SELECTED" else None
         if not isinstance(primary, Mapping):
+            continue
+        poi_id = str(primary.get("poi_id") or primary.get("source_object_id") or "")
+        dispute = disputed_by_id.get(poi_id)
+        if dispute is not None:
+            dispute_reason = str(
+                dispute.get("reason")
+                or "its linked structure event did not survive causal replay"
+            ).rstrip(" .")
+            withheld.append(
+                f"{direction} {primary.get('timeframe')} {primary.get('kind')} "
+                f"{primary.get('price_low')}-{primary.get('price_high')} withheld: "
+                f"{dispute_reason}"
+            )
             continue
         mapped.append(
             f"{direction} scenario: {primary.get('timeframe')} {primary.get('kind')} "
             f"{primary.get('price_low')}-{primary.get('price_high')} "
             f"({primary.get('lineage_role')}, lifecycle={primary.get('freshness')})"
         )
-    if not mapped:
+    if not mapped and not withheld:
         return None
-    return (
-        "; ".join(mapped)
-        + ". These are conditional route-map POIs only. Mixed context prevents promotion to an official active POI or trade plan."
-    )
+    parts: list[str] = []
+    if mapped:
+        parts.append(
+            "; ".join(mapped)
+            + ". These are conditional route-map POIs only; they are not an official active POI or trade plan."
+        )
+    if withheld:
+        parts.append("No authority is granted to disputed POIs. " + "; ".join(withheld) + ".")
+    return " ".join(parts)

@@ -35,9 +35,13 @@ def resample_to_ny_close_daily(df_15m: pd.DataFrame) -> pd.DataFrame:
     frame = df_15m.copy()
     frame["_ts"] = pd.to_datetime(frame["timestamp"], utc=True)
     frame["_ts_eastern"] = frame["_ts"].dt.tz_convert("US/Eastern")
-    frame["_ts_shifted"] = frame["_ts_eastern"] - pd.Timedelta(hours=17)
-    indexed = frame.set_index("_ts_shifted")
-    resampled = indexed.resample("1D", label="left", closed="left").agg(
+    local_date = frame["_ts_eastern"].dt.date
+    before_close = frame["_ts_eastern"].dt.hour < 17
+    frame["_session_open_date"] = [
+        value - pd.Timedelta(days=1) if is_before else value
+        for value, is_before in zip(local_date, before_close, strict=True)
+    ]
+    resampled = frame.groupby("_session_open_date", sort=True).agg(
         {
             "open": "first",
             "high": "max",
@@ -47,11 +51,20 @@ def resample_to_ny_close_daily(df_15m: pd.DataFrame) -> pd.DataFrame:
         }
     )
     resampled = resampled.dropna(subset=["open", "high", "low", "close"])
-    unshifted_index = resampled.index + pd.Timedelta(hours=17)
-    resampled["timestamp"] = unshifted_index.tz_convert("UTC").tz_localize(None)
+    session_dates = list(resampled.index)
+    resampled["timestamp"] = [_ny_wall_clock_utc(value, hour=17) for value in session_dates]
+    resampled["_close_visible_at"] = [
+        _ny_wall_clock_utc(value + pd.Timedelta(days=1), hour=17)
+        for value in session_dates
+    ]
     resampled = resampled.reset_index(drop=True)
-    resampled["_close_visible_at"] = resampled["timestamp"] + pd.Timedelta("1D")
     return resampled
+
+
+def _ny_wall_clock_utc(value: object, *, hour: int) -> pd.Timestamp:
+    """Convert an unambiguous New York wall-clock boundary to naive UTC."""
+    local_naive = pd.Timestamp(value).normalize() + pd.Timedelta(hours=hour)
+    return local_naive.tz_localize("US/Eastern").tz_convert("UTC").tz_localize(None)
 
 
 def precompute_htf_series(

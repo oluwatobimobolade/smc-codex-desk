@@ -371,7 +371,9 @@ def _structure_object(
 ) -> dict[str, Any]:
     semantic = certified_annotation_semantic(anchor)
     scope = anchor.structure_scope if anchor.structure_scope in {"external", "internal"} else "external"
-    episode_event_type = _episode_event_type(evidence_pack, anchor.object_id)
+    episode_event_type = _episode_event_type(
+        evidence_pack, anchor.object_id, timeframe=anchor.timeframe
+    )
     label, kind, line_style = _episode_annotation_semantic(
         episode_event_type,
         fallback_label=semantic.label,
@@ -379,6 +381,7 @@ def _structure_object(
         fallback_line_style=semantic.line_style,
         scope=scope,
     )
+    display_label = f"{anchor.timeframe.upper()} {label}" if anchor.timeframe != "15m" else label
     start_index = anchor.start_index if anchor.timeframe == "15m" else None
     end_index = anchor.end_index if anchor.timeframe == "15m" else None
     start_time = anchor.start_time
@@ -429,7 +432,7 @@ def _structure_object(
         "object_type": "structure_segment",
         "semantic_object_id": f"{anchor.object_id}:structure_segment",
         "timeframe": anchor.timeframe,
-        "label": label,
+        "label": display_label,
         "reason": (
             "Latest visible confirmed external structure break, anchored from protected swing to confirmation candle."
             if scope == "external"
@@ -459,15 +462,15 @@ def _structure_object(
     }
 
 
-def _episode_event_type(evidence_pack: Mapping[str, Any], object_id: str) -> str | None:
+def _episode_event_type(
+    evidence_pack: Mapping[str, Any], object_id: str, *, timeframe: str
+) -> str | None:
     graph = evidence_pack.get("formal_causal_episode_graph") or {}
     timeframes = graph.get("timeframes") if isinstance(graph, Mapping) else None
-    for node in timeframes.values() if isinstance(timeframes, Mapping) else []:
-        if not isinstance(node, Mapping):
-            continue
-        for episode in node.get("episodes", []) or []:
-            if isinstance(episode, Mapping) and str(episode.get("structure_event_id") or "") == object_id:
-                return str(episode.get("event_type") or "") or None
+    node = timeframes.get(timeframe) if isinstance(timeframes, Mapping) else None
+    for episode in node.get("episodes", []) or [] if isinstance(node, Mapping) else []:
+        if isinstance(episode, Mapping) and str(episode.get("structure_event_id") or "") == object_id:
+            return str(episode.get("event_type") or "") or None
     return None
 
 
@@ -691,13 +694,14 @@ def _poi_link_survives_episode_graph(
     linked_break_id = str(poi.get("linked_break_id") or "")
     if not linked_break_id:
         return False
+    timeframe = str(poi.get("timeframe") or "")
+    if not timeframe:
+        return False
     timeframes = graph.get("timeframes") or {}
-    for node in timeframes.values() if isinstance(timeframes, Mapping) else []:
-        if not isinstance(node, Mapping):
-            continue
-        for episode in node.get("episodes", []) or []:
-            if isinstance(episode, Mapping) and str(episode.get("structure_event_id") or "") == linked_break_id:
-                return True
+    node = timeframes.get(timeframe) if isinstance(timeframes, Mapping) else None
+    for episode in node.get("episodes", []) or [] if isinstance(node, Mapping) else []:
+        if isinstance(episode, Mapping) and str(episode.get("structure_event_id") or "") == linked_break_id:
+            return True
     return False
 
 

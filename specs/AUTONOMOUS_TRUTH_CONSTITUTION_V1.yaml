@@ -1,0 +1,214 @@
+schema: smc_codex_autonomous_truth_constitution_v1
+version: 1.0.0
+effective_date: "2026-08-14"
+status: ACTIVE_RESEARCH_CERTIFICATION_CONTRACT
+
+purpose: >-
+  Establish evidence that does not depend on human adjudication while keeping
+  definition conformance, market mechanism, forecasting, and economic value as
+  separate authorities. This contract certifies only the declared label family,
+  market, timeframe, definition version, evidence layer, and source state.
+
+non_goals:
+  - certify_a_universal_or_branded_smc_truth
+  - infer_participant_identity_or_intent_from_ohlcv
+  - grant_signal_paper_live_or_execution_authority
+  - convert_ai_agreement_into_ground_truth
+  - optimize_semantic_thresholds_for_profitability
+
+authority_ladder:
+  - id: DATA_VERIFIED
+    proves: source_and_decision_time_integrity
+    cannot_prove: [definition_conformance, mechanism, forecast, economic_value]
+  - id: DEFINITION_CONFORMANT
+    proves: implementation_matches_the_frozen_executable_house_definition
+    cannot_prove: [universal_smc_meaning, mechanism, forecast, economic_value]
+  - id: MECHANISM_SUPPORTED
+    proves: preregistered_association_with_named_market_observables
+    cannot_prove: [participant_identity, deterministic_causation, forecast, economic_value]
+  - id: FORECAST_CALIBRATED
+    proves: prospective_probability_quality_for_frozen_outcomes_and_scope
+    cannot_prove: [economic_value, execution_readiness]
+  - id: ECONOMICALLY_REPLICATED
+    proves: independent_untouched_after_cost_replication_for_frozen_strategy
+    cannot_prove: [future_profit, live_execution_readiness]
+
+promotion_rules:
+  monotonicity: passing_one_layer_never_promotes_the_next
+  unit: label_family_x_market_x_timeframe_x_definition_version_x_evidence_layer
+  disagreement: fail_closed_as_IMPLEMENTATION_CONFLICT
+  threshold_sensitivity: fail_closed_as_BOUNDARY_SENSITIVE
+  missing_definition: fail_closed_as_DOCTRINE_UNDEFINED
+  missing_data: fail_closed_as_DATA_FAILED
+  ai_role: challenger_and_explainer_only
+  majority_vote: prohibited
+  human_alignment: optional_external_audit_not_autonomous_truth_owner
+
+definition_conformance_gate:
+  required_oracles:
+    - frozen_executable_specification
+    - clean_room_reference_oracle
+    - production_detector
+    - metamorphic_and_counterfactual_oracle
+  independence_requirements:
+    clean_room_may_import:
+      - python_standard_library
+      - pandas
+      - smc_desk.data.hashing
+    clean_room_may_not_import:
+      - smc_desk.perception
+      - smc_desk.structure
+      - smc_desk.brain
+      - smc_desk.decision
+    shared_production_helpers: prohibited
+  pass_requirements:
+    - exact_normalized_claim_set_agreement
+    - deterministic_replay
+    - no_future_data_use
+    - required_metamorphic_relations_pass
+    - no_unresolved_threshold_changes_the_claim
+  certificate_statuses:
+    - DEFINITION_CONFORMANT
+    - IMPLEMENTATION_CONFLICT
+    - BOUNDARY_SENSITIVE
+    - DOCTRINE_UNDEFINED
+    - DATA_FAILED
+    - NOT_EVALUATED
+
+claim_classes:
+  - OBSERVED_MARKET_FACT
+  - DERIVED_GEOMETRY
+  - DEFINITION_CONFORMANCE
+  - MECHANISM_HYPOTHESIS
+  - OUTCOME_FORECAST
+  - ACTION_RECOMMENDATION
+
+executable_label_contracts:
+  swing:
+    version: autonomous_swing_v1
+    authority_target: DEFINITION_CONFORMANT
+    predicates:
+      - all_source_candles_closed_at_decision_time
+      - pivot_strictly_exceeds_left_extremes
+      - pivot_at_least_equals_right_extremes
+      - first_equal_extreme_owns_the_pivot
+      - dual_high_low_pivot_emits_both_sides
+      - confirmation_occurs_at_right_window_close
+    profiles:
+      local: {bars_left: 1, bars_right: 1}
+      internal: {bars_left: 3, bars_right: 3}
+      external: {bars_left: 5, bars_right: 5}
+  fair_value_gap:
+    version: autonomous_fvg_v1
+    authority_target: DEFINITION_CONFORMANT
+    predicates:
+      - exactly_three_ordered_closed_candles
+      - bullish_when_first_high_is_below_third_low
+      - bearish_when_first_low_is_above_third_high
+      - confirmed_at_third_candle_close
+      - qualification_is_separate_from_raw_geometry
+    qualification_gap_bps: 5.0
+  structural_level_interaction:
+    version: autonomous_level_interaction_v1
+    authority_target: NOT_EVALUATED
+    blocker: >-
+      The raw interaction geometry is executable, but production currently
+      exposes only structure-owned targets. A clean-room target-ownership and
+      protected-point state machine must agree before this family is certified.
+    predicates:
+      - target_swing_was_confirmed_before_interaction
+      - interaction_approached_from_protected_side
+      - wick_penetration_creates_probe
+      - body_close_beyond_level_confirms_geometry
+      - minimum_penetration_is_applied_point_in_time
+    qualification_penetration_bps: 4.0
+  order_block:
+    version: autonomous_order_block_v0
+    authority_target: NOT_EVALUATED
+    blocker: >-
+      A clean-room causal break, displacement, origin-cluster, lifecycle, and
+      parent-scope oracle must all pass before an order block can receive an
+      autonomous definition-conformance certificate.
+  liquidity_draw:
+    version: autonomous_liquidity_draw_v0
+    authority_target: NOT_EVALUATED
+    blocker: resolver_functionality_is_not_predictive_correctness
+  choch_mss_bos_semantics:
+    version: autonomous_structure_semantics_v0
+    authority_target: NOT_EVALUATED
+    blocker: scope_ownership_and_protected_point_doctrine_remain_contested
+
+robustness_envelopes:
+  rule: >-
+    A claim is ROBUST only when every admissible profile produces the same
+    normalized claim. A union-only claim is BOUNDARY_SENSITIVE and cannot be
+    promoted or used to tune economic outcomes.
+  profiles:
+    conservative:
+      local_window: 2
+      internal_window: 4
+      external_window: 7
+      fvg_minimum_gap_bps: 8.0
+      break_minimum_penetration_bps: 6.0
+    canonical:
+      local_window: 1
+      internal_window: 3
+      external_window: 5
+      fvg_minimum_gap_bps: 5.0
+      break_minimum_penetration_bps: 4.0
+    permissive:
+      local_window: 1
+      internal_window: 2
+      external_window: 4
+      fvg_minimum_gap_bps: 3.0
+      break_minimum_penetration_bps: 2.0
+  contested_decision_policy:
+    minimum_normalized_penetration: envelope
+    external_displacement_thresholds: doctrine_undefined
+    confirmation_horizon_policy: doctrine_undefined
+    external_swing_ownership_threshold: envelope
+    range_staleness_policy: doctrine_undefined
+    ob_cluster_boundary_policy: doctrine_undefined
+    fvg_mitigation_boundary_policy: doctrine_undefined
+    liquidity_level_salience_decay: doctrine_undefined
+    ai_pairwise_rank_acceptance: non_authoritative
+    annotation_comprehension_threshold: non_authoritative
+
+metamorphic_requirements:
+  price_translation: raw_geometry_and_lineage_invariant_qualification_may_change
+  positive_price_scale: classification_and_relative_geometry_invariant
+  vertical_mirror: raw_direction_mirrors_and_timestamps_remain_invariant_qualification_may_change
+  append_future_candles_after_decision: output_at_decision_must_not_change
+  one_candle_rollback: removed_candle_cannot_be_used
+  deterministic_replay: canonical_output_hash_must_match
+
+market_evidence_contract:
+  canonical_spine: completed_closed_ohlcv
+  sidecar_authority: read_only_evidence
+  continuous_market_timestamp_gap: DATA_FAILED
+  sessioned_market_exception: bounded_declared_scheduled_closure_only
+  unexplained_mid_session_gap: DATA_FAILED
+  required_integrity_states: [COMPLETE, DEGRADED, FAILED]
+  missing_numeric_evidence: null_not_neutral_default
+  sequence_gap_behavior: fail_closed_and_resynchronize
+  mechanism_claim_on_gap: prohibited
+
+selective_decision_evaluation:
+  refusal_rate_alone_is_value: false
+  required_metrics:
+    - coverage
+    - selective_error
+    - false_omission_rate
+    - missed_favorable_outcome_rate
+    - risk_coverage_curve
+    - area_under_risk_coverage_curve
+    - refusal_reason_distribution
+    - data_failure_rate
+
+authority_contract:
+  signal_allowed: false
+  paper_execution_allowed: false
+  live_execution_allowed: false
+  predictive_edge_claim_allowed: false
+  human_adjudication_required_for_definition_conformance: false
+  human_adjudication_required_for_human_alignment_claims: true

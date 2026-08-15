@@ -114,6 +114,7 @@ def build_smc_trader_annotation_scene(
         "hidden_level_count": max(0, len(levels) - len(visible_levels)),
         "display_contract": "trader_markup_sparse",
         "debug_chart_label": DEBUG_CHART_LABEL,
+        "review_notice": _review_notice(decision, result.status),
     }
 
 
@@ -295,7 +296,12 @@ def render_smc_trader_annotation_chart(
                     zorder=7,
                 )
 
-    title = f"{decision.get('symbol')} {timeframe}"
+    review_notice = str(scene.get("review_notice") or "")
+    title = (
+        f"GC=F PROXY · NOT XAUUSD · {timeframe}"
+        if review_notice.startswith("GC=F ≠ XAUUSD")
+        else f"{decision.get('symbol')} {timeframe}"
+    )
     subtitle = str(decision.get("official_state") or "").replace("_", " ")
     ax.set_title(title, color="#111111", fontsize=12, fontweight="bold", loc="left", pad=12)
     ax.text(
@@ -309,6 +315,25 @@ def render_smc_trader_annotation_chart(
         fontsize=7.5,
         fontweight="normal",
     )
+    if review_notice:
+        ax.text(
+            0.008,
+            0.965,
+            review_notice,
+            transform=ax.transAxes,
+            ha="left",
+            va="top",
+            color="#b42318",
+            fontsize=7.8,
+            fontweight="bold",
+            bbox={
+                "facecolor": "#fff7ed",
+                "edgecolor": "#f04438",
+                "alpha": 0.96,
+                "boxstyle": "round,pad=0.3",
+            },
+            zorder=10,
+        )
     labels = scene["visible_labels"]
     label_text = "\n".join(f"{idx}. {label['text']}" for idx, label in enumerate(labels, start=1))
     if label_text and scene["level_source"] != "annotation_plan_v2" and scene["chart_template"] != "watch_chart":
@@ -360,6 +385,34 @@ def render_smc_trader_annotation_chart(
     fig.savefig(output_path, dpi=160, facecolor=fig.get_facecolor())
     plt.close(fig)
     return scene
+
+
+def _review_notice(decision: Mapping[str, Any], validation_status: str) -> str | None:
+    if validation_status == "VALIDATED":
+        return None
+    issues = [
+        item
+        for item in decision.get("validation_issues", []) or []
+        if isinstance(item, Mapping) and item.get("severity") == "hard"
+    ]
+    codes = {str(item.get("code") or "") for item in issues}
+    messages = " ".join(str(item.get("message") or "") for item in issues)
+    if "market_source_identity_mismatch" in codes:
+        source = "GC=F ≠ XAUUSD · " if "GC=F" in messages else "WRONG MARKET SOURCE · "
+        return f"{source}ALL SMC OBJECTS WITHHELD · NO ENTRY / SL / TP"
+    if "autonomous_definition_conformance_blocked" in codes:
+        source = "GC=F PROXY · " if "GC=F" in messages else ""
+        return f"{source}DATA INTEGRITY FAILED · affected timeframes withheld · NO ENTRY / SL / TP"
+    if "context_depth_warning" in codes:
+        return "INSUFFICIENT USABLE CONTEXT · NO ENTRY / SL / TP"
+    if "causal_episode_graph_reconciliation_required" in codes:
+        return "STRUCTURE RECONCILIATION REQUIRED · disputed objects withheld · NO ENTRY / SL / TP"
+    if "causal_episode_entry_timing_withheld" in codes:
+        # The context read survived; only the timing layer is disputed. Saying
+        # "structure reconciliation required" here would misreport a coherent
+        # higher-timeframe story as unknown.
+        return "CONTEXT READABLE · timing unconfirmed · NO ENTRY / SL / TP"
+    return "REVIEW REQUIRED · NO ENTRY / SL / TP"
 
 
 def _resolve_scene_time_geometry(scene: Mapping[str, Any], df: pd.DataFrame) -> dict[str, Any]:
@@ -627,19 +680,37 @@ def _assign_level_label_positions(levels: list[dict[str, Any]], *, low: float, h
     if not levels:
         return []
     span = max(high - low, abs(high) * 0.01, 1e-9)
-    groups: dict[float, list[dict[str, Any]]] = {}
     positioned = [dict(level) for level in levels]
+    anchored: list[tuple[float, dict[str, Any]]] = []
     for level in positioned:
-        key = round(float(level["high"] if level["kind"] == "poi" and level["low"] != level["high"] else level["low"]), 8)
-        groups.setdefault(key, []).append(level)
-    for price, group in groups.items():
+        if _is_zone_kind(str(level.get("kind") or "")) and level["low"] != level["high"]:
+            anchor = (float(level["low"]) + float(level["high"])) / 2.0
+        else:
+            anchor = float(level["low"])
+        anchored.append((anchor, level))
+
+    # Text has height even when two semantic prices are not numerically equal.
+    # Cluster nearby anchors, then move captions only; the certified zone/line
+    # geometry itself stays exact. This prevents the common OB/BOS/IDM stack
+    # from becoming unreadable on compressed or low-volatility charts.
+    anchored.sort(key=lambda item: item[0])
+    proximity = span * 0.03
+    groups: list[list[tuple[float, dict[str, Any]]]] = []
+    for anchor, level in anchored:
+        if not groups or anchor - groups[-1][-1][0] > proximity:
+            groups.append([(anchor, level)])
+        else:
+            groups[-1].append((anchor, level))
+    for group in groups:
         if len(group) == 1:
-            group[0]["label_y"] = price
+            anchor, level = group[0]
+            level["label_y"] = anchor
             continue
         offset_step = span * 0.018
         midpoint = (len(group) - 1) / 2.0
-        for index, level in enumerate(group):
-            level["label_y"] = price + (index - midpoint) * offset_step
+        center = sum(anchor for anchor, _level in group) / len(group)
+        for index, (_anchor, level) in enumerate(group):
+            level["label_y"] = center + (index - midpoint) * offset_step
     return positioned
 
 

@@ -545,3 +545,42 @@ def test_ai_smc_thesis_uses_validated_boundary():
     assert thesis["source"] == "ValidatedAISMCDecision"
     assert thesis["show_trade_box"] is False
     assert thesis["claim_sequence"][0] == "bias_summary"
+
+
+def test_autonomous_bundle_blocks_trade_ready_until_all_trade_families_are_certified():
+    pack = _pack()
+    pack["definition_conformance"] = {
+        "schema": "autonomous_definition_conformance_bundle_v1",
+        "status": "BOUNDARY_SENSITIVE",
+        "by_timeframe": {},
+        "authority_contract": {
+            "structure_semantics_certified": False,
+            "order_blocks_certified": False,
+            "liquidity_draws_certified": False,
+            "signal_allowed": False,
+        },
+    }
+    result = validate_ai_smc_decision(_decision(), pack)
+    assert result.status == "REVIEW_REQUIRED"
+    assert "autonomous_trade_promotion_not_certified" in _issue_codes(result)
+    assert result.official_decision["entry_plan"]["entry_price"] is None
+    assert result.official_decision["stop_loss_plan"]["stop_price"] is None
+    assert result.official_decision["target_plan"]["targets"] == []
+
+
+def test_autonomous_boundary_sensitivity_warns_but_does_not_block_watch_state():
+    pack = _pack()
+    pack["definition_conformance"] = {
+        "schema": "autonomous_definition_conformance_bundle_v1",
+        "status": "BOUNDARY_SENSITIVE",
+        "by_timeframe": {},
+        "authority_contract": {
+            "structure_semantics_certified": False,
+            "order_blocks_certified": False,
+            "liquidity_draws_certified": False,
+            "signal_allowed": False,
+        },
+    }
+    result = validate_ai_smc_decision(_decision(_watch_payload()), pack)
+    assert result.status == "VALIDATED"
+    assert "autonomous_definition_boundary_sensitive" in _issue_codes(result)

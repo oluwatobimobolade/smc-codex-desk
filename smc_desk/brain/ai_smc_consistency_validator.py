@@ -44,32 +44,47 @@ def validate_ai_smc_decision(
 ) -> ValidationResult:
     issues: list[ValidationIssue] = []
     _check_reasoning_order(decision, issues)
-    _check_bias_alignment(decision, issues)
-    _check_formal_structure_graph(decision, evidence_pack, issues)
-    _check_formal_causal_episode_graph(decision, evidence_pack, issues)
-    _check_parent_child_structure(decision, evidence_pack, issues)
-    _check_no_1m_entry(decision, issues)
-    _check_chart_eligibility(decision, issues)
-    _check_trade_ready_preconditions(decision, issues)
-    _check_active_range(decision, evidence_pack, issues)
-    _check_direction_vs_active_range(decision, evidence_pack, issues)
-    _check_claimed_sweep(decision, evidence_pack, issues)
-    _check_claimed_displacement(decision, evidence_pack, issues)
-    _check_active_poi(decision, evidence_pack, issues)
-    _check_causal_poi_authority(decision, evidence_pack, issues)
-    _check_structural_stop(decision, issues)
-    _check_target_logic(decision, evidence_pack, issues)
-    _check_rr(decision, issues)
-    _check_label_budget(decision, issues)
-    _check_self_review(decision, issues)
-    _check_annotation_plan_v2(decision, evidence_pack, issues)
+    _check_market_source_identity(evidence_pack, issues, decision)
+    source_mismatch = any(issue.code == "market_source_identity_mismatch" for issue in issues)
+    if source_mismatch:
+        # Instrument identity is the root semantic boundary. Running range,
+        # graph, POI and annotation validators on the wrong market merely
+        # produces cascading symptoms and risks treating proxy geometry as a
+        # partially meaningful thesis. The official artifact is fully
+        # quarantined below; the single root-cause issue is sufficient.
+        mapped_prices = {"entry": None, "stop": None, "targets": [], "invalidation": None}
+    else:
+        _check_bias_alignment(decision, issues)
+        _check_autonomous_definition_conformance(decision, evidence_pack, issues)
+        _check_formal_structure_graph(decision, evidence_pack, issues)
+        _check_formal_causal_episode_graph(decision, evidence_pack, issues)
+        _check_parent_child_structure(decision, evidence_pack, issues)
+        _check_no_1m_entry(decision, issues)
+        _check_chart_eligibility(decision, issues)
+        _check_trade_ready_preconditions(decision, issues)
+        _check_active_range(decision, evidence_pack, issues)
+        _check_direction_vs_active_range(decision, evidence_pack, issues)
+        _check_claimed_sweep(decision, evidence_pack, issues)
+        _check_claimed_displacement(decision, evidence_pack, issues)
+        _check_active_poi(decision, evidence_pack, issues)
+        _check_causal_poi_authority(decision, evidence_pack, issues)
+        _check_structural_stop(decision, issues)
+        _check_target_logic(decision, evidence_pack, issues)
+        _check_rr(decision, issues)
+        _check_label_budget(decision, issues)
+        _check_self_review(decision, issues)
+        _check_annotation_plan_v2(decision, evidence_pack, issues)
 
-    mapped_prices = _check_anchors_and_grounding(decision, evidence_pack, issues)
-    _check_liquidity_status(decision, evidence_pack, issues)
+        mapped_prices = _check_anchors_and_grounding(decision, evidence_pack, issues)
+        _check_liquidity_status(decision, evidence_pack, issues)
 
     # SMC Doctrine vs Trade Plan categorisation
     smc_doctrine_issue_codes = {
         "direction_bias_mismatch",
+        "market_source_identity_mismatch",
+        "market_source_identity_unverified_trade",
+        "autonomous_definition_conformance_blocked",
+        "autonomous_trade_promotion_not_certified",
         "parent_child_conflict_direction_not_mixed",
         "parent_child_conflict_trade_ready",
         "parent_child_conflict_not_acknowledged",
@@ -190,6 +205,8 @@ def validate_ai_smc_decision(
 
     if status != "VALIDATED":
         official = strip_trade_plan_for_review(official, issues)
+        if any(issue.code == "market_source_identity_mismatch" for issue in issues):
+            official = strip_requested_market_semantics_for_source_mismatch(official, issues)
     else:
         official["validation_status"] = "VALIDATED"
         official["validation_issues"] = [issue.model_dump(mode="json") for issue in issues]
@@ -211,6 +228,116 @@ def validate_ai_smc_decision(
         smc_model_validity=smc_model_validity,
         trade_plan_validity=trade_plan_validity
     )
+
+
+def _check_market_source_identity(
+    evidence_pack: Mapping[str, Any], issues: list[ValidationIssue], decision: AISMCDecision | None = None
+) -> None:
+    session = evidence_pack.get("session_context") or {}
+    certificate = session.get("source_identity_certificate") if isinstance(session, Mapping) else None
+    if not isinstance(certificate, Mapping):
+        return
+    status = str(certificate.get("status") or "UNVERIFIED")
+    if status == "UNVERIFIED":
+        issues.append(
+            ValidationIssue(
+                code=(
+                    "market_source_identity_unverified_trade"
+                    if decision is not None and decision.official_state == "TRADE_PLAN_READY"
+                    else "market_source_identity_unverified"
+                ),
+                severity=(
+                    "hard"
+                    if decision is not None and decision.official_state == "TRADE_PLAN_READY"
+                    else "warning"
+                ),
+                message="Market source identity was not certified; trade promotion requires a verified requested/provider symbol match.",
+            )
+        )
+        return
+    if status not in {"MISMATCH", "MISMATCH_PROXY"}:
+        return
+    failures = list(certificate.get("failures") or [])
+    issues.append(
+        ValidationIssue(
+            code="market_source_identity_mismatch",
+            severity="hard",
+            message=(
+                f"Requested instrument and candle source do not match ({status}). "
+                f"{failures[0] if failures else 'No matching-instrument certificate exists.'} "
+                "All structure, POI, and trade authority is withheld."
+            ),
+        )
+    )
+
+
+def _check_autonomous_definition_conformance(
+    decision: AISMCDecision,
+    evidence_pack: Mapping[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    bundle = evidence_pack.get("definition_conformance")
+    if not isinstance(bundle, Mapping) or bundle.get("status") in {None, "NOT_RUN", "NOT_EVALUATED"}:
+        issues.append(ValidationIssue(
+            code="autonomous_definition_conformance_not_run",
+            severity="warning",
+            message="Independent definition-conformance was not supplied; no autonomous truth claim is available.",
+        ))
+        return
+    status = str(bundle.get("status"))
+    if status == "BLOCKED":
+        failures = {
+            timeframe: (payload.get("certificate") or {}).get("status")
+            for timeframe, payload in (bundle.get("by_timeframe") or {}).items()
+            if isinstance(payload, Mapping)
+            and (payload.get("certificate") or {}).get("status")
+            in {"IMPLEMENTATION_CONFLICT", "DATA_FAILED", "DOCTRINE_UNDEFINED"}
+        }
+        failure_reasons = {
+            timeframe: list((payload.get("certificate") or {}).get("failures") or [])[:1]
+            for timeframe, payload in (bundle.get("by_timeframe") or {}).items()
+            if isinstance(payload, Mapping)
+            and (payload.get("certificate") or {}).get("status")
+            in {"IMPLEMENTATION_CONFLICT", "DATA_FAILED", "DOCTRINE_UNDEFINED"}
+        }
+        session = evidence_pack.get("session_context") or {}
+        source = session.get("source_manifest") if isinstance(session, Mapping) else {}
+        source = source if isinstance(source, Mapping) else {}
+        source_note = str(source.get("proxy_note") or "")
+        source_identity = "/".join(
+            str(value)
+            for value in (source.get("source"), source.get("provider_symbol"))
+            if value
+        )
+        issues.append(ValidationIssue(
+            code="autonomous_definition_conformance_blocked",
+            severity="hard",
+            message=(
+                f"Independent production/reference gate is blocked: {failures}. "
+                f"First failure per timeframe: {failure_reasons}. "
+                f"Source: {source_identity or 'unspecified'}. {source_note}"
+            ).strip(),
+        ))
+    elif status == "BOUNDARY_SENSITIVE":
+        issues.append(ValidationIssue(
+            code="autonomous_definition_boundary_sensitive",
+            severity="warning",
+            message="Canonical swing/FVG labels agree, but admissible parameter profiles change some claims.",
+        ))
+
+    authority = bundle.get("authority_contract") or {}
+    if decision.official_state == "TRADE_PLAN_READY" and not all(
+        authority.get(key) is True
+        for key in ("structure_semantics_certified", "order_blocks_certified", "liquidity_draws_certified")
+    ):
+        issues.append(ValidationIssue(
+            code="autonomous_trade_promotion_not_certified",
+            severity="hard",
+            message=(
+                "Trade promotion requires independently conformant structure semantics, order blocks, "
+                "and liquidity draws; one or more families are still NOT_EVALUATED."
+            ),
+        ))
 
 
 def assert_validated_official_decision(result: ValidationResult) -> None:
@@ -266,6 +393,166 @@ def strip_trade_plan_for_review(official: Mapping[str, Any], issues: Sequence[Va
         ]
         stripped["annotation_plan_v2"] = annotation_plan_v2
 
+    stripped["validation_status"] = "REVIEW_REQUIRED"
+    stripped["validation_issues"] = [issue.model_dump(mode="json") for issue in issues]
+    return stripped
+
+
+def strip_requested_market_semantics_for_source_mismatch(
+    official: Mapping[str, Any],
+    issues: Sequence[ValidationIssue],
+) -> dict[str, Any]:
+    """Quarantine every requested-market claim derived from the wrong series.
+
+    A final trade gate is not enough: retaining a proxy-derived range, bias,
+    POI, path or invalidation in the official review artifact makes the wrong
+    instrument look analytically usable.  Preserve only the symbol and the
+    explicit identity failure so the output states what must be acquired next.
+    """
+    stripped = dict(official)
+    symbol = str(stripped.get("symbol") or "requested instrument")
+    mismatch = next(
+        (issue for issue in issues if issue.code == "market_source_identity_mismatch"),
+        None,
+    )
+    reason = mismatch.message if mismatch is not None else "Market source identity mismatch."
+    unavailable = (
+        f"{symbol} analysis unavailable: the supplied candles are not source-verified "
+        "for this requested instrument. Acquire the correct feed and rerun."
+    )
+
+    stripped["official_state"] = "REVIEW_REQUIRED"
+    stripped["direction"] = "mixed"
+    stripped["setup_model"] = "source_identity_quarantine"
+    stripped["setup_grade"] = "INVALID_SOURCE"
+    stripped["bias_summary"] = {
+        "daily": "unknown",
+        "4h": "unknown",
+        "1h": "unknown",
+        "final_bias": "mixed",
+        "evidence": [reason],
+    }
+    stripped["active_range"] = {
+        "timeframe": None,
+        "high": None,
+        "low": None,
+        "equilibrium": None,
+        "price_location": "unknown",
+        "source": "source_identity_quarantine",
+        "range_id": None,
+        "protected_high": None,
+        "protected_low": None,
+        "width_atr": None,
+        "max_allowed_width_atr": None,
+        "evidence_object_ids": [],
+        "evidence": [reason],
+    }
+    stripped["liquidity_story"] = {
+        "obvious_liquidity": [],
+        "swept_liquidity": [],
+        "unswept_liquidity": [],
+        "narrative": unavailable,
+    }
+    stripped["displacement_assessment"] = {
+        "direction": "none",
+        "quality": "none",
+        "structure_broken": False,
+        "evidence_object_ids": [],
+        "summary": unavailable,
+    }
+    stripped["active_poi"] = {
+        "poi_id": None,
+        "timeframe": None,
+        "kind": None,
+        "direction": "unknown",
+        "price_low": None,
+        "price_high": None,
+        "freshness": None,
+        "evidence_object_ids": [],
+        "summary": unavailable,
+    }
+
+    entry = dict(stripped.get("entry_plan") or {})
+    entry.update(
+        {
+            "entry_ready": False,
+            "entry_price": None,
+            "entry_zone_low": None,
+            "entry_zone_high": None,
+            "mapped_entry_price": None,
+            "signal_type": None,
+            "evidence_object_ids": [],
+            "summary": unavailable,
+        }
+    )
+    stripped["entry_plan"] = entry
+    stop = dict(stripped.get("stop_loss_plan") or {})
+    stop.update(
+        {
+            "stop_price": None,
+            "structural_invalidation_price": None,
+            "mapped_stop_price": None,
+            "source": None,
+            "evidence_object_ids": [],
+            "summary": unavailable,
+        }
+    )
+    stripped["stop_loss_plan"] = stop
+    stripped["target_plan"] = {
+        "targets": [],
+        "model_completion_liquidity_id": None,
+        "summary": unavailable,
+    }
+    stripped["rr_status"] = {
+        "rr": None,
+        "minimum_rr": (stripped.get("rr_status") or {}).get("minimum_rr", MINIMUM_RR),
+        "pass_rr": False,
+        "notes": "RR cannot be evaluated from a mismatched instrument source.",
+    }
+    stripped["invalidation"] = {
+        "invalidation_price": None,
+        "mapped_invalidation_price": None,
+        "condition": unavailable,
+        "source": None,
+        "evidence_object_ids": [],
+    }
+
+    annotation = dict(stripped.get("annotation_plan") or {})
+    annotation.update(
+        {
+            "chart_template": "review_chart",
+            "show_trade_box": False,
+            "labels": [
+                {
+                    "text": "SOURCE MISMATCH · REQUESTED-MARKET ANALYSIS WITHHELD",
+                    "kind": "state",
+                    "timeframe": None,
+                    "importance": 3,
+                }
+            ],
+            "levels": [],
+        }
+    )
+    stripped["annotation_plan"] = annotation
+    stripped["annotation_plan_v2"] = {
+        "schema": "professional_smc_annotation_plan_v2",
+        "style": "professional_smc_sparse",
+        "objects": [],
+        "notes": [reason, unavailable],
+    }
+    stripped["self_review"] = {
+        "active_range_check": "failed_source_identity",
+        "poi_check": "not_applicable",
+        "annotation_check": "passed_empty_quarantine",
+        "refusal_check": "passed",
+        "corrections_made": [
+            "Removed every proxy-derived requested-market semantic claim."
+        ],
+        "remaining_uncertainties": [
+            "Requested-market structure is unknown until a source-verified feed is supplied."
+        ],
+    }
+    stripped["final_thesis"] = unavailable
     stripped["validation_status"] = "REVIEW_REQUIRED"
     stripped["validation_issues"] = [issue.model_dump(mode="json") for issue in issues]
     return stripped
@@ -341,16 +628,44 @@ def _check_formal_causal_episode_graph(
     contract = graph.get("authority_contract") or {}
     if contract.get("enforcement_ready") is not True:
         return
-    if str(invariants.get("status") or "REVIEW_REQUIRED") == "REVIEW_REQUIRED":
+    reconciliation_status = str(invariants.get("status") or "REVIEW_REQUIRED")
+    if reconciliation_status == "REVIEW_REQUIRED":
         _issue(
             issues,
             "causal_episode_graph_reconciliation_required",
-            "The stricter causal episode replay disagrees with one or more controlling V1 breaks or POI lineages: "
-            f"{list(invariants.get('violations') or [])}. The V2 episode graph may only downgrade.",
+            "The stricter causal episode replay disagrees with one or more controlling V1 breaks or POI lineages "
+            f"at or above the context timeframe: {list(invariants.get('narrative_violations') or invariants.get('violations') or [])}. "
+            "The V2 episode graph may only downgrade.",
         )
+    elif reconciliation_status == "ENTRY_TIMING_WITHHELD":
+        # Everything at or above the context timeframe reconciled. Only the
+        # timing layer is disputed, so the read stands and the entry does not.
+        # A warning keeps the run VALIDATED; the TRADE_PLAN_READY block below
+        # is what actually withholds entry authority.
+        _issue(
+            issues,
+            "causal_episode_entry_timing_withheld",
+            "The context timeframe and above reconciled with the stricter V3 replay. Lower-timeframe breaks "
+            f"{list(invariants.get('entry_timing_violations') or [])} did not survive it, so structure and context "
+            "remain readable while entry, stop and target authority is withheld.",
+            severity="warning",
+        )
+        if decision.official_state == "TRADE_PLAN_READY":
+            _issue(
+                issues,
+                "entry_timing_unreconciled_blocks_trade_plan",
+                "A trade plan cannot be declared while the timing-timeframe breaks it depends on fail V3 replay: "
+                f"{list(invariants.get('entry_timing_violations') or [])}.",
+            )
     current_story = graph.get("current_story") or {}
     if (
-        str(current_story.get("status") or "INCOMPLETE") in {"INCOMPLETE", "MIXED_CONTEXT"}
+        str(current_story.get("status") or "INCOMPLETE")
+        in {
+            "INCOMPLETE",
+            "MIXED_CONTEXT",
+            "RECONCILIATION_REQUIRED",
+            "COHERENT_CONTEXT_ENTRY_WITHHELD",
+        }
         and decision.official_state == "TRADE_PLAN_READY"
     ):
         _issue(

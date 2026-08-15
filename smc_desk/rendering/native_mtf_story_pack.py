@@ -32,6 +32,9 @@ def build_native_mtf_storyboards(
 ) -> dict[str, Any]:
     graph = evidence_pack.get("formal_causal_episode_graph") or {}
     graph_timeframes = graph.get("timeframes") if isinstance(graph, Mapping) else {}
+    accepted_by_timeframe = _accepted_episode_ids_by_timeframe(graph_timeframes)
+    definition_blocked_timeframes = _definition_blocked_timeframes(evidence_pack)
+    source_identity_block = _source_identity_block(evidence_pack)
     scenarios = (evidence_pack.get("causal_poi_authority") or {}).get("scenarios")
     index = build_annotation_evidence_index(evidence_pack)
     context_authority = evidence_pack.get("annotation_context_authority") or {}
@@ -42,6 +45,38 @@ def build_native_mtf_storyboards(
     ] if isinstance(context_authority, Mapping) else []
     storyboards: dict[str, Any] = {}
     for timeframe in NATIVE_TIMEFRAMES:
+        if source_identity_block or timeframe in definition_blocked_timeframes:
+            suppression_status = source_identity_block or definition_blocked_timeframes[timeframe]
+            storyboards[timeframe] = {
+                "schema": "native_smc_storyboard_v1",
+                "timeframe": timeframe,
+                "objects": [],
+                "source": (
+                    "market_source_identity_fail_closed"
+                    if source_identity_block
+                    else "autonomous_definition_conformance_fail_closed"
+                ),
+                "resolution_manifest": {
+                    "schema": "native_annotation_resolution_v1",
+                    "requested_ids": [],
+                    "required_context_ids": [],
+                    "rendered_ids": [],
+                    "deduplicated_ids": [],
+                    "off_window_ids": [],
+                    "unsupported_ids": [],
+                    "unknown_ids": [],
+                    "budget_omissions": [],
+                    "data_authority_suppressed": True,
+                    "suppression_status": suppression_status,
+                },
+                "authority_contract": {
+                    "observe_only": True,
+                    "can_promote_trade_state": False,
+                    "trade_box_allowed": False,
+                    "data_authority_suppressed": True,
+                },
+            }
+            continue
         node = graph_timeframes.get(timeframe) if isinstance(graph_timeframes, Mapping) else None
         objects: list[dict[str, Any]] = []
         if isinstance(node, Mapping):
@@ -74,6 +109,11 @@ def build_native_mtf_storyboards(
                     continue
                 primary = scenario.get("primary_causal_poi")
                 if not isinstance(primary, Mapping) or primary.get("timeframe") != timeframe:
+                    continue
+                linked_break_id = str(primary.get("linked_break_id") or scenario.get("accepted_break_id") or "")
+                if linked_break_id not in accepted_by_timeframe.get(timeframe, set()):
+                    # A V1-selected POI whose native break failed V3 is a
+                    # disputed hypothesis, not a drawable continuation zone.
                     continue
                 poi_anchor = _poi_anchor(index, primary)
                 if poi_anchor is not None and _native_visible(poi_anchor, timeframe):
@@ -205,13 +245,9 @@ def validate_native_mtf_storyboards(
 ) -> dict[str, Any]:
     index = build_annotation_evidence_index(evidence_pack)
     graph = evidence_pack.get("formal_causal_episode_graph") or {}
-    accepted_ids = {
-        str(episode.get("structure_event_id"))
-        for node in (graph.get("timeframes") or {}).values()
-        if isinstance(node, Mapping)
-        for episode in node.get("episodes", []) or []
-        if isinstance(episode, Mapping) and episode.get("structure_event_id")
-    }
+    accepted_by_timeframe = _accepted_episode_ids_by_timeframe(
+        graph.get("timeframes") if isinstance(graph, Mapping) else {}
+    )
     issues: list[dict[str, str]] = []
     raw_storyboards = storyboards.get("storyboards") if storyboards.get("schema") == "native_mtf_smc_storyboard_pack_v1" else storyboards
     for timeframe, storyboard in raw_storyboards.items() if isinstance(raw_storyboards, Mapping) else []:
@@ -247,7 +283,11 @@ def validate_native_mtf_storyboards(
                 issues.append({"code": "native_storyboard_scope_mismatch", "message": f"{obj.get('semantic_object_id')} is not native to {timeframe}."})
             if obj.get("object_type") == "trade_box":
                 issues.append({"code": "native_storyboard_trade_box_forbidden", "message": "Native observe-only storyboards cannot contain trade boxes."})
-            if obj.get("object_type") == "structure_segment" and evidence_ids and evidence_ids[0] not in accepted_ids:
+            if (
+                obj.get("object_type") == "structure_segment"
+                and evidence_ids
+                and evidence_ids[0] not in accepted_by_timeframe.get(str(timeframe), set())
+            ):
                 issues.append({"code": "native_storyboard_structure_not_v3_accepted", "message": f"{evidence_ids[0]} did not survive the V3 lifecycle."})
     rendered_ids = {
         str(value)
@@ -449,7 +489,11 @@ def _apply_context_display_contract(
     if obj.get("object_type") == "poi_zone":
         if obj.get("kind") == "order_block":
             side = "Supply" if direction == "bearish" else "Demand" if direction == "bullish" else "Context"
-            prefix = "Refined" if role == "context_refinement" else "HTF"
+            # Native storyboards render each object on its own timeframe.  A
+            # superseded 15m/1h/4h zone is therefore *prior* structure on that
+            # chart, not automatically a higher-timeframe zone.  Calling it
+            # HTF would visually grant authority the evidence does not have.
+            prefix = "Refined" if role == "context_refinement" else "Prior"
             obj["label"] = f"{prefix} {side} OB (context)"
         else:
             side = "Bearish" if direction == "bearish" else "Bullish" if direction == "bullish" else "Context"
@@ -627,6 +671,44 @@ def _contains_evidence_id(objects: Sequence[Mapping[str, Any]], object_id: str) 
         object_id in {str(value) for value in obj.get("evidence_object_ids") or []}
         for obj in objects
     )
+
+
+def _accepted_episode_ids_by_timeframe(graph_timeframes: Any) -> dict[str, set[str]]:
+    if not isinstance(graph_timeframes, Mapping):
+        return {}
+    return {
+        str(timeframe): {
+            str(episode.get("structure_event_id"))
+            for episode in node.get("episodes", []) or []
+            if isinstance(episode, Mapping) and episode.get("structure_event_id")
+        }
+        for timeframe, node in graph_timeframes.items()
+        if isinstance(node, Mapping)
+    }
+
+
+def _definition_blocked_timeframes(evidence_pack: Mapping[str, Any]) -> dict[str, str]:
+    bundle = evidence_pack.get("definition_conformance") or {}
+    by_timeframe = bundle.get("by_timeframe") if isinstance(bundle, Mapping) else None
+    if not isinstance(by_timeframe, Mapping):
+        return {}
+    blocked = {"DATA_FAILED", "IMPLEMENTATION_CONFLICT", "DOCTRINE_UNDEFINED"}
+    result: dict[str, str] = {}
+    for timeframe, item in by_timeframe.items():
+        certificate = item.get("certificate") if isinstance(item, Mapping) else None
+        status = str(certificate.get("status") or "") if isinstance(certificate, Mapping) else ""
+        if status in blocked:
+            result[str(timeframe)] = status
+    return result
+
+
+def _source_identity_block(evidence_pack: Mapping[str, Any]) -> str | None:
+    session = evidence_pack.get("session_context") or {}
+    certificate = session.get("source_identity_certificate") if isinstance(session, Mapping) else None
+    if not isinstance(certificate, Mapping):
+        return None
+    status = str(certificate.get("status") or "")
+    return status if status in {"MISMATCH", "MISMATCH_PROXY"} else None
 
 
 def _dedupe_with_report(

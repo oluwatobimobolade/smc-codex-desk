@@ -1,4 +1,26 @@
 next_actions:
+  - id: WP-SMC-20
+    priority: 0
+    title: Autonomous definition truth, causal reconciliation, and market-source integrity
+    owner: Perception Validation Engineer
+    status: VALIDATED_LOCAL_OBSERVE_ONLY_SOURCE_BOUND
+    gate: GATE-WP-SMC-20-AUTONOMOUS-TRUTH-SOURCE-INTEGRITY-001
+    completed_scope:
+      - clean-room production-reference conformance with sealed definitions
+      - market microstructure integrity and regime observations
+      - selective-outcome recording without refusal erasure
+      - timeframe-qualified causal reconciliation and exact source binding
+      - reclaim-safe two-stage protected-level invalidation and later displacement MSS confirmation
+      - V3-disputed POI and structure withholding from official and native charts
+      - timeframe-honest prior and refined context labels without implied HTF entry authority
+      - effective post-gap context authority and data-failed timeframe suppression
+      - explicit proxy and wrong-instrument source-identity fail-closed gate
+      - fresh ETHUSDT HYPEUSDT and XAUUSD diagnostic exercise
+    prohibited_claims:
+      - deterministic conformance is not empirical perception accuracy
+      - refusal quality is not predictive edge or profitability
+      - GC=F is not XAUUSD spot truth
+      - no signal paper live or execution authority was created
   - id: WP-SMC-17
     priority: 0
     title: Preserve causally proven superseded HYPEUSDT context without weakening active-entry gates

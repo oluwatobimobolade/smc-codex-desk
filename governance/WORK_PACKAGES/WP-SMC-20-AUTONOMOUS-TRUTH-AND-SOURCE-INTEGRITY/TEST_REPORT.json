@@ -1,0 +1,74 @@
+{
+  "schema": "smc_work_package_test_report_v1",
+  "work_package": "WP-SMC-20-AUTONOMOUS-TRUTH-AND-SOURCE-INTEGRITY",
+  "date": "2026-08-14",
+  "status": "PASS_LOCAL_OBSERVE_ONLY_SOURCE_BOUND",
+  "focused_validation": {
+    "passed": 105,
+    "failed": 0,
+    "seconds": 18.93
+  },
+  "post_source_identity_validation": {
+    "passed": 72,
+    "failed": 0,
+    "seconds": 16.90
+  },
+  "five_market_repair_focused_validation": {
+    "commands": [
+      "PYTHONPATH=. .venv/bin/pytest -q tests/test_autonomous_definition_conformance.py tests/test_wp0038_avax_eurnzd_repairs.py tests/test_native_mtf_story_pack.py tests/test_structure_engine_v3_causal_episode_graph.py",
+      "PYTHONPATH=. .venv/bin/pytest -q tests/decision/test_smc_refinement.py -k ny_close_daily"
+    ],
+    "passed": 60,
+    "failed": 0,
+    "notes": "57 source, conformance, and annotation tests plus 3 New York daylight-saving reconstruction tests"
+  },
+  "full_validation_before_rebind": {
+    "passed": 1461,
+    "skipped": 1,
+    "failed_behavioral": 0,
+    "failed_governance_rebind": 1,
+    "seconds": 387.78,
+    "failure": "The previous current-gate source manifest correctly detected changed source hashes."
+  },
+  "full_validation_after_rebind": {
+    "command": ".venv/bin/python -m pytest -q",
+    "passed": 1462,
+    "skipped": 1,
+    "failed": 0,
+    "seconds": 390.14
+  },
+  "full_validation_after_five_market_rebind": {
+    "command": "PYTHONPATH=. .venv/bin/pytest -q",
+    "passed": 1469,
+    "skipped": 1,
+    "failed": 0,
+    "seconds": 481.86
+  },
+  "governance_consistency": "PASS",
+  "authority_boundary_check": "PASS",
+  "source_manifest": {
+    "records": 834,
+    "sha256": "bdf98b5cdb4cd9deabc6cd211a4ef268494ca0fdaf27114d6d0a70c1a3b17517"
+  },
+  "fresh_run": "analysis_runs/autonomous_reality_check_v6_20260814/LIVE_FULL_SYSTEM_AI_SMC_V3_20260814_091859",
+  "fresh_five_market_run": "analysis_runs/five_market_system_final_recheck_20260814/LIVE_FULL_SYSTEM_AI_SMC_V3_20260814_181241",
+  "xauusd_offline_proxy_quarantine_proof": "analysis_runs/autonomous_reality_check_v4_20260814/XAUUSD_OFFLINE_PROXY_QUARANTINE_PROOF_R2",
+  "fresh_run_states": {
+    "ETHUSDT": "REVIEW_REQUIRED_STRUCTURE_RECONCILIATION",
+    "HYPEUSDT": "REVIEW_REQUIRED_CONFIRMED_15M_EXTERNAL_MSS_NO_CAUSAL_POI_ENTRY",
+    "XAUUSD": "REVIEW_REQUIRED_MARKET_SOURCE_IDENTITY_MISMATCH"
+  },
+  "fresh_five_market_states": {
+    "GBPNZD": "REVIEW_REQUIRED_MIXED_HTF_LTF_NO_FRESH_15M_SEQUENCE",
+    "SOLUSDT": "REVIEW_REQUIRED_AT_BULLISH_4H_POI_WITH_BEARISH_15M_CONFLICT",
+    "BTCUSDT": "REVIEW_REQUIRED_V3_BEARISH_ALIGNMENT_NO_ELIGIBLE_BEARISH_POI",
+    "USDCHF": "REVIEW_REQUIRED_DAILY_LTF_CONFLICT_NO_FRESH_15M_SEQUENCE",
+    "CHFJPY": "REVIEW_REQUIRED_BEARISH_WATCH_AWAY_FROM_DAILY_POI"
+  },
+  "authority_contract": {
+    "signal_allowed": false,
+    "paper_execution_allowed": false,
+    "live_execution_allowed": false,
+    "empirical_perception_certified": false
+  }
+}

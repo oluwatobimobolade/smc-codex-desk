@@ -5,6 +5,9 @@ from smc_desk.rules import RuleConfig, load_rule_config
 from smc_desk.brain.ai_smc_trader_brain import AISMCDecision
 from smc_desk.brain.ai_smc_consistency_validator import validate_ai_smc_decision, ValidationResult
 from smc_desk.mtf import resample_to_ny_close_daily
+from smc_desk.data.timeframe_reconstruction import (
+    resample_to_ny_close_daily as resample_to_ny_close_daily_canonical,
+)
 
 
 def test_validation_decoupling_bad_rr():
@@ -288,3 +291,28 @@ def test_ny_close_daily_resampling():
     assert resampled.iloc[1]["high"] == 25.0
     assert resampled.iloc[1]["low"] == 19.0
     assert resampled.iloc[1]["close"] == 19.0
+
+
+@pytest.mark.parametrize(
+    "resampler",
+    [resample_to_ny_close_daily, resample_to_ny_close_daily_canonical],
+)
+def test_ny_close_daily_resampling_keeps_17_wall_clock_across_spring_dst(resampler):
+    frame = pd.DataFrame(
+        [
+            {"timestamp": "2026-03-07T22:00:00Z", "open": 10, "high": 11, "low": 9, "close": 10, "volume": 1},
+            {"timestamp": "2026-03-08T20:00:00Z", "open": 10, "high": 12, "low": 8, "close": 11, "volume": 1},
+            {"timestamp": "2026-03-08T21:00:00Z", "open": 11, "high": 13, "low": 10, "close": 12, "volume": 1},
+        ]
+    )
+
+    result = resampler(frame)
+
+    assert result["timestamp"].tolist() == [
+        pd.Timestamp("2026-03-07T22:00:00"),
+        pd.Timestamp("2026-03-08T21:00:00"),
+    ]
+    assert result["_close_visible_at"].tolist() == [
+        pd.Timestamp("2026-03-08T21:00:00"),
+        pd.Timestamp("2026-03-09T21:00:00"),
+    ]

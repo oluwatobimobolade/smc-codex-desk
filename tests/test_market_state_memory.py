@@ -28,6 +28,7 @@ from smc_desk.perception.market_state_memory import (
 )
 from tools.run_live_ai_smc_full_system import (
     _compare_shadow_to_canonical,
+    _fresh_v3_external_event,
     _load_final_evidence_pack,
     _market_identity_from_pack,
     _narrative_draw_note,
@@ -317,6 +318,63 @@ def test_runner_helper_reports_when_pack_has_no_market_state(tmp_path: Path) -> 
     )
     assert outcome["memory_status"] == "no_market_state_in_pack"
     assert outcome["shadow_status"] == "recorded"
+
+
+def test_runner_helper_never_updates_memory_or_shadow_from_mismatched_source(tmp_path: Path) -> None:
+    symbol_root = tmp_path / "run" / "XAUUSD"
+    _write_fake_run(symbol_root)
+    pack_path = symbol_root / "10_smc_evidence_pack_run_1" / "evidence_pack.json"
+    pack = json.loads(pack_path.read_text(encoding="utf-8"))
+    pack["session_context"]["source_identity_certificate"] = {
+        "status": "MISMATCH_PROXY",
+        "candle_authority_allowed": False,
+        "failures": ["GC=F is not XAUUSD"],
+    }
+    pack_path.write_text(json.dumps(pack), encoding="utf-8")
+
+    outcome = write_colleague_memory_and_narrative_shadow(
+        symbol_root=symbol_root,
+        output_root=tmp_path,
+        symbol="XAUUSD",
+    )
+
+    assert outcome["memory_status"] == "suppressed_source_identity"
+    assert outcome["memory_store_updated"] is False
+    assert outcome["memory_forward_transition"] is False
+    assert outcome["shadow_status"] == "suppressed_source_identity"
+    assert not (tmp_path / "market_state_store").exists()
+    transition = json.loads(
+        (symbol_root / "18_colleague_memory_narrative" / "market_state_transition.json").read_text()
+    )
+    shadow = json.loads(
+        (symbol_root / "18_colleague_memory_narrative" / "narrative_annotation_plan_shadow.json").read_text()
+    )
+    assert transition["store_updated"] is False
+    assert transition["store_path"] is None
+    assert transition["authority"] == "source_identity_quarantine"
+    assert shadow["plan"]["selections"] == []
+    assert shadow["comparison"]["status"] == "SUPPRESSED_SOURCE_IDENTITY"
+
+
+def test_fresh_v3_structure_is_descriptive_only_and_stale_structure_is_ignored() -> None:
+    event = {
+        "accepted_for_shadow_story": True,
+        "source_break_object_id": "break-15m",
+        "event_type": "EXTERNAL_MSS_CONFIRMED_BEARISH",
+        "direction": "bearish",
+        "confirmation_time": "2026-08-10T11:30:00Z",
+        "displacement_score": 0.9,
+    }
+    pack = {
+        "structure_engine_v3_shadow": {
+            "decision_time": "2026-08-10T12:00:00Z",
+            "timeframes": {"15m": {"latest_accepted_external": event}},
+        }
+    }
+
+    assert _fresh_v3_external_event(pack, timeframe="15m", maximum_age_bars=32) == event
+    pack["structure_engine_v3_shadow"]["decision_time"] = "2026-08-11T12:00:00Z"
+    assert _fresh_v3_external_event(pack, timeframe="15m", maximum_age_bars=32) is None
 
 
 

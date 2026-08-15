@@ -117,6 +117,7 @@ class StructureEngineV3Shadow:
             key=lambda item: _timestamp(item.get("candidate_at") or item.get("confirmed_at") or decision_time),
         )
         prior_direction: dict[str, str | None] = {"external": None, "internal": None}
+        pending_parent_invalidation: dict[str, Any] | None = None
         events: list[dict[str, Any]] = []
         config = _config_for_timeframe(timeframe)
         engine = ExperimentalBreakLifecycleEngine(config)
@@ -169,6 +170,28 @@ class StructureEngineV3Shadow:
                 decision_time=decision_time.to_pydatetime(),
             )
             event = lifecycle.to_dict()
+            source_confirmed_at = candidate.get("confirmed_at")
+            body_close_time = event.get("body_close_time")
+            source_binding_matches = bool(
+                source_confirmed_at is not None
+                and body_close_time is not None
+                and _timestamp(source_confirmed_at) == _timestamp(body_close_time)
+            )
+            # The shadow must replay the source candidate, not merely find an
+            # arbitrary earlier interaction with the same swing level.  A
+            # source-confirmed object can inherit V3 acceptance only when the
+            # replayed body-close belongs to that exact candidate.
+            if (
+                str(candidate.get("confirmation_status") or "") == "confirmed"
+                and not source_binding_matches
+            ):
+                event["event_type"] = "SOURCE_BINDING_MISMATCH"
+                event["lifecycle_state"] = "UNRESOLVED"
+                event["confirmation_time"] = None
+                event["reasons"] = [
+                    *list(event.get("reasons") or []),
+                    "replayed_body_close_does_not_match_source_confirmed_at",
+                ]
             event.update(
                 {
                     "source_break_object_id": str(candidate.get("object_id") or ""),
@@ -177,11 +200,32 @@ class StructureEngineV3Shadow:
                     "broken_swing_id": broken_swing_id,
                     "broken_level_price": level_price,
                     "level_available_at": available_at.isoformat().replace("+00:00", "Z"),
+                    "source_candidate_at": (
+                        _timestamp(candidate.get("candidate_at")).isoformat().replace("+00:00", "Z")
+                        if candidate.get("candidate_at") is not None
+                        else None
+                    ),
+                    "source_confirmed_at": (
+                        _timestamp(source_confirmed_at).isoformat().replace("+00:00", "Z")
+                        if source_confirmed_at is not None
+                        else None
+                    ),
+                    "source_binding_matches": source_binding_matches,
                     "timeframe": timeframe,
                     "atr_at_candidate": atr,
-                    "accepted_for_shadow_story": _is_accepted_event(event.get("event_type")),
                 }
             )
+            if scope == "external":
+                pending_parent_invalidation = _apply_parent_invalidation_chain(
+                    event=event,
+                    evidence=evidence,
+                    direction=direction,
+                    prior_direction=prior_direction[scope],
+                    pending=pending_parent_invalidation,
+                    candles=candles,
+                    config=config,
+                )
+            event["accepted_for_shadow_story"] = _is_accepted_event(event.get("event_type"))
             events.append(event)
             if event["accepted_for_shadow_story"]:
                 prior_direction[scope] = direction
@@ -210,6 +254,159 @@ class StructureEngineV3Shadow:
                 "failed_breakouts": sum(event.get("event_type") == "FAILED_BREAKOUT" for event in events),
             },
         }
+
+
+def _apply_parent_invalidation_chain(
+    *,
+    event: dict[str, Any],
+    evidence: Mapping[str, Any],
+    direction: str,
+    prior_direction: str | None,
+    pending: dict[str, Any] | None,
+    candles: Sequence[Mapping[str, Any]],
+    config: BreakLifecycleConfig,
+) -> dict[str, Any] | None:
+    """Confirm a two-stage external MSS without weakening break thresholds.
+
+    Sometimes the first body close through the protected point is decisive in
+    location but not strong enough to pass the external displacement gate. If
+    price then *holds* beyond that protected point and a later external level
+    breaks with full displacement/follow-through, the pair is one causal MSS
+    sequence. The first event remains rejected as a standalone break; only the
+    later, independently strong external event can complete the chain.
+    """
+    event["parent_invalidation_probe"] = False
+    event["parent_invalidation_chain"] = None
+
+    # A pending probe expires causally on a body-close reclaim. There is no
+    # wall-clock timeout and no future data: state survives exactly while the
+    # protected level remains invalidated on closed candles.
+    if pending is not None and not _closed_candles_hold_beyond(
+        candles=candles,
+        direction=str(pending["direction"]),
+        level=float(pending["protected_level"]),
+        start_time=str(pending["body_close_time"]),
+        end_time=str(event.get("body_close_time") or event.get("source_confirmed_at") or ""),
+    ):
+        pending = None
+
+    if (
+        pending is not None
+        and direction == pending.get("direction")
+        and str(event.get("event_type") or "").startswith("EXTERNAL_MSS_CANDIDATE_")
+        and event.get("source_binding_matches") is True
+        and event.get("confirmation_time") is not None
+        and _closed_candles_hold_beyond(
+            candles=candles,
+            direction=direction,
+            level=float(pending["protected_level"]),
+            start_time=str(pending["body_close_time"]),
+            end_time=str(event["confirmation_time"]),
+        )
+    ):
+        event["event_type"] = f"EXTERNAL_MSS_CONFIRMED_{direction.upper()}"
+        event["lifecycle_state"] = "ACCEPTED_BREAKOUT"
+        event["parent_invalidation_chain"] = {
+            "schema": "held_protected_break_plus_external_displacement_v1",
+            "protected_break_event_id": pending["source_break_object_id"],
+            "protected_swing_id": pending["protected_swing_id"],
+            "protected_level": pending["protected_level"],
+            "protected_break_body_close_time": pending["body_close_time"],
+            "confirming_external_event_id": event.get("source_break_object_id"),
+            "confirming_external_time": event.get("confirmation_time"),
+            "held_without_body_close_reclaim": True,
+        }
+        event["reasons"] = [
+            *list(event.get("reasons") or []),
+            "held_protected_break_confirmed_by_later_external_displacement",
+        ]
+        return None
+
+    direct_protected_break = bool(evidence.get("broke_protected_swing"))
+    if (
+        direct_protected_break
+        and prior_direction in {"bullish", "bearish"}
+        and direction != prior_direction
+        and _qualifies_as_parent_invalidation_probe(event, config)
+    ):
+        pending = {
+            "direction": direction,
+            "source_break_object_id": event.get("source_break_object_id"),
+            "protected_swing_id": evidence.get("protected_swing_id")
+            or evidence.get("broken_swing_id"),
+            "protected_level": event.get("broken_level_price"),
+            "body_close_time": event.get("body_close_time"),
+        }
+        event["parent_invalidation_probe"] = True
+        event["parent_invalidation_chain"] = {
+            "schema": "held_protected_break_plus_external_displacement_v1",
+            "status": "AWAITING_STRONG_EXTERNAL_FOLLOWUP",
+            **pending,
+        }
+
+    # A directly accepted protected break already owns the MSS label; no
+    # deferred chain remains necessary.
+    if direct_protected_break and _is_accepted_event(event.get("event_type")):
+        return None
+    return pending
+
+
+def _qualifies_as_parent_invalidation_probe(
+    event: Mapping[str, Any],
+    config: BreakLifecycleConfig,
+) -> bool:
+    if event.get("source_binding_matches") is not True:
+        return False
+    if str(event.get("source_confirmation_status") or "") != "confirmed":
+        return False
+    if event.get("body_close_time") is None or event.get("broken_level_price") is None:
+        return False
+    try:
+        penetration_atr = float(event.get("normalized_penetration_atr"))
+        penetration_bps = float(event.get("close_beyond_structure_bps"))
+    except (TypeError, ValueError):
+        return False
+    if penetration_atr < config.minimum_penetration_atr:
+        return False
+    if penetration_bps < config.minimum_close_beyond_structure_bps:
+        return False
+    reasons = set(str(reason) for reason in event.get("reasons") or [])
+    return not reasons.intersection(
+        {
+            "displacement_direction_mismatch",
+            "gap_open_requires_separate_interaction_policy",
+            "replayed_body_close_does_not_match_source_confirmed_at",
+        }
+    )
+
+
+def _closed_candles_hold_beyond(
+    *,
+    candles: Sequence[Mapping[str, Any]],
+    direction: str,
+    level: float,
+    start_time: str,
+    end_time: str,
+) -> bool:
+    if not start_time or not end_time:
+        return False
+    start = _timestamp(start_time)
+    end = _timestamp(end_time)
+    if end < start:
+        return False
+    observed = 0
+    tolerance = max(abs(level) * 1e-9, 1e-12)
+    for candle in candles:
+        close_time = _timestamp(candle.get("close_time") or candle.get("timestamp"))
+        if close_time < start or close_time > end:
+            continue
+        observed += 1
+        close = float(candle["close"])
+        if direction == "bullish" and close <= level + tolerance:
+            return False
+        if direction == "bearish" and close >= level - tolerance:
+            return False
+    return observed > 0
 
 
 def _config_for_timeframe(timeframe: str) -> BreakLifecycleConfig:

@@ -20,6 +20,7 @@ from smc_desk.perception.causal_poi_authority import build_causal_poi_authority
 from smc_desk.perception.formal_causal_episode_graph import build_formal_causal_episode_graph
 from smc_desk.perception.evidence_contract import build_object_evidence_contracts
 from smc_desk.perception.formal_structure_graph import build_mtf_structure_graph
+from smc_desk.perception.regime_observations import observe_regime_features
 from smc_desk.perception.structure_engine_v3 import StructureEngineV3Shadow
 from smc_desk.perception.structure_narrative import build_structure_narrative, prefer_formal_graph_override
 from smc_desk.perception.sweep_lifecycle import enrich_sweep_lifecycles
@@ -48,6 +49,64 @@ CANDIDATE_GROUPS = (
 )
 
 
+def _source_semantics_allowed(certificate: Any) -> bool:
+    """Return false only for an explicit fail-closed identity decision.
+
+    Legacy/offline callers without a source certificate remain usable for
+    research.  Once a certificate says the candles are not authoritative for
+    the requested instrument, however, no downstream semantic layer may
+    reinterpret the same rows as requested-market evidence.
+    """
+    if not isinstance(certificate, Mapping):
+        return True
+    status = str(certificate.get("status") or "UNVERIFIED")
+    return certificate.get("candle_authority_allowed") is not False and status not in {
+        "MISMATCH",
+        "MISMATCH_PROXY",
+    }
+
+
+def _source_identity_withheld_active_range(
+    *,
+    symbol: str,
+    certificate: Any,
+) -> dict[str, Any]:
+    status = (
+        str(certificate.get("status") or "MISMATCH")
+        if isinstance(certificate, Mapping)
+        else "MISMATCH"
+    )
+    failures = (
+        list(certificate.get("failures") or [])
+        if isinstance(certificate, Mapping)
+        else []
+    )
+    return {
+        "schema": "active_range_authority_v1",
+        "symbol": symbol,
+        "status": "SOURCE_IDENTITY_WITHHELD",
+        "method": "no_requested_market_geometry_from_mismatched_source",
+        "selected_range": None,
+        "candidate_ranges": [],
+        "rejected_ranges": [],
+        "source_identity_status": status,
+        "reason": (
+            f"Market source identity is {status}; active-range semantics are withheld. "
+            f"{failures[0] if failures else 'The candle source is not authoritative for the requested instrument.'}"
+        ),
+        "forbidden_sources": [
+            "mismatched_instrument_geometry",
+            "proxy_active_range",
+            "ohlcv_summary_high_low",
+            "dataset_high_low",
+        ],
+        "review_rule": (
+            "Acquire a source-verified candle series for the requested instrument before "
+            "constructing any active range or directional thesis."
+        ),
+    }
+
+
 def build_smc_evidence_pack(
     *,
     symbol: str,
@@ -59,6 +118,7 @@ def build_smc_evidence_pack(
     max_candles_per_timeframe: int = 120,
     embed_images: bool = False,
     daily_session_profile: str = "exchange_daily_utc",
+    definition_conformance: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     if not timeframe_dfs:
         raise ValueError("timeframe_dfs is required")
@@ -67,6 +127,7 @@ def build_smc_evidence_pack(
     ohlcv_windows: dict[str, Any] = {}
     dataframe_hashes: dict[str, str] = {}
     normalized_dfs: dict[str, pd.DataFrame] = {}
+    regime_observations: dict[str, Any] = {}
 
     for timeframe, df in timeframe_dfs.items():
         if df.empty:
@@ -76,29 +137,48 @@ def build_smc_evidence_pack(
         ohlcv_summaries[timeframe] = _summarize_df(normalized, timeframe=timeframe)
         ohlcv_windows[timeframe] = _tail_records(normalized, max_candles_per_timeframe)
         dataframe_hashes[timeframe] = _hash_dataframe(normalized)
+        regime_observations[timeframe] = observe_regime_features(normalized)
 
-    active_range_authority = resolve_active_range_authority(
-        symbol=symbol,
-        timeframe_dfs=timeframe_dfs,
-    )
-    candidate_manifest = _candidate_manifest(detector_candidates or {})
+    session_payload = dict(session_context or {})
+    source_identity_certificate = session_payload.get("source_identity_certificate")
+    source_semantics_allowed = _source_semantics_allowed(source_identity_certificate)
+    if source_semantics_allowed:
+        active_range_authority = resolve_active_range_authority(
+            symbol=symbol,
+            timeframe_dfs=timeframe_dfs,
+        )
+        semantic_timeframe_dfs: Mapping[str, pd.DataFrame] = timeframe_dfs
+        candidate_manifest = _candidate_manifest(detector_candidates or {})
+    else:
+        active_range_authority = _source_identity_withheld_active_range(
+            symbol=symbol,
+            certificate=source_identity_certificate,
+        )
+        # Defence in depth: the orchestrator already empties detector output,
+        # but the evidence boundary must also quarantine caller-supplied
+        # candidates.  Raw proxy candles remain below as explicitly labelled
+        # diagnostics; no semantic engine is allowed to infer from them.
+        semantic_timeframe_dfs = {}
+        candidate_manifest = _candidate_manifest(
+            {str(timeframe): {} for timeframe in timeframe_dfs}
+        )
     decision_time = _latest_closed_decision_time(ohlcv_summaries)
     candidate_manifest = enrich_sweep_lifecycles(
         candidate_manifest,
-        timeframe_dfs,
+        semantic_timeframe_dfs,
         decision_time=decision_time,
     )
     structure_engine_v3_shadow = StructureEngineV3Shadow().analyze(
         symbol=symbol,
         detector_candidates=candidate_manifest,
-        timeframe_dfs=timeframe_dfs,
+        timeframe_dfs=semantic_timeframe_dfs,
         decision_time=decision_time,
     ).to_dict()
     formal_structure_graph = build_mtf_structure_graph(
         symbol=symbol,
         detector_candidates=candidate_manifest,
         active_range_authority=active_range_authority,
-        timeframe_dfs=timeframe_dfs,
+        timeframe_dfs=semantic_timeframe_dfs,
         decision_time=decision_time,
     )
     causal_poi_authority = build_causal_poi_authority(
@@ -137,14 +217,51 @@ def build_smc_evidence_pack(
             "source": "local_ohlcv",
             "canonical_timeframe": "15m",
             "htf_policy": "derive_from_15m_unless_native_audit",
+            "semantic_market_authority": source_semantics_allowed,
+            "raw_data_role": (
+                "market_evidence"
+                if source_semantics_allowed
+                else "diagnostic_proxy_only_no_requested_instrument_semantics"
+            ),
             "execution_authority": "disabled",
         },
         "doctrine_profile": profile,
         "doctrine_notes": list(doctrine_notes or []),
-        "session_context": dict(session_context or {}),
+        "session_context": session_payload,
         "chart_images": _image_manifest(chart_images or {}, embed=embed_images),
         "ohlcv_summaries": ohlcv_summaries,
         "ohlcv_windows": ohlcv_windows,
+        "regime_observations": regime_observations,
+        "source_identity_quarantine": {
+            "active": not source_semantics_allowed,
+            "status": (
+                str(source_identity_certificate.get("status") or "MISMATCH")
+                if isinstance(source_identity_certificate, Mapping)
+                else "NOT_APPLICABLE"
+            ),
+            "withheld_semantics": (
+                [
+                    "active_range",
+                    "structure",
+                    "bias",
+                    "liquidity",
+                    "poi",
+                    "entry",
+                    "stop",
+                    "target",
+                    "annotation",
+                    "cross_run_memory",
+                ]
+                if not source_semantics_allowed
+                else []
+            ),
+        },
+        "definition_conformance": dict(definition_conformance or {
+            "schema": "autonomous_definition_conformance_bundle_v1",
+            "status": "NOT_RUN",
+            "reason": "caller_did_not_supply_bundle",
+            "authority_contract": {"signal_allowed": False},
+        }),
         "active_range_authority": active_range_authority,
         "detector_candidates": candidate_manifest,
         "structure_narrative": structure_narrative,

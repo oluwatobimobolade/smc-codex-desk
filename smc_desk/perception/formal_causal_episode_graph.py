@@ -31,7 +31,10 @@ def build_formal_causal_episode_graph(
     nodes: dict[str, dict[str, Any]] = {}
     edges: list[dict[str, Any]] = []
     timeframe_episodes: dict[str, Any] = {}
-    accepted_ids: set[str] = set()
+    # Detector object ids are not guaranteed to be globally unique across
+    # timeframes.  Keep acceptance scoped to the native timeframe so a 15m
+    # object can never make a same-named 4h object appear V3-accepted.
+    accepted_ids_by_timeframe: dict[str, set[str]] = {}
 
     shadow_timeframes = structure_shadow.get("timeframes") or {}
     for timeframe in TIMEFRAME_ORDER:
@@ -45,7 +48,11 @@ def build_formal_causal_episode_graph(
             if isinstance(event, Mapping) and event.get("accepted_for_shadow_story")
         ]
         events.sort(key=_event_time)
-        accepted_ids.update(str(event.get("source_break_object_id")) for event in events if event.get("source_break_object_id"))
+        accepted_ids_by_timeframe[timeframe] = {
+            str(event.get("source_break_object_id"))
+            for event in events
+            if event.get("source_break_object_id")
+        }
         candidate_index = _candidate_index(payload)
         episodes = [
             _build_episode(
@@ -77,18 +84,21 @@ def build_formal_causal_episode_graph(
             "shadow_counts": dict(shadow_tf.get("counts") or {}),
         }
 
-    current_story = _current_story(
-        timeframes=timeframe_episodes,
-        formal_structure_graph_v1=formal_structure_graph_v1,
-        causal_poi_authority=causal_poi_authority,
-        nodes=nodes,
-        edges=edges,
-    )
     invariants = _invariants(
         timeframes=timeframe_episodes,
         formal_structure_graph_v1=formal_structure_graph_v1,
         causal_poi_authority=causal_poi_authority,
-        accepted_ids=accepted_ids,
+        accepted_ids_by_timeframe=accepted_ids_by_timeframe,
+        shadow_timeframes=shadow_timeframes if isinstance(shadow_timeframes, Mapping) else {},
+    )
+    current_story = _current_story(
+        timeframes=timeframe_episodes,
+        formal_structure_graph_v1=formal_structure_graph_v1,
+        causal_poi_authority=causal_poi_authority,
+        accepted_ids_by_timeframe=accepted_ids_by_timeframe,
+        reconciliation_status=str(invariants.get("status") or "INSUFFICIENT_EVIDENCE"),
+        nodes=nodes,
+        edges=edges,
     )
     return {
         "schema": "formal_causal_episode_graph_v2",
@@ -137,7 +147,7 @@ def _build_episode(
     edges: list[dict[str, Any]],
 ) -> dict[str, Any]:
     break_id = str(event.get("source_break_object_id") or "")
-    event_node_id = f"structure_event:{break_id}"
+    event_node_id = f"structure_event:{timeframe}:{break_id}"
     event_node = {
         "node_id": event_node_id,
         "node_type": "structure_event",
@@ -158,7 +168,7 @@ def _build_episode(
     swing_id = str(event.get("broken_swing_id") or "")
     if swing_id:
         swing = candidate_index.get(swing_id) or {}
-        swing_node_id = f"swing:{swing_id}"
+        swing_node_id = f"swing:{timeframe}:{swing_id}"
         nodes[swing_node_id] = {
             "node_id": swing_node_id,
             "node_type": "swing",
@@ -172,7 +182,7 @@ def _build_episode(
         }
         _edge(edges, event_node_id, "breaks", swing_node_id, break_id)
 
-    displacement_node_id = f"displacement:{break_id}"
+    displacement_node_id = f"displacement:{timeframe}:{break_id}"
     nodes[displacement_node_id] = {
         "node_id": displacement_node_id,
         "node_type": "displacement_evidence",
@@ -186,7 +196,7 @@ def _build_episode(
     }
     _edge(edges, displacement_node_id, "confirms", event_node_id, break_id)
 
-    linked_pois = _pois_for_break(causal_poi_authority, break_id)
+    linked_pois = _pois_for_break(causal_poi_authority, break_id, timeframe=timeframe)
     enriched_pois = [
         {**poi, "structural_role": _poi_structural_role(poi, event)}
         for poi in linked_pois
@@ -195,7 +205,7 @@ def _build_episode(
         poi_id = str(poi.get("poi_id") or poi.get("source_object_id") or "")
         if not poi_id:
             continue
-        poi_node_id = f"poi:{poi_id}"
+        poi_node_id = f"poi:{timeframe}:{poi_id}"
         nodes[poi_node_id] = {
             "node_id": poi_node_id,
             "node_type": "poi",
@@ -221,7 +231,7 @@ def _build_episode(
         if not inducement_id:
             continue
         evidence = inducement.get("evidence") if isinstance(inducement.get("evidence"), Mapping) else {}
-        node_id = f"inducement:{inducement_id}"
+        node_id = f"inducement:{timeframe}:{inducement_id}"
         nodes[node_id] = {
             "node_id": node_id,
             "node_type": "inducement_hypothesis",
@@ -238,7 +248,7 @@ def _build_episode(
         _edge(edges, node_id, "conditions", event_node_id, break_id)
         sweep_id = str(evidence.get("sweep_id") or "")
         if sweep_id:
-            _edge(edges, f"sweep:{sweep_id}", "resolves", node_id, inducement_id)
+            _edge(edges, f"sweep:{timeframe}:{sweep_id}", "resolves", node_id, inducement_id)
 
     linked_sweeps = _sweeps_before_event(payload.get("sweeps"), event)
     for sweep in linked_sweeps:
@@ -246,7 +256,7 @@ def _build_episode(
         if not sweep_id:
             continue
         evidence = sweep.get("evidence") if isinstance(sweep.get("evidence"), Mapping) else {}
-        node_id = f"sweep:{sweep_id}"
+        node_id = f"sweep:{timeframe}:{sweep_id}"
         nodes.setdefault(
             node_id,
             {
@@ -295,6 +305,8 @@ def _current_story(
     timeframes: Mapping[str, Any],
     formal_structure_graph_v1: Mapping[str, Any],
     causal_poi_authority: Mapping[str, Any],
+    accepted_ids_by_timeframe: Mapping[str, set[str]],
+    reconciliation_status: str,
     nodes: dict[str, dict[str, Any]],
     edges: list[dict[str, Any]],
 ) -> dict[str, Any]:
@@ -328,12 +340,33 @@ def _current_story(
     direction = str(controlling_episode.get("direction") or "unknown")
     scenario = (causal_poi_authority.get("scenarios") or {}).get(direction)
     scenario = scenario if isinstance(scenario, Mapping) else {}
+    route_primary = scenario.get("primary_causal_poi")
+    route_secondary = list(scenario.get("secondary_reaction_pois") or [])
+    route_refinements = list(scenario.get("execution_refinements") or [])
+    route_inducements = list(scenario.get("inducement_candidates") or [])
+    disputed = _dedupe_route_objects([
+        _disputed_route_object(item)
+        for item in [route_primary, *route_secondary, *route_refinements, *route_inducements]
+        if isinstance(item, Mapping)
+        and not _poi_link_is_accepted(item, accepted_ids_by_timeframe)
+    ])
+    if not _poi_link_is_accepted(route_primary, accepted_ids_by_timeframe):
+        route_primary = None
+    route_secondary = [item for item in route_secondary if _poi_link_is_accepted(item, accepted_ids_by_timeframe)]
+    route_refinements = [item for item in route_refinements if _poi_link_is_accepted(item, accepted_ids_by_timeframe)]
+    route_inducements = [item for item in route_inducements if _poi_link_is_accepted(item, accepted_ids_by_timeframe)]
     route_map = {
         "direction": direction,
-        "primary_poi": scenario.get("primary_causal_poi"),
-        "secondary_pois": list(scenario.get("secondary_reaction_pois") or []),
-        "execution_refinements": list(scenario.get("execution_refinements") or []),
-        "inducement_candidates": list(scenario.get("inducement_candidates") or []),
+        "primary_poi": route_primary,
+        "secondary_pois": route_secondary,
+        "execution_refinements": route_refinements,
+        "inducement_candidates": route_inducements,
+        "disputed_objects": disputed,
+        "poi_resolution_status": (
+            "DISPUTED_BY_V3"
+            if scenario.get("primary_causal_poi") is not None and route_primary is None
+            else scenario.get("status", "UNRESOLVED")
+        ),
         "active_range": active_range,
         "liquidity_objective": (
             active_range.get("high") if direction == "bullish" else active_range.get("low")
@@ -341,7 +374,16 @@ def _current_story(
         "confirmation_requirement": "Lower-timeframe sweep/rejection plus accepted displacement; POI touch alone is not entry authority.",
         "invalidation": (controlling_episode.get("protected_origin") or {}).get("price"),
     }
-    status = "MIXED_CONTEXT" if parent_child.get("has_conflict") else "COHERENT_SHADOW_STORY"
+    if reconciliation_status == "ENTRY_TIMING_WITHHELD":
+        # The context timeframe and above reconciled; only the timing layer is
+        # disputed. The story is readable, the entry is not available.
+        status = "COHERENT_CONTEXT_ENTRY_WITHHELD"
+    elif reconciliation_status != "PASS":
+        status = "RECONCILIATION_REQUIRED"
+    elif parent_child.get("has_conflict"):
+        status = "MIXED_CONTEXT"
+    else:
+        status = "COHERENT_SHADOW_STORY"
     return {
         "status": status,
         "controlling_timeframe": controlling_tf,
@@ -349,9 +391,60 @@ def _current_story(
         "route_map": route_map,
         "summary": (
             f"{controlling_tf} {direction} {controlling_episode.get('event_type')} controls the shadow story. "
-            f"Parent-child status is {parent_child.get('status', 'unknown')}; POI status is {scenario.get('status', 'UNRESOLVED')}."
+            f"Parent-child status is {parent_child.get('status', 'unknown')}; "
+            f"POI status is {route_map['poi_resolution_status']}; reconciliation is {reconciliation_status}."
         ),
     }
+
+
+def _dedupe_route_objects(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """A POI can hold more than one route role; report the dispute once."""
+    seen: set[tuple[str, str, str]] = set()
+    result: list[dict[str, Any]] = []
+    for item in items:
+        key = (
+            str(item.get("poi_id") or item.get("object_id") or ""),
+            str(item.get("timeframe") or ""),
+            str(item.get("linked_break_id") or ""),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(item)
+    return result
+
+
+_TIMEFRAME_UNIT_MINUTES = {"m": 1, "h": 60, "d": 1440, "w": 10080}
+
+
+def _timeframe_minutes(timeframe: str) -> int | None:
+    """Parse '15m'/'4h'/'1d' into minutes. Unknown shapes return None."""
+    text = str(timeframe or "").strip().lower()
+    if len(text) < 2 or not text[:-1].isdigit():
+        return None
+    unit = _TIMEFRAME_UNIT_MINUTES.get(text[-1])
+    return int(text[:-1]) * unit if unit else None
+
+
+def _structure_role(timeframe: str, context_timeframe: str | None) -> str:
+    """Does a disagreement here break the story, or only the entry timing?
+
+    SMC reads top-down: the context timeframe owns the bias, and everything
+    below it is timing. A 15m break that fails a stricter replay means the
+    entry is not ready; it does not mean the daily narrative is unknown.
+    Previously every disagreement carried the same veto, so one marginal
+    lower-timeframe break suppressed a higher-timeframe read that both
+    engines agreed on.
+
+    Fail-closed: if either timeframe cannot be ranked, the check is treated as
+    narrative-owning, because an unclassifiable disagreement must not be
+    quietly downgraded to a timing note.
+    """
+    context_minutes = _timeframe_minutes(context_timeframe or "")
+    own_minutes = _timeframe_minutes(timeframe)
+    if context_minutes is None or own_minutes is None:
+        return "narrative"
+    return "timing" if own_minutes < context_minutes else "narrative"
 
 
 def _invariants(
@@ -359,25 +452,40 @@ def _invariants(
     timeframes: Mapping[str, Any],
     formal_structure_graph_v1: Mapping[str, Any],
     causal_poi_authority: Mapping[str, Any],
-    accepted_ids: set[str],
+    accepted_ids_by_timeframe: Mapping[str, set[str]],
+    shadow_timeframes: Mapping[str, Any],
 ) -> dict[str, Any]:
     checks: list[dict[str, Any]] = []
+    narrative_context = formal_structure_graph_v1.get("narrative_context") or {}
+    context_timeframe = (
+        str(narrative_context.get("context_timeframe") or "")
+        if isinstance(narrative_context, Mapping)
+        and narrative_context.get("is_coherent") is True
+        else ""
+    ) or None
     v1_nodes = formal_structure_graph_v1.get("timeframes") or {}
     for timeframe, node in v1_nodes.items() if isinstance(v1_nodes, Mapping) else []:
         latest = node.get("latest_external_break") if isinstance(node, Mapping) else None
         object_id = str(latest.get("object_id") or "") if isinstance(latest, Mapping) else ""
         if not object_id:
             continue
+        passed = object_id in accepted_ids_by_timeframe.get(str(timeframe), set())
+        challenge = _shadow_challenge(shadow_timeframes, str(timeframe), object_id)
+        role = _structure_role(str(timeframe), context_timeframe)
         checks.append(
             {
                 "code": f"{timeframe}_v1_controlling_external_break_survives_v3",
-                "passed": object_id in accepted_ids,
-                "severity": "review",
+                "passed": passed,
+                "severity": "review" if role == "narrative" else "entry_timing",
+                "structure_role": role,
+                "context_timeframe": context_timeframe,
                 "object_id": object_id,
+                "source_timeframe": str(timeframe),
+                "v3_classification": challenge,
                 "detail": (
                     "The V1 controlling external break passed the stricter V3 lifecycle."
-                    if object_id in accepted_ids
-                    else "The V1 controlling external break did not pass V3 penetration, displacement, and acceptance checks."
+                    if passed
+                    else _challenge_sentence(challenge)
                 ),
             }
         )
@@ -388,16 +496,30 @@ def _invariants(
         if not isinstance(primary, Mapping):
             continue
         linked_break_id = str(primary.get("linked_break_id") or scenario.get("accepted_break_id") or "")
+        source_timeframe = str(primary.get("timeframe") or scenario.get("controlling_timeframe") or "")
+        passed = bool(
+            source_timeframe
+            and linked_break_id in accepted_ids_by_timeframe.get(source_timeframe, set())
+        )
+        challenge = _shadow_challenge(shadow_timeframes, source_timeframe, linked_break_id)
+        # A POI is an entry-route object. When its lineage is disputed below the
+        # context timeframe, the route is unavailable -- the story above it is not.
+        role = _structure_role(source_timeframe, context_timeframe)
         checks.append(
             {
                 "code": f"{direction}_primary_poi_links_v3_accepted_break",
-                "passed": linked_break_id in accepted_ids,
-                "severity": "review",
+                "passed": passed,
+                "severity": "review" if role == "narrative" else "entry_timing",
+                "structure_role": role,
+                "context_timeframe": context_timeframe,
                 "object_id": str(primary.get("poi_id") or ""),
+                "linked_break_id": linked_break_id,
+                "source_timeframe": source_timeframe,
+                "v3_classification": challenge,
                 "detail": (
                     "Primary POI owns a V3-accepted structure event."
-                    if linked_break_id in accepted_ids
-                    else "Primary POI lineage ends at a break challenged by V3."
+                    if passed
+                    else f"Primary POI lineage ends at a same-timeframe break challenged by V3. {_challenge_sentence(challenge)}"
                 ),
             }
         )
@@ -407,14 +529,36 @@ def _invariants(
             "enforcement_ready": False,
             "checks": [],
             "violations": [],
+            "narrative_violations": [],
+            "entry_timing_violations": [],
+            "context_timeframe": context_timeframe,
             "certainty_definition": "deterministic_story_consistency_not_future_price_prediction",
         }
-    violations = [check["code"] for check in checks if not check["passed"]]
+    failed = [check for check in checks if not check["passed"]]
+    violations = [check["code"] for check in failed]
+    narrative_violations = [
+        check["code"] for check in failed if check.get("structure_role") != "timing"
+    ]
+    entry_timing_violations = [
+        check["code"] for check in failed if check.get("structure_role") == "timing"
+    ]
+    # A disputed break below the context timeframe withholds the entry, not the
+    # read. Only a disagreement at or above the context timeframe means the
+    # system genuinely does not know what the market is doing.
+    if narrative_violations:
+        status = "REVIEW_REQUIRED"
+    elif entry_timing_violations:
+        status = "ENTRY_TIMING_WITHHELD"
+    else:
+        status = "PASS"
     return {
-        "status": "PASS" if not violations else "REVIEW_REQUIRED",
+        "status": status,
         "enforcement_ready": True,
         "checks": checks,
         "violations": violations,
+        "narrative_violations": narrative_violations,
+        "entry_timing_violations": entry_timing_violations,
+        "context_timeframe": context_timeframe,
         "certainty_definition": "deterministic_story_consistency_not_future_price_prediction",
     }
 
@@ -428,7 +572,83 @@ def _candidate_index(payload: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]
     return index
 
 
-def _pois_for_break(authority: Mapping[str, Any], break_id: str) -> list[dict[str, Any]]:
+def _poi_link_is_accepted(
+    poi: Any,
+    accepted_ids_by_timeframe: Mapping[str, set[str]],
+) -> bool:
+    if not isinstance(poi, Mapping):
+        return False
+    timeframe = str(poi.get("timeframe") or "")
+    linked_break_id = str(poi.get("linked_break_id") or "")
+    return bool(
+        timeframe
+        and linked_break_id
+        and linked_break_id in accepted_ids_by_timeframe.get(timeframe, set())
+    )
+
+
+def _disputed_route_object(poi: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "poi_id": str(poi.get("poi_id") or poi.get("source_object_id") or ""),
+        "source_object_id": str(poi.get("source_object_id") or ""),
+        "timeframe": str(poi.get("timeframe") or ""),
+        "kind": str(poi.get("kind") or ""),
+        "direction": str(poi.get("direction") or ""),
+        "linked_break_id": str(poi.get("linked_break_id") or ""),
+        "display_authority": "WITHHELD",
+        "reason": "The POI's native-timeframe linked break did not survive V3 replay.",
+    }
+
+
+def _shadow_challenge(
+    shadow_timeframes: Mapping[str, Any], timeframe: str, object_id: str
+) -> dict[str, Any] | None:
+    node = shadow_timeframes.get(timeframe)
+    if not isinstance(node, Mapping):
+        return None
+    event = next(
+        (
+            item
+            for item in node.get("events", []) or []
+            if isinstance(item, Mapping)
+            and str(item.get("source_break_object_id") or "") == object_id
+        ),
+        None,
+    )
+    if not isinstance(event, Mapping):
+        return None
+    return {
+        "event_type": event.get("event_type"),
+        "lifecycle_state": event.get("lifecycle_state"),
+        "body_close_time": event.get("body_close_time"),
+        "confirmation_time": event.get("confirmation_time"),
+        "displacement_score": event.get("displacement_score"),
+        "normalized_penetration_atr": event.get("normalized_penetration_atr"),
+        "close_beyond_structure_bps": event.get("close_beyond_structure_bps"),
+        "body_to_range_ratio": event.get("body_to_range_ratio"),
+        "reasons": list(event.get("reasons") or []),
+    }
+
+
+def _challenge_sentence(challenge: Mapping[str, Any] | None) -> str:
+    if not isinstance(challenge, Mapping):
+        return "The V1 controlling external break has no matching accepted V3 event on its native timeframe."
+    event_type = str(challenge.get("event_type") or challenge.get("lifecycle_state") or "UNRESOLVED")
+    if event_type.startswith("EXTERNAL_MSS_CANDIDATE_"):
+        return (
+            "The external direction-change candidate passed break geometry and follow-through, "
+            "but it did not prove protected-parent invalidation; V3 therefore withholds a confirmed MSS."
+        )
+    reasons = ", ".join(str(value) for value in challenge.get("reasons") or []) or "unspecified lifecycle failure"
+    return (
+        "The V1 controlling external break did not pass same-timeframe V3 replay: "
+        f"{event_type} ({reasons})."
+    )
+
+
+def _pois_for_break(
+    authority: Mapping[str, Any], break_id: str, *, timeframe: str
+) -> list[dict[str, Any]]:
     found: dict[str, dict[str, Any]] = {}
     for scenario in (authority.get("scenarios") or {}).values():
         if not isinstance(scenario, Mapping):
@@ -438,6 +658,8 @@ def _pois_for_break(authority: Mapping[str, Any], break_id: str) -> list[dict[st
         collections.extend(scenario.get("execution_refinements") or [])
         for raw in collections:
             if not isinstance(raw, Mapping):
+                continue
+            if str(raw.get("timeframe") or "") != timeframe:
                 continue
             linked = {str(raw.get("linked_break_id") or ""), *(str(value) for value in raw.get("linked_break_ids") or [])}
             if break_id not in linked:
@@ -489,7 +711,7 @@ def _protected_origin_from_poi(
         return None
     poi_id = str(poi.get("poi_id") or poi.get("source_object_id") or "")
     return {
-        "node_id": f"protected_origin:{poi_id}",
+        "node_id": f"protected_origin:{poi.get('timeframe')}:{poi_id}",
         "node_type": "protected_origin",
         "object_id": poi_id,
         "timeframe": poi.get("timeframe"),

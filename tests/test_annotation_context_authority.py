@@ -321,6 +321,12 @@ def test_native_storyboard_cannot_silently_drop_required_context() -> None:
     assert parent["evidence_geometry"]["end_time"] != parent["display_geometry"]["end_time"]
     assert parent["display_geometry"]["clipping_rule"] == "context_zone_to_latest_visible_bar"
     assert parent["active_entry_authority"] is False
+    assert parent["label"] == "Prior Supply OB (context)"
+    refinement = next(
+        obj for obj in result["storyboards"]["1h"]["objects"]
+        if "ob_bearish_refined" in obj.get("evidence_object_ids", [])
+    )
+    assert refinement["label"] == "Refined Supply OB (context)"
 
 
 def test_ai_context_exception_is_prequalified_and_visibility_only() -> None:
