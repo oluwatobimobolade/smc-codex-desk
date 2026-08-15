@@ -9,7 +9,7 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-23-MECHANISM-EVIDENCE-20260815",
+    "record_id": "WP-SMC-23-MECHANISM-EVIDENCE-R2-20260815",
     "work_package": "WP-SMC-23-MECHANISM-EVIDENCE",
     "gate": "GATE-WP-SMC-23-MECHANISM-EVIDENCE-001"
   },
@@ -2142,6 +2142,66 @@
         "A mechanism certificate cannot establish forecast quality or economic value.",
         "Raw fair value gaps cannot be tested at these horizons at all: the pattern is too frequent for a clean control.",
         "Control-matching bucket counts were raised against a balance diagnostic, not against a significance result.",
+        "No signal, paper, live, or predictive-edge authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-23-MECHANISM-EVIDENCE-R2-20260815",
+      "work_package": "WP-SMC-23-MECHANISM-EVIDENCE",
+      "gate": "GATE-WP-SMC-23-MECHANISM-EVIDENCE-001",
+      "date": "2026-08-15",
+      "recorded_at": "2026-08-15T03:00:00Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_SOURCE_BOUND",
+      "supersedes_result_of": "WP-SMC-23-MECHANISM-EVIDENCE-20260815",
+      "correction_note": "Three defects in R1 were repaired: the block bootstrap resampled a pooled non-time-ordered array; the matched pairing was discarded in favour of pooled marginal means; and every hypothesis was scored with forward returns regardless of its declared observable. The BTCUSDT verdict moved from MECHANISM_NOT_SUPPORTED to BOUNDARY_SENSITIVE, so R1 under-reported the effect.",
+      "source": {
+        "git_head": "0ffe90b",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-23-MECHANISM-EVIDENCE/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "97b7cc0b46a9359f4b139ceb601a1f7f37ad6382ae06f55fa6428603b6376d73"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1528 passed, 1 skipped in 414.47s (0:06:54)"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": "run_mechanism_test.py FVG_CONTINUATION_V1 --qualified (BTCUSDT 15m, 20000 bars)",
+          "exit_code": 0,
+          "summary": "BOUNDARY_SENSITIVE; 207 pairs; h10 t=3.19 passes, h20 t=2.18 and h40 t=1.93 do not; balance passed"
+        },
+        {
+          "command": "run_mechanism_test.py FVG_CONTINUATION_V1 --qualified (ETHUSDT 15m, 20000 bars)",
+          "exit_code": 0,
+          "summary": "MECHANISM_NOT_SUPPORTED; 237 pairs; no horizon clears t>=3.0; effect profile is the inverse of BTC's; balance passed"
+        },
+        {
+          "command": "run_mechanism_test.py SWING_LIQUIDITY_ACCELERATION_V1",
+          "exit_code": 3,
+          "summary": "REFUSED; needs a penetration-event extractor, a confirmed swing is a different event"
+        }
+      ],
+      "primary_result": "1528 passed, 1 skipped in 414.47s (0:06:54)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-23-MECHANISM-EVIDENCE/README.md",
+      "authority_mode": "observe_only_preregistered_mechanism_association",
+      "limitations": [
+        "Cross-market replication was attempted and FAILED: BTC and ETH show opposite horizon profiles.",
+        "BTC's 10-bar horizon is the only passing cell; the preregistration forbids reporting it alone.",
+        "SWING_LIQUIDITY_ACCELERATION_V1 remains unrun; its event definition is not implemented.",
+        "FVG_FILL_RATE_V1 remains unrun; band_touch_within_horizon has no measurement function.",
+        "Two markets, one timeframe, one detector configuration.",
         "No signal, paper, live, or predictive-edge authority was created."
       ]
     }

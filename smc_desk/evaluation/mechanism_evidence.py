@@ -101,73 +101,122 @@ def load_preregistration(
 def forward_returns(
     candles: pd.DataFrame, indices: Sequence[int], horizon: int, *, signs: Sequence[float] | None = None
 ) -> np.ndarray:
-    """Signed close-to-close return in basis points over ``horizon`` bars."""
+    """Signed close-to-close return in basis points over ``horizon`` bars.
+
+    Returns NaN where the horizon runs past the data, so the caller keeps
+    positional alignment with ``indices`` -- a paired design cannot silently
+    drop one arm's entry and still call the remaining pairs matched.
+    """
     close = candles["close"].astype(float).to_numpy()
     total = len(close)
     out: list[float] = []
     for position, index in enumerate(indices):
         end = index + horizon
         if index < 0 or end >= total or close[index] <= 0:
+            out.append(np.nan)
             continue
         move = (close[end] - close[index]) / close[index] * 10_000.0
         out.append(move * (signs[position] if signs is not None else 1.0))
     return np.asarray(out, dtype=float)
 
 
-def stationary_block_bootstrap_pvalue(
-    treatment: np.ndarray,
-    control: np.ndarray,
+def realised_range_expansion(
+    candles: pd.DataFrame, indices: Sequence[int], horizon: int, *, signs: Sequence[float] | None = None
+) -> np.ndarray:
+    """Mean true range over the horizon, as a multiple of the range before it.
+
+    Direction-free by construction: an acceleration hypothesis is about how much
+    price moves, not which way, so the sign convention is deliberately unused.
+    """
+    high = candles["high"].astype(float).to_numpy()
+    low = candles["low"].astype(float).to_numpy()
+    total = len(high)
+    out: list[float] = []
+    for index in indices:
+        end = index + horizon
+        start = index - horizon
+        if start < 0 or end >= total:
+            out.append(np.nan)
+            continue
+        after = float(np.mean(high[index:end] - low[index:end]))
+        before = float(np.mean(high[start:index] - low[start:index]))
+        out.append(after / before if before > 0 else np.nan)
+    return np.asarray(out, dtype=float)
+
+
+# Each preregistered observable maps to exactly one measurement function.
+# Without this, every hypothesis was scored with `forward_returns` regardless of
+# what it declared -- so a fill-rate hypothesis would have been answered with a
+# directional-return number and stamped with the fill-rate id.
+OBSERVABLE_FUNCTIONS = {
+    "signed_forward_return_in_gap_direction": forward_returns,
+    "realised_range_expansion_after_penetration": realised_range_expansion,
+}
+
+
+def paired_block_bootstrap(
+    paired_differences: np.ndarray,
     *,
     block_length: int,
     resamples: int = 2000,
     seed: int = 0,
     two_sided: bool = False,
 ) -> dict[str, Any]:
-    """Test the difference in means while respecting serial dependence.
+    """Test whether a time-ordered series of paired differences has zero mean.
 
-    Blocks are drawn with a geometric length whose mean is ``block_length``, so
-    the resample preserves the local dependence that overlapping outcome windows
-    create. A plain bootstrap would treat those observations as independent and
-    return a p-value that is far too small.
+    ``paired_differences[i]`` is one event's outcome minus the mean outcome of
+    *its own* matched controls, in event order. Two things about that shape
+    matter, and an earlier version of this function got both wrong.
+
+    It is **paired**. Matching each event to its own controls and then comparing
+    marginal means across pooled arms throws the pairing away -- which is the
+    entire reason for matching, and costs power for nothing.
+
+    It is **time-ordered**. A block bootstrap only preserves serial dependence
+    if adjacent entries are adjacent in time. Resampling blocks from a pooled
+    ``[treatment, control]`` array does not: entries are returns from scattered
+    indices, and blocks straddling the arm boundary are meaningless. Here entry
+    *i* and *i+1* are consecutive events, so a block genuinely captures the
+    dependence that overlapping outcome windows create.
+
+    The null is built by recentring the series and resampling it in blocks, so
+    the null distribution inherits the same dependence as the data.
     """
-    treatment = treatment[np.isfinite(treatment)]
-    control = control[np.isfinite(control)]
-    if treatment.size < 2 or control.size < 2:
+    values = paired_differences[np.isfinite(paired_differences)]
+    if values.size < 2:
         return {"p_value": None, "reason": "insufficient_observations"}
 
-    observed = float(treatment.mean() - control.mean())
-    pooled = np.concatenate([treatment, control])
+    observed = float(values.mean())
+    centred = values - observed  # impose the null: mean difference is zero
     rng = np.random.default_rng(seed)
-    block_length = max(1, int(block_length))
+    block_length = max(1, min(int(block_length), values.size))
+    size = values.size
 
-    def draw(size: int) -> np.ndarray:
+    def draw() -> float:
         out = np.empty(size, dtype=float)
         filled = 0
         while filled < size:
-            start = rng.integers(0, pooled.size)
-            length = min(rng.geometric(1.0 / block_length), size - filled)
-            take = np.arange(start, start + length) % pooled.size
-            out[filled:filled + length] = pooled[take]
+            start = int(rng.integers(0, size))
+            length = int(min(rng.geometric(1.0 / block_length), size - filled))
+            take = np.arange(start, start + length) % size
+            out[filled:filled + length] = centred[take]
             filled += length
-        return out
+        return float(out.mean())
 
-    # Null: both arms come from the same distribution. Resampling the pooled
-    # series in blocks builds the null distribution of the mean difference.
-    differences = np.empty(resamples, dtype=float)
-    for i in range(resamples):
-        differences[i] = draw(treatment.size).mean() - draw(control.size).mean()
+    null = np.fromiter((draw() for _ in range(resamples)), dtype=float, count=resamples)
 
     if two_sided:
-        p_value = float((np.abs(differences) >= abs(observed)).mean())
+        p_value = float((np.abs(null) >= abs(observed)).mean())
     else:
-        p_value = float((differences >= observed).mean())
+        p_value = float((null >= observed).mean())
 
-    spread = float(differences.std(ddof=1))
+    spread = float(null.std(ddof=1))
     return {
         "observed_difference": round(observed, 6),
         "p_value": round(p_value, 6),
         "bootstrap_t": round(observed / spread, 6) if spread > 0 else None,
         "null_std": round(spread, 6),
+        "paired_observations": int(size),
         "resamples": resamples,
         "block_length": block_length,
         "two_sided": two_sided,
@@ -282,34 +331,54 @@ def certify_mechanism(
         return {**base, "status": "DATA_FAILED", "reason": "no_events_could_be_matched",
                 "matching": cohort.diagnostics}
 
+    observable = str(hypothesis.get("observable") or "")
+    measure = OBSERVABLE_FUNCTIONS.get(observable)
+    if measure is None:
+        # Refusing beats answering a different question than the one registered.
+        return {
+            **base, "status": "NOT_EVALUATED",
+            "reason": f"observable '{observable}' has no implemented measurement",
+        }
+
     sign_by_index = {int(i): float(s) for i, s in zip(event_indices, event_signs or [])} if event_signs else {}
     per_horizon: list[dict[str, Any]] = []
     for horizon in horizons:
         treated_idx = [s.event_index for s in cohort.samples]
         treated_signs = [sign_by_index.get(i, 1.0) for i in treated_idx] if sign_by_index else None
-        control_idx: list[int] = []
-        control_signs: list[float] = []
-        for sample in cohort.samples:
-            sign = sign_by_index.get(sample.event_index, 1.0)
-            for control in sample.control_indices:
-                control_idx.append(control)
-                control_signs.append(sign)
+        treated = measure(candles, treated_idx, horizon, signs=treated_signs)
 
-        treated = forward_returns(candles, treated_idx, horizon, signs=treated_signs)
-        control = forward_returns(candles, control_idx, horizon,
-                                  signs=control_signs if sign_by_index else None)
-        result = stationary_block_bootstrap_pvalue(
-            treated, control, block_length=horizon, resamples=resamples,
+        # Each event is compared against its OWN controls, keeping the pairing
+        # the matching created. Comparing pooled marginal means instead would
+        # discard it -- and would leave nothing time-ordered to block-bootstrap.
+        paired: list[float] = []
+        control_values: list[float] = []
+        for position, sample in enumerate(cohort.samples):
+            sign = sign_by_index.get(sample.event_index, 1.0)
+            controls = measure(
+                candles, list(sample.control_indices), horizon,
+                signs=[sign] * len(sample.control_indices) if sign_by_index else None,
+            )
+            controls = controls[np.isfinite(controls)]
+            if controls.size == 0 or not np.isfinite(treated[position]):
+                paired.append(np.nan)
+                continue
+            control_values.append(float(controls.mean()))
+            paired.append(float(treated[position]) - float(controls.mean()))
+
+        differences = np.asarray(paired, dtype=float)
+        usable = differences[np.isfinite(differences)]
+        result = paired_block_bootstrap(
+            differences, block_length=horizon, resamples=resamples,
             seed=seed + horizon, two_sided=two_sided,
         )
-        effective = _effective_sample_size(treated.size, horizon, len(candles))
+        treated_finite = treated[np.isfinite(treated)]
         per_horizon.append({
             "horizon_bars": horizon,
-            "treated_count": int(treated.size),
-            "control_count": int(control.size),
-            "effective_sample_size": round(effective, 3),
-            "treated_mean_bps": round(float(treated.mean()), 6) if treated.size else None,
-            "control_mean_bps": round(float(control.mean()), 6) if control.size else None,
+            "treated_count": int(treated_finite.size),
+            "control_count": len(control_values),
+            "effective_sample_size": round(_effective_sample_size(usable.size, horizon, len(candles)), 3),
+            "treated_mean": round(float(treated_finite.mean()), 6) if treated_finite.size else None,
+            "control_mean": round(float(np.mean(control_values)), 6) if control_values else None,
             **result,
         })
 
@@ -364,7 +433,9 @@ __all__ = [
     "Preregistration",
     "benjamini_hochberg",
     "certify_mechanism",
+    "OBSERVABLE_FUNCTIONS",
     "forward_returns",
     "load_preregistration",
-    "stationary_block_bootstrap_pvalue",
+    "paired_block_bootstrap",
+    "realised_range_expansion",
 ]

@@ -62,40 +62,93 @@ question "does a gap predict continuation" has no counterfactual because the
 market is almost never outside one. The matched baseline made that visible
 immediately; without it the same data would have produced a confident number.
 
-### Qualified fair value gaps — MECHANISM_NOT_SUPPORTED
+### Qualified fair value gaps
 
 The constitution keeps qualification separate from raw geometry, so the
 qualified subset is a different object, not a second attempt at the same one.
 Both runs are reported here, which is the condition under which running both is
 legitimate.
 
-215 events, median spacing 66 bars, balance **passed**.
+Two markets, 20,000 candles each, balance **passed** on both.
 
-| Horizon | Treated | Control | Difference | t | p | Passes |
+**BTCUSDT 15m — BOUNDARY_SENSITIVE.** 207 pairs, median spacing 66 bars.
+
+| Horizon | Treated | Control | Paired difference | t | p | Passes |
 |---|---|---|---|---|---|---|
-| 10 | +14.94 bps | −4.69 bps | **+19.63** | 2.55 | 0.006 | No |
-| 20 | +12.77 bps | −1.43 bps | +14.21 | 1.19 | 0.124 | No |
-| 40 | +10.09 bps | −4.66 bps | +14.75 | 0.94 | 0.177 | No |
+| 10 | +14.94 bps | −7.32 bps | **+22.27** | **3.19** | 0.001 | **Yes** |
+| 20 | +12.77 bps | −4.86 bps | +17.63 | 2.18 | 0.015 | No |
+| 40 | +10.09 bps | −7.28 bps | +17.38 | 1.93 | 0.027 | No |
 
-**This is the clearest possible demonstration of why the threshold matters.** At
-the conventional t ≈ 2.0 bar, the 10-bar horizon passes — t = 2.55, p = 0.006 —
-and the honest-sounding conclusion would have been "qualified fair value gaps
-predict continuation". At the preregistered t ≥ 3.0 it does not survive, and the
-effect decays across horizons instead of persisting.
+**ETHUSDT 15m — MECHANISM_NOT_SUPPORTED.** 237 pairs, median spacing 58 bars.
 
-Two things are worth keeping from a negative result. The direction is
-consistently positive at every horizon, which is *continuation*, not fill —
-directionally against the retail "gaps fill" belief and consistent with the
-published work disputing it. And the magnitudes are small: roughly 15–20 basis
-points before costs.
+| Horizon | Treated | Control | Paired difference | t | p | Passes |
+|---|---|---|---|---|---|---|
+| 10 | +13.09 bps | +1.02 bps | +12.08 | 1.16 | 0.127 | No |
+| 20 | +21.40 bps | −1.10 bps | +22.50 | 1.95 | 0.027 | No |
+| 40 | +31.58 bps | +4.44 bps | +27.14 | 1.79 | 0.037 | No |
+
+**The cross-market comparison is the strongest result here, and it is negative.**
+A real mechanism should replicate. BTC's effect is largest at the shortest
+horizon and decays with distance; ETH's is smallest at the shortest and grows.
+Opposite profiles on two highly correlated instruments over the same period.
+Direction is positive throughout — continuation rather than fill, which runs
+against the retail belief and with the work disputing it — but the shape does
+not survive changing the market, and no horizon clears the bar on both.
+
+BTC's 10-bar horizon is the one cell that passes, at t = 3.19. On its own that
+would be a finding. It is not one, because the preregistered rule requires every
+declared horizon to agree, and because ETH does not reproduce it. Reporting the
+passing cell while omitting the rest is explicitly listed as prohibited in the
+preregistration, and this is the case it was written for.
+
+## Three defects found in this package's own code, after the first commit
+
+Recorded because the numbers above changed when they were fixed, and a result
+that moved deserves to say so.
+
+**The block bootstrap was resampling a non-series.** It pooled `[treatment,
+control]` into one array and drew blocks from that. Blocks only preserve serial
+dependence when adjacent entries are adjacent *in time*; in a pooled array they
+are returns from scattered indices, and any block straddling the arm boundary is
+meaningless. The correction reduced the effective sample per test but produced a
+better-powered design.
+
+**The matched design was being discarded.** Each event was matched to its own
+controls and then compared against the pooled control mean — which throws away
+the pairing that matching exists to create. The test now runs on the per-event
+difference series, which is both paired and genuinely time-ordered, so the block
+bootstrap has something real to block over.
+
+Together these changed the BTCUSDT verdict from `MECHANISM_NOT_SUPPORTED` to
+`BOUNDARY_SENSITIVE`: the 10-bar horizon moved from t = 2.55 to t = 3.19 and now
+clears the bar. **The first commit under-reported the effect.** The corrected
+statistics are more favourable, not less, which is worth stating plainly — the
+error was not in the conservative direction.
+
+**Every hypothesis was scored with forward returns regardless of what it
+declared.** `FVG_FILL_RATE_V1` registers `band_touch_within_horizon` and would
+have been answered with a directional-return number carrying the fill-rate id.
+Observables now dispatch by name and an unimplemented one returns
+`NOT_EVALUATED` rather than a substitute.
+
+## Not run, and why
+
+`SWING_LIQUIDITY_ACCELERATION_V1` is the hypothesis closest to Osler's
+documented result, and it is refused. It concerns the moment price *trades
+through* a confirmed swing extreme — a penetration, which occurs later than the
+swing's own confirmation and may never occur at all. The available event source
+is confirmed swings, which is a different event. Running it on swings would
+measure one thing and stamp it with another hypothesis's id, which is the exact
+substitution the observable dispatch was added to prevent. The runner refuses it
+until a penetration-event extractor exists.
 
 ## Boundaries
 
 - A certificate here proves a preregistered association with a named observable.
   It cannot establish participant identity, deterministic causation, forecast
   quality, or economic value, and creates no signal, paper or live authority.
-- Single market, single timeframe, single detector configuration. Nothing here
-  generalises until it is replicated.
+- Two markets, one timeframe, one detector configuration. The replication that
+  was attempted failed, which is itself the result.
 - The bucket counts in the control matching were raised from 4/4 to 5/10 because
   a four-way split left location imbalanced at 0.19 SD. That is a design choice
   about the control arm made against a balance diagnostic, not a threshold tuned
@@ -111,9 +164,9 @@ a multiple-testing correction, and the test is where that gets noticed.
 
 ## Validation
 
-- Full source-bound suite: **1,524 passed, 1 skipped**.
+- Full source-bound suite: **1,528 passed, 1 skipped**.
 - Governance consistency: PASS. Authority-boundary scan: PASS.
-- 20 new tests. The two that matter: a random walk at a powered configuration
+- 24 new tests. The two that matter: a random walk at a powered configuration
   must not certify (checked across four seeds), and a planted effect must be
   detected — a harness that can only say no is as useless as one that can only
   say yes.

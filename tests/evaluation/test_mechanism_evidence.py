@@ -21,7 +21,8 @@ from smc_desk.evaluation.mechanism_evidence import (
     certify_mechanism,
     forward_returns,
     load_preregistration,
-    stationary_block_bootstrap_pvalue,
+    paired_block_bootstrap,
+    realised_range_expansion,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -182,18 +183,70 @@ def test_certificate_never_grants_authority() -> None:
 
 
 def test_block_bootstrap_is_more_conservative_than_ignoring_dependence() -> None:
-    """Overlapping windows inflate significance unless the blocks respect them."""
+    """Overlapping windows inflate significance unless the blocks respect them.
+
+    On a serially dependent series, longer blocks must widen the null -- that
+    widening IS the correction. If it did not, the block length would be
+    decorative and the p-values would be the too-small ones a plain bootstrap
+    gives.
+    """
     rng = np.random.default_rng(5)
-    serial = pd.Series(rng.normal(0, 1, 600)).rolling(20, min_periods=1).mean().to_numpy()
-    other = pd.Series(rng.normal(0.1, 1, 600)).rolling(20, min_periods=1).mean().to_numpy()
-    wide = stationary_block_bootstrap_pvalue(serial, other, block_length=20, resamples=400, seed=1)
-    narrow = stationary_block_bootstrap_pvalue(serial, other, block_length=1, resamples=400, seed=1)
+    dependent = pd.Series(rng.normal(0.05, 1, 600)).rolling(20, min_periods=1).mean().to_numpy()
+    wide = paired_block_bootstrap(dependent, block_length=20, resamples=600, seed=1)
+    narrow = paired_block_bootstrap(dependent, block_length=1, resamples=600, seed=1)
     assert wide["null_std"] > narrow["null_std"]
+    assert wide["p_value"] >= narrow["p_value"]
 
 
 def test_bootstrap_refuses_on_thin_input() -> None:
-    result = stationary_block_bootstrap_pvalue(np.array([1.0]), np.array([2.0]), block_length=5)
-    assert result["p_value"] is None
+    assert paired_block_bootstrap(np.array([1.0]), block_length=5)["p_value"] is None
+
+
+def test_bootstrap_ignores_non_finite_pairs() -> None:
+    """An event whose controls all fell outside the data contributes nothing."""
+    values = np.array([1.0, np.nan, 1.0, 1.0, np.nan])
+    result = paired_block_bootstrap(values, block_length=2, resamples=200, seed=0)
+    assert result["paired_observations"] == 3
+
+
+def test_a_zero_mean_difference_series_is_not_significant() -> None:
+    rng = np.random.default_rng(2)
+    result = paired_block_bootstrap(rng.normal(0.0, 1.0, 400), block_length=10, resamples=600, seed=3)
+    assert result["p_value"] > 0.05
+
+
+# -- the observable actually registered is the one measured -------------------
+
+
+def test_an_unimplemented_observable_is_refused_not_substituted() -> None:
+    """FVG_FILL_RATE_V1 declares band_touch_within_horizon.
+
+    Before the dispatch existed every hypothesis was scored with forward
+    returns, so this one would have been answered with a directional-return
+    number and stamped with the fill-rate id -- the wrong question, confidently
+    labelled as the right one.
+    """
+    result = certify_mechanism(
+        hypothesis_id="FVG_FILL_RATE_V1", candles=random_walk(POWERED_BARS),
+        event_indices=POWERED_EVENTS,
+    )
+    assert result["status"] == "NOT_EVALUATED"
+    assert "band_touch_within_horizon" in result["reason"]
+
+
+def test_range_expansion_measures_expansion() -> None:
+    n = 400
+    high = np.concatenate([np.full(200, 100.5), np.full(200, 103.0)])
+    low = np.concatenate([np.full(200, 100.0), np.full(200, 100.0)])
+    frame = pd.DataFrame({"high": high, "low": low, "close": (high + low) / 2})
+    # Range is 0.5 before index 200 and 3.0 after: a six-fold expansion.
+    assert realised_range_expansion(frame, [200], horizon=50)[0] == pytest.approx(6.0)
+
+
+def test_range_expansion_returns_nan_without_room_on_either_side() -> None:
+    frame = pd.DataFrame({"high": [1.0] * 60, "low": [0.5] * 60, "close": [0.75] * 60})
+    assert np.isnan(realised_range_expansion(frame, [5], horizon=20)[0])
+    assert np.isnan(realised_range_expansion(frame, [55], horizon=20)[0])
 
 
 def test_benjamini_hochberg_step_up() -> None:
@@ -206,8 +259,9 @@ def test_benjamini_hochberg_step_up() -> None:
 
 def test_forward_returns_drop_events_without_a_full_horizon() -> None:
     candles = random_walk(n=100)
-    assert forward_returns(candles, [95], horizon=20).size == 0
-    assert forward_returns(candles, [10], horizon=20).size == 1
+    # NaN rather than dropped, so a paired design keeps positional alignment.
+    assert np.isnan(forward_returns(candles, [95], horizon=20)[0])
+    assert np.isfinite(forward_returns(candles, [10], horizon=20)[0])
 
 
 def test_forward_returns_respect_the_sign_convention() -> None:

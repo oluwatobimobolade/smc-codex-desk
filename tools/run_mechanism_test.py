@@ -33,7 +33,21 @@ from smc_desk.perception.engine_v2 import PerceptionEngineV2  # noqa: E402
 FAMILY_BY_HYPOTHESIS = {
     "FVG_CONTINUATION_V1": "fvgs",
     "FVG_FILL_RATE_V1": "fvgs",
-    "SWING_LIQUIDITY_ACCELERATION_V1": "swings",
+}
+
+# Hypotheses whose event definition is not the same thing as a detected object.
+# SWING_LIQUIDITY_ACCELERATION_V1 is about the moment price *trades through* a
+# confirmed swing extreme -- a penetration, which happens later than and
+# separately from the swing's own confirmation, and may never happen at all.
+# Anchoring it on swing confirmations would measure a different event and stamp
+# it with this hypothesis id, which is precisely the substitution the observable
+# dispatch was added to prevent. Refusing is the honest state until a
+# penetration-event extractor exists.
+UNIMPLEMENTED_EVENT_MAPPING = {
+    "SWING_LIQUIDITY_ACCELERATION_V1": (
+        "needs a penetration-event extractor; a confirmed swing is not the same "
+        "event as price trading through it"
+    ),
 }
 
 
@@ -89,6 +103,10 @@ def main() -> int:
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
 
+    if args.hypothesis_id in UNIMPLEMENTED_EVENT_MAPPING:
+        print(f"REFUSED: {args.hypothesis_id} — {UNIMPLEMENTED_EVENT_MAPPING[args.hypothesis_id]}")
+        return 3
+
     group = FAMILY_BY_HYPOTHESIS.get(args.hypothesis_id)
     if args.qualified and group == "fvgs":
         group = "poi_grade_fvgs"
@@ -119,9 +137,9 @@ def main() -> int:
         print(f"reason: {certificate['reason']}")
     for entry in certificate.get("per_horizon") or []:
         print(
-            f"  h={entry['horizon_bars']:3d}  n={entry['treated_count']:5d}  "
-            f"treated={entry['treated_mean_bps']:9.2f}bps  control={entry['control_mean_bps']:9.2f}bps  "
-            f"diff={entry['observed_difference']:9.2f}  t={entry['bootstrap_t']}  "
+            f"  h={entry['horizon_bars']:3d}  pairs={entry.get('paired_observations')}  "
+            f"treated={entry['treated_mean']}  control={entry['control_mean']}  "
+            f"paired_diff={entry.get('observed_difference')}  t={entry['bootstrap_t']}  "
             f"p={entry['p_value']}  passes={entry['passes']}"
         )
     balance = certificate.get("balance") or {}
