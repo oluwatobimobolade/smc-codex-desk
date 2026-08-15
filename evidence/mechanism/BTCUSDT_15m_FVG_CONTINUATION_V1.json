@@ -1,0 +1,121 @@
+{
+  "schema": "smc_mechanism_certificate_v1",
+  "hypothesis_id": "FVG_CONTINUATION_V1",
+  "market": "BTCUSDT",
+  "timeframe": "15m",
+  "preregistration_sha256": "01d3fca744f10ee3b681893cca430e93b890bc197d2bada577d66305192a9892",
+  "authority_contract": {
+    "authority_rung": "MECHANISM_SUPPORTED",
+    "human_adjudication_used": false,
+    "proves": "preregistered_association_with_a_named_market_observable",
+    "cannot_prove": [
+      "participant_identity",
+      "deterministic_causation",
+      "forecast_quality",
+      "economic_value"
+    ],
+    "signal_allowed": false,
+    "paper_execution_allowed": false,
+    "live_execution_allowed": false
+  },
+  "hypothesis": {
+    "statement": "Following a confirmed fair value gap, forward return signed in the gap direction exceeds that of matched control points without a gap.",
+    "observable": "signed_forward_return_in_gap_direction",
+    "horizons_bars": [
+      10,
+      20,
+      40
+    ],
+    "prediction": "conditional_mean_exceeds_control_mean"
+  },
+  "per_horizon": [
+    {
+      "horizon_bars": 10,
+      "treated_count": 105,
+      "control_count": 181,
+      "effective_sample_size": 105.0,
+      "treated_mean_bps": -6.173239,
+      "control_mean_bps": 22.319964,
+      "observed_difference": -28.493203,
+      "p_value": 0.8325,
+      "bootstrap_t": -0.891274,
+      "null_std": 31.969061,
+      "resamples": 2000,
+      "block_length": 10,
+      "two_sided": false,
+      "survives_fdr": false,
+      "meets_t_threshold": false,
+      "passes": false
+    },
+    {
+      "horizon_bars": 20,
+      "treated_count": 105,
+      "control_count": 181,
+      "effective_sample_size": 105.0,
+      "treated_mean_bps": -7.987082,
+      "control_mean_bps": -2.651542,
+      "observed_difference": -5.335541,
+      "p_value": 0.5705,
+      "bootstrap_t": -0.149687,
+      "null_std": 35.644626,
+      "resamples": 2000,
+      "block_length": 20,
+      "two_sided": false,
+      "survives_fdr": false,
+      "meets_t_threshold": false,
+      "passes": false
+    },
+    {
+      "horizon_bars": 40,
+      "treated_count": 105,
+      "control_count": 181,
+      "effective_sample_size": 105.0,
+      "treated_mean_bps": -13.947821,
+      "control_mean_bps": 44.800568,
+      "observed_difference": -58.748389,
+      "p_value": 0.7545,
+      "bootstrap_t": -0.726367,
+      "null_std": 80.879801,
+      "resamples": 2000,
+      "block_length": 40,
+      "two_sided": false,
+      "survives_fdr": false,
+      "meets_t_threshold": false,
+      "passes": false
+    }
+  ],
+  "matching": {
+    "events_requested": 2171,
+    "events_matched": 105,
+    "events_unmatched": 2066,
+    "events_with_thin_control_pool": 96,
+    "controls_drawn": 181,
+    "controls_per_event_target": 5,
+    "recency_window_bars": 500,
+    "size_buckets": 5,
+    "location_buckets": 10,
+    "seed": 0
+  },
+  "balance": {
+    "size": {
+      "treated_mean": 345.86727891156426,
+      "control_mean": 359.5834648776633,
+      "standardised_mean_difference": -0.065501
+    },
+    "location": {
+      "treated_mean": 0.36977856584875507,
+      "control_mean": 0.3229368894290438,
+      "standardised_mean_difference": 0.158899
+    },
+    "balanced": false
+  },
+  "thresholds": {
+    "minimum_abs_t_statistic": 3.0,
+    "false_discovery_rate": 0.05,
+    "minimum_events": 100,
+    "minimum_effective_sample": 30.0
+  },
+  "status": "DATA_FAILED",
+  "reason": "matched controls failed the covariate balance check",
+  "certificate_sha256": "cf8dd857e6fb2c06b9cf767b0669fc0e496b689a3257fe94fa818098dda62eb4"
+}

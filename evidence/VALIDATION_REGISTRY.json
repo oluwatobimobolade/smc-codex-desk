@@ -9,9 +9,9 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES-20260815",
-    "work_package": "WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES",
-    "gate": "GATE-WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES-001"
+    "record_id": "WP-SMC-23-MECHANISM-EVIDENCE-20260815",
+    "work_package": "WP-SMC-23-MECHANISM-EVIDENCE",
+    "gate": "GATE-WP-SMC-23-MECHANISM-EVIDENCE-001"
   },
   "records": [
     {
@@ -2091,6 +2091,58 @@
         "MECHANISM_SUPPORTED still needs preregistration and a matched baseline; association without a baseline is confirmation, not evidence.",
         "The five 2026-08-14 live decisions cannot be scored yet: stored forward data ends 2026-06-27.",
         "Resolution creates no signal, paper, live, or predictive-edge authority."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-23-MECHANISM-EVIDENCE-20260815",
+      "work_package": "WP-SMC-23-MECHANISM-EVIDENCE",
+      "gate": "GATE-WP-SMC-23-MECHANISM-EVIDENCE-001",
+      "date": "2026-08-15",
+      "recorded_at": "2026-08-15T02:00:00Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_SOURCE_BOUND",
+      "source": {
+        "git_head": "cce641f",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-23-MECHANISM-EVIDENCE/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "2019dbb3087a462385e6b876f725761f2f218735b39726eee2039cd51ed40409"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1524 passed, 1 skipped in 356.10s (0:05:56)"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": "tools/run_mechanism_test.py FVG_CONTINUATION_V1 (raw geometry, BTCUSDT 15m, 20000 bars)",
+          "exit_code": 0,
+          "summary": "DATA_FAILED; median gap spacing 7 bars leaves no uncontaminated control at a 40-bar horizon; 2066 of 2171 events unmatched"
+        },
+        {
+          "command": "tools/run_mechanism_test.py FVG_CONTINUATION_V1 --qualified (BTCUSDT 15m, 20000 bars)",
+          "exit_code": 0,
+          "summary": "MECHANISM_NOT_SUPPORTED; balance passed; h10 t=2.55 p=0.006 fails the preregistered t>=3.0 bar; effect positive but decaying (+19.6/+14.2/+14.8 bps)"
+        }
+      ],
+      "primary_result": "1524 passed, 1 skipped in 356.10s (0:05:56)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-23-MECHANISM-EVIDENCE/README.md",
+      "authority_mode": "observe_only_preregistered_mechanism_association",
+      "limitations": [
+        "Single market, single timeframe, single detector configuration; nothing generalises until replicated.",
+        "A mechanism certificate cannot establish forecast quality or economic value.",
+        "Raw fair value gaps cannot be tested at these horizons at all: the pattern is too frequent for a clean control.",
+        "Control-matching bucket counts were raised against a balance diagnostic, not against a significance result.",
+        "No signal, paper, live, or predictive-edge authority was created."
       ]
     }
   ]

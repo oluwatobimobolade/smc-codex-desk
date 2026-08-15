@@ -254,3 +254,33 @@ def test_ranking_is_deterministic_for_identical_zones() -> None:
     first = [poi.object_id for poi in rank_pois(zones)]
     second = [poi.object_id for poi in rank_pois(list(reversed(zones)))]
     assert first == second == ["alpha", "zebra"]
+
+
+# -- the weights are frozen pending calibration -------------------------------
+
+
+def test_ranking_weights_are_frozen() -> None:
+    """These are reasoned defaults, not calibrated constants, and nothing has scored them.
+
+    Tuning them against outcomes is a parameter search: fifty combinations tested
+    at the 5% level give roughly a 92% chance that one looks significant by pure
+    chance. Harvey, Liu and Zhu argue the conventional t=2.0 bar is far too
+    permissive for exactly this reason and recommend 3.0 for a new factor.
+
+    This test is a tripwire, not a law. Changing a weight is allowed -- but it
+    must come with a multiple-testing correction and a recorded justification,
+    and editing this test is the moment to notice that.
+    """
+    from smc_desk.perception import poi_quality
+
+    assert poi_quality.WEIGHT_CAUSATION == 0.34
+    assert poi_quality.WEIGHT_SCOPE == 0.20
+    assert poi_quality.WEIGHT_DISPLACEMENT == 0.18
+    assert poi_quality.WEIGHT_LOCATION == 0.16
+    assert poi_quality.WEIGHT_FRESHNESS == 0.12
+    total = (
+        poi_quality.WEIGHT_CAUSATION + poi_quality.WEIGHT_SCOPE
+        + poi_quality.WEIGHT_DISPLACEMENT + poi_quality.WEIGHT_LOCATION
+        + poi_quality.WEIGHT_FRESHNESS
+    )
+    assert abs(total - 1.0) < 1e-9, "weights must remain a partition of one"

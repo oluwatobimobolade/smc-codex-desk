@@ -1,0 +1,120 @@
+schema: smc_codex_mechanism_preregistration_v1
+version: 1.0.0
+effective_date: "2026-08-15"
+status: ACTIVE_SEALED_HYPOTHESIS_SET
+
+purpose: >-
+  Freeze the mechanism hypotheses, their observables, horizons, controls and
+  decision thresholds BEFORE any result is computed. A hypothesis added or
+  edited after seeing an outcome is not evidence, and the seal is what makes
+  that claim checkable rather than promised.
+
+authority: >-
+  Supports the MECHANISM_SUPPORTED rung only. Passing proves a preregistered
+  association with a named market observable. It cannot prove participant
+  identity, deterministic causation, forecast quality, or economic value, and
+  it grants no signal, paper, or live authority.
+
+# Why these hypotheses and not others.
+#
+# The published record does not validate Smart Money Concepts as a packaged
+# system. It does document several of the specific market behaviours the
+# doctrine gestures at -- most directly Osler's finding, from the complete
+# Royal Bank of Scotland order book, that stop orders cluster just beyond round
+# numbers and prior extremes and that price accelerates through those clusters.
+#
+# So the hypotheses below are about mechanisms, not about doctrine. None of
+# them says "an order block works". Each says "this specific geometry should be
+# followed by this specific observable, more often than a matched control".
+rationale_sources:
+  - "Osler, Stop-Loss Orders and Price Cascades in Currency Markets"
+  - "Lo, Mamaysky & Wang, Foundations of Technical Analysis"
+  - "Harvey, Liu & Zhu, ...and the Cross-Section of Expected Returns"
+
+statistical_contract:
+  # Conditional-versus-unconditional is the Lo/Mamaysky/Wang design: compare
+  # the return distribution given the pattern against a matched distribution
+  # where the pattern is absent. Without the control arm, every claim confirms
+  # itself, because price revisits most levels eventually.
+  design: conditional_versus_matched_control_distribution
+  control_matching_dimensions: [size_bucket, location_bucket, recency_window]
+  controls_per_event: 5
+
+  # Outcome windows overlap, so observations are not independent and a plain
+  # t-test would overstate significance. A stationary block bootstrap with
+  # blocks no shorter than the horizon preserves the dependence.
+  resampling: stationary_block_bootstrap
+  block_length_policy: at_least_the_outcome_horizon
+  bootstrap_resamples: 2000
+
+  # Harvey/Liu/Zhu argue the conventional 2.0 threshold is far too permissive
+  # given how many strategies have been tested. 3.0 is their recommendation for
+  # a new factor and it is adopted here unchanged.
+  minimum_abs_t_statistic: 3.0
+  family_wise_correction: benjamini_hochberg
+  false_discovery_rate: 0.05
+
+  # A result that only appears at one horizon is a boundary artefact, not a
+  # mechanism. Agreement across every declared horizon is required.
+  robustness_rule: every_declared_horizon_must_agree_in_sign
+
+  minimum_events: 100
+  minimum_effective_sample: 30
+
+certificate_statuses:
+  - MECHANISM_SUPPORTED
+  - MECHANISM_NOT_SUPPORTED
+  - BOUNDARY_SENSITIVE
+  - UNDERPOWERED
+  - DATA_FAILED
+  - NOT_EVALUATED
+
+hypotheses:
+  - id: FVG_CONTINUATION_V1
+    label_family: fair_value_gap
+    # The retail belief is that gaps fill, commonly quoted near 70%. Rigorous
+    # work disputes it and finds continuation more common. The detector is
+    # already DEFINITION_CONFORMANT, the geometry is unambiguous, and the
+    # folklore makes a directional claim specific enough to be wrong -- which
+    # is exactly what makes this the right first test.
+    statement: >-
+      Following a confirmed fair value gap, forward return signed in the gap
+      direction exceeds that of matched control points without a gap.
+    observable: signed_forward_return_in_gap_direction
+    horizons_bars: [10, 20, 40]
+    direction_convention: bullish_gap_positive_bearish_gap_negative
+    prediction: conditional_mean_exceeds_control_mean
+    folklore_contradicted_if: control_exceeds_conditional
+
+  - id: FVG_FILL_RATE_V1
+    label_family: fair_value_gap
+    statement: >-
+      A confirmed fair value gap is retraced into within the horizon at a rate
+      different from matched control price bands of equal width and location.
+    observable: band_touch_within_horizon
+    horizons_bars: [10, 20, 40]
+    prediction: two_sided_difference_from_control
+    note: >-
+      Deliberately two-sided. The interesting answer is the size and sign of
+      the difference from control, not whether gaps are touched -- most price
+      bands are touched eventually, which is why the control arm exists.
+
+  - id: SWING_LIQUIDITY_ACCELERATION_V1
+    label_family: swing
+    # The closest thing in this repository to Osler's documented result: resting
+    # stops cluster just beyond prior extremes, and price moves unusually fast
+    # through them. Stated in terms this system can actually measure from OHLCV.
+    statement: >-
+      When price trades through a confirmed swing extreme, the realised range
+      of the following bars exceeds that of matched controls at comparable
+      distance from the extreme where no penetration occurred.
+    observable: realised_range_expansion_after_penetration
+    horizons_bars: [5, 10, 20]
+    prediction: conditional_mean_exceeds_control_mean
+
+prohibited:
+  - editing_or_adding_a_hypothesis_after_observing_its_result
+  - reporting_a_horizon_subset_that_agrees_while_omitting_one_that_does_not
+  - tuning_detector_thresholds_to_improve_a_mechanism_result
+  - treating_a_supported_mechanism_as_forecast_or_economic_evidence
+  - converting_any_result_into_signal_paper_or_live_authority
