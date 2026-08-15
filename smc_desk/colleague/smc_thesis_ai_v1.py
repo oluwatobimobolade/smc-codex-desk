@@ -175,11 +175,19 @@ def _narrative_context(evidence_pack: Mapping[str, Any]) -> dict[str, Any] | Non
     causal_graph = evidence_pack.get("formal_causal_episode_graph")
     invariants = causal_graph.get("invariants") if isinstance(causal_graph, Mapping) else None
     contract = causal_graph.get("authority_contract") if isinstance(causal_graph, Mapping) else None
+    # Scoped exactly as the causal graph scopes it. A disagreement at or above
+    # the context timeframe means the story is genuinely unresolved. One only
+    # below it means the entry is unavailable while the read stands.
+    #
+    # Collapsing both into "unresolved" made the thesis contradict itself on the
+    # page: it would list "1d bearish; 4h bearish; 1h bearish; 15m bearish" as
+    # surviving V3 structure and then conclude "final bias=mixed, direction
+    # remains unresolved". Four agreeing timeframes are not a mixed read.
     if (
         isinstance(contract, Mapping)
         and contract.get("enforcement_ready") is True
         and isinstance(invariants, Mapping)
-        and invariants.get("status") != "PASS"
+        and str(invariants.get("status") or "") not in {"PASS", "ENTRY_TIMING_WITHHELD"}
     ):
         provisional_bias = str(result.get("context_bias") or "unknown")
         violations = [str(value) for value in invariants.get("violations") or []]

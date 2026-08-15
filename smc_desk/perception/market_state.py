@@ -267,13 +267,28 @@ def build_market_state(
     causal_graph = evidence_pack.get("formal_causal_episode_graph")
     invariants = causal_graph.get("invariants") if isinstance(causal_graph, Mapping) else None
     causal_contract = causal_graph.get("authority_contract") if isinstance(causal_graph, Mapping) else None
-    if (
+    enforcement_ready = (
         isinstance(causal_contract, Mapping)
         and causal_contract.get("enforcement_ready") is True
         and isinstance(invariants, Mapping)
-        and invariants.get("status") != "PASS"
-    ):
-        violations = tuple(str(value) for value in invariants.get("violations") or [])
+    )
+    reconciliation_status = (
+        str(invariants.get("status") or "") if enforcement_ready else "PASS"
+    )
+    # A disagreement at or above the context timeframe means the story itself is
+    # unknown, so nothing downstream can be trusted. A disagreement only below it
+    # means the *entry* is not available while the read stands -- which is the
+    # whole point of the scoped gate introduced in WP-SMC-21.
+    #
+    # Treating both alike here quietly undid that fix: the state machine stopped
+    # at NO_CONTEXT, so `select_primary_poi` never ran and the POI ranking was
+    # dead code on every live run, even ones the validator passed.
+    entry_timing_withheld = reconciliation_status == "ENTRY_TIMING_WITHHELD"
+    if enforcement_ready and reconciliation_status not in {"PASS", "ENTRY_TIMING_WITHHELD"}:
+        violations = tuple(
+            str(value)
+            for value in (invariants.get("narrative_violations") or invariants.get("violations") or [])
+        )
         reasons.extend(["causal episode reconciliation required", *violations])
         return MarketState(
             **{
@@ -288,6 +303,12 @@ def build_market_state(
             ),
             invalidation=invalidation,
             reasons=tuple(reasons),
+        )
+    if entry_timing_withheld:
+        reasons.append(
+            "entry timing unreconciled below the context timeframe: "
+            f"{list(invariants.get('entry_timing_violations') or [])}; "
+            "context and POI mapping continue, entry authority is withheld"
         )
 
     # 1. Context must exist and hold together before anything else counts.
@@ -369,6 +390,25 @@ def build_market_state(
         context_timeframe=str(base["context_timeframe"] or ""),
         arrival_time=base["poi_arrival_time"],
     )
+    if confirmation.get("ready") and entry_timing_withheld:
+        # Everything the setup needs is present, and the timing-timeframe breaks
+        # it would rest on failed the stricter replay. The read advanced; the
+        # trade does not. Promoting here would hand back exactly the entry
+        # authority the scoped gate exists to withhold.
+        reasons.append(
+            "lower-timeframe confirmation is present but its timeframe failed V3 replay; "
+            "entry authority withheld"
+        )
+        return MarketState(
+            **base,
+            state=LTF_CONFIRMATION_PENDING,
+            waiting_for=(
+                "The lower-timeframe structure this confirmation rests on to survive "
+                "the stricter causal replay before any entry is considered."
+            ),
+            invalidation=invalidation,
+            reasons=tuple(reasons),
+        )
     if confirmation.get("ready"):
         reasons.append(
             "lower-timeframe liquidity event, displacement and aligned structural break completed after POI arrival"

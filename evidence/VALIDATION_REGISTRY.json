@@ -9,9 +9,9 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-25-PENETRATION-EVENTS-20260815",
-    "work_package": "WP-SMC-25-PENETRATION-EVENTS",
-    "gate": "GATE-WP-SMC-25-PENETRATION-EVENTS-001"
+    "record_id": "WP-SMC-26-SCOPED-RECONCILIATION-20260816",
+    "work_package": "WP-SMC-26-SCOPED-RECONCILIATION-COMPLETION",
+    "gate": "GATE-WP-SMC-26-SCOPED-RECONCILIATION-001"
   },
   "records": [
     {
@@ -2310,6 +2310,52 @@
         "No matching parameter was adjusted after seeing the result; balance failure is reported, not repaired.",
         "SWING_LIQUIDITY_ACCELERATION_V1 is untestable on this detector at all scales: penetrations occur every 3.8 bars.",
         "The WP-SMC-24 structure skeleton is unchanged; its 'these swings matter' justification is now unsupported.",
+        "No signal, paper, live, or predictive-edge authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-26-SCOPED-RECONCILIATION-20260816",
+      "work_package": "WP-SMC-26-SCOPED-RECONCILIATION-COMPLETION",
+      "gate": "GATE-WP-SMC-26-SCOPED-RECONCILIATION-001",
+      "date": "2026-08-16",
+      "recorded_at": "2026-08-16T00:15:00Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_SOURCE_BOUND",
+      "source": {
+        "git_head": "7896dce",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-26-SCOPED-RECONCILIATION-COMPLETION/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "e92d1e72098aecfe0a2ca9d3689651d7146f7cd5602405780da1e2194c0bc5b5"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1564 passed, 1 skipped in 336.47s"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": "run_live_ai_smc_full_system.py --symbols BTCUSDT ETHUSDT",
+          "exit_code": 0,
+          "summary": "BTC advances NO_CONTEXT -> LTF_CONFIRMATION_PENDING with a selected 4h bearish OB primary POI; narrative reads RETRACEMENT_WITHIN_PARENT with context/draw/invalidation"
+        }
+      ],
+      "primary_result": "1564 passed, 1 skipped in 336.47s",
+      "report": "governance/WORK_PACKAGES/WP-SMC-26-SCOPED-RECONCILIATION-COMPLETION/README.md",
+      "authority_mode": "observe_only_scoped_reconciliation_completion",
+      "limitations": [
+        "The thesis Bias Summary still prints the legacy 'final bias=mixed' vote beneath the coherent hierarchical read; cosmetic self-contradiction, recorded not patched.",
+        "POI selection now runs, but the ranking weights remain uncalibrated and frozen.",
+        "Entry authority is unchanged: LTF confirmation on a V3-failed timeframe stops at LTF_CONFIRMATION_PENDING.",
         "No signal, paper, live, or predictive-edge authority was created."
       ]
     }

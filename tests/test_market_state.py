@@ -352,3 +352,64 @@ def test_regression_is_reported():
     earlier = build_market_state(evidence_pack=_pack(coherent=False))
     transition = diff_states(later, earlier)
     assert transition.regressed
+
+
+# -- scoped reconciliation must not strand the state machine ------------------
+#
+# WP-SMC-21 scoped the reconciliation gate so a disputed timing timeframe stops
+# the entry, not the read. That fix reached the validator and the renderer but
+# NOT this module, which kept the old all-or-nothing rule. The consequence was
+# invisible and total: every live run halted at NO_CONTEXT with bias "unknown",
+# so `select_primary_poi` never executed and the POI ranking was dead code on
+# runs the validator had already passed.
+
+
+def _pack_with_reconciliation(status: str, *, ready: bool = True) -> dict:
+    """A coherent pack, plus a causal replay that disagrees at one level."""
+    pack = dict(_pack())
+    pack["formal_causal_episode_graph"] = {
+        "authority_contract": {"enforcement_ready": ready},
+        "invariants": {
+            "status": status,
+            "violations": ["15m_v1_controlling_external_break_survives_v3"],
+            "narrative_violations": (
+                [] if status == "ENTRY_TIMING_WITHHELD"
+                else ["1d_v1_controlling_external_break_survives_v3"]
+            ),
+            "entry_timing_violations": ["15m_v1_controlling_external_break_survives_v3"],
+        },
+    }
+    return pack
+
+
+def test_a_narrative_level_disagreement_still_stops_the_state_machine() -> None:
+    """A broken daily read means the story is unknown. This must not soften."""
+    state = build_market_state(evidence_pack=_pack_with_reconciliation("REVIEW_REQUIRED"))
+    payload = state.to_dict()
+    assert payload["state"] == "NO_CONTEXT"
+    assert payload["context"]["bias"] == "unknown"
+    assert payload["context"]["narrative_state"] == "RECONCILIATION_REQUIRED"
+
+
+def test_a_timing_only_disagreement_no_longer_strands_the_read() -> None:
+    """The read stands; only the entry is unavailable.
+
+    The assertion that matters is the negative one: the machine must not return
+    the NO_CONTEXT / "unknown" pair that made POI selection unreachable.
+    """
+    state = build_market_state(evidence_pack=_pack_with_reconciliation("ENTRY_TIMING_WITHHELD"))
+    payload = state.to_dict()
+    assert not (
+        payload["state"] == "NO_CONTEXT"
+        and payload["context"]["narrative_state"] == "RECONCILIATION_REQUIRED"
+    ), "timing-only disagreement was treated as a narrative failure"
+    assert any(
+        "entry timing unreconciled" in reason for reason in payload.get("reasons") or []
+    ), payload.get("reasons")
+
+
+def test_an_unenforceable_graph_does_not_gate_anything() -> None:
+    state = build_market_state(
+        evidence_pack=_pack_with_reconciliation("REVIEW_REQUIRED", ready=False)
+    )
+    assert state.to_dict()["context"]["narrative_state"] != "RECONCILIATION_REQUIRED"

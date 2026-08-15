@@ -3,8 +3,8 @@ project:
   product: Dual-Lens Market Colleague
   release: colleague-core-rc0
   status: autonomous_truth_and_source_integrity_repaired_empirical_certification_open
-  current_date: "2026-08-15"
-  last_updated: "2026-08-15"
+  current_date: "2026-08-16"
+  last_updated: "2026-08-16"
 
 scope:
   certified_initial_scope:
@@ -133,8 +133,8 @@ active_contracts:
   ai_structure_reasoning: AI_CENTERED_STRUCTURE_REASONING_V1
 
 current_gate:
-  id: GATE-WP-SMC-25-PENETRATION-EVENTS-001
-  work_package: WP-SMC-25-PENETRATION-EVENTS
+  id: GATE-WP-SMC-26-SCOPED-RECONCILIATION-001
+  work_package: WP-SMC-26-SCOPED-RECONCILIATION-COMPLETION
   status: passed_local_observe_only_source_bound_empirical_certification_unchanged
   next_programme: analyst_select_development_cases_then_blind_markup_before_threshold_tuning
 
