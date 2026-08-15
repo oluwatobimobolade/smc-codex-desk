@@ -9,9 +9,9 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-23-MECHANISM-EVIDENCE-R2-20260815",
-    "work_package": "WP-SMC-23-MECHANISM-EVIDENCE",
-    "gate": "GATE-WP-SMC-23-MECHANISM-EVIDENCE-001"
+    "record_id": "WP-SMC-24-STRUCTURE-SKELETON-20260815",
+    "work_package": "WP-SMC-24-STRUCTURE-SKELETON",
+    "gate": "GATE-WP-SMC-24-STRUCTURE-SKELETON-001"
   },
   "records": [
     {
@@ -2202,6 +2202,53 @@
         "SWING_LIQUIDITY_ACCELERATION_V1 remains unrun; its event definition is not implemented.",
         "FVG_FILL_RATE_V1 remains unrun; band_touch_within_horizon has no measurement function.",
         "Two markets, one timeframe, one detector configuration.",
+        "No signal, paper, live, or predictive-edge authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-24-STRUCTURE-SKELETON-20260815",
+      "work_package": "WP-SMC-24-STRUCTURE-SKELETON",
+      "gate": "GATE-WP-SMC-24-STRUCTURE-SKELETON-001",
+      "date": "2026-08-15",
+      "recorded_at": "2026-08-15T22:15:00Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_SOURCE_BOUND",
+      "source": {
+        "git_head": "7ad8de7",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-24-STRUCTURE-SKELETON/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "4179f65f7c4d7c529b74b77eb740de071817c1edad48961735a6fad434918c04"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1546 passed, 1 skipped in 339.21s (0:05:39)"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": "run_live_ai_smc_full_system.py --symbols BTCUSDT ETHUSDT",
+          "exit_code": 0,
+          "summary": "both VALIDATED, zero hard issues; BTC 4h 4->8 marks reading H/L/LH/LL; ETH 1d reads H/BOS/L/LL/LH/INTERNAL CHOCH"
+        }
+      ],
+      "primary_result": "1546 passed, 1 skipped in 339.21s (0:05:39)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-24-STRUCTURE-SKELETON/README.md",
+      "authority_mode": "observe_only_significance_selected_structural_context",
+      "limitations": [
+        "The significance grade is consulted and consistently scarce, but still uncalibrated: nothing has tested whether a major-graded swing behaves differently from a minor one.",
+        "Selection can only narrow what is drawn; ungraded swings are dropped rather than assumed significant.",
+        "The official 15m chart is unchanged and remains a deliberately sparse three-mark canvas.",
+        "Two markets, one detector configuration; the improvement is visual and structural, not an accuracy claim.",
         "No signal, paper, live, or predictive-edge authority was created."
       ]
     }

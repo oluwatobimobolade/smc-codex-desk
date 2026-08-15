@@ -133,8 +133,8 @@ active_contracts:
   ai_structure_reasoning: AI_CENTERED_STRUCTURE_REASONING_V1
 
 current_gate:
-  id: GATE-WP-SMC-23-MECHANISM-EVIDENCE-001
-  work_package: WP-SMC-23-MECHANISM-EVIDENCE
+  id: GATE-WP-SMC-24-STRUCTURE-SKELETON-001
+  work_package: WP-SMC-24-STRUCTURE-SKELETON
   status: passed_local_observe_only_source_bound_empirical_certification_unchanged
   next_programme: analyst_select_development_cases_then_blind_markup_before_threshold_tuning
 

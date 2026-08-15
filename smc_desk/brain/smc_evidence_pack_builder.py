@@ -35,6 +35,12 @@ def _coerce_float(value: Any) -> float | None:
         return None
 
 
+# How deep a ranked swing pool the pack carries per timeframe. Large enough
+# that a chart window still finds strong candidates inside it, small enough
+# that the pack does not carry every graded object.
+RANKED_SWING_POOL = 40
+
+
 CANDIDATE_GROUPS = (
     "swings",
     "structure_breaks",
@@ -564,12 +570,43 @@ def _significance_report(
                 swings=[s for s in swings if isinstance(s, Mapping)],
                 structure_breaks=breaks,
             )
+            # The chart-sized selection is made here, where the prominence
+            # scores live, rather than leaving a renderer to re-derive it from
+            # id lists that carry no ordering. `tradeable_object_ids` admits
+            # whatever cleared the threshold -- 106 objects on live BTCUSDT 4h,
+            # 675 on 15m -- which is a filter, not a selection.
+            from smc_desk.perception.significance import select_for_display
+
+            swing_ids = {
+                str(s.get("object_id") or "") for s in swings if isinstance(s, Mapping)
+            }
+            swing_scores = [s for s in summary.scores if s.object_id in swing_ids]
             report["timeframes"][timeframe] = {
                 "atr": round(summary.atr, 8),
                 "counts": summary.counts,
                 "raw_object_count": len(swings) + len(breaks),
                 "tradeable_object_ids": [s.object_id for s in summary.tradeable],
                 "major_object_ids": [s.object_id for s in summary.by_grade("major")],
+                # Grades for every swing a consumer might draw, not a ranked
+                # cut. The pack cannot make the selection: it does not know
+                # which bars a chart will show, and the most prominent swings
+                # over a long context are routinely older than the visible
+                # window -- ranking here produced off-screen ids and an empty
+                # skeleton. The pack supplies the facts; the renderer selects
+                # among what it can actually draw.
+                "swing_grades": {
+                    s.object_id: {
+                        "grade": s.grade,
+                        "atr_multiple": round(s.atr_multiple, 4),
+                        "prominence_percentile": (
+                            round(s.prominence_percentile, 4)
+                            if s.prominence_percentile is not None
+                            else None
+                        ),
+                    }
+                    for s in swing_scores
+                    if s.is_tradeable_structure
+                },
             }
         except Exception as exc:  # noqa: BLE001 -- descriptive layer, never fatal
             report["timeframes"][timeframe] = {"error": f"{type(exc).__name__}: {str(exc)[:120]}"}

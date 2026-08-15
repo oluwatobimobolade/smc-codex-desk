@@ -37,7 +37,7 @@ Grades, in descending order of structural weight:
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -79,6 +79,19 @@ class SignificanceScore:
     range_fraction: float
     reasons: tuple[str, ...] = ()
     schema: str = "structural_significance_v1"
+    # Where this object's prominence sits within its own timeframe, 0.0 to 1.0.
+    #
+    # The grade is an absolute statement -- "this cleared 1.5x ATR" -- and it is
+    # deliberately left that way, because it is auditable and does not change
+    # when the window changes. But absolute thresholds do not produce consistent
+    # scarcity: on live BTCUSDT, 9.9% of 4h objects graded major against 27.9%
+    # of 15m ones. The same word meant "top tenth" on one chart and "top
+    # quarter" on another, which makes it useless as a selection filter.
+    #
+    # The percentile carries the relative information without corrupting the
+    # grade, so a consumer that needs a chart-sized set can take the top N
+    # rather than everything above a threshold.
+    prominence_percentile: float | None = None
 
     @property
     def is_tradeable_structure(self) -> bool:
@@ -92,6 +105,11 @@ class SignificanceScore:
             "grade": self.grade,
             "atr_multiple": round(self.atr_multiple, 4),
             "range_fraction": round(self.range_fraction, 4),
+            "prominence_percentile": (
+                round(self.prominence_percentile, 4)
+                if self.prominence_percentile is not None
+                else None
+            ),
             "reasons": list(self.reasons),
         }
 
@@ -374,7 +392,54 @@ def grade_timeframe(
         scores.append(grade_swing(swing, atr=atr, range_size=range_size))
     for brk in structure_breaks:
         scores.append(grade_structure_break(brk, atr=atr, range_size=range_size))
-    return SignificanceSummary(scores=tuple(scores), atr=atr, range_size=range_size)
+    return SignificanceSummary(
+        scores=tuple(_with_percentiles(scores)), atr=atr, range_size=range_size
+    )
+
+
+def _with_percentiles(scores: Sequence[SignificanceScore]) -> list[SignificanceScore]:
+    """Stamp each score with where its prominence sits in this timeframe.
+
+    Ties share the same percentile, so two identically prominent objects are
+    never ordered arbitrarily by an accident of input order.
+    """
+    if not scores:
+        return []
+    ordered = sorted(scores, key=lambda s: s.atr_multiple)
+    total = len(ordered)
+    percentile_by_value: dict[float, float] = {}
+    for index, score in enumerate(ordered):
+        percentile_by_value.setdefault(score.atr_multiple, index / total)
+    return [
+        replace(score, prominence_percentile=percentile_by_value[score.atr_multiple])
+        for score in scores
+    ]
+
+
+# A chart is a fixed-size surface, so selection is a count, not a threshold.
+# Roughly this many structural marks is what a professional markup carries per
+# timeframe before it stops being readable.
+DEFAULT_DISPLAY_LIMIT = 8
+
+
+def select_for_display(
+    scores: Iterable[SignificanceScore],
+    *,
+    limit: int = DEFAULT_DISPLAY_LIMIT,
+    minimum_grade: str = "intermediate",
+) -> list[SignificanceScore]:
+    """Pick the chart-sized set of the most significant objects.
+
+    This is the answer to the inconsistent scarcity of the absolute grades. A
+    threshold admits whatever the market happens to produce -- 46 objects on one
+    timeframe, 367 on another -- while a chart can hold about eight. Selecting a
+    count gives the same density on every timeframe without pretending the
+    grades themselves mean the same thing everywhere.
+
+    Ordering and ties are inherited from ``rank_by_significance`` so the result
+    stays deterministic under the evidence-hash contract.
+    """
+    return rank_by_significance(scores, limit=limit, minimum_grade=minimum_grade)
 
 
 def rank_by_significance(
@@ -442,6 +507,8 @@ __all__ = [
     "INTERMEDIATE_ATR_PROMINENCE",
     "MINOR_ATR_PROMINENCE",
     "MINIMUM_BREAK_DISPLACEMENT_ATR",
+    "DEFAULT_DISPLAY_LIMIT",
+    "select_for_display",
     "SignificanceScore",
     "SignificanceSummary",
     "average_true_range",

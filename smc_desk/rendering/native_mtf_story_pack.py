@@ -17,7 +17,9 @@ import pandas as pd
 from smc_desk.brain.ai_smc_consistency_validator import ValidationResult
 from smc_desk.brain.annotation_evidence import AnnotationEvidenceAnchor, build_annotation_evidence_index
 from smc_desk.brain.annotation_geometry import build_geometry_contract
+from smc_desk.perception.significance import SignificanceScore
 from smc_desk.rendering.bitmap_annotation_review import review_rendered_annotation_bitmap
+from smc_desk.rendering.swing_skeleton import build_swing_skeleton
 from smc_desk.rendering.smc_trader_annotation_renderer import render_smc_trader_annotation_chart
 
 
@@ -99,6 +101,15 @@ def build_native_mtf_storyboards(
                     objects.append(_liquidity_object(idm, label="IDM", kind="idm"))
                 elif (sweep := _first_anchor(index, episode.get("sweep_ids"), timeframe)) is not None:
                     objects.append(_liquidity_object(sweep, label="Sweep", kind="liquidity"))
+        # Structural context: the HH/HL/LH/LL sequence the episode above broke.
+        # Without it a reader sees a BOS tag floating in bare candles with no
+        # way to check the structure it refers to. Selection is by significance
+        # and capped, so this narrows the 400-odd detected swings to a
+        # chart-sized set rather than restoring the detector firehose.
+        objects.extend(
+            _swing_skeleton_objects(evidence_pack, index, timeframe)
+        )
+
         # The causal POI authority is the production primary selector.  The
         # episode graph may deliberately leave episode.primary_poi unset, so a
         # native storyboard must also consume the selected scenario primary or
@@ -254,8 +265,14 @@ def validate_native_mtf_storyboards(
         if not isinstance(storyboard, Mapping):
             continue
         objects = storyboard.get("objects") or []
-        if len(objects) > MAX_NATIVE_OBJECTS:
+        # Swing markers are context, budgeted separately from the story marks;
+        # counting them here would flag every chart that carries a skeleton.
+        story_objects = [obj for obj in objects if not _is_skeleton(obj)]
+        skeleton_objects = [obj for obj in objects if _is_skeleton(obj)]
+        if len(story_objects) > MAX_NATIVE_OBJECTS:
             issues.append({"code": "native_storyboard_object_budget_exceeded", "message": f"{timeframe} contains more than {MAX_NATIVE_OBJECTS} story objects."})
+        if len(skeleton_objects) > SWING_SKELETON_LIMIT:
+            issues.append({"code": "native_storyboard_skeleton_budget_exceeded", "message": f"{timeframe} carries more than {SWING_SKELETON_LIMIT} swing markers."})
         resolution = storyboard.get("resolution_manifest") or {}
         unresolved = [
             *list(resolution.get("unknown_ids") or []),
@@ -726,13 +743,33 @@ def _dedupe_with_report(
     return list(unique.values()), sorted(set(duplicate_ids))
 
 
+def _is_skeleton(obj: Mapping[str, Any]) -> bool:
+    return str(obj.get("object_type") or "") == "swing_marker"
+
+
 def _apply_native_budget(
     objects: Sequence[dict[str, Any]], *, required_ids: set[str]
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    if len(objects) <= MAX_NATIVE_OBJECTS:
+    """Budget the story objects. The swing skeleton is budgeted separately.
+
+    The seven-object limit was calibrated for story marks -- zones, segments,
+    labelled liquidity lines -- which are visually heavy and compete for the
+    same attention. A swing tick is a different class: a short dotted mark with
+    a two-character label, which is what a reader scans to check the structure
+    rather than something they act on.
+
+    Making them share one budget would mean either clipping the skeleton to
+    nothing (it ranks last on importance, so it loses every tie) or raising the
+    story limit and letting genuinely heavy marks multiply. Separating them
+    keeps the calibrated story budget untouched and bounds the context layer at
+    its own selection limit.
+    """
+    story = [obj for obj in objects if not _is_skeleton(obj)]
+    skeleton = [obj for obj in objects if _is_skeleton(obj)]
+    if len(story) <= MAX_NATIVE_OBJECTS:
         return list(objects), []
     ranked = sorted(
-        enumerate(objects),
+        enumerate(story),
         key=lambda pair: (
             0 if required_ids.intersection(str(value) for value in pair[1].get("evidence_object_ids") or []) else 1,
             int(pair[1].get("importance") or 2),
@@ -740,7 +777,7 @@ def _apply_native_budget(
         ),
     )
     kept_indexes = {index for index, _obj in ranked[:MAX_NATIVE_OBJECTS]}
-    kept = [obj for index, obj in enumerate(objects) if index in kept_indexes]
+    kept = [obj for index, obj in enumerate(story) if index in kept_indexes] + skeleton
     omitted = [
         {
             "semantic_object_id": str(obj.get("semantic_object_id") or ""),
@@ -858,6 +895,51 @@ def _first_anchor(
         if anchor is not None and anchor.timeframe == timeframe and _native_visible(anchor, timeframe):
             return anchor
     return None
+
+
+SWING_SKELETON_LIMIT = 6
+
+
+def _swing_skeleton_objects(
+    evidence_pack: Mapping[str, Any],
+    index: Mapping[str, AnnotationEvidenceAnchor],
+    timeframe: str,
+) -> list[dict[str, Any]]:
+    """Labelled structural swings for one timeframe, or nothing.
+
+    Fail-soft by contract. The skeleton is context a reader benefits from, not
+    evidence anything depends on, so a missing or malformed significance report
+    yields an unlabelled chart rather than a failed render.
+    """
+    significance = evidence_pack.get("structural_significance") or {}
+    node = (significance.get("timeframes") or {}).get(timeframe) if isinstance(significance, Mapping) else None
+    if not isinstance(node, Mapping):
+        return []
+    # The selection was already made by the grading layer, which is where the
+    # prominence scores are. This only rehydrates the chosen few.
+    scores_by_id = {
+        str(object_id): SignificanceScore(
+            object_id=str(object_id),
+            grade=str(item.get("grade") or "noise"),
+            atr_multiple=float(item.get("atr_multiple") or 0.0),
+            range_fraction=0.0,
+            prominence_percentile=item.get("prominence_percentile"),
+        )
+        for object_id, item in (node.get("swing_grades") or {}).items()
+        if isinstance(item, Mapping)
+    }
+    if not scores_by_id:
+        return []
+    anchors = [
+        anchor for anchor in index.values()
+        if anchor.evidence_type == "swing" and _native_visible(anchor, timeframe)
+    ]
+    try:
+        return build_swing_skeleton(
+            anchors, scores_by_id, timeframe=timeframe, limit=SWING_SKELETON_LIMIT
+        )
+    except Exception:  # noqa: BLE001 -- descriptive context may never fail a render
+        return []
 
 
 def _native_visible(anchor: AnnotationEvidenceAnchor, timeframe: str) -> bool:
