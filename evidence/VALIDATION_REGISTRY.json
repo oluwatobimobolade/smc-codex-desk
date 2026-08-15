@@ -9,9 +9,9 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-24-STRUCTURE-SKELETON-20260815",
-    "work_package": "WP-SMC-24-STRUCTURE-SKELETON",
-    "gate": "GATE-WP-SMC-24-STRUCTURE-SKELETON-001"
+    "record_id": "WP-SMC-25-PENETRATION-EVENTS-20260815",
+    "work_package": "WP-SMC-25-PENETRATION-EVENTS",
+    "gate": "GATE-WP-SMC-25-PENETRATION-EVENTS-001"
   },
   "records": [
     {
@@ -2249,6 +2249,67 @@
         "Selection can only narrow what is drawn; ungraded swings are dropped rather than assumed significant.",
         "The official 15m chart is unchanged and remains a deliberately sparse three-mark canvas.",
         "Two markets, one detector configuration; the improvement is visual and structural, not an accuracy claim.",
+        "No signal, paper, live, or predictive-edge authority was created."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-25-PENETRATION-EVENTS-20260815",
+      "work_package": "WP-SMC-25-PENETRATION-EVENTS",
+      "gate": "GATE-WP-SMC-25-PENETRATION-EVENTS-001",
+      "date": "2026-08-15",
+      "recorded_at": "2026-08-15T23:30:00Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_SOURCE_BOUND",
+      "source": {
+        "git_head": "457d57f",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-25-PENETRATION-EVENTS/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "e6f30f792b6e6389356e7d62794bb146c175f5d540ef426ba9b4d4fd1b91ec56",
+        "preregistration": "specs/MECHANISM_PREREGISTRATION_V2.yaml",
+        "preregistration_sha256": "8bb454a376e252d2e250e611af1db0209f7b1e0fc365498617e6f45d13d92c3b",
+        "preregistration_sealed_before_runs": true
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1561 passed, 1 skipped in 381.96s (0:06:21)"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": "run_mechanism_test.py SWING_LIQUIDITY_ACCELERATION_V1 (BTCUSDT 15m)",
+          "exit_code": 0,
+          "summary": "UNDERPOWERED; 5205 penetrations in 20000 bars, median 2 bars to penetration; too frequent for uncontaminated controls at any declared horizon"
+        },
+        {
+          "command": "run_mechanism_test.py SWING_GRADE_DISCRIMINATION_V1 (BTCUSDT 15m)",
+          "exit_code": 0,
+          "summary": "prediction contradicted; major-minor = -0.039/-0.064/-0.029; both arms report, major arm DATA_FAILED on balance"
+        },
+        {
+          "command": "run_mechanism_test.py SWING_GRADE_DISCRIMINATION_V1 (ETHUSDT 15m)",
+          "exit_code": 0,
+          "summary": "replicates BTC; major-minor = -0.035/-0.052/-0.072; both arms DATA_FAILED on balance"
+        }
+      ],
+      "primary_result": "1561 passed, 1 skipped in 381.96s (0:06:21)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-25-PENETRATION-EVENTS/README.md",
+      "authority_mode": "observe_only_preregistered_mechanism_association",
+      "limitations": [
+        "SWING_GRADE_DISCRIMINATION_V1: predicted direction contradicted in 6 of 6 horizons across two markets.",
+        "Both grade arms failed covariate balance; effect magnitudes are unreliable and only the sign consistency survives.",
+        "No matching parameter was adjusted after seeing the result; balance failure is reported, not repaired.",
+        "SWING_LIQUIDITY_ACCELERATION_V1 is untestable on this detector at all scales: penetrations occur every 3.8 bars.",
+        "The WP-SMC-24 structure skeleton is unchanged; its 'these swings matter' justification is now unsupported.",
         "No signal, paper, live, or predictive-edge authority was created."
       ]
     }

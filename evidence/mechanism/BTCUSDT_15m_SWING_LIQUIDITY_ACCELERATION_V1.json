@@ -1,0 +1,187 @@
+{
+  "diagnostics": {
+    "confirmed_swings": 15802,
+    "penetrations": 5205,
+    "closed_beyond": 2578,
+    "median_bars_to_penetration": 2
+  },
+  "certificates": {
+    "all": {
+      "schema": "smc_mechanism_certificate_v1",
+      "hypothesis_id": "SWING_LIQUIDITY_ACCELERATION_V1",
+      "market": "BTCUSDT",
+      "timeframe": "15m",
+      "preregistration_sha256": "8bb454a376e252d2e250e611af1db0209f7b1e0fc365498617e6f45d13d92c3b",
+      "authority_contract": {
+        "authority_rung": "MECHANISM_SUPPORTED",
+        "human_adjudication_used": false,
+        "proves": "preregistered_association_with_a_named_market_observable",
+        "cannot_prove": [
+          "participant_identity",
+          "deterministic_causation",
+          "forecast_quality",
+          "economic_value"
+        ],
+        "signal_allowed": false,
+        "paper_execution_allowed": false,
+        "live_execution_allowed": false
+      },
+      "hypothesis": {
+        "statement": "When price trades through a confirmed swing extreme, the realised range of the following bars exceeds that of matched controls at comparable distance from the extreme where no penetration occurred.",
+        "observable": "realised_range_expansion_after_penetration",
+        "horizons_bars": [
+          5,
+          10,
+          20
+        ],
+        "prediction": "conditional_mean_exceeds_control_mean"
+      },
+      "per_horizon": [
+        {
+          "horizon_bars": 5,
+          "treated_count": 23,
+          "control_count": 23,
+          "effective_sample_size": 23.0,
+          "treated_mean": 1.128872,
+          "control_mean": 0.91642,
+          "paired_differences": [
+            -0.02963484,
+            0.16754984,
+            0.98856627,
+            0.12637124,
+            0.18358259,
+            -0.05988408,
+            0.26857872,
+            0.0876275,
+            -0.12893717,
+            0.5082587,
+            0.58167759,
+            -0.21527848,
+            -0.293392,
+            0.13431949,
+            -0.08456367,
+            0.41977953,
+            -0.00073825,
+            2.46072103,
+            0.41521226,
+            0.19389116,
+            -0.10041076,
+            -0.14317401,
+            -0.59370905
+          ],
+          "observed_difference": 0.212453,
+          "p_value": 0.015,
+          "bootstrap_t": 2.217349,
+          "null_std": 0.095814,
+          "paired_observations": 23,
+          "resamples": 2000,
+          "block_length": 5,
+          "two_sided": false,
+          "survives_fdr": true,
+          "meets_t_threshold": false,
+          "passes": false
+        },
+        {
+          "horizon_bars": 10,
+          "treated_count": 23,
+          "control_count": 13,
+          "effective_sample_size": 13.0,
+          "treated_mean": 1.159077,
+          "control_mean": 0.999869,
+          "paired_differences": [
+            0.1860798,
+            0.26375517,
+            -0.23395213,
+            -0.17253096,
+            -0.5109363,
+            0.00190745,
+            -0.20426748,
+            0.96326194,
+            -0.56094407,
+            0.75187452,
+            0.46804053,
+            0.32522131,
+            0.32749256
+          ],
+          "observed_difference": 0.123462,
+          "p_value": 0.069,
+          "bootstrap_t": 1.496388,
+          "null_std": 0.082506,
+          "paired_observations": 13,
+          "resamples": 2000,
+          "block_length": 10,
+          "two_sided": false,
+          "survives_fdr": false,
+          "meets_t_threshold": false,
+          "passes": false
+        },
+        {
+          "horizon_bars": 20,
+          "treated_count": 23,
+          "control_count": 10,
+          "effective_sample_size": 10.0,
+          "treated_mean": 1.140838,
+          "control_mean": 1.178162,
+          "paired_differences": [
+            -0.15520919,
+            -0.4129047,
+            -0.31934098,
+            -0.41113343,
+            0.20046241,
+            -0.25002464,
+            0.8818475,
+            0.36517807,
+            0.40259894,
+            0.72615091
+          ],
+          "observed_difference": 0.102762,
+          "p_value": 0.14,
+          "bootstrap_t": 0.948708,
+          "null_std": 0.108318,
+          "paired_observations": 10,
+          "resamples": 2000,
+          "block_length": 10,
+          "two_sided": false,
+          "survives_fdr": false,
+          "meets_t_threshold": false,
+          "passes": false
+        }
+      ],
+      "matching": {
+        "events_requested": 5154,
+        "events_matched": 23,
+        "events_unmatched": 5131,
+        "events_with_thin_control_pool": 19,
+        "controls_drawn": 59,
+        "controls_per_event_target": 5,
+        "recency_window_bars": 500,
+        "size_buckets": 5,
+        "location_buckets": 10,
+        "seed": 0
+      },
+      "balance": {
+        "size": {
+          "treated_mean": 359.42577639751545,
+          "control_mean": 436.2000608337055,
+          "standardised_mean_difference": -0.343831
+        },
+        "location": {
+          "treated_mean": 0.182616407415688,
+          "control_mean": 0.16231975635613752,
+          "standardised_mean_difference": 0.157356
+        },
+        "balanced": false
+      },
+      "thresholds": {
+        "minimum_abs_t_statistic": 3.0,
+        "false_discovery_rate": 0.05,
+        "minimum_events": 100,
+        "minimum_effective_sample": 30.0
+      },
+      "status": "UNDERPOWERED",
+      "reason": "3 horizon(s) below the preregistered effective sample floor of 30.0; overlapping windows do not each contribute a full observation",
+      "certificate_sha256": "79065aa086d0b44139d7d2cc046b31bbafdbdc96c15220f7d61ff581891e6751"
+    }
+  },
+  "arm_comparison": null
+}

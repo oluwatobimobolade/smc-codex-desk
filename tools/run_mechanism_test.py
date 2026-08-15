@@ -26,7 +26,12 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from smc_desk.colleague.run_context import dataframe_to_candles  # noqa: E402
-from smc_desk.evaluation.mechanism_evidence import certify_mechanism  # noqa: E402
+from smc_desk.evaluation.mechanism_evidence import certify_mechanism, compare_arms  # noqa: E402
+from smc_desk.perception.penetration_events import (  # noqa: E402
+    deduplicate_by_bar,
+    extract_penetration_events,
+)
+from smc_desk.perception.significance import grade_timeframe  # noqa: E402
 from smc_desk.perception.engine_v2 import PerceptionEngineV2  # noqa: E402
 
 # Which detected family each hypothesis draws its events from.
@@ -35,20 +40,69 @@ FAMILY_BY_HYPOTHESIS = {
     "FVG_FILL_RATE_V1": "fvgs",
 }
 
-# Hypotheses whose event definition is not the same thing as a detected object.
-# SWING_LIQUIDITY_ACCELERATION_V1 is about the moment price *trades through* a
-# confirmed swing extreme -- a penetration, which happens later than and
-# separately from the swing's own confirmation, and may never happen at all.
-# Anchoring it on swing confirmations would measure a different event and stamp
-# it with this hypothesis id, which is precisely the substitution the observable
-# dispatch was added to prevent. Refusing is the honest state until a
-# penetration-event extractor exists.
-UNIMPLEMENTED_EVENT_MAPPING = {
-    "SWING_LIQUIDITY_ACCELERATION_V1": (
-        "needs a penetration-event extractor; a confirmed swing is not the same "
-        "event as price trading through it"
-    ),
+# Hypotheses whose events are penetrations of prior swing extremes rather than
+# detected objects. A confirmed swing is not the same event as price trading
+# through it: the penetration happens later, may never happen at all, and is
+# what Osler's order-book result is actually about.
+PENETRATION_HYPOTHESES = {
+    "SWING_LIQUIDITY_ACCELERATION_V1": None,        # all grades
+    "SWING_GRADE_DISCRIMINATION_V1": ("major", "minor"),  # two arms, compared
 }
+
+UNIMPLEMENTED_EVENT_MAPPING: dict[str, str] = {}
+
+
+def detect_penetrations(
+    frame: pd.DataFrame,
+    symbol: str,
+    timeframe: str,
+    session: str,
+    *,
+    grades: tuple[str, ...] | None = None,
+):
+    """Penetration events, optionally split by the swing's significance grade.
+
+    Returns ``{grade_or_'all': (indices, diagnostics)}``. Grading happens over
+    the same candle window the events are measured in, so a swing's grade and
+    its penetration are evaluated against one volatility regime.
+    """
+    candles = dataframe_to_candles(
+        frame, venue="TEST", instrument=symbol, timeframe=timeframe, session_profile=session
+    )
+    snapshot = PerceptionEngineV2().analyze(candles, candles[-1].close_time).model_dump(mode="json")
+    # `swings` is keyed by detection scale (local / internal / external), not a
+    # flat list. Iterating it directly yields the scale *names*, which silently
+    # produced an empty event set on the first run. Every scale is kept: the
+    # preregistration says "a confirmed swing extreme" without qualifying scale,
+    # and narrowing it here would answer a different question than the sealed one.
+    by_scale = snapshot.get("swings") or {}
+    swings = [
+        s for scale_swings in by_scale.values()
+        for s in (scale_swings or [])
+        if isinstance(s, dict)
+    ] if isinstance(by_scale, dict) else []
+
+    records = frame.to_dict("records")
+    summary = grade_timeframe(candles=records, swings=swings)
+    grade_by_id = {s.object_id: s.grade for s in summary.scores}
+
+    events = deduplicate_by_bar(extract_penetration_events(swings, frame))
+    buckets: dict[str, list] = {}
+    for wanted in (grades or ("all",)):
+        chosen = [
+            e for e in events
+            if wanted == "all" or grade_by_id.get(e.swing_object_id) == wanted
+        ]
+        buckets[wanted] = chosen
+    return buckets, {
+        "confirmed_swings": len(swings),
+        "penetrations": len(events),
+        "closed_beyond": sum(1 for e in events if e.closed_beyond),
+        "median_bars_to_penetration": (
+            int(pd.Series([e.bars_since_confirmation for e in events]).median())
+            if events else None
+        ),
+    }
 
 
 def detect_events(frame: pd.DataFrame, symbol: str, timeframe: str, group: str, session: str):
@@ -85,6 +139,88 @@ def detect_events(frame: pd.DataFrame, symbol: str, timeframe: str, group: str, 
     }
 
 
+def _print_certificate(label: str, certificate: dict) -> None:
+    print(f"\n[{label}] STATUS: {certificate['status']}")
+    if certificate.get("reason"):
+        print(f"  reason: {certificate['reason']}")
+    for entry in certificate.get("per_horizon") or []:
+        print(
+            f"    h={entry['horizon_bars']:3d}  pairs={entry.get('paired_observations')}  "
+            f"treated={entry['treated_mean']}  control={entry['control_mean']}  "
+            f"diff={entry.get('observed_difference')}  t={entry['bootstrap_t']}  "
+            f"p={entry['p_value']}  passes={entry['passes']}"
+        )
+    print(f"  balance: {(certificate.get('balance') or {}).get('balanced')}")
+
+
+def _run_penetration(args, frame: pd.DataFrame) -> int:
+    """Run a penetration hypothesis, single-arm or graded two-arm."""
+    grades = PENETRATION_HYPOTHESES[args.hypothesis_id]
+    buckets, diagnostics = detect_penetrations(
+        frame, args.symbol, args.timeframe, args.session, grades=grades
+    )
+    print(f"penetrations: {json.dumps(diagnostics)}")
+
+    certificates: dict[str, dict] = {}
+    for arm, events in buckets.items():
+        indices = [e.bar_index for e in events]
+        print(f"  arm '{arm}': {len(indices)} events")
+        certificates[arm] = certify_mechanism(
+            hypothesis_id=args.hypothesis_id, candles=frame,
+            event_indices=indices, market=args.symbol,
+            timeframe=args.timeframe, seed=args.seed,
+        )
+        _print_certificate(arm, certificates[arm])
+
+    comparison = None
+    if grades and len(grades) == 2:
+        # The arms are compared on control-adjusted differences, so the local
+        # volatility and location confounds are already removed from both sides.
+        first, second = grades
+        by_horizon = {}
+        for entry_a in certificates[first].get("per_horizon") or []:
+            horizon = entry_a["horizon_bars"]
+            entry_b = next(
+                (e for e in certificates[second].get("per_horizon") or []
+                 if e["horizon_bars"] == horizon), None
+            )
+            if entry_b is None:
+                continue
+            import numpy as np
+            by_horizon[horizon] = compare_arms(
+                np.asarray(entry_a.get("paired_differences") or [], dtype=float),
+                np.asarray(entry_b.get("paired_differences") or [], dtype=float),
+                block_length=horizon, seed=args.seed + horizon,
+            )
+        comparison = {
+            "schema": "smc_mechanism_arm_comparison_v1",
+            "hypothesis_id": args.hypothesis_id,
+            "arm_a": first, "arm_b": second,
+            "per_horizon": by_horizon,
+        }
+        print(f"\nARM COMPARISON ({first} vs {second}):")
+        for horizon, result in sorted(by_horizon.items()):
+            print(
+                f"  h={horizon:3d}  {first}={result.get('arm_a_mean')} "
+                f"{second}={result.get('arm_b_mean')}  "
+                f"diff={result.get('observed_difference')}  t={result.get('bootstrap_t')}  "
+                f"p={result.get('p_value')}"
+            )
+
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(
+            json.dumps(
+                {"diagnostics": diagnostics, "certificates": certificates,
+                 "arm_comparison": comparison},
+                indent=2, default=str,
+            ),
+            encoding="utf-8",
+        )
+        print(f"\nwrote {args.out}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("hypothesis_id")
@@ -107,10 +243,11 @@ def main() -> int:
         print(f"REFUSED: {args.hypothesis_id} — {UNIMPLEMENTED_EVENT_MAPPING[args.hypothesis_id]}")
         return 3
 
+    is_penetration = args.hypothesis_id in PENETRATION_HYPOTHESES
     group = FAMILY_BY_HYPOTHESIS.get(args.hypothesis_id)
     if args.qualified and group == "fvgs":
         group = "poi_grade_fvgs"
-    if group is None:
+    if group is None and not is_penetration:
         print(f"No detector family mapped for {args.hypothesis_id}")
         return 2
 
@@ -119,6 +256,9 @@ def main() -> int:
     frame = frame.sort_values("timestamp").tail(args.bars).reset_index(drop=True)
     print(f"{args.symbol} {args.timeframe}: {len(frame)} candles "
           f"{frame['timestamp'].iloc[0]} -> {frame['timestamp'].iloc[-1]}")
+
+    if is_penetration:
+        return _run_penetration(args, frame)
 
     indices, signs, counts = detect_events(frame, args.symbol, args.timeframe, group, args.session)
     print(f"events: {json.dumps(counts)}")

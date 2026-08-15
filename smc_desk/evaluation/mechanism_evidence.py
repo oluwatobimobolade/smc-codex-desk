@@ -49,8 +49,8 @@ from smc_desk.evaluation.matched_baseline import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_PREREGISTRATION_PATH = ROOT / "specs" / "MECHANISM_PREREGISTRATION_V1.yaml"
-DEFAULT_SEAL_PATH = ROOT / "specs" / "MECHANISM_PREREGISTRATION_V1.sha256"
+DEFAULT_PREREGISTRATION_PATH = ROOT / "specs" / "MECHANISM_PREREGISTRATION_V2.yaml"
+DEFAULT_SEAL_PATH = ROOT / "specs" / "MECHANISM_PREREGISTRATION_V2.sha256"
 EXPECTED_SCHEMA = "smc_codex_mechanism_preregistration_v1"
 
 CERTIFICATE_STATUSES = {
@@ -123,23 +123,33 @@ def forward_returns(
 def realised_range_expansion(
     candles: pd.DataFrame, indices: Sequence[int], horizon: int, *, signs: Sequence[float] | None = None
 ) -> np.ndarray:
-    """Mean true range over the horizon, as a multiple of the range before it.
+    """Mean true range AFTER the event bar, as a multiple of the range before it.
 
     Direction-free by construction: an acceleration hypothesis is about how much
     price moves, not which way, so the sign convention is deliberately unused.
+
+    The event bar itself is excluded from both windows, and that exclusion is
+    the whole validity of the measurement. A bar that just traded through a
+    prior extreme is, by construction, a wide bar -- it reached further than
+    every bar before it. Including it would measure "is the breaking candle
+    big?", which is close to a tautology and would report a large effect on any
+    data at all. Starting the window one bar later asks the question the
+    hypothesis actually poses: does the movement *continue* after the level is
+    taken, which is what a stop cascade would produce.
     """
     high = candles["high"].astype(float).to_numpy()
     low = candles["low"].astype(float).to_numpy()
     total = len(high)
     out: list[float] = []
     for index in indices:
-        end = index + horizon
-        start = index - horizon
-        if start < 0 or end >= total:
+        after_start = index + 1
+        after_end = after_start + horizon
+        before_start = index - horizon
+        if before_start < 0 or after_end > total:
             out.append(np.nan)
             continue
-        after = float(np.mean(high[index:end] - low[index:end]))
-        before = float(np.mean(high[start:index] - low[start:index]))
+        after = float(np.mean(high[after_start:after_end] - low[after_start:after_end]))
+        before = float(np.mean(high[before_start:index] - low[before_start:index]))
         out.append(after / before if before > 0 else np.nan)
     return np.asarray(out, dtype=float)
 
@@ -220,6 +230,67 @@ def paired_block_bootstrap(
         "resamples": resamples,
         "block_length": block_length,
         "two_sided": two_sided,
+    }
+
+
+def compare_arms(
+    arm_a: np.ndarray,
+    arm_b: np.ndarray,
+    *,
+    block_length: int,
+    resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Test whether one arm's control-adjusted effect exceeds another's.
+
+    Both inputs are already paired differences -- each event minus the mean of
+    its own matched controls -- so the local volatility and location confounds
+    are removed *before* the arms meet. That ordering is the whole design:
+    comparing raw acceleration between a major-swing arm and a minor-swing arm
+    would mostly measure that major swings sit at more extreme prices.
+
+    The null is that both arms are draws from the same distribution, built by
+    resampling the pooled series in blocks so the comparison inherits the serial
+    dependence that overlapping outcome windows create.
+    """
+    a = arm_a[np.isfinite(arm_a)]
+    b = arm_b[np.isfinite(arm_b)]
+    if a.size < 2 or b.size < 2:
+        return {"p_value": None, "reason": "insufficient_observations"}
+
+    observed = float(a.mean() - b.mean())
+    pooled = np.concatenate([a, b])
+    rng = np.random.default_rng(seed)
+    block_length = max(1, min(int(block_length), pooled.size))
+
+    def draw(size: int) -> np.ndarray:
+        out = np.empty(size, dtype=float)
+        filled = 0
+        while filled < size:
+            start = int(rng.integers(0, pooled.size))
+            length = int(min(rng.geometric(1.0 / block_length), size - filled))
+            take = np.arange(start, start + length) % pooled.size
+            out[filled:filled + length] = pooled[take]
+            filled += length
+        return out
+
+    null = np.fromiter(
+        (draw(a.size).mean() - draw(b.size).mean() for _ in range(resamples)),
+        dtype=float,
+        count=resamples,
+    )
+    spread = float(null.std(ddof=1))
+    return {
+        "arm_a_mean": round(float(a.mean()), 6),
+        "arm_b_mean": round(float(b.mean()), 6),
+        "arm_a_count": int(a.size),
+        "arm_b_count": int(b.size),
+        "observed_difference": round(observed, 6),
+        "p_value": round(float((null >= observed).mean()), 6),
+        "bootstrap_t": round(observed / spread, 6) if spread > 0 else None,
+        "null_std": round(spread, 6),
+        "block_length": block_length,
+        "resamples": resamples,
     }
 
 
@@ -379,6 +450,10 @@ def certify_mechanism(
             "effective_sample_size": round(_effective_sample_size(usable.size, horizon, len(candles)), 3),
             "treated_mean": round(float(treated_finite.mean()), 6) if treated_finite.size else None,
             "control_mean": round(float(np.mean(control_values)), 6) if control_values else None,
+            # Carried so two certificates can be compared arm to arm. Each value
+            # is already control-adjusted, which is what makes a later
+            # comparison a test of the arms rather than of their surroundings.
+            "paired_differences": [round(float(v), 8) for v in usable],
             **result,
         })
 
@@ -432,6 +507,7 @@ __all__ = [
     "CERTIFICATE_STATUSES",
     "Preregistration",
     "benjamini_hochberg",
+    "compare_arms",
     "certify_mechanism",
     "OBSERVABLE_FUNCTIONS",
     "forward_returns",
