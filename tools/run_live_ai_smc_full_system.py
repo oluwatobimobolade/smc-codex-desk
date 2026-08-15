@@ -1643,10 +1643,6 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-if __name__ == "__main__":
-    main()
-
-
 def record_selective_decision(
     *,
     symbol_root: Path,
@@ -1713,3 +1709,6 @@ def record_selective_decision(
     except Exception as exc:  # noqa: BLE001 -- additive evidence, never fatal
         outcome["selective_ledger_status"] = f"failed:{type(exc).__name__}"
     return outcome
+
+if __name__ == "__main__":
+    main()
