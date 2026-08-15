@@ -9,9 +9,9 @@
     "failed_records_are_retained": true
   },
   "current_gate": {
-    "record_id": "WP-SMC-21-SCOPED-RECONCILIATION-20260815",
-    "work_package": "WP-SMC-21-SCOPED-RECONCILIATION-AND-MEASURED-REFUSAL",
-    "gate": "GATE-WP-SMC-21-SCOPED-RECONCILIATION-001"
+    "record_id": "WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES-20260815",
+    "work_package": "WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES",
+    "gate": "GATE-WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES-001"
   },
   "records": [
     {
@@ -2044,6 +2044,53 @@
         "A context read may rest on a single surviving narrative check (CHFJPY); no depth requirement was added.",
         "No detector threshold was tuned and no disputed object was rescued.",
         "Human adjudication remains the only route to definition correctness."
+      ]
+    },
+    {
+      "record_id": "WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES-20260815",
+      "work_package": "WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES",
+      "gate": "GATE-WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES-001",
+      "date": "2026-08-15",
+      "recorded_at": "2026-08-15T01:00:00Z",
+      "status": "PASS_LOCAL_OBSERVE_ONLY_SOURCE_BOUND",
+      "source": {
+        "git_head": "a60abd2",
+        "source_state": "dirty_worktree_source_bound",
+        "python_version": "3.14.5",
+        "source_manifest": "governance/WORK_PACKAGES/WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES/SOURCE_MANIFEST.tsv",
+        "source_manifest_sha256": "2621ad9467693c1a99281fb8563bb7eb8453e67c4b5aa0320771a4f0358aa197"
+      },
+      "commands": [
+        {
+          "command": ".venv/bin/python -m pytest -q",
+          "exit_code": 0,
+          "summary": "1504 passed, 1 skipped in 348.21s (0:05:48)"
+        },
+        {
+          "command": ".venv/bin/python tools/check_authority_boundaries.py",
+          "exit_code": 0,
+          "summary": "PASS"
+        },
+        {
+          "command": ".venv/bin/python tools/check_governance_consistency.py",
+          "exit_code": 0,
+          "summary": "PASS; current 4-entry source manifest content verified"
+        },
+        {
+          "command": "tools/resolve_selective_outcomes.py (10 real BTCUSDT 15m decision points)",
+          "exit_code": 0,
+          "summary": "10 resolved; false_omission_rate 0.3; AURC 0.653; resolver demonstration, not an SMC claim"
+        }
+      ],
+      "primary_result": "1504 passed, 1 skipped in 348.21s (0:05:48)",
+      "report": "governance/WORK_PACKAGES/WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES/README.md",
+      "authority_mode": "observe_only_market_adjudicated_outcome_resolution",
+      "limitations": [
+        "The demonstration used a naive momentum stand-in read; it tests the resolver, not SMC.",
+        "missed_favorable_outcome_rate is definitionally 1.0 while coverage is 0 and is not yet informative.",
+        "MECHANISM_SUPPORTED still needs preregistration and a matched baseline; association without a baseline is confirmation, not evidence.",
+        "The five 2026-08-14 live decisions cannot be scored yet: stored forward data ends 2026-06-27.",
+        "Resolution creates no signal, paper, live, or predictive-edge authority."
       ]
     }
   ]

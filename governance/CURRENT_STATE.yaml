@@ -133,8 +133,8 @@ active_contracts:
   ai_structure_reasoning: AI_CENTERED_STRUCTURE_REASONING_V1
 
 current_gate:
-  id: GATE-WP-SMC-21-SCOPED-RECONCILIATION-001
-  work_package: WP-SMC-21-SCOPED-RECONCILIATION-AND-MEASURED-REFUSAL
+  id: GATE-WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES-001
+  work_package: WP-SMC-22-MARKET-ADJUDICATED-OUTCOMES
   status: passed_local_observe_only_source_bound_empirical_certification_unchanged
   next_programme: analyst_select_development_cases_then_blind_markup_before_threshold_tuning
 
