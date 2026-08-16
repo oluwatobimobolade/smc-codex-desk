@@ -1,0 +1,77 @@
+schema: smc_codex_poi_weight_revision_supplement_v1
+supplements: specs/POI_WEIGHT_REVISION_V1.yaml
+supplements_sha256: 08a18ca7ce2093d3619efacdc44386b6450cfde0bc8e56a413d117890c132b73
+version: 1.0.0
+effective_date: "2026-08-16"
+status: ACTIVE_SEALED_SUPPLEMENT
+
+purpose: >-
+  Record the outcome of the falsification test the sealed revision demanded, and
+  a regime dependence the revision did not anticipate. The revision itself is
+  not edited: a sealed document that gets amended when its own test returns an
+  awkward result is not a seal.
+
+falsification_test:
+  condition_from_the_seal: >-
+    "If location's out-of-sample lift fails to replicate on a third instrument,
+    location returns toward its prior weight and this revision is recorded as
+    not replicated."
+  instruments_added: [SOLUSDT, XRPUSDT, BNBUSDT]
+  method: identical walk-forward split at the midpoint, second half never inspected
+  result: REPLICATED
+  out_of_sample_lift:
+    BTCUSDT: 0.081
+    ETHUSDT: 0.099
+    SOLUSDT: 0.115
+    XRPUSDT: 0.144
+    BNBUSDT: 0.036
+  summary: five of five instruments positive out of sample, mean lift about +9.5%
+  verdict: >-
+    The condition is met. The 0.30 location weight stands.
+
+# The part the seal did not foresee, and the more important half of the result.
+regime_dependence:
+  observation: >-
+    In-sample lift is inconsistent and sometimes strongly negative, while
+    out-of-sample lift is positive on every instrument. That is the inverse of
+    the usual overfitting signature and it demands an explanation rather than
+    celebration.
+  in_sample_lift:
+    BTCUSDT: -0.005
+    ETHUSDT: 0.043
+    SOLUSDT: -0.270
+    XRPUSDT: 0.060
+    BNBUSDT: -0.025
+  base_rate_shift:
+    first_half_hold_rate: roughly 0.19 to 0.35 depending on instrument
+    second_half_hold_rate: roughly 0.35 to 0.50 depending on instrument
+  reading: >-
+    The two halves are different regimes, not two samples of one. The 4R target
+    was rarely reached in the first half on any instrument, so every feature had
+    little to separate. The out-of-sample "outperformance" is therefore partly a
+    property of the later period rather than evidence that the feature improves
+    on unseen data.
+  the_uncomfortable_case: >-
+    SOLUSDT first half shows location at -27.0% on n=167 versus n=196. That is
+    far too large and too well populated to be noise. In that regime,
+    well-located zones performed materially WORSE. Location is not a constant
+    of the market; it is a behaviour that holds in some conditions and inverts
+    in others.
+
+what_this_changes:
+  weight: unchanged at 0.30, because the preregistered condition was met
+  claim_strength: >-
+    Downgraded in wording, not in weight. The correct statement is "location
+    replicated out of sample on five of five instruments tested, in a single
+    market regime, and inverted badly on one instrument in the preceding
+    regime" -- not "location works".
+  what_must_not_be_done:
+    - raising location further on the strength of five agreeing out-of-sample halves
+    - reporting the mean +9.5% lift without the SOLUSDT -27.0% beside it
+    - treating a five-instrument agreement inside one regime as five independent tests
+
+next_test_required: >-
+  A regime label attached to each case, and the lift measured within regime
+  rather than within time-split. Until that exists, the honest position is that
+  location is the best-evidenced factor available and is still conditional on
+  conditions nobody has characterised.

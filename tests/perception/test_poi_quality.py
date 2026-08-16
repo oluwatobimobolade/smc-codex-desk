@@ -328,3 +328,32 @@ def test_the_founder_zone_still_ranks_above_an_idle_neighbour() -> None:
     idle = make_poi("idle", "bearish", low=113.90, high=114.05, caused=False, scope="internal")
     ranked = rank_pois([idle, CADJPY_SUPPLY], equilibrium=114.5, current_price=113.95)
     assert ranked[0].object_id == "ob-cadjpy-0731"
+
+
+def test_the_supplement_is_sealed_and_points_at_the_revision_it_supplements() -> None:
+    """A seal that gets amended when its own test returns an awkward result is not a seal.
+
+    The falsification condition in POI_WEIGHT_REVISION_V1 was met -- location
+    replicated out of sample on three further instruments, five of five overall.
+    The regime dependence found alongside it is recorded in a supplement rather
+    than edited into the original, so the original still says exactly what was
+    committed to before the test ran.
+    """
+    import yaml
+
+    from smc_desk.data.hashing import file_sha256
+
+    root = Path(__file__).resolve().parents[2]
+    supplement = root / "specs" / "POI_WEIGHT_REVISION_V1_SUPPLEMENT_R2.yaml"
+    seal = root / "specs" / "POI_WEIGHT_REVISION_V1_SUPPLEMENT_R2.sha256"
+    assert file_sha256(supplement) == seal.read_text(encoding="utf-8").strip()
+
+    doc = yaml.safe_load(supplement.read_text(encoding="utf-8"))
+    original = root / "specs" / "POI_WEIGHT_REVISION_V1.yaml"
+    assert doc["supplements_sha256"] == file_sha256(original), (
+        "the supplement no longer describes the revision it claims to supplement"
+    )
+    assert doc["falsification_test"]["result"] == "REPLICATED"
+    assert doc["what_this_changes"]["weight"] == "unchanged at 0.30, because the preregistered condition was met"
+    # The awkward number must stay attached to the happy one.
+    assert doc["regime_dependence"]["in_sample_lift"]["SOLUSDT"] == -0.270
