@@ -1696,7 +1696,13 @@ def record_selective_decision(
             narrative_context=graph.get("narrative_context") or {},
             invariants=episode_graph.get("invariants") or {},
             source_hashes={
-                "evidence_pack_sha256": str(pack.get("pack_sha256") or ""),
+                # The pack carries its hash at provenance.pack_hash. Reading a
+                # non-existent top-level key silently wrote "" into every real
+                # ledger entry, so decisions could not be tied to the evidence
+                # that produced them -- the one thing a hash chain is for.
+                "evidence_pack_sha256": str(
+                    (pack.get("provenance") or {}).get("pack_hash") or ""
+                ),
             },
             data_failed=str(summary.get("status") or "").upper().startswith("FAILED"),
         )

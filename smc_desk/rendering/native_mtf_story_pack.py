@@ -784,7 +784,10 @@ def _apply_native_budget(
             "evidence_object_ids": [str(value) for value in obj.get("evidence_object_ids") or []],
             "reason_code": "native_storyboard_object_budget",
         }
-        for index, obj in enumerate(objects)
+        # Indices are positions in `story`, so the report must enumerate the
+        # same list. Enumerating `objects` mixed in the skeleton and named the
+        # wrong marks as omitted.
+        for index, obj in enumerate(story)
         if index not in kept_indexes
     ]
     return kept, omitted

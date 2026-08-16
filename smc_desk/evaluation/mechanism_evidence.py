@@ -249,9 +249,9 @@ def compare_arms(
     comparing raw acceleration between a major-swing arm and a minor-swing arm
     would mostly measure that major swings sit at more extreme prices.
 
-    The null is that both arms are draws from the same distribution, built by
-    resampling the pooled series in blocks so the comparison inherits the serial
-    dependence that overlapping outcome windows create.
+    The null is equal means, imposed by centring each arm and resampling it in
+    blocks from its own series -- never from the two concatenated, which would
+    stitch blocks across an artificial join between two separate time series.
     """
     a = arm_a[np.isfinite(arm_a)]
     b = arm_b[np.isfinite(arm_b)]
@@ -259,23 +259,31 @@ def compare_arms(
         return {"p_value": None, "reason": "insufficient_observations"}
 
     observed = float(a.mean() - b.mean())
-    pooled = np.concatenate([a, b])
     rng = np.random.default_rng(seed)
-    block_length = max(1, min(int(block_length), pooled.size))
 
-    def draw(size: int) -> np.ndarray:
+    # Each arm is resampled from ITS OWN centred series. Concatenating the two
+    # and drawing blocks from the pooled array is the same defect already fixed
+    # in `paired_block_bootstrap` and reintroduced here: the arms are separate
+    # time series, so a block spanning their join is stitched across an
+    # artificial boundary and preserves a dependence that does not exist.
+    # Centring each arm imposes the null -- equal means -- without pretending
+    # the two are one series.
+    def block_mean(series: np.ndarray) -> float:
+        size = series.size
+        span = max(1, min(int(block_length), size))
         out = np.empty(size, dtype=float)
         filled = 0
         while filled < size:
-            start = int(rng.integers(0, pooled.size))
-            length = int(min(rng.geometric(1.0 / block_length), size - filled))
-            take = np.arange(start, start + length) % pooled.size
-            out[filled:filled + length] = pooled[take]
+            start = int(rng.integers(0, size))
+            length = int(min(rng.geometric(1.0 / span), size - filled))
+            take = np.arange(start, start + length) % size
+            out[filled:filled + length] = series[take]
             filled += length
-        return out
+        return float(out.mean())
 
+    centred_a, centred_b = a - a.mean(), b - b.mean()
     null = np.fromiter(
-        (draw(a.size).mean() - draw(b.size).mean() for _ in range(resamples)),
+        (block_mean(centred_a) - block_mean(centred_b) for _ in range(resamples)),
         dtype=float,
         count=resamples,
     )
