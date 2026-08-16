@@ -1,4 +1,63 @@
 next_actions:
+  - id: WP-SMC-28-RISK-MODULE
+    priority: 0
+    title: Price a trade -- stop, target, R, expectancy
+    owner: Trading Systems Engineer
+    status: NOT_STARTED
+    blocks: every downstream result, because a system that cannot price a trade
+      terminates good and bad findings in the same REVIEW_REQUIRED
+    evidence: >-
+      Live BTCUSDT priced at R=0.07 against the narrative invalidation (the 1d
+      protected high, 30% away) and R=3.94 against the setup invalidation (the
+      POI edge plus 1x 4h ATR). Same setup, two stops. Round-trip cost is 2.8%
+      of the reward at the second.
+    scope:
+      - separate narrative invalidation from setup invalidation
+      - derive R from the POI edge and the already-computed liquidity draw
+      - expectancy from R and the ledger-measured hold rate
+      - reject setups whose reward is small relative to spread and slippage
+    prohibited:
+      - creating signal, paper or live authority
+      - sizing recommendations without a measured win rate
+
+  - id: WP-SMC-29-EPISODE-SELECTION
+    priority: 1
+    title: Why the 4h latest external episode is weeks stale
+    status: NOT_STARTED
+    evidence: >-
+      XRPUSDT 4h renders no structure across a four-week downtrend because the
+      controlling EXTERNAL_BOS_BEARISH is anchored to a swing from 2026-05-26,
+      before the window, while the visible trend broke structure repeatedly.
+    note: >-
+      A render-side fix was built, rendered and reverted in 22589e5. Widening
+      `_native_visible` also admitted an off-window IDM priced outside the
+      visible range, expanding the y-axis by a third. The answer is upstream.
+
+  - id: WP-SMC-30-ROLLING-CASE-LIBRARY
+    priority: 2
+    title: Rebuild the case library on a rolling basis
+    status: NOT_STARTED
+    unlocks: [swept_before, left_imbalance, distance_to_draw_atr]
+    evidence: >-
+      A single engine pass over 20,000 BTCUSDT bars places all 207 sweeps and
+      all 90 liquidity levels in the final ~100 bars, because
+      liquidity_sweep_lookback bounds them to recent swings. Those features are
+      structurally unmeasurable in a single pass and are held in
+      ROLLING_ONLY_FEATURES so they cannot be reintroduced as if tested.
+    design: checkpoint harvesting on trailing windows, each contributing only
+      its fresh tail, so no object is detected with future data
+
+  - id: WP-SMC-31-REGIME-LABELS
+    priority: 3
+    title: Measure feature lift within regime rather than within time split
+    status: NOT_STARTED
+    required_by: specs/POI_WEIGHT_REVISION_V1_SUPPLEMENT_R2.yaml
+    evidence: >-
+      Location showed -27.0% lift on SOLUSDT in the first half and +11.5% in the
+      second, on n=167/196. Hold rates shift from roughly 0.19-0.35 to 0.35-0.50
+      across the split on every instrument. The two halves are different regimes,
+      so five instruments agreeing out of sample are not five independent tests.
+
   - id: WP-SMC-20
     priority: 0
     title: Autonomous definition truth, causal reconciliation, and market-source integrity
