@@ -9,6 +9,8 @@ still thin. That must not cost it a single point.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from smc_desk.perception.poi_quality import (
@@ -259,28 +261,70 @@ def test_ranking_is_deterministic_for_identical_zones() -> None:
 # -- the weights are frozen pending calibration -------------------------------
 
 
-def test_ranking_weights_are_frozen() -> None:
-    """These are reasoned defaults, not calibrated constants, and nothing has scored them.
+def test_ranking_weights_match_the_sealed_revision() -> None:
+    """The weights may only be what the sealed revision document says they are.
 
-    Tuning them against outcomes is a parameter search: fifty combinations tested
-    at the 5% level give roughly a 92% chance that one looks significant by pure
-    chance. Harvey, Liu and Zhu argue the conventional t=2.0 bar is far too
-    permissive for exactly this reason and recommend 3.0 for a new factor.
+    They were frozen behind a tripwire so that moving them would require a
+    written, hash-sealed justification rather than a quiet edit. That happened
+    once: specs/POI_WEIGHT_REVISION_V1.yaml, sealed BEFORE the change was
+    applied, recording the out-of-sample evidence for location, the absence of
+    measured lift for causation, and the conditions that would reverse either.
 
-    This test is a tripwire, not a law. Changing a weight is allowed -- but it
-    must come with a multiple-testing correction and a recorded justification,
-    and editing this test is the moment to notice that.
+    Changing a weight again is allowed. Doing it without amending that document
+    first is not, and this test is where that gets noticed.
     """
+    import yaml
+
+    from smc_desk.data.hashing import file_sha256
     from smc_desk.perception import poi_quality
 
-    assert poi_quality.WEIGHT_CAUSATION == 0.34
-    assert poi_quality.WEIGHT_SCOPE == 0.20
-    assert poi_quality.WEIGHT_DISPLACEMENT == 0.18
-    assert poi_quality.WEIGHT_LOCATION == 0.16
-    assert poi_quality.WEIGHT_FRESHNESS == 0.12
-    total = (
-        poi_quality.WEIGHT_CAUSATION + poi_quality.WEIGHT_SCOPE
-        + poi_quality.WEIGHT_DISPLACEMENT + poi_quality.WEIGHT_LOCATION
-        + poi_quality.WEIGHT_FRESHNESS
+    root = Path(__file__).resolve().parents[2]
+    spec = root / "specs" / "POI_WEIGHT_REVISION_V1.yaml"
+    seal = root / "specs" / "POI_WEIGHT_REVISION_V1.sha256"
+    assert file_sha256(spec) == seal.read_text(encoding="utf-8").strip(), (
+        "the weight revision document has been edited since it was sealed"
     )
-    assert abs(total - 1.0) < 1e-9, "weights must remain a partition of one"
+
+    revision = yaml.safe_load(spec.read_text(encoding="utf-8"))["revision"]
+    actual = {
+        "location": poi_quality.WEIGHT_LOCATION,
+        "causation": poi_quality.WEIGHT_CAUSATION,
+        "scope": poi_quality.WEIGHT_SCOPE,
+        "displacement": poi_quality.WEIGHT_DISPLACEMENT,
+        "freshness": poi_quality.WEIGHT_FRESHNESS,
+    }
+    for name, entry in revision.items():
+        assert actual[name] == entry["to"], f"{name} is {actual[name]}, sealed says {entry['to']}"
+    assert abs(sum(actual.values()) - 1.0) < 1e-9, "weights must remain a partition of one"
+
+
+def test_location_is_now_the_heaviest_weight() -> None:
+    """The substantive change: the only replicated factor leads the ranking."""
+    from smc_desk.perception import poi_quality
+
+    assert poi_quality.WEIGHT_LOCATION == max(
+        poi_quality.WEIGHT_LOCATION, poi_quality.WEIGHT_CAUSATION,
+        poi_quality.WEIGHT_SCOPE, poi_quality.WEIGHT_DISPLACEMENT,
+        poi_quality.WEIGHT_FRESHNESS,
+    )
+
+
+def test_location_now_separates_two_otherwise_identical_causal_zones() -> None:
+    """Both caused the break; only one is on the right side of equilibrium.
+
+    This is the behaviour the out-of-sample evidence bought: +8.1% on BTCUSDT
+    and +9.9% on ETHUSDT for supply in premium over supply in discount.
+    """
+    premium = make_poi("premium-supply", "bearish", low=120.0, high=121.0)
+    discount = make_poi("discount-supply", "bearish", low=100.0, high=101.0)
+    ranked = rank_pois([discount, premium], equilibrium=110.0)
+    assert [poi.object_id for poi in ranked] == ["premium-supply", "discount-supply"]
+    # The gap must be material, not cosmetic: location now carries 0.30.
+    assert ranked[0].score - ranked[1].score > 0.2
+
+
+def test_the_founder_zone_still_ranks_above_an_idle_neighbour() -> None:
+    """The CADJPY regression must survive a reweighting, not be broken by it."""
+    idle = make_poi("idle", "bearish", low=113.90, high=114.05, caused=False, scope="internal")
+    ranked = rank_pois([idle, CADJPY_SUPPLY], equilibrium=114.5, current_price=113.95)
+    assert ranked[0].object_id == "ob-cadjpy-0731"

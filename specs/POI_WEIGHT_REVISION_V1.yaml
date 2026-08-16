@@ -1,0 +1,101 @@
+schema: smc_codex_poi_weight_revision_v1
+version: 1.0.0
+effective_date: "2026-08-16"
+status: ACTIVE_SEALED_WEIGHT_REVISION
+
+purpose: >-
+  Record the evidence, the reasoning and the falsification conditions for the
+  first change ever made to the POI ranking weights, sealed before the change is
+  applied. The weights were frozen behind a tripwire precisely so that moving
+  them would require this document.
+
+why_a_seal_is_needed: >-
+  Fifty parameter combinations tested at the 5% level give roughly a 92% chance
+  that one looks significant by chance, and several feature variants have now
+  been run against this data. Writing down what is being changed, on what
+  evidence, and what would reverse it is the difference between acting on a
+  result and fitting to one.
+
+evidence:
+  design: >-
+    Walk-forward split of 4h order blocks at bar 4382 of 8765 (2024-06-19). The
+    second half was never inspected during feature development. Outcome is a
+    triple barrier: stop at the zone edge plus 2x ATR, target 4R, 200-bar window
+    to be revisited and 100 bars to resolve. Zones price never revisited are
+    counted separately and excluded from the hold rate.
+  location_favourable:
+    definition: supply above the midpoint of its local 120-bar range, demand below it
+    btcusdt: {in_sample_lift: -0.005, out_of_sample_lift: 0.081, oos_expectancy: "+0.97R vs +0.57R"}
+    ethusdt: {in_sample_lift: 0.043, out_of_sample_lift: 0.099, oos_expectancy: "+1.34R vs +0.84R"}
+    verdict: replicated_out_of_sample_on_both_instruments
+  caused_structure_break:
+    marginal_lift_15m: 0.004
+    verdict: no_measurable_lift_in_any_test_run_so_far
+  is_external:
+    marginal_lift_15m: 0.018
+    verdict: weak_positive_untested_out_of_sample
+  displacement_atr: {verdict: never_tested_in_isolation}
+  freshness: {verdict: never_tested}
+
+# What actually changes, and why each move is no larger than its evidence.
+revision:
+  location:
+    from: 0.16
+    to: 0.30
+    reason: >-
+      The only feature that has replicated out of sample, on two instruments,
+      roughly doubling expectancy. It becomes the largest single weight because
+      it is the only measured discriminator among order blocks.
+  causation:
+    from: 0.34
+    to: 0.26
+    reason: >-
+      Showed no measurable lift, so it loses its position as the heaviest
+      weight. It is NOT reduced further, and deliberately not to zero: absence
+      of lift in the tests run so far is not proof of no value, and causation is
+      what makes an object an order block rather than an arbitrary candle. It
+      defines the population the location evidence was measured within.
+  scope:
+    from: 0.20
+    to: 0.17
+    reason: weak positive marginal evidence only; reduced slightly to fund location
+  displacement:
+    from: 0.18
+    to: 0.15
+    reason: never tested in isolation; reduced slightly to fund location
+  freshness:
+    from: 0.12
+    to: 0.12
+    reason: >-
+      Unchanged. It has never been tested, and there is no evidence either way,
+      so there is no basis for moving it in either direction.
+
+scope_of_the_claim:
+  measured_on: [BTCUSDT, ETHUSDT]
+  timeframe: 4h
+  population: order blocks emitted by the production detector
+  not_claimed:
+    - that a well-located non-causal zone outranks a badly-located real order block
+    - that these weights are optimal, or fitted, or calibrated to any objective
+    - that the ranking now predicts anything; it orders candidates for a reader
+    - any transfer to forex, equities, or timeframes other than 4h
+
+falsification:
+  - >-
+    If location's out-of-sample lift fails to replicate on a third instrument,
+    location returns toward its prior weight and this revision is recorded as
+    not replicated.
+  - >-
+    If a rolling-build test shows causation carries lift once measured properly,
+    causation is restored. The single-pass tests behind its demotion did not
+    measure sweep or liquidity context at all.
+  - >-
+    These weights are reviewed whenever the case library is rebuilt on a rolling
+    basis, which is the first design able to test the features currently listed
+    in ROLLING_ONLY_FEATURES.
+
+prohibited:
+  - tuning_any_weight_to_improve_a_backtest_result
+  - reporting_the_weights_as_calibrated_or_optimal
+  - changing_a_weight_without_amending_this_document_first
+  - treating_the_ranking_as_a_probability_or_a_signal

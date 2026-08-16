@@ -37,12 +37,28 @@ from smc_desk.perception.poi_contract import (
     canonicalize_poi_candidate,
 )
 
-# Weights are ordered by how much a trader leans on each factor. They are
-# reasoned defaults, NOT calibrated constants -- no markup has scored them yet.
-WEIGHT_CAUSATION = 0.34
-WEIGHT_SCOPE = 0.20
-WEIGHT_DISPLACEMENT = 0.18
-WEIGHT_LOCATION = 0.16
+# Revised once, under specs/POI_WEIGHT_REVISION_V1.yaml, which was sealed before
+# the change was applied. Still NOT calibrated constants -- they are reasoned
+# weights, one of which now has out-of-sample evidence behind it.
+#
+# Location is the largest weight because it is the only factor that has
+# replicated on held-out data: +8.1% on BTCUSDT and +9.9% on ETHUSDT at 4h,
+# roughly doubling expectancy. Its mechanism is positioning rather than
+# geometry -- a supply zone high in its range has trapped buyers above it, which
+# is where the resting orders are.
+#
+# Causation lost its position as the heaviest weight because it showed no
+# measurable lift, and was deliberately not cut further. Absence of lift in the
+# tests run so far is not proof of no value, and causation is what makes an
+# object an order block rather than an arbitrary opposing candle -- it defines
+# the population within which the location evidence was measured.
+#
+# Freshness is untouched. Nothing has tested it, so there is no basis for moving
+# it in either direction.
+WEIGHT_LOCATION = 0.30
+WEIGHT_CAUSATION = 0.26
+WEIGHT_SCOPE = 0.17
+WEIGHT_DISPLACEMENT = 0.15
 WEIGHT_FRESHNESS = 0.12
 
 SPENT_STATES = {"consumed", "terminal", "invalidated", "mitigated"}
