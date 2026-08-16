@@ -793,12 +793,22 @@ def _apply_native_budget(
 def _structure_object(anchor: AnnotationEvidenceAnchor, episode: Mapping[str, Any]) -> dict[str, Any]:
     label, kind, line_style = _structure_semantic(str(episode.get("event_type") or ""), str(episode.get("scope") or ""))
     start_index, end_index = _confirmation_side_span(anchor, maximum_bars=18)
+    truncated = _origin_is_off_window(anchor)
+    reason = (
+        f"V3-accepted {episode.get('event_type')} anchored from the certified swing to accepted confirmation."
+        if not truncated
+        else (
+            f"V3-accepted {episode.get('event_type')}. The swing it broke predates this window, so the "
+            "mark is drawn back from its confirmation and its left edge is not the origin."
+        )
+    )
     return {
         "object_type": "structure_segment",
         "semantic_object_id": f"{anchor.object_id}:native_episode_segment",
         "timeframe": anchor.timeframe,
         "label": label,
-        "reason": f"V3-accepted {episode.get('event_type')} anchored from the certified swing to accepted confirmation.",
+        "origin_off_window": truncated,
+        "reason": reason,
         "kind": kind,
         "direction": anchor.direction or "unknown",
         "price": anchor.exact_price,
@@ -943,6 +953,27 @@ def _swing_skeleton_objects(
 
 
 def _native_visible(anchor: AnnotationEvidenceAnchor, timeframe: str) -> bool:
+    """Can this object be placed on this timeframe's canvas?
+
+    Both indices are required, and an attempt to relax that was reverted.
+
+    The motivating case looked reasonable: on XRPUSDT 4h the controlling
+    EXTERNAL_BOS_BEARISH is anchored to a swing from weeks before the window, so
+    ``start_index`` is None and the break is dropped, leaving a four-week
+    downtrend with no structure mark. Admitting price-anchored marks with a
+    missing origin fixed that and made the chart materially worse: it also
+    admitted an off-window IDM priced well above the visible range, which
+    expanded the y-axis by a third and compressed every candle into the lower
+    half of the frame. Two left-edge stubs were gained and the whole chart was
+    lost.
+
+    The deeper problem is not here. An object whose origin AND confirmation both
+    sit at the window edge is not part of this chart's story, and the reason the
+    4h has nothing newer to draw is that the episode graph's latest external
+    episode is weeks stale while the visible trend broke structure repeatedly.
+    That is an episode-selection question, and widening a render filter is the
+    wrong place to answer it.
+    """
     return (
         anchor.timeframe == timeframe
         and anchor.start_index is not None
@@ -955,9 +986,31 @@ def _native_visible(anchor: AnnotationEvidenceAnchor, timeframe: str) -> bool:
 def _confirmation_side_span(
     anchor: AnnotationEvidenceAnchor, *, maximum_bars: int
 ) -> tuple[int | None, int | None]:
-    if anchor.start_index is None or anchor.end_index is None:
+    """Bars the mark spans, truncating an origin that predates the window.
+
+    A structure break is anchored to the swing it broke, and that swing is
+    routinely older than the chart. On live XRPUSDT 4h the controlling
+    EXTERNAL_BOS_BEARISH was anchored to a swing from 2026-05-26, weeks before
+    the visible window, so ``start_index`` resolved to None and the break was
+    dropped -- leaving a four-week downtrend rendered with no structure at all.
+
+    An off-window origin does not make the level irrelevant: the broken PRICE is
+    what a reader checks, and the confirmation bar is on the chart. So the mark
+    is drawn back from its confirmation by a bounded span instead of being
+    discarded, which is what a trader does when the origin runs off the left of
+    the screen. Nothing is fabricated -- the price and the confirmation are
+    real, and only the extent is truncated.
+    """
+    if anchor.end_index is None:
         return anchor.start_index, anchor.end_index
+    if anchor.start_index is None:
+        return max(0, anchor.end_index - maximum_bars), anchor.end_index
     return max(anchor.start_index, anchor.end_index - maximum_bars), anchor.end_index
+
+
+def _origin_is_off_window(anchor: AnnotationEvidenceAnchor) -> bool:
+    """True when the mark's origin predates the chart and had to be truncated."""
+    return anchor.start_index is None and anchor.end_index is not None
 
 
 def _dedupe(objects: list[dict[str, Any]]) -> list[dict[str, Any]]:
