@@ -163,3 +163,36 @@ def test_selection_is_deterministic() -> None:
     first = [a.object_id for a in select_skeleton_swings(anchors, scores, limit=6)]
     second = [a.object_id for a in select_skeleton_swings(list(reversed(anchors)), scores, limit=6)]
     assert first == second
+
+
+def test_the_same_pivot_seen_at_three_scales_is_drawn_once() -> None:
+    """Live XRPUSDT 4h emitted one low three times, labelled L, LL and LL.
+
+    The detector runs at local, internal and external scales, so a single
+    extreme appears repeatedly at the same price. Without deduplication the
+    second and third compare the swing against itself and conclude it made a
+    lower low than itself, which is not a statement about the market.
+    """
+    anchors, scores = cohort([
+        ("local",    LOW, 0.9993, 110, 5.0),
+        ("internal", LOW, 0.9993, 112, 6.0),
+        ("external", LOW, 0.9993, 114, 7.0),
+        ("a_high",   HIGH, 1.0908, 13, 9.0),
+    ])
+    markers = build_swing_skeleton(anchors, scores, timeframe="4h", limit=6)
+    lows = [m for m in markers if m["kind"] == "swing_low"]
+    assert len(lows) == 1, [m["label"] for m in markers]
+    assert lows[0]["label"] == "L"
+    assert "LL" not in [m["label"] for m in markers]
+
+
+def test_genuinely_different_lows_are_both_kept() -> None:
+    """Deduplication must not collapse a real lower low into its predecessor."""
+    anchors, scores = cohort([
+        ("first_low",  LOW, 1.0500, 10, 9.0),
+        ("second_low", LOW, 0.9900, 40, 8.0),
+        ("a_high",     HIGH, 1.1000, 25, 9.0),
+    ])
+    markers = build_swing_skeleton(anchors, scores, timeframe="4h", limit=6)
+    lows = [m["label"] for m in markers if m["kind"] == "swing_low"]
+    assert lows == ["L", "LL"]

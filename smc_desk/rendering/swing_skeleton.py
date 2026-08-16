@@ -55,6 +55,35 @@ def _price_of(anchor: Any) -> float | None:
     return None
 
 
+# One price move is one pivot, however many detection scales notice it. Two
+# markers closer together than this fraction of price are the same extreme.
+DUPLICATE_PRICE_TOLERANCE = 0.0005
+
+
+def _duplicates_a_selected_pivot(
+    anchor: Any, side: str, taken: Sequence[tuple[str, float]]
+) -> bool:
+    """Has this exact extreme already been drawn under another scale's name?
+
+    The detector runs at local, internal and external scales, so a single low
+    is routinely emitted three times at the same price and overlapping bars. On
+    live XRPUSDT 4h that produced three stacked markers at 0.9993 labelled
+    ``L``, ``LL`` and ``LL`` -- the second and third comparing the swing against
+    itself and concluding it had made a lower low than itself. Deduplicating
+    before labelling is what stops the sequence stating something impossible.
+    """
+    price = _price_of(anchor)
+    if price is None:
+        return False
+    for taken_side, taken_price in taken:
+        if taken_side != side:
+            continue
+        scale = max(abs(taken_price), 1e-9)
+        if abs(price - taken_price) / scale <= DUPLICATE_PRICE_TOLERANCE:
+            return True
+    return False
+
+
 def select_skeleton_swings(
     anchors: Sequence[Any],
     scores_by_id: Mapping[str, SignificanceScore],
@@ -89,6 +118,7 @@ def select_skeleton_swings(
             queues[side].append(anchor)
 
     selected: list[Any] = []
+    taken: list[tuple[str, float]] = []
     side = _HIGH_SIDE
     while len(selected) < limit and (queues[_HIGH_SIDE] or queues[_LOW_SIDE]):
         # Take from the requested side when it still has candidates, otherwise
@@ -96,7 +126,11 @@ def select_skeleton_swings(
         source = side if queues[side] else (_LOW_SIDE if side == _HIGH_SIDE else _HIGH_SIDE)
         if not queues[source]:
             break
-        selected.append(queues[source].pop(0))
+        anchor = queues[source].pop(0)
+        if _duplicates_a_selected_pivot(anchor, source, taken):
+            continue  # same extreme, seen at another scale
+        selected.append(anchor)
+        taken.append((source, _price_of(anchor) or 0.0))
         side = _LOW_SIDE if side == _HIGH_SIDE else _HIGH_SIDE
 
     # Ranking returns strongest-first; a labelled sequence has to read left to
