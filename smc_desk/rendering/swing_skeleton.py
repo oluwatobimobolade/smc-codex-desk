@@ -29,7 +29,7 @@ invents a swing the detector did not confirm, and creates no trade authority.
 """
 from __future__ import annotations
 
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
 from smc_desk.perception.significance import (
     DEFAULT_DISPLAY_LIMIT,

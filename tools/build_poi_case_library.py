@@ -26,7 +26,9 @@ if str(REPO_ROOT) not in sys.path:
 
 from smc_desk.colleague.run_context import dataframe_to_candles  # noqa: E402
 from smc_desk.evaluation.poi_outcomes import (  # noqa: E402
+    FEATURE_SCHEMA_VERSION,
     PoiCase,
+    assert_library_schema,
     featurize,
     resolve_outcome,
     retrieve_analogues,
@@ -113,6 +115,7 @@ def build(args) -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps({
         "schema": "poi_case_library_v1",
+        "feature_schema_version": FEATURE_SCHEMA_VERSION,
         "authority": "descriptive_historical_only_no_signal",
         "cases": existing + [c.to_dict() for c in cases],
     }, indent=1), encoding="utf-8")
@@ -122,6 +125,9 @@ def build(args) -> int:
 
 def ask(args) -> int:
     payload = json.loads(args.library.read_text(encoding="utf-8"))
+    # Fail closed rather than compare a live zone against features that were
+    # never recorded; a missing key reads as 0.0 and looks like a real distance.
+    assert_library_schema(payload)
     library = [
         PoiCase(
             case_id=c["case_id"], symbol=c["symbol"], timeframe=c["timeframe"],

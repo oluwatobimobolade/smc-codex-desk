@@ -37,8 +37,8 @@ recency are reported so a reader can discount it.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, Iterable, Mapping, Sequence
+from dataclasses import dataclass
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 import pandas as pd
@@ -118,6 +118,32 @@ FEATURE_SCALES: dict[str, float] = {
 # Requires a rolling build. Listed so they are not quietly reintroduced into a
 # single-pass library, where they are structurally unmeasurable.
 ROLLING_ONLY_FEATURES = ("swept_before", "left_imbalance", "distance_to_draw_atr")
+
+# Bumped whenever FEATURE_SCALES changes. A library built under an older schema
+# is not comparable to a live zone featurized under this one, and the failure is
+# silent by default: `similarity_distance` reads a missing key as 0.0, so every
+# stored case would score as though its location were unfavourable. That is a
+# distance computed from absent data and presented as a neighbourhood.
+#
+# It has already happened once. Renaming `location_in_range` to the
+# direction-aware `location_favourable` left a library on disk whose cases had
+# neither the new key nor any way to signal that.
+FEATURE_SCHEMA_VERSION = 2
+
+
+class FeatureSchemaMismatch(ValueError):
+    """Raised when a stored library predates the current feature schema."""
+
+
+def assert_library_schema(payload: Mapping[str, Any]) -> None:
+    """Refuse a library that cannot be compared against current features."""
+    version = payload.get("feature_schema_version")
+    if version != FEATURE_SCHEMA_VERSION:
+        raise FeatureSchemaMismatch(
+            f"case library was built under feature schema {version!r}, current is "
+            f"{FEATURE_SCHEMA_VERSION}. Rebuild it; comparing across schemas reads "
+            f"missing features as zero and reports the result as a neighbourhood."
+        )
 
 
 def _f(value: Any, default: float = 0.0) -> float:
@@ -241,6 +267,15 @@ def resolve_outcome(
     resolve_end = min(total, touch + resolve_window)
     if touch + 1 >= resolve_end:
         return UNRESOLVED, touch - formed_index, None
+    # Invalidation is CLOSE-based while the target is WICK-based, and the
+    # asymmetry is deliberate: a wick through supply that closes back below is
+    # a zone that held, which is what the SMC reading of a zone actually claims.
+    #
+    # It is also optimistic relative to a resting stop order, which would have
+    # been filled on that wick. So a hold rate measured here is an upper bound
+    # on what a mechanical stop would have achieved, and any expectancy built on
+    # it inherits that. Recorded rather than silently corrected, because the
+    # right correction depends on how the trade is actually managed.
     for index in range(touch, resolve_end):
         invalidated = closes[index] > stop if bearish else closes[index] < stop
         reached = lows[index] <= target if bearish else highs[index] >= target
@@ -371,6 +406,9 @@ __all__ = [
     "DEFAULT_RESOLVE_WINDOW",
     "DEFAULT_RETURN_WINDOW",
     "FEATURE_SCALES",
+    "FEATURE_SCHEMA_VERSION",
+    "FeatureSchemaMismatch",
+    "assert_library_schema",
     "ROLLING_ONLY_FEATURES",
     "NEVER_RETURNED",
     "REJECTED",
