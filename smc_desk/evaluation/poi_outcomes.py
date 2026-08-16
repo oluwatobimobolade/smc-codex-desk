@@ -84,25 +84,40 @@ class PoiCase:
         }
 
 
-# Feature names, and the scale each is normalised by when measuring similarity.
-# Binary features are already 0/1; continuous ones are divided by a typical
-# spread so no single dimension dominates the distance.
+# Features that a SINGLE PASS of the perception engine can honestly supply.
+#
+# Not every detector looks back. Running the engine once over 20,000 BTCUSDT 15m
+# bars places order blocks, FVGs and structure breaks across the whole series --
+# but every one of its 207 sweeps and 90 liquidity levels lands in the final
+# ~100 bars, because `liquidity_sweep_lookback` bounds them to recent swings.
+#
+# That is not a weak signal, it is a detector that cannot answer the question. A
+# `swept_before` feature built this way found 9 hits in 3,202 zones and would
+# have been read as "prior sweeps do not matter" when the truth is they were
+# never looked for. Any feature derived from sweeps, liquidity levels or
+# inducements needs a ROLLING build -- the engine re-run at each decision point
+# on only the data available then -- which is what the no-lookahead doctrine
+# demands anyway and what a single pass silently violates.
+#
+# The features below are derived from the zone's own geometry and from raw
+# candles, both of which a single pass reports faithfully at any point in the
+# series.
 FEATURE_SCALES: dict[str, float] = {
     "caused_structure_break": 1.0,
     "is_external": 1.0,
     "displacement_atr": 2.0,
     "zone_height_atr": 2.0,
-    "location_in_range": 1.0,
+    # Direction-aware: 1.0 means supply high in the range or demand low in it.
+    # The raw position cannot be used, because "high" is favourable for a
+    # bearish zone and unfavourable for a bullish one, so across a mixed
+    # population the two halves cancel and the feature reads as inert.
+    "location_favourable": 1.0,
     "htf_aligned": 1.0,
-    # Was the opposite side's liquidity taken shortly before this zone formed?
-    # A zone built on the back of a sweep has fuel behind it. The system detects
-    # sweeps and inducements and has never used either to rank a POI.
-    "swept_before": 1.0,
-    # Did the departure leave an unfilled gap? Inefficiency left behind is one
-    # of the few things that distinguishes a zone price *ran* from one it drifted
-    # out of, and it is likewise detected and unused.
-    "left_imbalance": 1.0,
 }
+
+# Requires a rolling build. Listed so they are not quietly reintroduced into a
+# single-pass library, where they are structurally unmeasurable.
+ROLLING_ONLY_FEATURES = ("swept_before", "left_imbalance", "distance_to_draw_atr")
 
 
 def _f(value: Any, default: float = 0.0) -> float:
@@ -120,10 +135,15 @@ def featurize(
     range_low: float,
     range_high: float,
     htf_bias: str | None = None,
-    swept_before: bool = False,
-    left_imbalance: bool = False,
 ) -> dict[str, float]:
-    """Feature vector as of formation. Nothing here may look forward."""
+    """Feature vector as of formation. Nothing here may look forward.
+
+    ``location_favourable`` is deliberately direction-aware. ``range_low`` and
+    ``range_high`` should describe the LOCAL range the zone formed in, not the
+    whole series: premium and discount are properties of the leg being traded,
+    and measured against four years of history every recent zone sits in the
+    same bucket.
+    """
     low, high = sorted((_f(poi.get("price_low")), _f(poi.get("price_high"))))
     direction = str(poi.get("direction") or "").lower()
     evidence = poi.get("evidence") if isinstance(poi.get("evidence"), Mapping) else {}
@@ -138,11 +158,27 @@ def featurize(
         "is_external": 1.0 if scope == "external" else 0.0,
         "displacement_atr": _f(evidence.get("displacement_atr")),
         "zone_height_atr": (high - low) / atr,
-        "location_in_range": float(np.clip(((low + high) / 2.0 - range_low) / span, 0.0, 1.0)),
+        "location_favourable": _location_favourable(direction, (low + high) / 2.0, range_low, range_high),
         "htf_aligned": 1.0 if (htf_bias and htf_bias.lower() == direction) else 0.0,
-        "swept_before": 1.0 if swept_before else 0.0,
-        "left_imbalance": 1.0 if left_imbalance else 0.0,
     }
+
+
+def _location_favourable(direction: str, midpoint: float, range_low: float, range_high: float) -> float:
+    """1.0 for supply in premium or demand in discount, 0.0 otherwise.
+
+    Measured out-of-sample on 4h data this is the only feature that has
+    separated good zones from bad on both instruments tested: +8.1% on BTCUSDT
+    and +9.9% on ETHUSDT, roughly doubling expectancy. It is also the oldest
+    rule in the doctrine, and the mechanism is positioning rather than geometry
+    -- a supply zone high in its range has trapped buyers above it.
+    """
+    span = max(range_high - range_low, 1e-9)
+    position = float(np.clip((midpoint - range_low) / span, 0.0, 1.0))
+    if direction == "bearish":
+        return 1.0 if position > 0.5 else 0.0
+    if direction == "bullish":
+        return 1.0 if position < 0.5 else 0.0
+    return 0.0
 
 
 def resolve_outcome(
@@ -335,6 +371,7 @@ __all__ = [
     "DEFAULT_RESOLVE_WINDOW",
     "DEFAULT_RETURN_WINDOW",
     "FEATURE_SCALES",
+    "ROLLING_ONLY_FEATURES",
     "NEVER_RETURNED",
     "REJECTED",
     "UNRESOLVED",

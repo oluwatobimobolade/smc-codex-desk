@@ -34,8 +34,7 @@ from smc_desk.evaluation.poi_outcomes import (  # noqa: E402
 from smc_desk.perception.engine_v2 import PerceptionEngineV2  # noqa: E402
 from smc_desk.perception.significance import average_true_range  # noqa: E402
 
-SWEEP_LOOKBACK = 12   # bars before formation searched for a liquidity sweep
-IMBALANCE_LOOKAHEAD = 3  # bars after formation in which a departure gap may appear
+LOCAL_RANGE_BARS = 120  # the leg a zone's premium/discount is measured against
 
 
 def _snapshot(frame: pd.DataFrame, symbol: str, timeframe: str, session: str) -> dict:
@@ -62,22 +61,12 @@ def build(args) -> int:
     obs = [o for o in (snap.get("order_blocks") or []) if isinstance(o, dict)]
     print(f"order blocks detected: {len(obs)}")
 
-    # Sweep and FVG bar indices, used as formation-context features.
-    sweep_bars = set()
-    for s in snap.get("sweeps") or []:
-        idx = position.get(pd.Timestamp(s.get("confirmed_at") or s.get("pivot_time") or 0, tz="UTC"))
-        if idx is not None:
-            sweep_bars.add(idx)
-    fvg_bars = set()
-    for g in snap.get("fvgs") or []:
-        idx = position.get(pd.Timestamp(g.get("confirmed_at") or 0, tz="UTC"))
-        if idx is not None:
-            fvg_bars.add(idx)
+    # Sweep- and liquidity-derived features are deliberately absent. A single
+    # engine pass places every sweep it finds in the final ~100 bars, so those
+    # features are structurally unmeasurable here; see ROLLING_ONLY_FEATURES.
 
     records = frame.to_dict("records")
     atr_all = average_true_range(records)
-    range_low = float(frame["low"].min())
-    range_high = float(frame["high"].max())
 
     cases: list[PoiCase] = []
     for ob in obs:
@@ -91,12 +80,13 @@ def build(args) -> int:
         if direction not in {"bullish", "bearish"}:
             continue
 
-        swept = any(b in sweep_bars for b in range(max(0, formed - SWEEP_LOOKBACK), formed + 1))
-        imbalance = any(b in fvg_bars for b in range(formed, formed + IMBALANCE_LOOKAHEAD + 1))
-
+        # Local range, not the whole series: premium and discount describe the
+        # leg being traded, and against four years every recent zone is "high".
+        window = max(0, formed - LOCAL_RANGE_BARS)
         features = featurize(
-            ob, atr=atr_all, range_low=range_low, range_high=range_high,
-            swept_before=swept, left_imbalance=imbalance,
+            ob, atr=atr_all,
+            range_low=float(frame["low"].iloc[window:formed + 1].min()),
+            range_high=float(frame["high"].iloc[window:formed + 1].max()),
         )
         outcome, bars_to_return, r = resolve_outcome(
             frame, formed_index=formed, direction=direction, atr=atr_all,
@@ -150,7 +140,6 @@ def ask(args) -> int:
     snap = _snapshot(frame, args.symbol, args.timeframe, args.session)
     records = frame.to_dict("records")
     atr = average_true_range(records)
-    range_low, range_high = float(frame["low"].min()), float(frame["high"].max())
     price = float(frame["close"].iloc[-1])
 
     obs = [o for o in (snap.get("order_blocks") or []) if isinstance(o, dict)]
@@ -169,7 +158,11 @@ def ask(args) -> int:
           f"{len(live)} untouched zones ahead of price\n")
     rows = []
     for ob, lo, hi, direction in live:
-        features = featurize(ob, atr=atr, range_low=range_low, range_high=range_high)
+        features = featurize(
+            ob, atr=atr,
+            range_low=float(frame["low"].tail(LOCAL_RANGE_BARS).min()),
+            range_high=float(frame["high"].tail(LOCAL_RANGE_BARS).max()),
+        )
         report = retrieve_analogues(features, library, direction=direction, k=args.k)
         rows.append((abs((lo + hi) / 2 - price), ob, lo, hi, direction, report))
 
